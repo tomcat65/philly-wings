@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The jawn that hits different. Real Philly wings for real Philly fans. No BS, just the best wings in the 215.">
+    <meta property="og:title" content="Philly Wings Express - The Official Jawn">
+    <meta property="og:description" content="Yo, these wings hit different. Made in Philly for Philly. Order on your app, we got youse.">
+    <meta property="og:image" content="/images/hero-wings.jpg">
+    
+    <title>Philly Wings Express - The Jawn That Hits Different</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    
+    <!-- Main App Module -->
+    <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+    <!-- Game Day Banner -->
+    <div class="game-day-banner" id="gameDayBanner">
+        <p class="game-day-text">🏈 EAGLES VS COWBOYS SUNDAY • Order your Tailgate Special now • <span id="liveOrderCount">17</span> orders this hour</p>
+    </div>
+
+    <!-- Hero Section - The Appetite Awakener -->
+    <section class="hero">
+        <div class="hero-media">
+            <video autoplay muted loop playsinline class="hero-video" id="heroVideo">
+                <source src="/videos/wings-sizzle.mp4" type="video/mp4">
+                <img src="/images/hero-wings.jpg" alt="Crispy buffalo wings" class="hero-fallback">
+            </video>
+            <div class="hero-overlay"></div>
+        </div>
+        
+        <div class="hero-content">
+            <h1 class="hero-headline chalk-text">Yo, This Is<br><span class="text-eagles">THE JAWN</span></h1>
+            <p class="hero-subhead chalk-text">Real Wings for Real Ones</p>
+            <p class="hero-micro chalk-text">Made in Philly • No BS • Just Fire Wings</p>
+            
+            <div class="made-in-philly-badge">
+                <img src="images/made-in-philadelphia.png" alt="Made in Philadelphia" width="120">
+            </div>
+            
+            <div class="cta-container">
+                <button class="cta-primary pulse" onclick="scrollToOrder()">
+                    <span class="cta-text">Order Now - I'm Hungry</span>
+                    <span class="cta-icon">🔥</span>
+                </button>
+                <p class="cta-helper">Youse guys killed 2,847 wings this week!</p>
+            </div>
+            
+            <!-- Rating Badge - Moved inside hero content for mobile -->
+            <div class="rating-badge-container">
+                <div class="rating-badge">
+                    <span class="rating-stars">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-text">4.9 on DoorDash</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wings Gallery Section -->
+    <section class="wings-gallery" id="wingsGallery">
+        <div class="container">
+            <h2 class="section-headline chalk-text">The <span class="text-eagles">Jawns</span> in Action</h2>
+            <p class="section-subhead chalk-text">Warning: These pics gonna make you hungry</p>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item featured">
+                    <img src="/images/wings-hero-shot.jpg" alt="Perfect crispy wings">
+                    <div class="gallery-caption">
+                        <h3>The Money Shot</h3>
+                        <p>Crispy outside, juicy inside. Every. Damn. Time.</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="/images/dallas-crusher.jpg" alt="Dallas Crusher wings">
+                    <div class="gallery-caption">
+                        <h3>Dallas Crusher</h3>
+                        <p>This jawn brings the heat</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="/images/classic-buffalo.jpg" alt="Classic Buffalo wings">
+                    <div class="gallery-caption">
+                        <h3>The Classic Jawn</h3>
+                        <p>OG buffalo perfection</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="/images/garlic-parm.jpg" alt="Garlic Parmesan wings">
+                    <div class="gallery-caption">
+                        <h3>Gritty's Garlic Parm</h3>
+                        <p>Smooth as butter</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="/images/tailgate-spread.jpg" alt="Tailgate party spread">
+                    <div class="gallery-caption">
+                        <h3>The Tailgater</h3>
+                        <p>Game day done right</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="/images/mvp-meal.jpg" alt="MVP Meal combo">
+                    <div class="gallery-caption">
+                        <h3>MVP Meal</h3>
+                        <p>The complete jawn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flavor Explosion Gallery -->
+    <section class="flavors" id="flavors">
+        <div class="container">
+            <h2 class="section-headline chalk-text">Pick Your <span class="text-eagles">Jawn</span></h2>
+            <p class="section-subhead chalk-text">From "wassup" to "yo chill!"</p>
+            
+            <div class="flavor-grid">
+                <!-- Classic Buffalo -->
+                <div class="flavor-card" data-heat="3">
+                    <div class="flavor-image">
+                        <img src="/images/buffalo-wings.jpg" alt="Classic Buffalo Wings" loading="lazy">
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                        </div>
+                    </div>
+                    <h3 class="flavor-name chalk-text">The Classic Jawn</h3>
+                    <p class="flavor-description">The OG buffalo that's been hittin' since day one.</p>
+                </div>
+
+                <!-- Honey Habanero -->
+                <div class="flavor-card" data-heat="4">
+                    <div class="flavor-image">
+                        <img src="/images/honey-habanero.jpg" alt="Honey Habanero Wings" loading="lazy">
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                        </div>
+                    </div>
+                    <h3 class="flavor-name chalk-text">Honey Jawn Fire</h3>
+                    <p class="flavor-description">Sweet at first, then BAM! Don't say we ain't warn youse.</p>
+                </div>
+
+                <!-- Atomic Buffalo -->
+                <div class="flavor-card atomic" data-heat="5">
+                    <div class="flavor-image">
+                        <img src="/images/atomic-buffalo.jpg" alt="Atomic Buffalo Wings" loading="lazy">
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                        </div>
+                        <div class="atomic-warning">☢️ ATOMIC</div>
+                    </div>
+                    <h3 class="flavor-name chalk-text">Dallas Crusher</h3>
+                    <p class="flavor-description">This jawn crushes Cowboys fans AND your taste buds.</p>
+                    <p class="atomic-challenge">Ayo! Finish 12 and get Eagles green sauce FREE!</p>
+                </div>
+
+                <!-- Garlic Parmesan -->
+                <div class="flavor-card" data-heat="1">
+                    <div class="flavor-image">
+                        <img src="/images/garlic-parmesan.jpg" alt="Garlic Parmesan Wings" loading="lazy">
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                        </div>
+                    </div>
+                    <h3 class="flavor-name chalk-text">Gritty's Garlic Parm</h3>
+                    <p class="flavor-description">Smooth as Gritty on ice. This jawn smacks different.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Validation -->
+    <section class="social-proof">
+        <div class="container">
+            <h2 class="section-headline chalk-text">Philly <span class="text-eagles">Certified Jawn</span></h2>
+            
+            <div class="live-orders">
+                <h3 class="live-orders-title chalk-text">🏈 Who's Grubbin' Right Now</h3>
+                <div class="order-ticker" id="orderTicker">
+                    <div class="order-item">
+                        <span class="order-time">2 min ago</span>
+                        <span class="order-details">Mike from Fishtown copped The Tailgater jawn</span>
+                    </div>
+                    <div class="order-item">
+                        <span class="order-time">5 min ago</span>
+                        <span class="order-details">Sarah from Mayfair said "lemme get that MVP Meal"</span>
+                    </div>
+                    <div class="order-item">
+                        <span class="order-time">8 min ago</span>
+                        <span class="order-details">Tommy from Delco grabbed 50 wings for the squad</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Yo these jawns SMACK! Dallas Crusher had me sweatin' but I'd run it back."</p>
+                    <p class="review-author">- Chris M., DoorDash</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Crispy, juicy, perfect. My new Sunday tradition."</p>
+                    <p class="review-author">- Maria S., Uber Eats</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Forget the cheesesteaks. These wings are Philly's best kept secret."</p>
+                    <p class="review-author">- James T., Grubhub</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who We Are Section -->
+    <section class="who-we-are" id="whoWeAre">
+        <div class="container">
+            <div class="who-content">
+                <h2 class="section-headline chalk-text">Who We <span class="text-eagles">Are</span></h2>
+                <div class="who-statement">
+                    <p class="big-statement">Mother luvin'<br>
+                    wing cravin'<br>
+                    real Philly<br>
+                    <span class="text-eagles">no BS style</span></p>
+                </div>
+                <div class="who-details">
+                    <p class="chalk-text">Born in Northeast Philly. Raised on Eagles wins and Phillies comebacks.</p>
+                    <p class="chalk-text">We don't do fancy. We do FIRE wings that hit different.</p>
+                    <p class="chalk-text">Every order made fresh. Every sauce crafted daily. Every bite a Philly experience.</p>
+                    <p class="chalk-text">This ain't just wings. This is Philly pride on a plate.</p>
+                </div>
+            </div>
+            <div class="who-images">
+                <img src="/images/kitchen-action.jpg" alt="Our kitchen in action" class="who-img">
+                <img src="/images/philly-pride.jpg" alt="Philly pride" class="who-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Board - Sports Bar Style -->
+    <section class="menu-board" id="menuSection">
+        <div class="container">
+            <div class="chalkboard-frame">
+                <h2 class="menu-title chalk-text">The Jawns We Make</h2>
+                <p class="menu-subtitle chalk-text">Fresh cooked when you order, never frozen</p>
+                
+                <div class="menu-columns">
+                    <!-- Wings Column -->
+                    <div class="menu-column">
+                        <h3 class="column-title chalk-text">Just Wings</h3>
+                        <div class="menu-items">
+                            <div class="menu-item">
+                                <span class="item-name">6 Wings</span>
+                                <span class="dots"></span>
+                                <span class="item-note">Perfect solo jawn</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="item-name">12 Wings</span>
+                                <span class="dots"></span>
+                                <span class="item-note">The regular</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="item-name">24 Wings</span>
+                                <span class="dots"></span>
+                                <span class="item-note">Share wit' your peoples</span>
+                            </div>
+                            <div class="menu-item featured">
+                                <span class="item-name">30 Wings</span>
+                                <span class="dots"></span>
+                                <span class="item-note">Game day special</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="item-name">50 Wings</span>
+                                <span class="dots"></span>
+                                <span class="item-note">Feed the whole squad</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Combos Column -->
+                    <div class="menu-column">
+                        <h3 class="column-title chalk-text">The Jawns (Combos)</h3>
+                        <div class="menu-items">
+                            <div class="menu-item">
+                                <span class="item-name">The Rookie</span>
+                                <span class="dots"></span>
+                                <span class="item-note">6 wings + side</span>
+                            </div>
+                            <div class="menu-item featured">
+                                <span class="item-name">The Classic Philly</span>
+                                <span class="dots"></span>
+                                <span class="item-note">Our most popular jawn</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="item-name">The Home Game</span>
+                                <span class="dots"></span>
+                                <span class="item-note">Family style feast</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="item-name">The Tailgater</span>
+                                <span class="dots"></span>
+                                <span class="item-note">Party time special</span>
+                            </div>
+                            <div class="menu-item special">
+                                <span class="item-name">The MVP Meal</span>
+                                <span class="dots"></span>
+                                <span class="item-note">The complete jawn</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="menu-footer">
+                    <p class="chalk-text">Sides: Crispy Fries • Mozz Sticks • Bottled Water</p>
+                    <p class="chalk-text">All sauces made fresh daily in-house</p>
+                    <p class="chalk-text made-in">MADE IN PHILADELPHIA</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Email Capture Section -->
+    <section class="email-capture" id="emailCapture">
+        <div class="container">
+            <div class="email-content">
+                <h2 class="email-headline chalk-text">Yo, Get In On <span class="text-eagles">The Jawn List</span></h2>
+                <p class="email-subhead">Drop your digits for exclusive deals, VIP perks, and first dibs on new flavors</p>
+                
+                <form id="emailForm" class="email-form">
+                    <div class="form-group">
+                        <input type="email" id="customerEmail" placeholder="Your email jawn" required>
+                        <button type="submit" class="email-submit">
+                            <span>I'm In</span>
+                            <span class="arrow">→</span>
+                        </button>
+                    </div>
+                    <p class="email-promise">📧 We keep it real - no spam, just deals that slap</p>
+                </form>
+                
+                <div class="email-perks">
+                    <div class="perk">
+                        <span class="perk-icon">🎫</span>
+                        <span class="perk-text">15% off your first order</span>
+                    </div>
+                    <div class="perk">
+                        <span class="perk-icon">🔥</span>
+                        <span class="perk-text">Early access to new flavors</span>
+                    </div>
+                    <div class="perk">
+                        <span class="perk-icon">🏈</span>
+                        <span class="perk-text">Game day specials</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Closer - Order Section -->
+    <section class="order-section" id="orderSection">
+        <div class="container">
+            <h2 class="section-headline chalk-text">Yo, You Tryna <span class="text-eagles">Order or Nah?</span></h2>
+            <p class="order-subhead chalk-text">Pick your app, we got youse covered</p>
+            
+            <div class="platform-grid">
+                <a href="https://www.doordash.com/store/philly-wings-express" class="platform-card doordash" onclick="trackPlatformClick('doordash')">
+                    <img src="/images/doordash-logo.svg" alt="Order on DoorDash" class="platform-logo">
+                    <p class="platform-time">25-35 min</p>
+                    <p class="platform-promo">Free delivery on first order</p>
+                </a>
+                
+                <a href="https://www.ubereats.com/store/philly-wings-express" class="platform-card ubereats" onclick="trackPlatformClick('ubereats')">
+                    <img src="/images/ubereats-logo.svg" alt="Order on Uber Eats" class="platform-logo">
+                    <p class="platform-time">20-30 min</p>
+                    <p class="platform-promo">20% off orders $30+</p>
+                </a>
+                
+                <a href="https://www.grubhub.com/restaurant/philly-wings-express" class="platform-card grubhub" onclick="trackPlatformClick('grubhub')">
+                    <img src="/images/grubhub-logo.svg" alt="Order on Grubhub" class="platform-logo">
+                    <p class="platform-time">30-40 min</p>
+                    <p class="platform-promo">$5 off with code WINGS5</p>
+                </a>
+            </div>
+            
+            <div class="final-cta">
+                <button class="cta-secondary" onclick="showAllPlatforms()">
+                    <span class="cta-text">Order Your Wings Now</span>
+                    <span class="cta-arrow">→</span>
+                </button>
+                <p class="guarantee">🔥 Satisfaction guaranteed or your money back</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p><a href="mailto:customerservice@phillywingsexpress.com">customerservice@phillywingsexpress.com</a></p>
+                    <p><a href="tel:+12155551234">Call for Catering: (215) 555-1234</a></p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>The Jawn</h3>
+                    <p class="footer-links">
+                        <a href="#" onclick="showNutrition()">Nutritional Info</a><br>
+                        <a href="#" onclick="showAllergens()">Allergens</a><br>
+                        <a href="#whoWeAre">Our Story</a>
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Stay connected for the latest drops</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Instagram">📸</a>
+                        <a href="#" aria-label="Facebook">👤</a>
+                        <a href="#" aria-label="Twitter">🐦</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Philly Wings Express. Made with 🔥 in Philadelphia</p>
+                <p class="admin-link"><a href="https://admin.phillywingsexpress.com" target="_blank">Admin Access</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Sticky Mobile CTA -->
+    <div class="sticky-mobile-cta" id="stickyCTA">
+        <button class="mobile-cta-button" onclick="scrollToOrder()">
+            Order Now 🔥
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="scripts.js"></script>
+</body>
+</html>

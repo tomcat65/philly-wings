@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philly Wings Admin - Content Management</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="login-screen">
+            <div class="login-box">
+                <h1>Philly Wings Admin</h1>
+                <form id="loginForm">
+                    <input type="email" id="emailInput" placeholder="Email" required>
+                    <input type="password" id="passwordInput" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+                <div id="loginError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="admin-dashboard" style="display: none;">
+            <header class="admin-header">
+                <h1>Philly Wings Content Management</h1>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </header>
+
+            <nav class="admin-nav">
+                <button class="nav-btn active" data-section="gameDayBanner">Game Day Banner</button>
+                <button class="nav-btn" data-section="menuItems">Menu Items</button>
+                <button class="nav-btn" data-section="combos">Combos</button>
+                <button class="nav-btn" data-section="reviews">Reviews</button>
+                <button class="nav-btn" data-section="settings">Settings</button>
+            </nav>
+
+            <main class="admin-content">
+                <!-- Game Day Banner Section -->
+                <section id="gameDayBanner" class="content-section active">
+                    <h2>Game Day Banner Management</h2>
+                    
+                    <div class="banner-form">
+                        <h3>Create/Edit Banner</h3>
+                        <form id="bannerForm">
+                            <div class="form-row">
+                                <label>
+                                    Active
+                                    <input type="checkbox" id="bannerActive" checked>
+                                </label>
+                            </div>
+                            
+                            <div class="form-row">
+                                <input type="text" id="team1" placeholder="Team 1 (e.g., EAGLES)" required>
+                                <input type="text" id="team2" placeholder="Team 2 (e.g., COWBOYS)" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <input type="datetime-local" id="gameDate" required>
+                                <input type="number" id="priority" placeholder="Priority (higher = shown first)" min="0" value="0">
+                            </div>
+                            
+                            <div class="form-row">
+                                <input type="text" id="specialOffer" placeholder="Special Offer (e.g., Order your Tailgate Special now)">
+                            </div>
+                            
+                            <div class="form-row">
+                                <input type="text" id="bannerMessage" placeholder="Additional Message">
+                            </div>
+                            
+                            <button type="submit">Save Banner</button>
+                        </form>
+                    </div>
+
+                    <div class="banner-list">
+                        <h3>Active Banners</h3>
+                        <div id="bannersList"></div>
+                    </div>
+                </section>
+
+                <!-- Menu Items Section -->
+                <section id="menuItems" class="content-section">
+                    <h2>Menu Items Management</h2>
+                    
+                    <div class="menu-form">
+                        <h3>Add/Edit Menu Item</h3>
+                        <form id="menuForm">
+                            <div class="form-row">
+                                <input type="text" id="itemName" placeholder="Item Name" required>
+                                <select id="itemCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="wings">Wings</option>
+                                    <option value="sides">Sides</option>
+                                    <option value="drinks">Drinks</option>
+                                    <option value="desserts">Desserts</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-row">
+                                <textarea id="itemDescription" placeholder="Description" rows="3" required></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <input type="number" id="itemPrice" placeholder="Price" step="0.01" min="0" required>
+                                <input type="number" id="heatLevel" placeholder="Heat Level (0-5)" min="0" max="5" value="0">
+                                <input type="number" id="sortOrder" placeholder="Sort Order" min="0" value="0">
+                            </div>
+                            
+                            <div class="form-row">
+                                <label>
+                                    Active
+                                    <input type="checkbox" id="itemActive" checked>
+                                </label>
+                                <label>
+                                    Featured
+                                    <input type="checkbox" id="itemFeatured">
+                                </label>
+                            </div>
+                            
+                            <div class="form-row">
+                                <label>
+                                    Image
+                                    <input type="file" id="itemImage" accept="image/*">
+                                </label>
+                            </div>
+                            
+                            <button type="submit">Save Menu Item</button>
+                        </form>
+                    </div>
+
+                    <div class="menu-list">
+                        <h3>Current Menu</h3>
+                        <div class="category-filter">
+                            <button class="filter-btn active" data-category="all">All</button>
+                            <button class="filter-btn" data-category="wings">Wings</button>
+                            <button class="filter-btn" data-category="sides">Sides</button>
+                            <button class="filter-btn" data-category="drinks">Drinks</button>
+                            <button class="filter-btn" data-category="desserts">Desserts</button>
+                        </div>
+                        <div id="menuList"></div>
+                    </div>
+                </section>
+
+                <!-- Combos Section -->
+                <section id="combos" class="content-section">
+                    <h2>Combo Deals Management</h2>
+                    <div class="combo-form">
+                        <h3>Create/Edit Combo</h3>
+                        <form id="comboForm">
+                            <!-- Combo form fields -->
+                        </form>
+                    </div>
+                    <div id="combosList"></div>
+                </section>
+
+                <!-- Reviews Section -->
+                <section id="reviews" class="content-section">
+                    <h2>Customer Reviews</h2>
+                    <div id="reviewsList"></div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="content-section">
+                    <h2>Site Settings</h2>
+                    <form id="settingsForm">
+                        <!-- Settings form fields -->
+                    </form>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="./admin.js"></script>
+</body>
+</html>
