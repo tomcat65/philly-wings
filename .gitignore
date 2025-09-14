@@ -78,3 +78,7 @@ service-account.json
 serviceAccountKey.json
 firebase-admin-sdk.json
 *-firebase-adminsdk-*.json
+
+# Assets (served from Firebase Storage)
+assets/
+/assets
