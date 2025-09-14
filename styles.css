@@ -1,5 +1,9 @@
 /* Philly Wings Express - Premium Conversion-Focused Styles */
 
+/* Import additional menu styles */
+@import './menu-styles.css';
+@import './sauce-menu-styles.css';
+
 :root {
     --eagles-green: #004C54;
     --eagles-silver: #A5ACAF;
