@@ -27,6 +27,22 @@ service firebase.storage {
         isValidSize(5); // 5MB limit for public images
     }
 
+    // Images folder - public read for website
+    match /images/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() &&
+        isImageFile() &&
+        isValidSize(5); // 5MB limit
+    }
+
+    // Videos folder - public read for website
+    match /videos/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() &&
+        request.resource.contentType.matches('video/.*') &&
+        isValidSize(50); // 50MB limit for videos
+    }
+
     // Menu items images - public read, admin write
     match /menu-items/{fileName} {
       allow read: if true;
