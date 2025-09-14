@@ -1,5 +1,6 @@
 import './firebase-config';
 import './components/game-day-banner';
+import './components/menu-navigation';
 import { MenuService, ReviewService, LiveOrderService, FirebaseService } from './services/firebase-service';
 
 // Dynamic content loaders
@@ -11,7 +12,7 @@ class PhillyWingsApp {
   async init() {
     // Load dynamic content
     await Promise.all([
-      this.loadFlavors(),
+      // this.loadFlavors(), // Commented out - using new menu system
       this.loadReviews(),
       this.initLiveOrders()
     ]);
@@ -85,7 +86,7 @@ class PhillyWingsApp {
         return `
           <div class="order-item">
             <span class="order-time">${timeAgo}</span>
-            <span class="order-details">${order.customerName} from ${order.neighborhood} ${order.items}</span>
+            <span class="order-details">Order placed: ${order.items}</span>
           </div>
         `;
       }).join('');

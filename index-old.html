@@ -127,286 +127,231 @@
             </div>
         </div>
     </section>
-<!-- New Menu Section with Sticky Navigation -->
-<section class="menu-full" id="menuFull">
-    <!-- Sticky Category Navigation -->
-    <nav class="menu-nav-sticky">
-        <div class="menu-nav-container">
-            <button class="menu-nav-btn active" data-category="wings">Wings</button>
-            <button class="menu-nav-btn" data-category="sauces">Sauces</button>
-            <button class="menu-nav-btn" data-category="sides">Sides</button>
-            <button class="menu-nav-btn" data-category="combos">Combos</button>
-            <button class="menu-nav-btn" data-category="drinks">Drinks</button>
-        </div>
-    </nav>
 
-    <div class="container">
-        <!-- Wings Section -->
-        <div class="menu-category" id="category-wings">
-            <div class="category-hero">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                     alt="Crispy Wings" class="hero-banner">
-                <div class="hero-overlay">
-                    <h2 class="category-title">Wings</h2>
-                    <p class="category-subtitle">Double-fried, hand-tossed perfection</p>
-                </div>
-            </div>
-
-            <div class="menu-grid">
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="6 Wings" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">6 Wings</h3>
-                        <p class="menu-card-desc">Perfect solo order. Choose your sauce.</p>
-                        <span class="menu-card-price">Order on App</span>
+    <!-- Flavor Explosion Gallery -->
+    <section class="flavors" id="flavors">
+        <div class="container">
+            <h2 class="section-headline chalk-text">Pick Your <span class="text-eagles">Jawn</span></h2>
+            <p class="section-subhead chalk-text">From "wassup" to "yo chill!"</p>
+            
+            <div class="flavor-grid">
+                <!-- Classic Buffalo -->
+                <div class="flavor-card" data-heat="3">
+                    <div class="flavor-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Classic Buffalo Wings" loading="lazy">
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                        </div>
                     </div>
+                    <h3 class="flavor-name chalk-text">Classic Buffalo</h3>
+                    <p class="flavor-description">The OG buffalo that's been hittin' since day one.</p>
                 </div>
 
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="12 Wings" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">12 Wings</h3>
-                        <p class="menu-card-desc">Our most popular. Perfect for 2-3 people.</p>
-                        <span class="menu-card-price">Order on App</span>
+                <!-- Honey Habanero -->
+                <div class="flavor-card" data-heat="4">
+                    <div class="flavor-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Honey Habanero Wings" loading="lazy">
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                        </div>
                     </div>
+                    <h3 class="flavor-name chalk-text">Honey Fire</h3>
+                    <p class="flavor-description">Clover honey meets habanero. Sweet heat that builds.</p>
                 </div>
 
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="24 Wings" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">24 Wings</h3>
-                        <p class="menu-card-desc">Share with friends. Mix two sauces.</p>
-                        <span class="menu-card-price">Order on App</span>
+                <!-- Atomic Buffalo -->
+                <div class="flavor-card atomic" data-heat="5">
+                    <div class="flavor-image">
+                        <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                            <source src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/videos%2Fdallas-crusher-sauce.mp4?alt=media" type="video/mp4">
+                            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Atomic Buffalo Wings" loading="lazy">
+                        </video>
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame active">🔥</span>
+                        </div>
+                        <div class="atomic-warning">☢️ ATOMIC</div>
                     </div>
+                    <h3 class="flavor-name chalk-text">Dallas Crusher</h3>
+                    <p class="flavor-description">Our hottest sauce. Carolina Reaper and scorpion peppers.</p>
+                    <p class="atomic-challenge">Ayo! Finish 12 and get Eagles green sauce FREE!</p>
                 </div>
 
-                <div class="menu-card featured">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="50 Wings Party Pack" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">50 Wing Party Pack</h3>
-                        <p class="menu-card-desc">Game day special! Mix up to 3 sauces.</p>
-                        <span class="menu-card-price featured">🏈 Best Value</span>
+                <!-- Garlic Parmesan -->
+                <div class="flavor-card" data-heat="1">
+                    <div class="flavor-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Garlic Parmesan Wings" loading="lazy">
+                        <div class="heat-meter">
+                            <span class="heat-flame active">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                            <span class="heat-flame">🔥</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sauces Section -->
-        <div class="menu-category" id="category-sauces">
-            <div class="category-hero">
-                <video autoplay muted loop playsinline class="hero-banner">
-                    <source src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/videos%2Fdallas-crusher-sauce.mp4?alt=media" type="video/mp4">
-                </video>
-                <div class="hero-overlay">
-                    <h2 class="category-title">Signature Sauces</h2>
-                    <p class="category-subtitle">Six flavors from mild to wild</p>
-                </div>
-            </div>
-
-            <div class="menu-grid">
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="Classic Buffalo" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Classic Buffalo</h3>
-                        <p class="menu-card-desc">Double-fried, tossed in signature buffalo sauce</p>
-                        <div class="heat-indicator">🔥🔥🔥</div>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="Honey Fire" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Honey Fire</h3>
-                        <p class="menu-card-desc">Clover honey meets habanero. Sweet heat.</p>
-                        <div class="heat-indicator">🔥🔥🔥🔥</div>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="Dallas Crusher" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Dallas Crusher</h3>
-                        <p class="menu-card-desc">Carolina Reaper & scorpion peppers</p>
-                        <div class="heat-indicator">🔥🔥🔥🔥🔥</div>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="Garlic Parm" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Gritty's Garlic Parm</h3>
-                        <p class="menu-card-desc">Roasted garlic, aged parmesan, fresh herbs</p>
-                        <div class="heat-indicator">🔥</div>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="BBQ" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Smoky BBQ</h3>
-                        <p class="menu-card-desc">Sweet & tangy with hickory smoke</p>
-                        <div class="heat-indicator">🔥🔥</div>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="Lemon Pepper" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Lemon Pepper Dry</h3>
-                        <p class="menu-card-desc">Zesty citrus with cracked black pepper</p>
-                        <div class="heat-indicator">🔥</div>
-                    </div>
+                    <h3 class="flavor-name chalk-text">Gritty's Garlic Parm</h3>
+                    <p class="flavor-description">Roasted garlic, aged parmesan, fresh herbs.</p>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Sides Section -->
-        <div class="menu-category" id="category-sides">
-            <div class="category-hero">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Floaded-fries.png?alt=media"
-                     alt="Sides" class="hero-banner">
-                <div class="hero-overlay">
-                    <h2 class="category-title">Sides</h2>
-                    <p class="category-subtitle">The perfect wingman for your wings</p>
+    <!-- Social Validation -->
+    <section class="social-proof">
+        <div class="container">
+            <h2 class="section-headline chalk-text">What <span class="text-eagles">Philly Says</span></h2>
+            
+            <div class="live-orders">
+                <h3 class="live-orders-title chalk-text">🏈 Who's Grubbin' Right Now</h3>
+                <div class="order-ticker" id="orderTicker">
+                    <div class="order-item">
+                        <span class="order-time">2 min ago</span>
+                        <span class="order-details">Latest order: The Tailgater Special</span>
+                    </div>
+                    <div class="order-item">
+                        <span class="order-time">5 min ago</span>
+                        <span class="order-details">Customer ordered: MVP Meal Deal</span>
+                    </div>
+                    <div class="order-item">
+                        <span class="order-time">8 min ago</span>
+                        <span class="order-details">Large order: 50 Piece Party Pack</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="menu-grid">
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Floaded-fries.png?alt=media"
-                         alt="Loaded Fries" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Loaded Fries</h3>
-                        <p class="menu-card-desc">Cheese sauce, bacon, green onions</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Dallas Crusher brought serious heat. Perfectly crispy wings. Will definitely reorder."</p>
+                    <p class="review-author">- Chris M., DoorDash</p>
                 </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="Mozzarella Sticks" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Mozzarella Sticks</h3>
-                        <p class="menu-card-desc">6 golden fried with marinara</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
+                <div class="review-card">
+                    <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Crispy, juicy, perfect. My new Sunday tradition."</p>
+                    <p class="review-author">- Maria S., Uber Eats</p>
                 </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="Onion Rings" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Onion Rings</h3>
-                        <p class="menu-card-desc">Beer battered with ranch dip</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="French Fries" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">French Fries</h3>
-                        <p class="menu-card-desc">Crispy golden, perfectly salted</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
+                <div class="review-card">
+                    <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Forget the cheesesteaks. These wings are Philly's best kept secret."</p>
+                    <p class="review-author">- James T., Grubhub</p>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Combos Section -->
-        <div class="menu-category" id="category-combos">
-            <div class="category-hero">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcombo-platter.png?alt=media"
-                     alt="Combo Deals" class="hero-banner">
-                <div class="hero-overlay">
-                    <h2 class="category-title">Combo Deals</h2>
-                    <p class="category-subtitle">More bang for your buck</p>
+    <!-- Who We Are Section -->
+    <section class="who-we-are" id="whoWeAre">
+        <div class="container">
+            <div class="who-content">
+                <h2 class="section-headline chalk-text">Who We <span class="text-eagles">Are</span></h2>
+                <div class="who-statement">
+                    <p class="big-statement">Mother luvin'<br>
+                    wing cravin'<br>
+                    real Philly<br>
+                    <span class="text-eagles">no BS style</span></p>
+                </div>
+                <div class="who-details">
+                    <p class="chalk-text">Born in Northeast Philly. Raised on Eagles wins and Phillies comebacks.</p>
+                    <p class="chalk-text">We don't do fancy. We do FIRE wings that hit different.</p>
+                    <p class="chalk-text">Every order made fresh. Every sauce crafted daily. Every bite a Philly experience.</p>
+                    <p class="chalk-text">This ain't just wings. This is Philly pride on a plate.</p>
                 </div>
             </div>
-
-            <div class="menu-grid">
-                <div class="menu-card featured">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcombo-platter.png?alt=media"
-                         alt="The Tailgater" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">The Tailgater</h3>
-                        <p class="menu-card-desc">20 wings, large fries, 4 drinks</p>
-                        <span class="menu-card-price featured">Game Day Special</span>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="MVP Meal" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">MVP Meal</h3>
-                        <p class="menu-card-desc">12 wings, fries, drink</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcombo-platter.png?alt=media"
-                         alt="Sampler Platter" class="menu-card-img">
-                    <div class="menu-card-content">
-                        <h3 class="menu-card-title">Sampler Platter</h3>
-                        <p class="menu-card-desc">6 wings, mozz sticks, loaded fries</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
-                </div>
+            <div class="who-images">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Our kitchen in action" class="who-img">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcombo-platter.png?alt=media" alt="Philly pride" class="who-img">
             </div>
         </div>
+    </section>
 
-        <!-- Drinks Section -->
-        <div class="menu-category" id="category-drinks">
-            <div class="category-hero">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                     alt="Drinks" class="hero-banner">
-                <div class="hero-overlay">
-                    <h2 class="category-title">Drinks</h2>
-                    <p class="category-subtitle">Cool down the heat</p>
+    <!-- Menu Board - Kretzer's Style -->
+    <section class="menu-board" id="menuSection" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)), url('https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media'); background-size: cover; background-attachment: fixed;">
+        <div class="container">
+            <div class="menu-header" style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="font-family: 'Permanent Marker', cursive; color: white; font-size: 3rem; margin: 0;">Philly Wings</h2>
+                <p style="color: #FFD700; font-size: 1.2rem; margin: 0.5rem 0;">SPECIALS • EVERY EAGLES GAME • 11AM-10PM</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; max-width: 1200px; margin: 0 auto;">
+                <!-- Appetizer Specials -->
+                <div class="menu-section" style="background: rgba(0,0,0,0.7); padding: 2rem; border-radius: 10px;">
+                    <h3 style="font-family: 'Permanent Marker', cursive; color: white; font-size: 2rem; margin-bottom: 1.5rem;">APPETIZER SPECIALS</h3>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem;">
+                        <span style="color: white; font-weight: bold; text-transform: uppercase; display: block;">SAMPLER PLATTER</span>
+                        <p style="color: #ccc; font-size: 0.9rem; margin: 0;">Wings, mozz sticks, loaded fries - perfect for sharing</p>
+                    </div>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem;">
+                        <span style="color: white; font-weight: bold; text-transform: uppercase; display: block;">LOADED FRIES</span>
+                        <p style="color: #ccc; font-size: 0.9rem; margin: 0;">Crispy fries with cheese sauce, bacon, green onions</p>
+                    </div>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem;">
+                        <span style="color: white; font-weight: bold; text-transform: uppercase; display: block;">MOZZARELLA STICKS (6)</span>
+                        <p style="color: #ccc; font-size: 0.9rem; margin: 0;">Golden fried with marinara dipping sauce</p>
+                    </div>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem;">
+                        <span style="color: white; font-weight: bold; text-transform: uppercase; display: block;">ONION RINGS</span>
+                        <p style="color: #ccc; font-size: 0.9rem; margin: 0;">Beer battered, served with ranch dip</p>
+                    </div>
+                </div>
+
+                <!-- Wing Specials -->
+                <div class="menu-section" style="background: rgba(0,0,0,0.7); padding: 2rem; border-radius: 10px;">
+                    <h3 style="font-family: 'Permanent Marker', cursive; color: white; font-size: 2rem; margin-bottom: 1.5rem;">WING SPECIALS</h3>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem;">
+                        <span style="color: white; font-weight: bold; text-transform: uppercase; display: block;">6 WINGS</span>
+                        <p style="color: #ccc; font-size: 0.9rem; margin: 0;">Perfect solo order - choose your flavor</p>
+                    </div>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem;">
+                        <span style="color: white; font-weight: bold; text-transform: uppercase; display: block;">12 WINGS</span>
+                        <p style="color: #ccc; font-size: 0.9rem; margin: 0;">Our most popular size - perfect for 2-3 people</p>
+                    </div>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem;">
+                        <span style="color: white; font-weight: bold; text-transform: uppercase; display: block;">24 WINGS</span>
+                        <p style="color: #ccc; font-size: 0.9rem; margin: 0;">Share with friends - mix two flavors</p>
+                    </div>
+
+                    <div class="menu-item" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,215,0,0.1); border: 2px solid #FFD700; border-radius: 5px;">
+                        <span style="color: #FFD700; font-weight: bold; text-transform: uppercase; display: block; font-size: 1.2rem;">50 WINGS PARTY PACK</span>
+                        <p style="color: white; font-size: 0.9rem; margin: 0;">🏈 GAME DAY SPECIAL - Mix up to 3 flavors!</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="menu-grid">
-                <div class="menu-card">
-                    <div class="menu-card-content no-image">
-                        <h3 class="menu-card-title">Soft Drinks</h3>
-                        <p class="menu-card-desc">Coke, Sprite, Orange, Root Beer</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
-                </div>
+            <!-- Delivery Info -->
+            <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: rgba(255,215,0,0.1); border: 3px solid #FFD700; border-radius: 10px;">
+                <h3 style="font-family: 'Permanent Marker', cursive; color: #FFD700; font-size: 2rem; margin: 0;">🚚 DELIVERY ONLY 🚚</h3>
+                <p style="color: white; font-size: 1.2rem; margin: 1rem 0;">We bring the wings to YOU!</p>
+                <p style="color: #FFD700; font-size: 1.1rem;">Call: +1 267-376-4646</p>
+                <p style="color: white; margin-top: 0.5rem;">Order through DoorDash, UberEats, or Grubhub</p>
+            </div>
 
-                <div class="menu-card">
-                    <div class="menu-card-content no-image">
-                        <h3 class="menu-card-title">Bottled Water</h3>
-                        <p class="menu-card-desc">Stay hydrated</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
-                </div>
-
-                <div class="menu-card">
-                    <div class="menu-card-content no-image">
-                        <h3 class="menu-card-title">Lemonade</h3>
-                        <p class="menu-card-desc">Fresh squeezed</p>
-                        <span class="menu-card-price">Order on App</span>
-                    </div>
-                </div>
+            <!-- Food Images -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem; max-width: 800px; margin: 2rem auto;">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Buffalo Wings" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px;">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcombo-platter.png?alt=media" alt="Combo Platter" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px;">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Floaded-fries.png?alt=media" alt="Loaded Fries" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px;">
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
     <!-- Email Capture Section -->
     <section class="email-capture" id="emailCapture">
         <div class="container">

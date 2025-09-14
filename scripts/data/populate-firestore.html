@@ -144,16 +144,16 @@
                         name: "Classic Buffalo",
                         price: 12.99,
                         heatLevel: 3,
-                        description: "The OG jawn. Crispy wings tossed in traditional buffalo sauce.",
+                        description: "Double-fried wings tossed in our signature buffalo sauce. The original.",
                         category: "wings",
                         active: true,
                         featured: true
                     },
                     {
-                        name: "Honey Jawn Fire",
+                        name: "Honey Fire",
                         price: 13.99,
                         heatLevel: 4,
-                        description: "Sweet at first, then BAM! Don't say we ain't warn youse.",
+                        description: "Clover honey meets habanero. Sweet heat that builds with every bite.",
                         category: "wings",
                         active: true,
                         featured: true
@@ -162,7 +162,7 @@
                         name: "Dallas Crusher",
                         price: 14.99,
                         heatLevel: 5,
-                        description: "This jawn crushes Cowboys fans AND your taste buds.",
+                        description: "Our hottest sauce. Carolina Reaper and scorpion peppers. Not for the weak.",
                         category: "wings",
                         active: true,
                         featured: true
@@ -171,14 +171,14 @@
                         name: "Gritty's Garlic Parm",
                         price: 12.99,
                         heatLevel: 1,
-                        description: "Smooth as Gritty on ice. This jawn smacks different.",
+                        description: "Roasted garlic, aged parmesan, fresh herbs. Rich and savory.",
                         category: "wings",
                         active: true,
                         featured: true
                     }
                 ];
 
-                const menuItemIds = ['classic-buffalo', 'honey-jawn-fire', 'dallas-crusher', 'grittys-garlic-parm'];
+                const menuItemIds = ['classic-buffalo', 'honey-fire', 'dallas-crusher', 'grittys-garlic-parm'];
                 for (let i = 0; i < menuItems.length; i++) {
                     await setDoc(doc(db, 'menuItems', menuItemIds[i]), menuItems[i]);
                 }
@@ -216,7 +216,7 @@
                     {
                         customerName: "James T.",
                         rating: 5,
-                        reviewText: "The Honey Jawn Fire has the perfect balance of sweet and heat. These jawns hit different!",
+                        reviewText: "The Honey Fire has the perfect balance of sweet and heat. Best wings in South Philly!",
                         timestamp: "2025-09-12T16:45:00.000Z",
                         verified: true
                     }
@@ -242,7 +242,7 @@
                     {
                         customerName: "Sarah",
                         location: "Mayfair",
-                        orderItems: ["Honey Jawn Fire (6pc)", "Small Fries", "Drink"],
+                        orderItems: ["Honey Fire (6pc)", "Small Fries", "Drink"],
                         total: 16.99,
                         status: "out-for-delivery",
                         estimatedDelivery: "10-15 mins",
