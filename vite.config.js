@@ -14,8 +14,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
-        dashboard: 'dashboard.html',
-        badges: 'badges.html',
         admin: 'admin/index.html'
       }
     }
