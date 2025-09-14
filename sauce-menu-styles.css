@@ -1,0 +1,183 @@
+/* ===========================
+   SAUCE MENU ENHANCEMENTS
+   =========================== */
+
+/* Wing Options Bar */
+.wing-options-bar {
+    background: rgba(26, 26, 26, 0.95);
+    border: 2px solid var(--eagles-green);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.option-group h3 {
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+}
+
+.style-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.style-btn {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.style-btn:hover {
+    border-color: var(--eagles-green);
+    transform: translateY(-2px);
+}
+
+.style-btn.active {
+    background: var(--eagles-green);
+    border-color: var(--eagles-green);
+}
+
+.style-note {
+    color: #999;
+    font-size: 0.9rem;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Sauce Category Titles */
+.sauce-category-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: white;
+    margin: 2rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--eagles-green);
+}
+
+.prep-note {
+    font-size: 0.9rem;
+    color: #999;
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Heat Indicators */
+.heat-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.heat-level {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.heat-level {
+    color: #fff;
+}
+
+.heat-flames {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+}
+
+/* Heat Level Colors */
+.menu-card-content:has(.heat-level:contains("Sweet")) .heat-level {
+    color: #4CAF50;
+}
+
+.menu-card-content:has(.heat-level:contains("Mild")) .heat-level {
+    color: #FFC107;
+}
+
+.menu-card-content:has(.heat-level:contains("Medium")) .heat-level {
+    color: #FF9800;
+}
+
+.menu-card-content:has(.heat-level:contains("Hot")) .heat-level {
+    color: #FF5722;
+}
+
+.menu-card-content:has(.heat-level:contains("Extra Hot")) .heat-level {
+    color: #F44336;
+}
+
+.menu-card-content:has(.heat-level:contains("INSANE")) .heat-level {
+    color: #D32F2F;
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Dipping Sauces */
+.dip-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.dip-card {
+    background: rgba(26, 26, 26, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.dip-card:hover {
+    border-color: var(--eagles-green);
+    transform: translateY(-3px);
+}
+
+.dip-card h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: white;
+    margin: 0 0 0.5rem 0;
+}
+
+.dip-card p {
+    color: #999;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .style-buttons {
+        flex-direction: column;
+    }
+
+    .style-btn {
+        width: 100%;
+    }
+
+    .heat-indicator {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .dip-options {
+        grid-template-columns: 1fr;
+    }
+}
