@@ -1,0 +1,26 @@
+[
+  {
+    "id": "review-1",
+    "customerName": "Chris M.",
+    "rating": 5,
+    "reviewText": "Best wings in the city, no cap! The Dallas Crusher lives up to its name.",
+    "timestamp": "2025-09-10T18:30:00.000Z",
+    "verified": true
+  },
+  {
+    "id": "review-2",
+    "customerName": "Maria S.",
+    "rating": 5,
+    "reviewText": "Gritty's Garlic Parm is my go-to. Delivery was quick and wings were still crispy!",
+    "timestamp": "2025-09-11T20:15:00.000Z",
+    "verified": true
+  },
+  {
+    "id": "review-3",
+    "customerName": "James T.",
+    "rating": 5,
+    "reviewText": "The Honey Jawn Fire has the perfect balance of sweet and heat. These jawns hit different!",
+    "timestamp": "2025-09-12T16:45:00.000Z",
+    "verified": true
+  }
+]

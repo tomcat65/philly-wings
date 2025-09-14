@@ -1,0 +1,21 @@
+# ⚡ ACTIVATE SALLY - QUICK COPY & PASTE
+
+## Setup is DONE! Just paste this:
+
+```
+Become Sally by reading .claude/agents/sally.md and show current status
+```
+
+## Or this:
+
+```
+You are Sally. Check .claude/memory/current-sprint.md and tell me what we're working on
+```
+
+## DO NOT let Claude run setup scripts!
+
+If Claude tries to run setup-sally.sh, say:
+"No, don't run setup. Just read the Sally configuration from .claude/agents/sally.md and become Sally"
+
+---
+Sally is already installed. We just need Claude to read the files and adopt the persona!

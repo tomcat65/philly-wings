@@ -1,41 +1,113 @@
-rules_version = '2';
+rules_version='2'
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public read access to active content
-    match /gameDayBanners/{document=**} {
-      allow read: if resource.data.active == true;
-      allow write: if request.auth != null;
+    // Helper functions for authentication and authorization
+    function isAuthenticated() {
+      return request.auth != null;
     }
-    
-    match /menuItems/{document=**} {
-      allow read: if resource.data.active == true;
-      allow write: if request.auth != null;
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.admin == true;
     }
-    
-    match /combos/{document=**} {
-      allow read: if resource.data.active == true;
-      allow write: if request.auth != null;
+
+    function isOwner(userId) {
+      return isAuthenticated() &&
+        request.auth.uid == userId;
     }
-    
-    match /reviews/{document=**} {
-      allow read: if resource.data.featured == true;
-      allow write: if request.auth != null;
+
+    function isValidEmail(email) {
+      return email.matches('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}');
     }
-    
-    match /liveOrders/{document=**} {
-      allow read: if resource.data.display == true;
-      allow write: if request.auth != null;
-    }
-    
+
+    // Settings collection - read-only for all authenticated users, write for admins only
     match /settings/{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if true; // Public settings for app configuration
+      allow write: if isAdmin();
     }
-    
-    match /emailSubscribers/{document=**} {
-      allow read: if request.auth != null;
-      allow create: if true;
-      allow update, delete: if request.auth != null;
+
+    // Menu items - public read, admin write
+    match /menuItems/{itemId} {
+      allow read: if true; // Public menu
+      allow create, update: if isAdmin() &&
+        request.resource.data.keys().hasAll(['name', 'price', 'category']) &&
+        request.resource.data.price is number &&
+        request.resource.data.price >= 0;
+      allow delete: if isAdmin();
+    }
+
+    // Combos - public read, admin write
+    match /combos/{comboId} {
+      allow read: if true; // Public combos
+      allow create, update: if isAdmin() &&
+        request.resource.data.keys().hasAll(['name', 'price', 'items']) &&
+        request.resource.data.price is number &&
+        request.resource.data.price >= 0;
+      allow delete: if isAdmin();
+    }
+
+    // Orders - authenticated users can create and read their own
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() &&
+        (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['items', 'total', 'status']) &&
+        request.resource.data.status == 'pending';
+      allow update: if isAuthenticated() &&
+        (isOwner(resource.data.userId) &&
+         request.resource.data.status in ['cancelled'] &&
+         resource.data.status == 'pending') ||
+        isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Live orders - public read for display, admin write
+    match /liveOrders/{orderId} {
+      allow read: if true; // Public display board
+      allow write: if isAdmin();
+    }
+
+    // Reviews - authenticated users can create, public read
+    match /reviews/{reviewId} {
+      allow read: if true; // Public reviews
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['rating', 'comment']) &&
+        request.resource.data.rating >= 1 &&
+        request.resource.data.rating <= 5;
+      allow update: if isOwner(resource.data.userId) &&
+        request.resource.data.userId == resource.data.userId; // Can't change ownership
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // User profiles - users can read/write their own profile
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasAll(['email', 'createdAt']);
+      allow update: if isOwner(userId) &&
+        request.resource.data.email == resource.data.email; // Can't change email
+      allow delete: if isAdmin();
+    }
+
+    // Admin users collection - restricted access
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Game day banners - public read, admin write
+    match /gameDayBanners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

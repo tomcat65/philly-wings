@@ -1,0 +1,42 @@
+[
+  {
+    "id": "classic-buffalo",
+    "name": "Classic Buffalo",
+    "price": 12.99,
+    "heatLevel": 3,
+    "description": "The OG jawn. Crispy wings tossed in traditional buffalo sauce.",
+    "category": "wings",
+    "active": true,
+    "featured": true
+  },
+  {
+    "id": "honey-jawn-fire",
+    "name": "Honey Jawn Fire",
+    "price": 13.99,
+    "heatLevel": 4,
+    "description": "Sweet at first, then BAM! Don't say we ain't warn youse.",
+    "category": "wings",
+    "active": true,
+    "featured": true
+  },
+  {
+    "id": "dallas-crusher",
+    "name": "Dallas Crusher",
+    "price": 14.99,
+    "heatLevel": 5,
+    "description": "This jawn crushes Cowboys fans AND your taste buds.",
+    "category": "wings",
+    "active": true,
+    "featured": true
+  },
+  {
+    "id": "grittys-garlic-parm",
+    "name": "Gritty's Garlic Parm",
+    "price": 12.99,
+    "heatLevel": 1,
+    "description": "Smooth as Gritty on ice. This jawn smacks different.",
+    "category": "wings",
+    "active": true,
+    "featured": true
+  }
+]

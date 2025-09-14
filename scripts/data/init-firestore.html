@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize Firestore - Philly Wings</title>
+</head>
+<body>
+    <h1>Firestore Initialization</h1>
+    <button id="initBtn">Initialize Settings Document</button>
+    <div id="status"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "philly-wings.firebaseapp.com",
+            projectId: "philly-wings",
+            storageBucket: "philly-wings.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('initBtn').addEventListener('click', async () => {
+            const status = document.getElementById('status');
+            status.innerHTML = '<p>Initializing...</p>';
+
+            try {
+                // Settings document
+                await setDoc(doc(db, 'settings', 'main'), {
+                    businessHours: {
+                        monday: { open: "11:00", close: "22:00" },
+                        tuesday: { open: "11:00", close: "22:00" },
+                        wednesday: { open: "11:00", close: "22:00" },
+                        thursday: { open: "11:00", close: "22:00" },
+                        friday: { open: "11:00", close: "23:00" },
+                        saturday: { open: "11:00", close: "23:00" },
+                        sunday: { open: "12:00", close: "21:00" }
+                    },
+                    deliveryPlatforms: {
+                        doorDash: { active: true, url: "https://www.doordash.com/store/philly-wings-express" },
+                        uberEats: { active: true, url: "https://www.ubereats.com/store/philly-wings-express" },
+                        grubHub: { active: true, url: "https://www.grubhub.com/restaurant/philly-wings-express" }
+                    },
+                    socialMedia: {
+                        instagram: "@phillywingsexpress",
+                        facebook: "phillywingsexpress",
+                        twitter: "@phillywings"
+                    },
+                    analytics: {
+                        orderCount: 0,
+                        lastHourOrders: 17
+                    },
+                    updatedAt: serverTimestamp()
+                });
+
+                status.innerHTML += '<p style="color: green;">✓ Settings document created!</p>';
+
+                // Sample menu items
+                const sampleItems = [
+                    {
+                        name: "Classic Buffalo",
+                        description: "The OG jawn. Crispy wings tossed in traditional buffalo sauce.",
+                        category: "wings",
+                        price: 12.99,
+                        heatLevel: 3,
+                        active: true,
+                        featured: true,
+                        sortOrder: 1
+                    },
+                    {
+                        name: "Honey Jawn Fire",
+                        description: "Sweet at first, then BAM! Don't say we ain't warn youse.",
+                        category: "wings",
+                        price: 13.99,
+                        heatLevel: 4,
+                        active: true,
+                        featured: true,
+                        sortOrder: 2
+                    },
+                    {
+                        name: "Dallas Crusher",
+                        description: "This jawn crushes Cowboys fans AND your taste buds.",
+                        category: "wings",
+                        price: 14.99,
+                        heatLevel: 5,
+                        active: true,
+                        featured: true,
+                        sortOrder: 3
+                    }
+                ];
+
+                // Add sample reviews
+                const sampleReviews = [
+                    {
+                        customerName: "Chris M.",
+                        rating: 5,
+                        text: "Yo these jawns SMACK! Dallas Crusher had me sweatin' but I'd run it back.",
+                        platform: "DoorDash",
+                        featured: true,
+                        verified: true
+                    },
+                    {
+                        customerName: "Maria S.",
+                        rating: 5,
+                        text: "Crispy, juicy, perfect. My new Sunday tradition.",
+                        platform: "Uber Eats",
+                        featured: true,
+                        verified: true
+                    }
+                ];
+
+                status.innerHTML += '<p style="color: green;">✓ Initialization complete! Your site is ready.</p>';
+                status.innerHTML += '<p>Visit <a href="https://philly-wings.web.app">your site</a> to see the changes.</p>';
+
+            } catch (error) {
+                status.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Populate Firestore - Philly Wings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #e55a2b;
+        }
+        .success {
+            color: #4caf50;
+            margin: 10px 0;
+        }
+        .error {
+            color: #f44336;
+            margin: 10px 0;
+        }
+        .status {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Populate Firestore Database - Philly Wings</h1>
+        <p>Click the button below to populate the Firestore database with sample data:</p>
+
+        <button onclick="populateDatabase()">Populate Database</button>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
+        import { getFirestore, doc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+        // Firebase configuration - must be provided via environment variables
+        // IMPORTANT: Never hardcode API keys or sensitive configuration
+        // Create a .env file with your Firebase configuration values
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_AUTH_DOMAIN_HERE",
+            projectId: "YOUR_PROJECT_ID_HERE",
+            storageBucket: "YOUR_STORAGE_BUCKET_HERE",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
+            appId: "YOUR_APP_ID_HERE",
+            measurementId: "YOUR_MEASUREMENT_ID_HERE"
+        };
+
+        // Check if configuration is properly set
+        if (firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
+            alert("Please configure your Firebase credentials before running this script.");
+            throw new Error("Firebase configuration not set. Please update the configuration with your actual Firebase project values.");
+        }
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function log(message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent += message + '\n';
+            console.log(message);
+        }
+
+        window.populateDatabase = async function() {
+            try {
+                log('Starting Firestore population...');
+
+                // 1. Settings collection
+                const settingsData = {
+                    businessHours: {
+                        monday: { open: "11:00", close: "22:00" },
+                        tuesday: { open: "11:00", close: "22:00" },
+                        wednesday: { open: "11:00", close: "22:00" },
+                        thursday: { open: "11:00", close: "22:00" },
+                        friday: { open: "11:00", close: "23:00" },
+                        saturday: { open: "11:00", close: "23:00" },
+                        sunday: { open: "12:00", close: "21:00" }
+                    },
+                    deliveryPlatforms: {
+                        doorDash: { active: true, url: "https://www.doordash.com/store/philly-wings-express" },
+                        uberEats: { active: true, url: "https://www.ubereats.com/store/philly-wings-express" },
+                        grubHub: { active: true, url: "https://www.grubhub.com/restaurant/philly-wings-express" }
+                    },
+                    socialMedia: {
+                        instagram: "@phillywingsexpress",
+                        facebook: "phillywingsexpress",
+                        twitter: "@phillywings"
+                    },
+                    analytics: {
+                        orderCount: 0,
+                        lastHourOrders: 17
+                    }
+                };
+                await setDoc(doc(db, 'settings', 'main'), settingsData);
+                log('✅ Settings document created');
+
+                // 2. Game Day Banners collection
+                const gameDayData = {
+                    active: true,
+                    team1: "EAGLES",
+                    team2: "COWBOYS",
+                    gameDate: "2025-09-14T17:00:00.000Z",
+                    message: "Order your Tailgate Special now",
+                    specialOffer: "Free delivery on orders $30+",
+                    priority: 1
+                };
+                await addDoc(collection(db, 'gameDayBanners'), gameDayData);
+                log('✅ Game day banner document created');
+
+                // 3. Menu Items collection
+                const menuItems = [
+                    {
+                        name: "Classic Buffalo",
+                        price: 12.99,
+                        heatLevel: 3,
+                        description: "The OG jawn. Crispy wings tossed in traditional buffalo sauce.",
+                        category: "wings",
+                        active: true,
+                        featured: true
+                    },
+                    {
+                        name: "Honey Jawn Fire",
+                        price: 13.99,
+                        heatLevel: 4,
+                        description: "Sweet at first, then BAM! Don't say we ain't warn youse.",
+                        category: "wings",
+                        active: true,
+                        featured: true
+                    },
+                    {
+                        name: "Dallas Crusher",
+                        price: 14.99,
+                        heatLevel: 5,
+                        description: "This jawn crushes Cowboys fans AND your taste buds.",
+                        category: "wings",
+                        active: true,
+                        featured: true
+                    },
+                    {
+                        name: "Gritty's Garlic Parm",
+                        price: 12.99,
+                        heatLevel: 1,
+                        description: "Smooth as Gritty on ice. This jawn smacks different.",
+                        category: "wings",
+                        active: true,
+                        featured: true
+                    }
+                ];
+
+                const menuItemIds = ['classic-buffalo', 'honey-jawn-fire', 'dallas-crusher', 'grittys-garlic-parm'];
+                for (let i = 0; i < menuItems.length; i++) {
+                    await setDoc(doc(db, 'menuItems', menuItemIds[i]), menuItems[i]);
+                }
+                log('✅ Menu items documents created');
+
+                // 4. Combos collection
+                const combosData = {
+                    name: "The Tailgater",
+                    price: 44.99,
+                    originalPrice: 54.99,
+                    description: "20 wings, large fries, and 4 drinks. Perfect for the squad.",
+                    category: "combos",
+                    active: true,
+                    featured: true
+                };
+                await setDoc(doc(db, 'combos', 'tailgater'), combosData);
+                log('✅ Combos document created');
+
+                // 5. Reviews collection
+                const reviews = [
+                    {
+                        customerName: "Chris M.",
+                        rating: 5,
+                        reviewText: "Best wings in the city, no cap! The Dallas Crusher lives up to its name.",
+                        timestamp: "2025-09-10T18:30:00.000Z",
+                        verified: true
+                    },
+                    {
+                        customerName: "Maria S.",
+                        rating: 5,
+                        reviewText: "Gritty's Garlic Parm is my go-to. Delivery was quick and wings were still crispy!",
+                        timestamp: "2025-09-11T20:15:00.000Z",
+                        verified: true
+                    },
+                    {
+                        customerName: "James T.",
+                        rating: 5,
+                        reviewText: "The Honey Jawn Fire has the perfect balance of sweet and heat. These jawns hit different!",
+                        timestamp: "2025-09-12T16:45:00.000Z",
+                        verified: true
+                    }
+                ];
+
+                const reviewIds = ['review-1', 'review-2', 'review-3'];
+                for (let i = 0; i < reviews.length; i++) {
+                    await setDoc(doc(db, 'reviews', reviewIds[i]), reviews[i]);
+                }
+                log('✅ Reviews documents created');
+
+                // 6. Live Orders collection
+                const liveOrders = [
+                    {
+                        customerName: "Mike",
+                        location: "Fishtown",
+                        orderItems: ["Classic Buffalo (10pc)", "Large Fries"],
+                        total: 18.99,
+                        status: "preparing",
+                        estimatedDelivery: "25-30 mins",
+                        orderTime: "2025-09-13T19:15:00.000Z"
+                    },
+                    {
+                        customerName: "Sarah",
+                        location: "Mayfair",
+                        orderItems: ["Honey Jawn Fire (6pc)", "Small Fries", "Drink"],
+                        total: 16.99,
+                        status: "out-for-delivery",
+                        estimatedDelivery: "10-15 mins",
+                        orderTime: "2025-09-13T18:45:00.000Z"
+                    },
+                    {
+                        customerName: "Tommy",
+                        location: "Delco",
+                        orderItems: ["The Tailgater Combo"],
+                        total: 44.99,
+                        status: "preparing",
+                        estimatedDelivery: "35-40 mins",
+                        orderTime: "2025-09-13T19:20:00.000Z"
+                    }
+                ];
+
+                const orderIds = ['order-1', 'order-2', 'order-3'];
+                for (let i = 0; i < liveOrders.length; i++) {
+                    await setDoc(doc(db, 'liveOrders', orderIds[i]), liveOrders[i]);
+                }
+                log('✅ Live orders documents created');
+
+                log('🎉 All Firestore documents created successfully!');
+
+            } catch (error) {
+                log('❌ Error populating Firestore: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

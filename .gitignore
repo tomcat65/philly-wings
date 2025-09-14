@@ -10,10 +10,14 @@ build/
 
 # Environment variables
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+.env.development
+.env.staging
 
 # Logs
 *.log
@@ -70,3 +74,7 @@ Thumbs.db
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+service-account.json
+serviceAccountKey.json
+firebase-admin-sdk.json
+*-firebase-adminsdk-*.json

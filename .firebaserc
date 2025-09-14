@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "philly-wings"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }

@@ -1,0 +1,25 @@
+{
+  "businessHours": {
+    "monday": { "open": "11:00", "close": "22:00" },
+    "tuesday": { "open": "11:00", "close": "22:00" },
+    "wednesday": { "open": "11:00", "close": "22:00" },
+    "thursday": { "open": "11:00", "close": "22:00" },
+    "friday": { "open": "11:00", "close": "23:00" },
+    "saturday": { "open": "11:00", "close": "23:00" },
+    "sunday": { "open": "12:00", "close": "21:00" }
+  },
+  "deliveryPlatforms": {
+    "doorDash": { "active": true, "url": "https://www.doordash.com/store/philly-wings-express" },
+    "uberEats": { "active": true, "url": "https://www.ubereats.com/store/philly-wings-express" },
+    "grubHub": { "active": true, "url": "https://www.grubhub.com/restaurant/philly-wings-express" }
+  },
+  "socialMedia": {
+    "instagram": "@phillywingsexpress",
+    "facebook": "phillywingsexpress",
+    "twitter": "@phillywings"
+  },
+  "analytics": {
+    "orderCount": 0,
+    "lastHourOrders": 17
+  }
+}

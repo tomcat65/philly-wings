@@ -1,0 +1,32 @@
+[
+  {
+    "id": "order-1",
+    "customerName": "Mike",
+    "location": "Fishtown",
+    "orderItems": ["Classic Buffalo (10pc)", "Large Fries"],
+    "total": 18.99,
+    "status": "preparing",
+    "estimatedDelivery": "25-30 mins",
+    "orderTime": "2025-09-13T19:15:00.000Z"
+  },
+  {
+    "id": "order-2",
+    "customerName": "Sarah",
+    "location": "Mayfair",
+    "orderItems": ["Honey Jawn Fire (6pc)", "Small Fries", "Drink"],
+    "total": 16.99,
+    "status": "out-for-delivery",
+    "estimatedDelivery": "10-15 mins",
+    "orderTime": "2025-09-13T18:45:00.000Z"
+  },
+  {
+    "id": "order-3",
+    "customerName": "Tommy",
+    "location": "Delco",
+    "orderItems": ["The Tailgater Combo"],
+    "total": 44.99,
+    "status": "preparing",
+    "estimatedDelivery": "35-40 mins",
+    "orderTime": "2025-09-13T19:20:00.000Z"
+  }
+]

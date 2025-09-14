@@ -1,0 +1,10 @@
+{
+  "id": "tailgater",
+  "name": "The Tailgater",
+  "price": 44.99,
+  "originalPrice": 54.99,
+  "description": "20 wings, large fries, and 4 drinks. Perfect for the squad.",
+  "category": "combos",
+  "active": true,
+  "featured": true
+}

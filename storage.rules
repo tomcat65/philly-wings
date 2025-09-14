@@ -1,22 +1,96 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Public read access to all images
-    match /{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
     }
-    
-    // Specific rules for menu items
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.admin == true;
+    }
+
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isValidSize(maxSizeMB) {
+      return request.resource.size <= maxSizeMB * 1024 * 1024;
+    }
+
+    // Public assets (menu items, combos, logos) - public read
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() &&
+        isImageFile() &&
+        isValidSize(5); // 5MB limit for public images
+    }
+
+    // Menu items images - public read, admin write
     match /menu-items/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null && request.resource.size < 5 * 1024 * 1024; // 5MB limit
+      allow write: if isAdmin() &&
+        isImageFile() &&
+        isValidSize(5); // 5MB limit
     }
-    
-    // Specific rules for combo images
+
+    // Combo images - public read, admin write
     match /combos/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null && request.resource.size < 5 * 1024 * 1024; // 5MB limit
+      allow write: if isAdmin() &&
+        isImageFile() &&
+        isValidSize(5); // 5MB limit
+    }
+
+    // Game day banners - public read, admin write
+    match /game-day-banners/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() &&
+        isImageFile() &&
+        isValidSize(10); // 10MB limit for banners
+    }
+
+    // User profile images - authenticated users can manage their own
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+        request.auth.uid == userId &&
+        isImageFile() &&
+        isValidSize(2); // 2MB limit for profile images
+      allow delete: if isAuthenticated() &&
+        request.auth.uid == userId;
+    }
+
+    // Order attachments - authenticated users can upload, admins can manage
+    match /orders/{orderId}/attachments/{fileName} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        isValidSize(10); // 10MB limit for attachments
+      allow update, delete: if isAdmin();
+    }
+
+    // Admin uploads - restricted to admins only
+    match /admin/{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if isAdmin() &&
+        isValidSize(50); // 50MB limit for admin uploads
+    }
+
+    // Temporary uploads - authenticated users, auto-cleanup recommended
+    match /temp/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated() &&
+        request.auth.uid == userId;
+      allow write: if isAuthenticated() &&
+        request.auth.uid == userId &&
+        isValidSize(10); // 10MB limit
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == userId || isAdmin());
+    }
+
+    // Default deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }

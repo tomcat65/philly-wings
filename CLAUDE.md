@@ -1,0 +1,3 @@
+- remember to use the firebase mcp when dealing with firebase
+- remember use firebase-mcp for crud operations and firebase for project management
+- remember whenever in doubt or needing more context use context7 mcp
