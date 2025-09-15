@@ -8,7 +8,7 @@ export const NutritionService = {
   async getById(itemId) {
     try {
       // First try to find by the id field
-      const items = await FirebaseService.getAll('nutrition', {
+      const items = await FirebaseService.getAll('nutritionData', {
         where: ['id', '==', itemId],
         limit: 1
       });
@@ -18,7 +18,7 @@ export const NutritionService = {
       }
 
       // Fallback to document ID
-      return await FirebaseService.getById('nutrition', itemId);
+      return await FirebaseService.getById('nutritionData', itemId);
     } catch (error) {
       console.error('Error fetching nutrition data:', error);
       return null;
@@ -28,7 +28,7 @@ export const NutritionService = {
   // Get all nutrition items by category
   async getByCategory(category) {
     try {
-      return await FirebaseService.getAll('nutrition', {
+      return await FirebaseService.getAll('nutritionData', {
         where: ['category', '==', category],
         orderBy: ['sortOrder', 'asc']
       });
@@ -41,7 +41,7 @@ export const NutritionService = {
   // Get all active nutrition items
   async getAllActive() {
     try {
-      return await FirebaseService.getAll('nutrition', {
+      return await FirebaseService.getAll('nutritionData', {
         where: ['active', '==', true],
         orderBy: ['sortOrder', 'asc']
       });
@@ -53,7 +53,7 @@ export const NutritionService = {
 
   // Subscribe to real-time nutrition updates
   subscribeToItem(itemId, callback) {
-    return FirebaseService.subscribe('nutrition', (items) => {
+    return FirebaseService.subscribe('nutritionData', (items) => {
       const item = items.find(i => i.id === itemId);
       callback(item);
     }, {
