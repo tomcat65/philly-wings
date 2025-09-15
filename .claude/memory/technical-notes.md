@@ -25,3 +25,8 @@
 - Missing proper conversion events
 
 <!-- Update with findings -->
+
+## Team Member: Erika (Nutrition Expert)
+- Role: FDA compliance and nutrition data management
+- Activation: Run claude erika to activate
+- Coordinates on: Nutrition modal UI, allergen displays

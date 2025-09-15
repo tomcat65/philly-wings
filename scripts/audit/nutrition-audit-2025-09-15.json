@@ -1,0 +1,334 @@
+{
+  "timestamp": "2025-09-15T16:43:17.144Z",
+  "summary": {
+    "totalItems": 24,
+    "compliant": 0,
+    "warnings": 0,
+    "errors": 24
+  },
+  "categories": {
+    "wings": {
+      "total": 5,
+      "compliant": 0,
+      "warnings": 0,
+      "errors": 5,
+      "items": {
+        "6-wings": {
+          "name": "6 Wings",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)"
+          ]
+        },
+        "12-wings": {
+          "name": "12 Wings",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)"
+          ]
+        },
+        "24-wings": {
+          "name": "24 Wings",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)"
+          ]
+        },
+        "30-wings": {
+          "name": "30 Wings",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)"
+          ]
+        },
+        "50-wings": {
+          "name": "50 Wing Party Pack",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)"
+          ]
+        }
+      }
+    },
+    "sauces": {
+      "total": 9,
+      "compliant": 0,
+      "warnings": 0,
+      "errors": 9,
+      "items": {
+        "classic-lemon-pepper": {
+          "name": "Classic Lemon Pepper (Dry Rub)",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"Keto-Friendly\" designation (≤5g net carbs)"
+          ]
+        },
+        "northeast-hot-lemon": {
+          "name": "Northeast Hot Lemon (Dry Rub)",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"Keto-Friendly\" designation (≤5g net carbs)"
+          ]
+        },
+        "frankford-cajun": {
+          "name": "Frankford Cajun (Dry Rub)",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"Keto-Friendly\" designation (≤5g net carbs)"
+          ]
+        },
+        "sweet-teriyaki": {
+          "name": "Sweet Teriyaki",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        },
+        "tailgate-bbq": {
+          "name": "Tailgate BBQ",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        },
+        "mild-buffalo": {
+          "name": "Mild Buffalo",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        },
+        "philly-classic-hot": {
+          "name": "Philly Classic Hot",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        },
+        "broad-pattison-burn": {
+          "name": "Broad & Pattison Burn",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        },
+        "grittys-revenge": {
+          "name": "Gritty's Revenge",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"Keto-Friendly\" designation (≤5g net carbs)"
+          ]
+        }
+      }
+    },
+    "dippingSauces": {
+      "total": 3,
+      "compliant": 0,
+      "warnings": 0,
+      "errors": 3,
+      "items": {
+        "ranch": {
+          "name": "Ranch",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        },
+        "honey-mustard": {
+          "name": "Honey Mustard",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        },
+        "blue-cheese": {
+          "name": "Blue Cheese",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": []
+        }
+      }
+    },
+    "sides": {
+      "total": 4,
+      "compliant": 0,
+      "warnings": 0,
+      "errors": 4,
+      "items": {
+        "loaded-fries": {
+          "name": "Loaded Fries",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [
+            "Serving size should include metric weight: \"1 order\""
+          ],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)"
+          ]
+        },
+        "mozzarella-sticks": {
+          "name": "Mozzarella Sticks (6)",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [
+            "Serving size should include metric weight: \"6 sticks\""
+          ],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)"
+          ]
+        },
+        "french-fries": {
+          "name": "French Fries",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [
+            "Serving size should include metric weight: \"1 medium order\"",
+            "No allergen information provided"
+          ],
+          "recommendations": []
+        },
+        "bottled-water": {
+          "name": "Bottled Water",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [
+            "No allergen information provided",
+            "Missing cross-contact warning for fried items"
+          ],
+          "recommendations": []
+        }
+      }
+    },
+    "combos": {
+      "total": 3,
+      "compliant": 0,
+      "warnings": 0,
+      "errors": 3,
+      "items": {
+        "the-tailgater": {
+          "name": "The Tailgater",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)",
+            "Consider adding serving size (e.g., \"Serves 2-3\")"
+          ]
+        },
+        "mvp-meal": {
+          "name": "MVP Meal",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)",
+            "Consider adding serving size (e.g., \"Serves 2-3\")"
+          ]
+        },
+        "sampler-platter": {
+          "name": "Sampler Platter",
+          "errors": [
+            "Missing added sugars (required as of 2020)",
+            "Missing vitamin D (required as of 2020)",
+            "Missing potassium (required as of 2020)"
+          ],
+          "warnings": [],
+          "recommendations": [
+            "Qualifies for \"High Protein\" claim (≥20% DV)",
+            "Consider adding serving size (e.g., \"Serves 2-3\")"
+          ]
+        }
+      }
+    }
+  },
+  "issues": [],
+  "recommendations": []
+}

@@ -1,0 +1,636 @@
+/* FDA 2020 Compliant Nutrition Modal Styles */
+/* Designed by Sally for Philly Wings Express */
+/* Mobile-first, accessible, and FDA compliant */
+
+.nutrition-modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.nutrition-modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.nutrition-modal-header {
+  background: linear-gradient(135deg, #d35400, #e74c3c);
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+}
+
+.nutrition-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+  background: rgba(255, 255, 255, 0.2);
+  outline: 2px solid white;
+}
+
+/* Mobile Tab Navigation */
+.nutrition-tabs {
+  display: none;
+  background: #f8f9fa;
+  padding: 10px;
+  gap: 10px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.nutrition-tabs.mobile-only {
+  display: none;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: white;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-button.active {
+  background: #d35400;
+  color: white;
+}
+
+.tab-button:hover:not(.active) {
+  background: #e9ecef;
+}
+
+/* Body */
+.nutrition-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Serving Toggle */
+.serving-toggle {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+.toggle-slider {
+  width: 50px;
+  height: 26px;
+  background: #ccc;
+  border-radius: 13px;
+  position: relative;
+  transition: background 0.3s;
+  margin-right: 10px;
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: #d35400;
+}
+
+.toggle-switch input:checked + .toggle-slider::after {
+  transform: translateX(24px);
+}
+
+.toggle-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.servings-info {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.3s;
+}
+
+/* Nutrition Facts Panel */
+.nutrition-facts {
+  border: 2px solid black;
+  padding: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: white;
+}
+
+.nutrition-facts-header {
+  margin-bottom: 5px;
+}
+
+.nutrition-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.serving-size {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.servings-count {
+  font-weight: bold;
+}
+
+/* Calories - FDA requires largest display */
+.nutrition-calories {
+  margin: 10px 0;
+}
+
+.calories-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.calories-label {
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.calories-value {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #d35400;
+}
+
+/* Nutrition Rows */
+.nutrition-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.nutrition-row.indent {
+  padding-left: 20px;
+}
+
+.nutrition-row.double-indent {
+  padding-left: 40px;
+}
+
+.nutrition-label {
+  flex: 1;
+}
+
+.nutrition-label.bold,
+.nutrition-label b {
+  font-weight: 700;
+}
+
+.nutrition-label.right {
+  text-align: right;
+}
+
+.nutrition-value {
+  font-weight: normal;
+}
+
+.nutrition-value.bold {
+  font-weight: 700;
+}
+
+/* Daily Value Color Coding */
+.dv-good {
+  color: #28a745;
+  font-weight: 700;
+}
+
+.dv-warning {
+  color: #dc3545;
+  font-weight: 700;
+}
+
+.dv-high {
+  color: #ffc107;
+  font-weight: 700;
+}
+
+/* Separators */
+.nutrition-separator {
+  border-top: 1px solid black;
+  margin: 5px 0;
+}
+
+.nutrition-separator.thick {
+  border-top-width: 8px;
+  margin: 8px 0;
+}
+
+/* Vitamins Grid */
+.nutrition-vitamins {
+  margin-top: 10px;
+}
+
+.vitamin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.vitamin-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.vitamin-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 5px;
+}
+
+.vitamin-value {
+  font-size: 1.2rem;
+  color: #212529;
+  margin-bottom: 3px;
+}
+
+.vitamin-dv {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* Disclaimer */
+.nutrition-disclaimer {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #dee2e6;
+}
+
+.nutrition-disclaimer p {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Allergen Section */
+.allergen-info {
+  margin-top: 20px;
+  padding: 20px;
+  background: #fff5f5;
+  border-radius: 8px;
+  border: 1px solid #ff6b6b;
+}
+
+.allergen-info h4 {
+  margin: 0 0 15px 0;
+  color: #c92a2a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+}
+
+.warning-icon {
+  font-size: 1.5rem;
+}
+
+.allergen-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.allergen-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 20px;
+  border: 2px solid;
+  font-weight: 600;
+}
+
+.allergen-critical {
+  border-color: #dc3545;
+  background: #ffebee;
+}
+
+.allergen-high {
+  border-color: #ff9800;
+  background: #fff3e0;
+}
+
+.allergen-medium {
+  border-color: #ffc107;
+  background: #fffde7;
+}
+
+.allergen-icon {
+  font-size: 1.2rem;
+}
+
+.allergen-label {
+  font-size: 0.9rem;
+}
+
+.no-allergens {
+  color: #28a745;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Cross-contamination Warning */
+.cross-contamination-warning {
+  background: #ffeaa7;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.warning-text {
+  margin: 0;
+  font-weight: 600;
+  color: #d35400;
+  font-size: 0.9rem;
+}
+
+/* Sesame Notice */
+.sesame-notice {
+  background: #d1f2eb;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+  border: 1px solid #00b894;
+}
+
+.sesame-notice p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #00866a;
+}
+
+/* Dietary Claims */
+.dietary-claims {
+  margin-top: 15px;
+  padding: 15px;
+  background: #e8f5e9;
+  border-radius: 8px;
+}
+
+.claims-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dietary-claim {
+  display: inline-block;
+  padding: 5px 12px;
+  background: #4caf50;
+  color: white;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .nutrition-modal-content {
+    border: 3px solid black;
+  }
+
+  .nutrition-facts {
+    border-width: 3px;
+  }
+
+  .calories-value {
+    color: black;
+    text-decoration: underline;
+  }
+
+  .dv-warning {
+    text-decoration: underline;
+    text-decoration-style: wavy;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .nutrition-modal,
+  .nutrition-modal-content,
+  .tab-content,
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .nutrition-modal {
+    padding: 0;
+  }
+
+  .nutrition-modal-content {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .nutrition-modal-header {
+    border-radius: 0;
+    padding: 15px;
+  }
+
+  .nutrition-modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .nutrition-tabs.mobile-only {
+    display: flex;
+  }
+
+  .nutrition-modal-body {
+    padding: 15px;
+  }
+
+  /* Hide desktop vitamins on mobile */
+  .desktop-only {
+    display: none !important;
+  }
+
+  /* Show mobile-only content */
+  .mobile-only {
+    display: block !important;
+  }
+
+  .nutrition-facts {
+    padding: 8px;
+  }
+
+  .nutrition-title {
+    font-size: 1.5rem;
+  }
+
+  .calories-label {
+    font-size: 1.4rem;
+  }
+
+  .calories-value {
+    font-size: 2.2rem;
+  }
+
+  .allergen-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .serving-toggle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* Tablet Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .nutrition-modal-content {
+    max-width: 700px;
+  }
+
+  .allergen-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .nutrition-modal {
+    position: static;
+    display: block !important;
+    background: white;
+  }
+
+  .nutrition-modal-content {
+    box-shadow: none;
+    max-height: none;
+  }
+
+  .close-modal,
+  .nutrition-tabs,
+  .serving-toggle {
+    display: none !important;
+  }
+
+  .nutrition-facts {
+    page-break-inside: avoid;
+  }
+}
