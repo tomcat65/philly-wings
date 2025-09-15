@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initStickyMobileCTA();
     initHeroVideoOptimization();
     initSoundEffects();
+    initWingStyleSelector();
     trackPageView();
 });
 
@@ -110,6 +111,26 @@ function initLiveOrders() {
             addNewOrder();
         }
     }, 20000);
+}
+
+// Wing Style Selector
+function initWingStyleSelector() {
+    const wingStyleCards = document.querySelectorAll('.wing-style-card');
+
+    wingStyleCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove active from all cards
+            wingStyleCards.forEach(c => c.classList.remove('active'));
+            // Add active to clicked card
+            this.classList.add('active');
+
+            // Track selection
+            const style = this.dataset.style;
+            trackEvent('wing_style_selected', {
+                style: style
+            });
+        });
+    });
 }
 
 // Sticky Mobile CTA

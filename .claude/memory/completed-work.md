@@ -1,5 +1,16 @@
 # Completed UX Work
 
+## Sep 15, 2025 - Wing Type Selector Upgrade
+- [X] Visual Wing Type Selection
+  - Status: COMPLETE
+  - Upgraded from text buttons to image-based cards
+  - Added images for Classic Wings and Boneless options
+  - Implemented responsive grid layout with hover effects
+  - Added JavaScript tracking for selections
+  - Mobile-optimized with 2-column grid
+  - Technical: Modified index.html, sauce-menu-styles.css, scripts.js
+  - Result: More engaging visual selection experience
+
 ## Dec 13, 2024 Sprint
 - [X] Firebase Storage Audit
   - Status: COMPLETE

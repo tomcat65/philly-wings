@@ -52,6 +52,57 @@
     font-style: italic;
 }
 
+/* Wing Style Grid - New Image-Based Selector */
+.wing-style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.wing-style-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.wing-style-card:hover {
+    border-color: var(--eagles-green);
+    transform: translateY(-5px);
+    background: rgba(0, 71, 48, 0.2);
+}
+
+.wing-style-card.active {
+    border-color: var(--eagles-green);
+    background: rgba(0, 71, 48, 0.3);
+    box-shadow: 0 0 20px rgba(0, 71, 48, 0.5);
+}
+
+.wing-style-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.wing-style-card h4 {
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem;
+    margin: 0 0 0.25rem 0;
+}
+
+.wing-style-desc {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
 /* Sauce Category Titles */
 .sauce-category-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -169,6 +220,24 @@
 
     .style-btn {
         width: 100%;
+    }
+
+    /* Wing Style Grid on Mobile */
+    .wing-style-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .wing-style-img {
+        height: 120px;
+    }
+
+    .wing-style-card h4 {
+        font-size: 1.1rem;
+    }
+
+    .wing-style-desc {
+        font-size: 0.8rem;
     }
 
     .heat-indicator {
