@@ -9,6 +9,10 @@ export class MenuNavigation {
         this.categories = document.querySelectorAll('.menu-category');
         this.activeCategory = null;
         this.scrollTimeout = null;
+
+        // Bind event handlers to maintain consistent references
+        this.handleNavClick = this.handleNavClick.bind(this);
+        this.handleScroll = this.handleScroll.bind(this);
     }
 
     init() {
@@ -16,11 +20,11 @@ export class MenuNavigation {
 
         // Add click handlers to navigation buttons
         this.navButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleNavClick(e));
+            btn.addEventListener('click', this.handleNavClick);
         });
 
         // Track scroll position for active state
-        window.addEventListener('scroll', () => this.handleScroll());
+        window.addEventListener('scroll', this.handleScroll);
 
         // Set initial active state
         this.updateActiveState();
