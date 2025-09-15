@@ -82,3 +82,6 @@ firebase-admin-sdk.json
 # Assets (served from Firebase Storage)
 assets/
 /assets
+
+screenshots/
+/screenshots
