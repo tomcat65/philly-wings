@@ -3,6 +3,7 @@
 - remember whenever in doubt or needing more context use context7 mcp
 - remember The Reality
 - DEPLOYMENT: We deploy through GitHub Actions, not directly. User has a PR that allows preview of changes. User is in charge of deploying when changes are made. DO NOT run firebase deploy commands.
+- GIT COMMITS: User (human) is in charge of committing. ONLY commit when user gives explicit permission. Never commit without permission.
 
 Philly Wings is a sophisticated Firebase-powered application (not a simple static site)
 All media assets are served from Firebase Storage (that's why I couldn't find local images)
@@ -22,3 +23,6 @@ Simple Setup
 Just run the setup script above, and Sally will be configured with the correct understanding of your Firebase-powered marketing site.
 The key insight: This is already a well-built application. Sally's job is to optimize the user experience within this existing architecture, not rebuild it.
 - remember we are deploying through github actions, i have a PR that let's us preview the changes. I am in charge of deploying when changes are made.
+- do not commit, I am the one (human)in charge of commiting
+- you can commit if I give you permission to, and only then
+- preview url: https://philly-wings--pr1-my-new-feature-13zb8iwz.web.app/
