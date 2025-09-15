@@ -393,7 +393,10 @@ export class NutritionModalFirebase {
   populateModal(nutrition) {
     // Determine if we should show per-serving data
     const hasMultipleServings = nutrition.servingsPerContainer && nutrition.servingsPerContainer > 1;
-    const displayData = (this.showPerServing && nutrition.perServing) ? nutrition.perServing : nutrition;
+
+    // Extract nutrients - handle both nested and flat structures
+    const nutrients = nutrition.nutrients || nutrition;
+    const displayData = (this.showPerServing && nutrition.perServing) ? nutrition.perServing : nutrients;
 
     // Title
     document.getElementById('nutritionTitle').textContent = `Nutrition Information - ${nutrition.name}`;
@@ -410,26 +413,26 @@ export class NutritionModalFirebase {
       document.getElementById('servingsCount').textContent = '';
     }
 
-    document.getElementById('servingSize').textContent = nutrition.servingSize;
+    document.getElementById('servingSize').textContent = nutrition.servingSize || nutrition.serving?.size || '';
 
-    // Populate nutrition values
-    document.getElementById('calories').textContent = displayData.calories || nutrition.calories || 0;
-    document.getElementById('totalFat').textContent = displayData.totalFat || nutrition.totalFat || 0;
-    document.getElementById('saturatedFat').textContent = displayData.saturatedFat || nutrition.saturatedFat || 0;
-    document.getElementById('transFat').textContent = displayData.transFat || nutrition.transFat || 0;
-    document.getElementById('cholesterol').textContent = displayData.cholesterol || nutrition.cholesterol || 0;
-    document.getElementById('sodium').textContent = displayData.sodium || nutrition.sodium || 0;
-    document.getElementById('totalCarbs').textContent = displayData.totalCarbs || nutrition.totalCarbs || 0;
-    document.getElementById('dietaryFiber').textContent = displayData.dietaryFiber || nutrition.dietaryFiber || 0;
-    document.getElementById('totalSugars').textContent = displayData.totalSugars || nutrition.totalSugars || nutrition.sugars || 0;
-    document.getElementById('addedSugars').textContent = displayData.addedSugars || nutrition.addedSugars || 0;
-    document.getElementById('protein').textContent = displayData.protein || nutrition.protein || 0;
+    // Populate nutrition values from nutrients object
+    document.getElementById('calories').textContent = displayData.calories || 0;
+    document.getElementById('totalFat').textContent = displayData.totalFat || 0;
+    document.getElementById('saturatedFat').textContent = displayData.saturatedFat || 0;
+    document.getElementById('transFat').textContent = displayData.transFat || 0;
+    document.getElementById('cholesterol').textContent = displayData.cholesterol || 0;
+    document.getElementById('sodium').textContent = displayData.sodium || 0;
+    document.getElementById('totalCarbs').textContent = displayData.totalCarbs || 0;
+    document.getElementById('dietaryFiber').textContent = displayData.dietaryFiber || 0;
+    document.getElementById('totalSugars').textContent = displayData.totalSugars || displayData.sugars || 0;
+    document.getElementById('addedSugars').textContent = displayData.addedSugars || 0;
+    document.getElementById('protein').textContent = displayData.protein || 0;
 
-    // FDA 2020 Required Nutrients
-    const vitaminD = nutrition.vitaminD || 0;
-    const calcium = nutrition.calcium || 0;
-    const iron = nutrition.iron || 0;
-    const potassium = nutrition.potassium || 0;
+    // FDA 2020 Required Nutrients - extract from nutrients object
+    const vitaminD = nutrients.vitaminD || 0;
+    const calcium = nutrients.calcium || 0;
+    const iron = nutrients.iron || 0;
+    const potassium = nutrients.potassium || 0;
 
     document.getElementById('vitaminD').textContent = vitaminD;
     document.getElementById('calcium').textContent = calcium;
@@ -442,8 +445,8 @@ export class NutritionModalFirebase {
     document.getElementById('ironMobile').textContent = iron;
     document.getElementById('potassiumMobile').textContent = potassium;
 
-    // Calculate Daily Values
-    const dailyValues = NutritionService.calculateDailyValues(displayData.calories ? displayData : nutrition);
+    // Calculate Daily Values - use the nutrients object
+    const dailyValues = NutritionService.calculateDailyValues(nutrients);
 
     // Apply Daily Values
     this.setDailyValue('totalFatDV', dailyValues.totalFatDV);
