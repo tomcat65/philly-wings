@@ -415,24 +415,32 @@ export class NutritionModalFirebase {
 
     document.getElementById('servingSize').textContent = nutrition.servingSize || nutrition.serving?.size || '';
 
+    // Helper function to extract value from nutrient object or return direct value
+    const getNutrientValue = (nutrient) => {
+      if (typeof nutrient === 'object' && nutrient !== null && 'amount' in nutrient) {
+        return nutrient.amount;
+      }
+      return nutrient || 0;
+    };
+
     // Populate nutrition values from nutrients object
-    document.getElementById('calories').textContent = displayData.calories || 0;
-    document.getElementById('totalFat').textContent = displayData.totalFat || 0;
-    document.getElementById('saturatedFat').textContent = displayData.saturatedFat || 0;
-    document.getElementById('transFat').textContent = displayData.transFat || 0;
-    document.getElementById('cholesterol').textContent = displayData.cholesterol || 0;
-    document.getElementById('sodium').textContent = displayData.sodium || 0;
-    document.getElementById('totalCarbs').textContent = displayData.totalCarbs || 0;
-    document.getElementById('dietaryFiber').textContent = displayData.dietaryFiber || 0;
-    document.getElementById('totalSugars').textContent = displayData.totalSugars || displayData.sugars || 0;
-    document.getElementById('addedSugars').textContent = displayData.addedSugars || 0;
-    document.getElementById('protein').textContent = displayData.protein || 0;
+    document.getElementById('calories').textContent = getNutrientValue(displayData.calories);
+    document.getElementById('totalFat').textContent = getNutrientValue(displayData.totalFat);
+    document.getElementById('saturatedFat').textContent = getNutrientValue(displayData.saturatedFat);
+    document.getElementById('transFat').textContent = getNutrientValue(displayData.transFat);
+    document.getElementById('cholesterol').textContent = getNutrientValue(displayData.cholesterol);
+    document.getElementById('sodium').textContent = getNutrientValue(displayData.sodium);
+    document.getElementById('totalCarbs').textContent = getNutrientValue(displayData.totalCarbs);
+    document.getElementById('dietaryFiber').textContent = getNutrientValue(displayData.dietaryFiber);
+    document.getElementById('totalSugars').textContent = getNutrientValue(displayData.totalSugars) || getNutrientValue(displayData.sugars);
+    document.getElementById('addedSugars').textContent = getNutrientValue(displayData.addedSugars);
+    document.getElementById('protein').textContent = getNutrientValue(displayData.protein);
 
     // FDA 2020 Required Nutrients - extract from nutrients object
-    const vitaminD = nutrients.vitaminD || 0;
-    const calcium = nutrients.calcium || 0;
-    const iron = nutrients.iron || 0;
-    const potassium = nutrients.potassium || 0;
+    const vitaminD = getNutrientValue(nutrients.vitaminD);
+    const calcium = getNutrientValue(nutrients.calcium);
+    const iron = getNutrientValue(nutrients.iron);
+    const potassium = getNutrientValue(nutrients.potassium);
 
     document.getElementById('vitaminD').textContent = vitaminD;
     document.getElementById('calcium').textContent = calcium;

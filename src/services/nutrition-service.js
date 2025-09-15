@@ -79,19 +79,27 @@ export const NutritionService = {
       potassium: 4700 // mg (FDA 2020 NEW)
     };
 
+    // Helper function to extract value from nutrient object or return direct value
+    const getNutrientValue = (nutrient) => {
+      if (typeof nutrient === 'object' && nutrient !== null && 'amount' in nutrient) {
+        return nutrient.amount;
+      }
+      return nutrient || 0;
+    };
+
     return {
-      totalFatDV: Math.round((nutrition.totalFat / dailyValues.totalFat) * 100),
-      saturatedFatDV: Math.round((nutrition.saturatedFat / dailyValues.saturatedFat) * 100),
-      cholesterolDV: Math.round((nutrition.cholesterol / dailyValues.cholesterol) * 100),
-      sodiumDV: Math.round((nutrition.sodium / dailyValues.sodium) * 100),
-      totalCarbsDV: Math.round((nutrition.totalCarbs / dailyValues.totalCarbs) * 100),
-      dietaryFiberDV: Math.round(((nutrition.dietaryFiber || 0) / dailyValues.dietaryFiber) * 100),
-      addedSugarsDV: Math.round(((nutrition.addedSugars || 0) / dailyValues.addedSugars) * 100),
-      proteinDV: Math.round((nutrition.protein / dailyValues.protein) * 100),
-      vitaminDDV: Math.round(((nutrition.vitaminD || 0) / dailyValues.vitaminD) * 100),
-      calciumDV: Math.round(((nutrition.calcium || 0) / dailyValues.calcium) * 100),
-      ironDV: Math.round(((nutrition.iron || 0) / dailyValues.iron) * 100),
-      potassiumDV: Math.round(((nutrition.potassium || 0) / dailyValues.potassium) * 100)
+      totalFatDV: Math.round((getNutrientValue(nutrition.totalFat) / dailyValues.totalFat) * 100),
+      saturatedFatDV: Math.round((getNutrientValue(nutrition.saturatedFat) / dailyValues.saturatedFat) * 100),
+      cholesterolDV: Math.round((getNutrientValue(nutrition.cholesterol) / dailyValues.cholesterol) * 100),
+      sodiumDV: Math.round((getNutrientValue(nutrition.sodium) / dailyValues.sodium) * 100),
+      totalCarbsDV: Math.round((getNutrientValue(nutrition.totalCarbs) / dailyValues.totalCarbs) * 100),
+      dietaryFiberDV: Math.round((getNutrientValue(nutrition.dietaryFiber) / dailyValues.dietaryFiber) * 100),
+      addedSugarsDV: Math.round((getNutrientValue(nutrition.addedSugars) / dailyValues.addedSugars) * 100),
+      proteinDV: Math.round((getNutrientValue(nutrition.protein) / dailyValues.protein) * 100),
+      vitaminDDV: Math.round((getNutrientValue(nutrition.vitaminD) / dailyValues.vitaminD) * 100),
+      calciumDV: Math.round((getNutrientValue(nutrition.calcium) / dailyValues.calcium) * 100),
+      ironDV: Math.round((getNutrientValue(nutrition.iron) / dailyValues.iron) * 100),
+      potassiumDV: Math.round((getNutrientValue(nutrition.potassium) / dailyValues.potassium) * 100)
     };
   },
 
