@@ -316,7 +316,17 @@ export class NutritionModalFirebase {
     this.activeTab = tabName;
   }
 
-  async open(itemId, sauceId = null) {
+  async open(category, itemId, sauceId = null) {
+    // Handle both old format (category, itemId) and new format (just itemId)
+    if (arguments.length === 2 && typeof category === 'string' && typeof itemId === 'string') {
+      // Old format: open('wings', '6-wings')
+      // Ignore category, use itemId
+    } else if (arguments.length === 1) {
+      // New format: open('6-wings')
+      itemId = category;
+      category = null;
+    }
+
     this.showLoading(true);
     this.modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -574,15 +584,15 @@ export class NutritionModalFirebase {
 }
 
 // Initialize modal when DOM is ready
-let nutritionModalFirebase;
+let nutritionModal;
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    nutritionModalFirebase = new NutritionModalFirebase();
-    window.nutritionModalFirebase = nutritionModalFirebase;
+    nutritionModal = new NutritionModalFirebase();
+    window.nutritionModal = nutritionModal;
   });
 } else {
-  nutritionModalFirebase = new NutritionModalFirebase();
-  window.nutritionModalFirebase = nutritionModalFirebase;
+  nutritionModal = new NutritionModalFirebase();
+  window.nutritionModal = nutritionModal;
 }
 
 export default NutritionModalFirebase;

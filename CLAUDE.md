@@ -2,6 +2,7 @@
 - remember use firebase-mcp for crud operations and firebase for project management
 - remember whenever in doubt or needing more context use context7 mcp
 - remember The Reality
+- DEPLOYMENT: We deploy through GitHub Actions, not directly. User has a PR that allows preview of changes. User is in charge of deploying when changes are made. DO NOT run firebase deploy commands.
 
 Philly Wings is a sophisticated Firebase-powered application (not a simple static site)
 All media assets are served from Firebase Storage (that's why I couldn't find local images)
