@@ -180,13 +180,13 @@
 
 .toggle-label {
   font-weight: 600;
-  color: #495057;
+  color: #212529;
 }
 
 .servings-info {
   margin: 0;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #212529;
 }
 
 /* Tab Content */
@@ -205,6 +205,7 @@
   padding: 10px;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   background: white;
+  color: #000;
 }
 
 .nutrition-facts-header {
@@ -216,11 +217,13 @@
   font-weight: 900;
   margin: 0;
   letter-spacing: -0.5px;
+  color: #000;
 }
 
 .serving-size {
   margin: 5px 0;
   font-size: 0.9rem;
+  color: #000;
 }
 
 .servings-count {
@@ -241,6 +244,7 @@
 .calories-label {
   font-size: 1.8rem;
   font-weight: 900;
+  color: #000;
 }
 
 .calories-value {
@@ -254,7 +258,8 @@
   display: flex;
   justify-content: space-between;
   padding: 2px 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #888;
+  color: #000;
 }
 
 .nutrition-row.indent {
@@ -267,6 +272,7 @@
 
 .nutrition-label {
   flex: 1;
+  color: #000;
 }
 
 .nutrition-label.bold,
@@ -280,6 +286,7 @@
 
 .nutrition-value {
   font-weight: normal;
+  color: #000;
 }
 
 .nutrition-value.bold {
@@ -335,19 +342,19 @@
 
 .vitamin-label {
   font-weight: 600;
-  color: #495057;
+  color: #000;
   margin-bottom: 5px;
 }
 
 .vitamin-value {
   font-size: 1.2rem;
-  color: #212529;
+  color: #000;
   margin-bottom: 3px;
 }
 
 .vitamin-dv {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #212529;
 }
 
 /* Disclaimer */
@@ -359,7 +366,7 @@
 
 .nutrition-disclaimer p {
   font-size: 0.75rem;
-  color: #6c757d;
+  color: #000;
   margin: 0;
   line-height: 1.4;
 }
@@ -425,6 +432,7 @@
 
 .allergen-label {
   font-size: 0.9rem;
+  color: #000;
 }
 
 .no-allergens {
@@ -444,7 +452,7 @@
 .warning-text {
   margin: 0;
   font-weight: 600;
-  color: #d35400;
+  color: #8b2500;
   font-size: 0.9rem;
 }
 
