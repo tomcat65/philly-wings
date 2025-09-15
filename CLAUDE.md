@@ -20,3 +20,4 @@ Conversion tracking - Platform click-through rates
 Simple Setup
 Just run the setup script above, and Sally will be configured with the correct understanding of your Firebase-powered marketing site.
 The key insight: This is already a well-built application. Sally's job is to optimize the user experience within this existing architecture, not rebuild it.
+- remember we are deploying through github actions, i have a PR that let's us preview the changes. I am in charge of deploying when changes are made.

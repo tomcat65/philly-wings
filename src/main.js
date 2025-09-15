@@ -1,7 +1,7 @@
 import './firebase-config';
 import './components/game-day-banner';
 import './components/menu-navigation';
-import './components/nutrition-modal';
+import './components/nutrition-modal-firebase';
 import { MenuService, ReviewService, LiveOrderService, FirebaseService } from './services/firebase-service';
 
 // Dynamic content loaders
