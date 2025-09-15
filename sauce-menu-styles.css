@@ -106,6 +106,87 @@
     margin: 0;
 }
 
+/* Zoomable Images */
+.zoomable {
+    cursor: zoom-in;
+    position: relative;
+}
+
+.zoomable:hover {
+    opacity: 0.9;
+}
+
+/* Zoom Modal */
+.zoom-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.95);
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.zoom-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 80vh;
+    animation: zoomScale 0.3s ease;
+}
+
+@keyframes zoomScale {
+    from {
+        transform: scale(0.8);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.zoom-caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 30px;
+    font-size: 1.1rem;
+}
+
+.zoom-close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+.zoom-close:hover,
+.zoom-close:focus {
+    color: var(--eagles-green);
+    text-decoration: none;
+}
+
 /* Sauce Category Titles */
 .sauce-category-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -257,6 +338,27 @@
 
     .wing-style-desc {
         font-size: 0.8rem;
+    }
+
+    /* Zoom Modal on Mobile */
+    .zoom-modal {
+        padding-top: 30px;
+    }
+
+    .zoom-content {
+        max-width: 95%;
+        max-height: 70vh;
+    }
+
+    .zoom-close {
+        top: 10px;
+        right: 20px;
+        font-size: 35px;
+    }
+
+    .zoom-caption {
+        font-size: 0.9rem;
+        padding: 5px 10px;
     }
 
     .heat-indicator {

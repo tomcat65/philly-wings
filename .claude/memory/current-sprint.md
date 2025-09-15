@@ -11,6 +11,20 @@ Complete Philly Wings Express Frontend & Prepare for Virtual Kitchen Expansion
 - **Tech**: Using existing Android tablets, Firebase (free tier)
 - **Admin**: Already has basic admin panel at /admin
 
+## COMPLETED (Sep 15, 2025 - Evening)
+- [X] Wing Type Selector Visual Upgrade
+  - Replaced text buttons with image-based cards
+  - Three options: Drums, Flats, Boneless (each with own image)
+  - Images from Firebase Storage (original-drums.png, original-flats.png, boneless-wings.png)
+  - Responsive 3-column grid (1 column on mobile)
+  - Green Eagles border for active selection
+- [X] Image Zoom Feature
+  - Click any wing image for full-screen detail view
+  - Smooth zoom animations with dark overlay
+  - Three close methods: X button, click outside, Escape key
+  - Mobile-optimized sizing
+  - Helps customers see wing details before ordering
+
 ## COMPLETED TODAY (Dec 14)
 - [X] Added 30-count wings option (6, 12, 24, 30, 50)
 - [X] Updated sauce names for local market:

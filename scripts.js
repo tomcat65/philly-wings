@@ -116,9 +116,19 @@ function initLiveOrders() {
 // Wing Style Selector
 function initWingStyleSelector() {
     const wingStyleCards = document.querySelectorAll('.wing-style-card');
+    const modal = document.getElementById('imageZoomModal');
+    const modalImg = document.getElementById('zoomedImage');
+    const captionText = document.getElementById('zoomCaption');
+    const closeBtn = document.querySelector('.zoom-close');
 
+    // Handle card selection
     wingStyleCards.forEach(card => {
-        card.addEventListener('click', function() {
+        card.addEventListener('click', function(e) {
+            // If clicking on the image, don't change selection
+            if (e.target.classList.contains('zoomable')) {
+                return;
+            }
+
             // Remove active from all cards
             wingStyleCards.forEach(c => c.classList.remove('active'));
             // Add active to clicked card
@@ -130,6 +140,38 @@ function initWingStyleSelector() {
                 style: style
             });
         });
+    });
+
+    // Handle image zoom
+    const zoomableImages = document.querySelectorAll('.zoomable');
+    zoomableImages.forEach(img => {
+        img.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card selection
+            modal.style.display = 'block';
+            modalImg.src = this.src;
+            captionText.innerHTML = this.alt;
+        });
+    });
+
+    // Close modal when clicking X
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+
+    // Close modal when clicking outside the image
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal || e.target === closeBtn) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
     });
 }
 
