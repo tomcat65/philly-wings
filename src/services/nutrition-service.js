@@ -133,7 +133,8 @@ export const NutritionService = {
     }
 
     // Gluten-Free (no wheat allergen)
-    if (!nutrition.allergens || !nutrition.allergens.includes('wheat')) {
+    const allergensList = this.formatAllergens(nutrition.allergens);
+    if (!allergensList || !allergensList.includes('wheat')) {
       claims.push('Gluten-Free Option Available');
     }
 
@@ -142,16 +143,29 @@ export const NutritionService = {
 
   // Format allergens for display
   formatAllergens(allergens) {
-    if (!allergens || !Array.isArray(allergens)) return [];
+    if (!allergens) return [];
 
-    // Handle both array format and string format from Firebase
+    // Handle object format with contains/mayContain properties
+    if (typeof allergens === 'object' && !Array.isArray(allergens)) {
+      // Combine contains and mayContain arrays
+      const contains = allergens.contains || [];
+      const mayContain = allergens.mayContain || [];
+      return [...contains, ...mayContain];
+    }
+
+    // Handle array format
+    if (Array.isArray(allergens)) {
+      return allergens;
+    }
+
+    // Handle string format from Firebase
     if (typeof allergens === 'string') {
       // Parse string like "[soy, wheat, sesame]"
       const cleanString = allergens.replace(/[\[\]]/g, '');
       return cleanString.split(',').map(a => a.trim());
     }
 
-    return allergens;
+    return [];
   },
 
   // Get nutrition with combined sauce

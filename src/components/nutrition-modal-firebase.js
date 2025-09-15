@@ -534,7 +534,11 @@ export class NutritionModalFirebase {
     }
 
     const warningEl = document.getElementById('allergenWarning');
-    warningEl.textContent = nutrition.warning || 'Prepared in a kitchen that handles all major allergens. Cross-contamination may occur.';
+    // Handle both old warning field and new allergens.crossContactWarning
+    const warningText = nutrition.warning ||
+                       (nutrition.allergens && nutrition.allergens.crossContactWarning) ||
+                       'Prepared in a kitchen that handles all major allergens. Cross-contamination may occur.';
+    warningEl.textContent = warningText;
   }
 
   displayDietaryClaims(nutrition) {
