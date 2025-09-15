@@ -105,6 +105,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Nutrition data - public read, admin write
+    match /nutritionData/{itemId} {
+      allow read: if true; // Public nutrition information
+      allow write: if isAdmin();
+    }
+
+    // Email subscribers - write only for new signups, admin read
+    match /emailSubscribers/{subscriberId} {
+      allow read: if isAdmin();
+      allow create: if true; // Anyone can subscribe
+      allow update, delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;
