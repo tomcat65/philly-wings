@@ -88,19 +88,26 @@
   border: 2px solid black;
   padding: 10px;
   font-family: 'Helvetica', 'Arial', sans-serif;
-  background: white;
+  background: white !important;
   margin-bottom: 20px;
+  color: black !important; /* Force black text */
+}
+
+.nutrition-facts * {
+  color: black !important; /* Ensure ALL child elements are black */
 }
 
 .nutrition-facts-header h3 {
   font-size: 2rem;
   font-weight: 900;
   margin: 0 0 5px 0;
+  color: black !important; /* Ensure header is black */
 }
 
 .serving-size {
   font-size: 0.9rem;
   margin: 0;
+  color: black !important;
 }
 
 .nutrition-separator {
@@ -118,6 +125,7 @@
   justify-content: space-between;
   padding: 2px 0;
   font-size: 0.9rem;
+  color: black !important;
 }
 
 .nutrition-row.indent {
@@ -126,6 +134,7 @@
 
 .nutrition-label {
   flex: 1;
+  color: black !important;
 }
 
 .nutrition-label.bold,
@@ -141,6 +150,7 @@
 .nutrition-value {
   text-align: right;
   min-width: 50px;
+  color: black !important;
 }
 
 .nutrition-vitamins {
@@ -153,6 +163,7 @@
 
 .nutrition-vitamins span {
   width: 48%;
+  color: black !important;
 }
 
 .nutrition-disclaimer {
@@ -165,6 +176,7 @@
   font-size: 0.75rem;
   margin: 5px 0;
   line-height: 1.2;
+  color: black !important;
 }
 
 /* Allergen Information */
