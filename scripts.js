@@ -401,9 +401,24 @@ document.addEventListener('mouseleave', (e) => {
         `;
         
         popup.innerHTML = `
+            <button onclick="this.parentElement.remove()" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: transparent;
+                color: #F5F5F5;
+                border: 2px solid #F5F5F5;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                font-size: 20px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            " onmouseover="this.style.background='#F5F5F5'; this.style.color='#1A1A1A'" onmouseout="this.style.background='transparent'; this.style.color='#F5F5F5'">&times;</button>
             <h2 style="margin-bottom: 16px; color: #00FF00; font-family: 'Bebas Neue', sans-serif; font-size: 32px; text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);">Yo! Don't Dip Without Your Wings! 🔥</h2>
             <p style="margin-bottom: 24px; color: #F5F5F5; font-size: 18px;">Get 15% off your first jawn with code <strong style="color: #00FF00;">FIRSTWINGS</strong></p>
-            <button onclick="this.parentElement.remove()" style="
+            <button onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); this.parentElement.remove();" style="
                 background: #00FF00;
                 color: #1A1A1A;
                 border: none;

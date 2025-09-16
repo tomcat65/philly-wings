@@ -113,7 +113,7 @@
                                 <div class="combo-price-label">From</div>
                                 <div class="combo-price">$34.99</div>
                             </div>
-                            <button class="combo-cta">
+                            <button class="combo-cta" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;">
                                 Order This <span class="combo-cta-arrow">→</span>
                             </button>
                         </div>
@@ -133,7 +133,7 @@
                                 <div class="combo-price-label">From</div>
                                 <div class="combo-price">$15.99</div>
                             </div>
-                            <button class="combo-cta">
+                            <button class="combo-cta" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;">
                                 Order This <span class="combo-cta-arrow">→</span>
                             </button>
                         </div>
@@ -154,7 +154,7 @@
                                 <div class="combo-price-label">From</div>
                                 <div class="combo-price">$54.99</div>
                             </div>
-                            <button class="combo-cta">
+                            <button class="combo-cta" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;">
                                 Order This <span class="combo-cta-arrow">→</span>
                             </button>
                         </div>
@@ -246,52 +246,42 @@
 
             <div class="menu-grid">
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="6 Wings" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">6 Wings</h3>
                         <p class="menu-card-desc">Perfect solo order. Choose your sauce.</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('wings', '6-wings')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
 
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="12 Wings" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">12 Wings</h3>
                         <p class="menu-card-desc">Our most popular. Perfect for 2-3 people.</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('wings', '12-wings')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
 
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="24 Wings" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">24 Wings</h3>
                         <p class="menu-card-desc">Share with friends. Mix two sauces.</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('wings', '24-wings')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
 
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="30 Wings" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">30 Wings</h3>
                         <p class="menu-card-desc">Perfect for small parties. Mix up to 3 sauces.</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('wings', '30-wings')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
 
                 <div class="menu-card featured">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
-                         alt="50 Wings Party Pack" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">50 Wing Party Pack</h3>
                         <p class="menu-card-desc">Game day special! Mix up to 3 sauces.</p>
@@ -520,7 +510,7 @@
                         <h3 class="menu-card-title">Loaded Fries</h3>
                         <p class="menu-card-desc">Cheese sauce, bacon, green onions</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('sides', 'loaded-fries')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
 
@@ -531,7 +521,7 @@
                         <h3 class="menu-card-title">Mozzarella Sticks</h3>
                         <p class="menu-card-desc">6 golden fried with marinara</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('sides', 'mozzarella-sticks')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
 
@@ -543,7 +533,7 @@
                         <h3 class="menu-card-title">Fries</h3>
                         <p class="menu-card-desc">Crispy golden, perfectly salted</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('sides', 'french-fries')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
             </div>
@@ -579,7 +569,7 @@
                         <h3 class="menu-card-title">MVP Meal</h3>
                         <p class="menu-card-desc">12 wings, fries, drink</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('combos', 'mvp-meal')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
 
@@ -590,7 +580,7 @@
                         <h3 class="menu-card-title">Sampler Platter</h3>
                         <p class="menu-card-desc">6 wings, mozz sticks, loaded fries</p>
                         <button class="nutrition-btn" onclick="window.nutritionModal.open('combos', 'sampler-platter')">📊 Nutrition Info</button>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
             </div>
@@ -612,7 +602,7 @@
                     <div class="menu-card-content no-image">
                         <h3 class="menu-card-title">Bottled Water</h3>
                         <p class="menu-card-desc">Ice cold bottled water to cool down the heat</p>
-                        <span class="menu-card-price">Order on App</span>
+                        <button class="menu-card-price" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;" style="cursor: pointer; background: none; border: none; color: inherit; font: inherit;">ORDER ON APP</button>
                     </div>
                 </div>
             </div>
