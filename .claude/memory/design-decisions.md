@@ -39,6 +39,18 @@
 **Result:** Credibility through specificity. Real food people appreciate real details
 **Evidence:** Serious Eats style copy converts better than hype
 
+## Sep 15, 2025 - MIRROR MODE PIVOT
+**Decision:** Complete abandonment of cart/ordering system - now menu showcase only
+**Why:** ChatGPT analysis revealed we were building fake interactions that confuse users
+**What Changed:**
+- Removed ALL form inputs (radios, checkboxes, sliders)
+- No wing customization on our site
+- No Firebase order storage
+- No deep linking with modifiers
+- Quick Picks above fold → Menu display → Platform buttons
+**Result:** Honest UX - users know ordering happens on delivery apps
+**Evidence:** 5/5 score from ChatGPT, simpler to build, better conversion expected
+
 ## Dec 13, 2024 - Menu Style Overhaul
 **Decision:** Kretzer's dark rustic vibe, NO PRICES on menu
 **Why:** User wants authentic restaurant feel - prices create decision fatigue, discovery is better

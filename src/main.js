@@ -3,6 +3,7 @@ import './components/game-day-banner';
 import './components/menu-navigation';
 import './components/nutrition-modal-firebase';
 import { MenuService, ReviewService, LiveOrderService, FirebaseService } from './services/firebase-service';
+import { initAnalytics, setupSectionObservers, setupBounceTracking } from './analytics';
 
 // Dynamic content loaders
 class PhillyWingsApp {
@@ -11,6 +12,11 @@ class PhillyWingsApp {
   }
 
   async init() {
+    // Initialize analytics first (Mirror Mode tracking)
+    initAnalytics();
+    setupSectionObservers();
+    setupBounceTracking();
+
     // Load dynamic content
     await Promise.all([
       // this.loadFlavors(), // Commented out - using new menu system

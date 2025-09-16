@@ -17,15 +17,16 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="menu-styles.css">
     <link rel="stylesheet" href="sauce-menu-styles.css">
+    <link rel="stylesheet" href="quick-picks.css">
     <link rel="stylesheet" href="src/styles/nutrition-modal-fda2020.css">
 
     <!-- Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EBHT2CKRNY"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID');
+        gtag('config', 'G-EBHT2CKRNY');
     </script>
     
     <!-- Main App Module -->
@@ -34,7 +35,7 @@
 <body>
     <!-- Game Day Banner -->
     <div class="game-day-banner" id="gameDayBanner">
-        <p class="game-day-text">🏈 EAGLES VS COWBOYS SUNDAY • Order your Tailgate Special now • <span id="liveOrderCount">17</span> orders this hour</p>
+        <p class="game-day-text">🏈 EAGLES VS COWBOYS SUNDAY • Order your Tailgate Special now • 🔥 Limited time deals</p>
     </div>
 
     <!-- Hero Section - The Appetite Awakener -->
@@ -69,6 +70,81 @@
                 <div class="rating-badge">
                     <span class="rating-stars">⭐⭐⭐⭐⭐</span>
                     <span class="rating-text">4.9 on DoorDash</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Picks Section - Above the Fold for Mirror Mode -->
+    <section class="quick-picks" id="quickPicks">
+        <div class="container">
+            <div class="quick-picks-header">
+                <h2 class="quick-picks-headline">Popular Combos</h2>
+                <p class="quick-picks-subhead">Most ordered this week • Ready in 20-30 mins</p>
+                <span class="quick-picks-badge">🔥 LIMITED TIME DEALS</span>
+            </div>
+
+            <div class="combo-cards">
+                <!-- Game Day 30 -->
+                <div class="combo-card popular" onclick="scrollToOrder(); window.trackQuickPickView && trackQuickPickView('Game Day 30', '34.99')">
+                    <span class="combo-badge">MOST POPULAR</span>
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
+                         alt="Game Day Special - 30 Wings"
+                         class="combo-image">
+                    <div class="combo-content">
+                        <h3 class="combo-name">Game Day 30</h3>
+                        <p class="combo-description">30 Classic Wings • Buffalo & BBQ • Feeds 3-4</p>
+                        <div class="combo-details">
+                            <div>
+                                <div class="combo-price-label">From</div>
+                                <div class="combo-price">$34.99</div>
+                            </div>
+                            <button class="combo-cta">
+                                Order This <span class="combo-cta-arrow">→</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Night Dozen -->
+                <div class="combo-card" onclick="scrollToOrder(); window.trackQuickPickView && trackQuickPickView('Date Night Dozen', '15.99')">
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
+                         alt="Date Night - 12 Wings"
+                         class="combo-image">
+                    <div class="combo-content">
+                        <h3 class="combo-name">Date Night Dozen</h3>
+                        <p class="combo-description">12 Wings • Choose 2 Sauces • Perfect for 2</p>
+                        <div class="combo-details">
+                            <div>
+                                <div class="combo-price-label">From</div>
+                                <div class="combo-price">$15.99</div>
+                            </div>
+                            <button class="combo-cta">
+                                Order This <span class="combo-cta-arrow">→</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Party Pack 50 -->
+                <div class="combo-card" onclick="scrollToOrder(); window.trackQuickPickView && trackQuickPickView('Party Pack 50', '54.99')">
+                    <span class="combo-badge">BEST VALUE</span>
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcombo-platter.png?alt=media"
+                         alt="Party Pack - 50 Wings"
+                         class="combo-image">
+                    <div class="combo-content">
+                        <h3 class="combo-name">Party Pack 50</h3>
+                        <p class="combo-description">50 Wings • Up to 4 Sauces • Mix & Match</p>
+                        <div class="combo-details">
+                            <div>
+                                <div class="combo-price-label">From</div>
+                                <div class="combo-price">$54.99</div>
+                            </div>
+                            <button class="combo-cta">
+                                Order This <span class="combo-cta-arrow">→</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

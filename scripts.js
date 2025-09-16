@@ -251,14 +251,17 @@ function initSoundEffects() {
     }
 }
 
-// Conversion Tracking
+// Conversion Tracking - Enhanced for Mirror Mode
+// This function is overridden by the analytics module when it loads
 function trackPlatformClick(platform) {
+    // The analytics module will replace this function
+    // This is a fallback for immediate clicks before module loads
     gtag('event', 'click', {
         'event_category': 'Platform Order',
         'event_label': platform,
         'value': 1
     });
-    
+
     // Add to conversion pixel tracking
     if (window.fbq) {
         fbq('track', 'InitiateCheckout', {

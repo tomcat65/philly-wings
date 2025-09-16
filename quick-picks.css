@@ -1,0 +1,252 @@
+/* Quick Picks Section - Mirror Mode Above-Fold Conversion */
+.quick-picks {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #f5f5f5 0%, #fff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-picks::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #004c54, #a5acaf, #004c54);
+}
+
+.quick-picks-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.quick-picks-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: #004c54;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.quick-picks-subhead {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0;
+}
+
+.quick-picks-badge {
+    display: inline-block;
+    background: #ff3008;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+.combo-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.combo-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.combo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.combo-card.popular {
+    border: 2px solid #004c54;
+}
+
+.combo-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff3008;
+    color: white;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(255,48,8,0.3);
+}
+
+.combo-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.combo-content {
+    padding: 1.5rem;
+}
+
+.combo-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.75rem;
+    color: #004c54;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.combo-description {
+    color: #666;
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.combo-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.combo-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #004c54;
+}
+
+.combo-price-label {
+    font-size: 0.75rem;
+    color: #999;
+    text-transform: uppercase;
+}
+
+.combo-cta {
+    background: #004c54;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.combo-cta:hover {
+    background: #ff3008;
+    transform: scale(1.05);
+}
+
+.combo-cta-arrow {
+    transition: transform 0.3s ease;
+}
+
+.combo-cta:hover .combo-cta-arrow {
+    transform: translateX(3px);
+}
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+    .quick-picks {
+        padding: 1.5rem 0;
+    }
+
+    .combo-cards {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .combo-card {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        border-radius: 8px;
+    }
+
+    .combo-image {
+        height: 120px;
+        border-radius: 8px 0 0 8px;
+    }
+
+    .combo-content {
+        padding: 1rem;
+    }
+
+    .combo-name {
+        font-size: 1.25rem;
+    }
+
+    .combo-badge {
+        top: 5px;
+        right: 5px;
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .combo-details {
+        padding-top: 0.75rem;
+    }
+
+    .combo-price {
+        font-size: 1.25rem;
+    }
+
+    .combo-cta {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Tablet Optimization */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .combo-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Animation */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+/* Loading State */
+.combo-card.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #f5f5f5 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}

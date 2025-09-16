@@ -11,6 +11,14 @@ Complete Philly Wings Express Frontend & Prepare for Virtual Kitchen Expansion
 - **Tech**: Using existing Android tablets, Firebase (free tier)
 - **Admin**: Already has basic admin panel at /admin
 
+## COMPLETED (Sep 15, 2025 - Evening Session 2)
+- [X] Fixed Mozzarella Sticks & Fries Images
+  - Corrected wrong images (was showing buffalo wings)
+  - Uploaded proper images to Firebase Storage
+  - Renamed "French Fries" to "Fries"
+  - Resolved upload issue (file path vs actual file content)
+  - Images now displaying correctly on preview site
+
 ## COMPLETED (Sep 15, 2025 - Evening)
 - [X] Wing Type Selector Visual Upgrade
   - Replaced text buttons with image-based cards

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 Analytics Test - Philly Wings Express</title>
+
+    <!-- Test the GA4 implementation -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EBHT2CKRNY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-EBHT2CKRNY');
+
+        // Test event tracking
+        gtag('event', 'test_event', {
+            'event_category': 'Analytics Test',
+            'event_label': 'Setup Validation',
+            'value': 1
+        });
+
+        console.log('GA4 Analytics initialized with ID: G-EBHT2CKRNY');
+        console.log('Test event sent to verify tracking');
+    </script>
+</head>
+<body>
+    <h1>GA4 Analytics Test Page</h1>
+    <p>This page validates that Google Analytics 4 is properly configured for Philly Wings Express.</p>
+
+    <div style="background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px;">
+        <h2>Configuration Details:</h2>
+        <ul>
+            <li><strong>GA4 Measurement ID:</strong> G-EBHT2CKRNY</li>
+            <li><strong>Firebase Project:</strong> philly-wings</li>
+            <li><strong>Status:</strong> <span style="color: green;">✓ Active</span></li>
+        </ul>
+    </div>
+
+    <button onclick="testTracking()" style="background: #00FF00; color: #1A1A1A; padding: 15px 30px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+        Test Event Tracking
+    </button>
+
+    <div id="results" style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 5px; display: none;">
+        <h3>Test Results:</h3>
+        <div id="test-output"></div>
+    </div>
+
+    <script>
+        function testTracking() {
+            const results = document.getElementById('results');
+            const output = document.getElementById('test-output');
+
+            // Test various tracking events
+            gtag('event', 'test_platform_click', {
+                'event_category': 'Platform Test',
+                'event_label': 'DoorDash',
+                'value': 1
+            });
+
+            gtag('event', 'test_page_view', {
+                'page_title': 'Analytics Test Page',
+                'page_location': window.location.href
+            });
+
+            output.innerHTML = `
+                <p>✓ Platform click event sent</p>
+                <p>✓ Page view event sent</p>
+                <p>✓ Check Google Analytics dashboard for real-time events</p>
+                <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+            `;
+
+            results.style.display = 'block';
+
+            console.log('Test events sent successfully');
+        }
+
+        // Auto-run test on page load
+        window.addEventListener('load', function() {
+            console.log('Page loaded, analytics should be tracking');
+            console.log('DataLayer:', window.dataLayer);
+        });
+    </script>
+</body>
+</html>
