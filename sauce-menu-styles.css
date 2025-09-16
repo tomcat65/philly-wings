@@ -143,9 +143,25 @@
 .zoom-content {
     margin: auto;
     display: block;
-    max-width: 90%;
-    max-height: 80vh;
+    width: 90%;
+    max-width: 800px;
+    height: 80vh;
     animation: zoomScale 0.3s ease;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Specific zoom positioning for wing types */
+.zoom-content.drums-zoom {
+    object-position: center 35%;
+}
+
+.zoom-content.flats-zoom {
+    object-position: center 40%;
+}
+
+.zoom-content.boneless-zoom {
+    object-position: center center;
 }
 
 @keyframes zoomScale {
@@ -346,8 +362,9 @@
     }
 
     .zoom-content {
-        max-width: 95%;
-        max-height: 70vh;
+        width: 95%;
+        max-width: none;
+        height: 70vh;
     }
 
     .zoom-close {

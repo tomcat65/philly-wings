@@ -150,6 +150,14 @@ function initWingStyleSelector() {
             modal.style.display = 'block';
             modalImg.src = this.src;
             captionText.innerHTML = this.alt;
+
+            // Apply specific zoom class based on wing type
+            modalImg.className = 'zoom-content'; // Reset classes
+            const parentCard = this.closest('.wing-style-card');
+            if (parentCard) {
+                const wingStyle = parentCard.dataset.style;
+                modalImg.classList.add(`${wingStyle}-zoom`);
+            }
         });
     });
 
