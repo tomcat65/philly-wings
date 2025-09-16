@@ -1,0 +1,25 @@
+{
+  "name": "Philly Wings Express",
+  "short_name": "Wings Express",
+  "description": "Authentic Philly wings. Double-fried for maximum crisp, hand-tossed in our signature sauces.",
+  "icons": [
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/icons%2Fandroid-chrome-192x192.png?alt=media",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/icons%2Fandroid-chrome-512x512.png?alt=media",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#004c54",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": ["food", "restaurant", "delivery"]
+}
