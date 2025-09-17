@@ -55,11 +55,8 @@ export class WebPImageService {
       const filenameWithExt = decodeURIComponent(pathMatch[1]);
 
       // Remove extension to get base filename
-      const nameWithoutExt = filenameWithExt.replace(/\.(jpg|jpeg|png|gif)$/i, '');
-
-      if (!nameWithoutExt) {
-        return originalUrl;
-      }
+      // If no extension found, use the full filename
+      const nameWithoutExt = filenameWithExt.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '') || filenameWithExt;
 
       // Build WebP filename
       const webpFilename = `${nameWithoutExt}_${size}.webp`;
@@ -69,8 +66,11 @@ export class WebPImageService {
       const webpPath = `images%2Fresized%2F${encodeURIComponent(webpFilename)}`;
       const webpUrl = `${baseUrl}/o/${webpPath}`;
 
-      console.log('Transforming URL:', {
+      console.log('WebP Transform:', {
         original: originalUrl,
+        filename: filenameWithExt,
+        nameWithoutExt: nameWithoutExt,
+        webpFilename: webpFilename,
         webp: webpUrl + '?alt=media'
       });
 
