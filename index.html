@@ -164,6 +164,38 @@
         </div>
     </section>
 
+    <!-- Our Story Section -->
+    <section class="our-story" id="whoWeAre">
+        <div class="container">
+            <h2 class="section-headline chalk-text">The <span class="text-eagles">Real Story</span></h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <h3>Fed Up with Frozen Wings</h3>
+                    <p>Look, I'm Arleth. Born and raised in Northeast Philly. Oxford Circle, to be exact. And I was TIRED of it.</p>
+
+                    <p>Tired of every "wing spot" serving the same frozen, sysco-truck garbage. Tired of places claiming "best wings in Philly" while microwaving pre-sauced sadness. Tired of paying $15 for wings that taste like they came from a school cafeteria.</p>
+
+                    <p>You know what I'm talking about. Those franchise joints where everything's pre-portioned, pre-cooked, pre-disappointed. Where "buffalo sauce" is just Frank's from a gallon jug. Where they act like throwing some Old Bay on frozen fries makes them "gourmet."</p>
+
+                    <h3>So I Did Something About It</h3>
+                    <p>2023. Franklin Mills Mall food court. My cousin's Charley's franchise was struggling. I saw an opportunity.</p>
+
+                    <p>Not to open another mediocre wing joint. But to show Northeast Philly what REAL wings taste like. Wings that are brined for 24 hours. Double-fried at exactly 375°. Sauces made from scratch every morning. Dry rubs we blend ourselves.</p>
+
+                    <p>Every single order? I'm back there watching. Making sure your wings get the full 14 minutes they deserve. Making sure that buffalo sauce has the right tang. Making sure those drums are crispy enough to make you forget every disappointing wing you've ever had.</p>
+
+                    <h3>This Ain't a Franchise</h3>
+                    <p>This is personal. This is Northeast Philly proving we don't need some corporate chain to tell us how to make wings. This is every late-night craving, every Eagles tailgate, every "I need real food" moment - answered with RESPECT.</p>
+
+                    <p>We're not trying to be Buffalo. We're not trying to be trendy. We're Northeast Philly - where we do things right or we don't do them at all.</p>
+
+                    <p class="story-signature">Every. Single. Wing. Matters.<br>
+                    <span>- Arleth</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Wings Gallery Section -->
     <section class="wings-gallery" id="wingsGallery">
         <div class="container">
@@ -698,8 +730,7 @@
                 <div class="footer-section">
                     <h3>Philly Wings Express</h3>
                     <p class="footer-links">
-                        <a href="#" onclick="showNutrition()">Nutritional Info</a><br>
-                        <a href="#" onclick="showAllergens()">Allergens</a><br>
+                        <a href="#" onclick="showNutritionInfo(); return false;">Nutritional Info & Allergens</a><br>
                         <a href="#whoWeAre">Our Story</a>
                     </p>
                 </div>
@@ -733,6 +764,31 @@
         </div>
     </footer>
 
+    <!-- Nutrition Info Modal -->
+    <div id="nutritionInfoModal" class="info-modal" style="display: none;">
+        <div class="info-modal-content">
+            <span class="info-modal-close" onclick="closeNutritionInfo()">&times;</span>
+            <h2>📊 Nutrition & Allergen Information</h2>
+            <div class="info-modal-body">
+                <p><strong>Every menu item includes complete nutrition facts!</strong></p>
+
+                <p>Look for the <span class="nutrition-btn-example">📊 Nutrition Info</span> button on each item to see:</p>
+
+                <ul>
+                    <li>✓ Full FDA 2020 compliant nutrition facts</li>
+                    <li>✓ Detailed allergen information with severity indicators</li>
+                    <li>✓ Complete vitamin and mineral breakdown</li>
+                    <li>✓ Serving sizes and per-serving calculations</li>
+                    <li>✓ Dietary badges (Gluten-Free, Dairy-Free, etc.)</li>
+                </ul>
+
+                <p class="info-note">We take your health seriously. All nutrition data is laboratory-tested and updated regularly. Our kitchen maintains strict allergen protocols to prevent cross-contamination.</p>
+
+                <p class="info-cta">Click any item's nutrition button to get started!</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Image Zoom Modal -->
     <div id="imageZoomModal" class="zoom-modal">
         <span class="zoom-close">&times;</span>
@@ -749,5 +805,35 @@
 
     <!-- Scripts -->
     <script type="module" src="scripts.js"></script>
+    <script type="module" src="src/components/nutrition-modal-firebase.js"></script>
+    <script type="module">
+        // Initialize the nutrition modal
+        import { NutritionModalFirebase } from './src/components/nutrition-modal-firebase.js';
+        window.nutritionModal = new NutritionModalFirebase();
+    </script>
+    <script>
+        // Nutrition Info Modal Functions
+        function showNutritionInfo() {
+            const modal = document.getElementById('nutritionInfoModal');
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        }
+
+        function closeNutritionInfo() {
+            const modal = document.getElementById('nutritionInfoModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('nutritionInfoModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
