@@ -135,35 +135,44 @@ window.initFoodImageZoom = function initFoodImageZoom() {
         const openZoomModal = function() {
             modal.style.display = 'block';
 
-            // Get the original image source from the HTML (not the transformed one)
-            const originalSrc = img.dataset.originalSrc || img.getAttribute('src') || img.src;
+            // Get the current image source - it might be transformed by WebP service
+            const currentSrc = img.src;
+            // Get the original source from dataset if available
+            const originalSrc = img.dataset.originalSrc || img.getAttribute('src');
+
+            console.log('Opening zoom modal for image:', {
+                currentSrc: currentSrc,
+                originalSrc: originalSrc,
+                datasetOriginal: img.dataset.originalSrc
+            });
 
             // Clear any previous error handlers
             modalImg.onerror = null;
             modalImg.onload = null;
 
-            // For zoom, use the original image source directly
-            // The WebP transformation is causing issues with the modal
-            let zoomSrc = originalSrc;
+            // Use the original source if available, otherwise use current
+            let zoomSrc = originalSrc || currentSrc;
 
-            // Ensure we're using the original Firebase Storage URL
-            if (originalSrc.includes('firebasestorage')) {
-                // Clean up any WebP transformations and use original
-                zoomSrc = originalSrc.replace(/images%2Fresized%2F.*\.webp/, function(match) {
-                    // Extract the original filename from WebP path if present
-                    return originalSrc.split('/o/')[1].split('?')[0];
-                });
+            // Make sure we have a valid URL
+            if (!zoomSrc || zoomSrc === 'undefined' || zoomSrc === 'null') {
+                console.error('No valid image source found for zoom');
+                zoomSrc = currentSrc;
             }
 
-            console.log('Zoom modal using image:', zoomSrc);
+            console.log('Zoom modal will use:', zoomSrc);
 
             // Add error handler for image loading
             modalImg.onerror = function() {
                 console.error('Failed to load zoom image:', zoomSrc);
-                // Try the current src as fallback
-                if (img.src && img.src !== zoomSrc) {
-                    console.log('Falling back to current src:', img.src);
-                    modalImg.src = img.src;
+                // Try alternatives
+                if (zoomSrc !== currentSrc && currentSrc) {
+                    console.log('Trying current src as fallback:', currentSrc);
+                    modalImg.src = currentSrc;
+                } else if (originalSrc && originalSrc !== zoomSrc) {
+                    console.log('Trying original src as fallback:', originalSrc);
+                    modalImg.src = originalSrc;
+                } else {
+                    console.error('All image sources failed to load');
                 }
             };
 
@@ -174,7 +183,7 @@ window.initFoodImageZoom = function initFoodImageZoom() {
                 modalImg.style.visibility = 'visible';
             };
 
-            // Use the original source for zoom
+            // Set the source and try to load
             modalImg.src = zoomSrc;
 
             // Force image to display
