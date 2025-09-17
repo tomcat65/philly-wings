@@ -85,3 +85,10 @@ assets/
 
 screenshots/
 /screenshots
+
+# Docker files
+Dockerfile
+Dockerfile.simple
+docker-compose.yml
+.dockerignore
+test-local.sh

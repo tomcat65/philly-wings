@@ -387,19 +387,24 @@ function trackPageView() {
     }, 5000);
 }
 
-// Utility Functions
+// Utility Functions - Make globally available
 function scrollToOrder() {
-    document.getElementById('orderSection').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
+    document.getElementById('orderSection').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
     });
-    
+
     // Track CTA click
-    gtag('event', 'click', {
-        'event_category': 'CTA',
-        'event_label': 'Hero Order Button'
-    });
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'click', {
+            'event_category': 'CTA',
+            'event_label': 'Hero Order Button'
+        });
+    }
 }
+
+// Make scrollToOrder globally available
+window.scrollToOrder = scrollToOrder;
 
 function showAllPlatforms() {
     scrollToOrder();
