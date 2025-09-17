@@ -1,9 +1,17 @@
 {
   "combos": [
     {
+      "id": "game-day-30",
+      "name": "Game Day 30",
+      "description": "30 wings (mix up to 3 sauces) (Feeds 5-6)",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media",
+      "tags": ["Most Popular", "Feeds 5-6"],
+      "special": "Game Day Special"
+    },
+    {
       "id": "the-tailgater",
       "name": "The Tailgater",
-      "description": "30 wings (mix up to 3 sauces), 2 large fries, 12 mozzarella sticks",
+      "description": "24 wings (mix up to 3 sauces), 8 mozzarella sticks, 1 large fries (Feeds 3-5)",
       "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media",
       "tags": ["Best for sharing", "Fan favorite"],
       "special": "Game Day Special"
@@ -26,9 +34,9 @@
     {
       "id": "party-pack-50",
       "name": "Party Pack 50",
-      "description": "50 wings (mix up to 4 sauces), 3 large fries, 20 mozzarella sticks",
+      "description": "50 wings (mix up to 4 sauces), 3 large fries, 16 mozzarella sticks (Feeds 8-10)",
       "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fparty-pack-50-wings.png?alt=media",
-      "tags": ["Best value", "Feeds 5-6"],
+      "tags": ["Best value", "Feeds 8-10"],
       "special": "Game Day Special"
     }
   ]
