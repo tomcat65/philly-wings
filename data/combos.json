@@ -3,7 +3,7 @@
     {
       "id": "the-tailgater",
       "name": "The Tailgater",
-      "description": "30 wings (mix up to 3 sauces), large fries, 6 mozzarella sticks",
+      "description": "30 wings (mix up to 3 sauces), 2 large fries, 12 mozzarella sticks",
       "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media",
       "tags": ["Best for sharing", "Fan favorite"],
       "special": "Game Day Special"
@@ -19,7 +19,7 @@
     {
       "id": "sampler-platter",
       "name": "Sampler Platter",
-      "description": "6 wings, 4 tenders, regular fries, onion rings",
+      "description": "6 wings, regular fries",
       "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fsampler-platter.png?alt=media",
       "tags": ["Try everything"]
     },
