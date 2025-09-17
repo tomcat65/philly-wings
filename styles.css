@@ -218,6 +218,72 @@ h1, h2, h3 {
     text-align: center;
 }
 
+/* Partner Trust Bar */
+.partner-trust-bar {
+    background: var(--eagles-black);
+    border-top: 1px solid var(--eagles-silver);
+    border-bottom: 1px solid var(--eagles-silver);
+    padding: 12px 20px;
+    text-align: center;
+}
+
+/* Social Proof Banner */
+.social-proof-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+    padding: 12px 20px;
+    background: rgba(0, 200, 83, 0.1);
+    border: 1px solid rgba(0, 200, 83, 0.3);
+    border-radius: 8px;
+    font-size: 16px;
+    color: var(--chalk-white);
+}
+
+.social-proof-stars {
+    font-size: 18px;
+    letter-spacing: 2px;
+}
+
+.social-proof-text {
+    font-weight: 600;
+}
+
+.partner-trust-text {
+    font-size: 14px;
+    color: var(--chalk-white);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.trust-delivery {
+    color: var(--eagles-silver);
+    font-weight: 600;
+}
+
+.trust-divider {
+    color: var(--eagles-silver);
+    opacity: 0.5;
+    display: none;
+}
+
+.trust-details {
+    color: var(--chalk-white);
+    opacity: 0.9;
+}
+
+@media (min-width: 769px) {
+    .trust-divider {
+        display: inline;
+    }
+}
+
 @media (min-width: 769px) {
     .rating-badge-container {
         position: absolute;
@@ -705,6 +771,27 @@ section {
     position: relative;
     overflow: hidden;
 }
+
+.platform-logo-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.platform-logo {
+    flex-shrink: 0;
+}
+
+.platform-name {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.platform-card.doordash .platform-name { color: #FF3008; }
+.platform-card.ubereats .platform-name { color: #06C167; }
+.platform-card.grubhub .platform-name { color: #F63440; }
 
 .platform-card::before {
     content: '';

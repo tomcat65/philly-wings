@@ -3,10 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Authentic Philly wings. Double-fried for maximum crisp, hand-tossed in our signature sauces. Order on DoorDash, UberEats, or Grubhub.">
+    <meta name="description" content="Authentic Philly wings. Double-fried for maximum crisp, hand-tossed in our signature sauces. Order on DoorDash, UberEats, or Grubhub. 4.8★ average rating.">
     <meta property="og:title" content="Philly Wings Express - Authentic Wings from South Philly">
-    <meta property="og:description" content="Double-fried wings made fresh in South Philly. Six signature sauces. Order on your favorite delivery app.">
+    <meta property="og:description" content="Double-fried wings made fresh in South Philly. Six signature sauces. 4.8★ on DoorDash. Ready in 20-30 mins. Order on your favorite delivery app.">
     <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://phillywingsexpress.com">
+    <meta property="og:site_name" content="Philly Wings Express">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Philly Wings Express - Authentic Wings from South Philly">
+    <meta name="twitter:description" content="Double-fried wings made fresh in South Philly. Six signature sauces. 4.8★ on DoorDash. Ready in 20-30 mins.">
+    <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media">
     
     <title>Philly Wings Express - Real Wings, Real Philly</title>
 
@@ -89,6 +100,15 @@
         </div>
     </section>
 
+    <!-- Partner Trust Section -->
+    <div class="partner-trust-bar">
+        <p class="partner-trust-text">
+            <span class="trust-delivery">Delivery via DoorDash • Uber Eats • Grubhub</span>
+            <span class="trust-divider">—</span>
+            <span class="trust-details">Cooked to order, vented packaging, typically 20-30 min</span>
+        </p>
+    </div>
+
     <!-- Quick Picks Section - Above the Fold for Mirror Mode -->
     <section class="quick-picks" id="quickPicks">
         <div class="container">
@@ -104,7 +124,8 @@
                     <span class="combo-badge">MOST POPULAR</span>
                     <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media"
                          alt="Game Day Special - 30 Wings"
-                         class="combo-image">
+                         class="combo-image"
+                         loading="lazy">
                     <div class="combo-content">
                         <h3 class="combo-name">Game Day 30</h3>
                         <p class="combo-description">30 Classic Wings • Buffalo & BBQ • Feeds 5-6</p>
@@ -124,7 +145,8 @@
                 <div class="combo-card" onclick="scrollToOrder(); window.trackQuickPickView && trackQuickPickView('Date Night Dozen', '15.99')">
                     <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
                          alt="Date Night - 12 Wings"
-                         class="combo-image">
+                         class="combo-image"
+                         loading="lazy">
                     <div class="combo-content">
                         <h3 class="combo-name">Date Night Dozen</h3>
                         <p class="combo-description">12 Wings • Choose 2 Sauces • Perfect for 2</p>
@@ -145,7 +167,8 @@
                     <span class="combo-badge">BEST VALUE</span>
                     <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fparty-pack-50-wings.png?alt=media"
                          alt="Party Pack - 50 Wings"
-                         class="combo-image">
+                         class="combo-image"
+                         loading="lazy">
                     <div class="combo-content">
                         <h3 class="combo-name">Party Pack 50</h3>
                         <p class="combo-description">50 Wings • 3 Large Fries • 16 Mozzarella Sticks • Feeds 8-10</p>
@@ -505,22 +528,43 @@
         <div class="container">
             <h2 class="section-headline chalk-text">🔥 <span class="text-eagles">ORDER NOW</span> ON YOUR FAVORITE APP 🔥</h2>
             <p class="order-subhead chalk-text">Ready in 20-30 mins • Free delivery available</p>
-            
+
+            <!-- Social Proof -->
+            <div class="social-proof-banner">
+                <span class="social-proof-stars">⭐⭐⭐⭐⭐</span>
+                <span class="social-proof-text">4.8★ average last 90 days • Loved on DoorDash</span>
+            </div>
+
             <div class="platform-grid">
                 <a href="https://www.doordash.com/store/philly-wings-express" class="platform-card doordash" onclick="trackPlatformClick('doordash')">
-                    <div class="platform-logo-text" style="font-size: 24px; font-weight: bold; color: #FF3008;">DoorDash</div>
+                    <div class="platform-logo-wrapper">
+                        <svg class="platform-logo" viewBox="0 0 24 24" width="32" height="32">
+                            <path fill="#FF3008" d="M23.91 8.31c-.17-.53-.57-.96-1.08-1.16l-7.62-3c-.49-.19-1.04-.17-1.52.06s-.85.64-.99 1.14l-.9 3.24-8.13 3.49c-.52.22-.9.68-1.02 1.22s.03 1.1.42 1.48l5.27 5.27c.26.26.61.41.97.41.14 0 .29-.02.43-.07.5-.17.87-.6.98-1.11l.58-2.4 7.9.01c.55 0 1.06-.27 1.37-.72.31-.45.37-1.02.2-1.53l-1.46-4.33z"/>
+                        </svg>
+                        <span class="platform-name">DoorDash</span>
+                    </div>
                     <p class="platform-time">25-35 min</p>
                     <p class="platform-promo">Free delivery on first order</p>
                 </a>
                 
                 <a href="https://www.ubereats.com/store/philly-wings-express" class="platform-card ubereats" onclick="trackPlatformClick('ubereats')">
-                    <div class="platform-logo-text" style="font-size: 24px; font-weight: bold; color: #06C167;">Uber Eats</div>
+                    <div class="platform-logo-wrapper">
+                        <svg class="platform-logo" viewBox="0 0 24 24" width="32" height="32">
+                            <path fill="#06C167" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.19 14.75h-2.38c-1.38 0-2.5-1.12-2.5-2.5v-4.5h1.5v4.5c0 .55.45 1 1 1h2.38c.55 0 1-.45 1-1v-4.5h1.5v4.5c0 1.38-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        <span class="platform-name">Uber Eats</span>
+                    </div>
                     <p class="platform-time">20-30 min</p>
                     <p class="platform-promo">20% off orders $30+</p>
                 </a>
                 
                 <a href="https://www.grubhub.com/restaurant/philly-wings-express" class="platform-card grubhub" onclick="trackPlatformClick('grubhub')">
-                    <div class="platform-logo-text" style="font-size: 24px; font-weight: bold; color: #F63440;">Grubhub</div>
+                    <div class="platform-logo-wrapper">
+                        <svg class="platform-logo" viewBox="0 0 24 24" width="32" height="32">
+                            <path fill="#F63440" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm3.5-9h-7c-.3 0-.5.2-.5.5v2c0 1.9 1.6 3.5 3.5 3.5s3.5-1.6 3.5-3.5v-2c0-.3-.2-.5-.5-.5z"/>
+                        </svg>
+                        <span class="platform-name">Grubhub</span>
+                    </div>
                     <p class="platform-time">30-40 min</p>
                     <p class="platform-promo">$5 off with code WINGS5</p>
                 </a>
@@ -544,6 +588,7 @@
                     <h3>Contact Us</h3>
                     <p><a href="mailto:customerservice@phillywingsexpress.com">customerservice@phillywingsexpress.com</a></p>
                     <p><a href="tel:+12673763113">Call for Catering: (267) 376-3113</a></p>
+                    <p class="service-area">Serving: South Philly & Surrounding Areas</p>
                 </div>
                 
                 <div class="footer-section">

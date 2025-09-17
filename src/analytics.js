@@ -41,8 +41,9 @@ export function initAnalytics() {
 export function trackPlatformClick(platform) {
     const timeToClick = Math.round((Date.now() - sessionStartTime) / 1000);
 
-    // Primary conversion event
-    gtag('event', 'platform_click', {
+    // Primary conversion event with GA4 naming convention
+    const eventName = `click_${platform.toLowerCase()}`;
+    gtag('event', eventName, {
         'event_category': 'conversion',
         'event_label': platform,
         'value': 1,

@@ -150,11 +150,11 @@ window.initFoodImageZoom = function initFoodImageZoom() {
             modalImg.onerror = null;
             modalImg.onload = null;
 
-            // CRITICAL: Set noWebp flag BEFORE setting src to prevent transformation
+            // CRITICAL: Set noWebp flag BEFORE any src operations
             modalImg.dataset.noWebp = 'true';
 
-            // Use the ACTUAL src attribute which contains the working WebP URL with token
-            let zoomSrc = img.getAttribute('src');
+            // Get the actual current src that's working on the page (should be WebP with token)
+            let zoomSrc = img.src; // Use .src property, not getAttribute
 
             console.log('Zoom modal debugging:', {
                 imgSrc: img.src,
@@ -166,19 +166,24 @@ window.initFoodImageZoom = function initFoodImageZoom() {
 
             // Fallback logic if no src found
             if (!zoomSrc || zoomSrc === 'undefined' || zoomSrc === 'null') {
-                console.error('No src attribute, trying currentSrc');
-                zoomSrc = currentSrc || originalSrc || '';
+                console.error('No src found, using fallback');
+                zoomSrc = img.getAttribute('src') || currentSrc || originalSrc || '';
             }
 
             // Add error handler for image loading
             modalImg.onerror = function() {
                 console.error('Failed to load zoom image:', zoomSrc);
-                // Try original as ultimate fallback
-                if (originalSrc && originalSrc !== zoomSrc) {
-                    console.log('Trying original src as fallback:', originalSrc);
-                    // Make sure noWebp is still set
-                    modalImg.dataset.noWebp = 'true';
-                    modalImg.src = originalSrc;
+                // Try alternatives
+                const alternatives = [
+                    img.getAttribute('src'),
+                    currentSrc,
+                    originalSrc
+                ].filter(src => src && src !== zoomSrc);
+
+                if (alternatives.length > 0) {
+                    console.log('Trying alternative:', alternatives[0]);
+                    // IMPORTANT: Use direct property assignment to bypass WebP service
+                    modalImg.setAttribute('src', alternatives[0]);
                 } else {
                     console.error('All image sources failed to load');
                 }
@@ -191,8 +196,8 @@ window.initFoodImageZoom = function initFoodImageZoom() {
                 modalImg.style.visibility = 'visible';
             };
 
-            // Set the source - this should use the exact WebP URL that's working on the page
-            modalImg.src = zoomSrc;
+            // BYPASS WebP service by using setAttribute instead of .src property
+            modalImg.setAttribute('src', zoomSrc);
 
             // Force image to display
             modalImg.style.display = 'block';
@@ -400,7 +405,9 @@ function initSoundEffects() {
 function trackPlatformClick(platform) {
     // The analytics module will replace this function
     // This is a fallback for immediate clicks before module loads
-    gtag('event', 'click', {
+    // Using proper GA4 event naming convention
+    const eventName = `click_${platform.toLowerCase()}`;
+    gtag('event', eventName, {
         'event_category': 'Platform Order',
         'event_label': platform,
         'value': 1
