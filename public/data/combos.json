@@ -34,5 +34,17 @@
     "items": ["6-wings", "4-tenders", "fries-regular", "onion-rings"],
     "badges": ["Try everything"],
     "updatedAt": 1737000000000
+  },
+  {
+    "id": "combo-party-pack",
+    "name": "Party Pack 50",
+    "description": "50 wings (mix up to 4 sauces), large fries, 10 mozzarella sticks",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings-c03aa.appspot.com/o/menu-images%2Fparty-pack-50-wings.webp?alt=media",
+    "sortOrder": 4,
+    "active": true,
+    "featured": true,
+    "items": ["50-wings", "fries-large", "mozzarella-sticks-10"],
+    "badges": ["Best value", "Feeds 5-6"],
+    "updatedAt": 1737000000000
   }
 ]
