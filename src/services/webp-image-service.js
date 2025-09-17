@@ -40,48 +40,45 @@ export class WebPImageService {
       return originalUrl;
     }
 
-    // Extract the filename from the URL
-    // Handle both encoded (%2F) and unencoded (/) paths
-    const urlParts = originalUrl.split('?')[0];
+    try {
+      // Extract the base URL and the encoded path
+      const [baseUrlWithPath, queryParams] = originalUrl.split('?');
 
-    // Decode the URL to work with the actual path
-    const decodedUrl = decodeURIComponent(urlParts);
+      // Extract just the filename from the path
+      // The URL structure is: .../o/images%2Ffilename.ext?alt=media...
+      const pathMatch = baseUrlWithPath.match(/\/o\/images%2F([^?]+)/);
+      if (!pathMatch) {
+        console.warn('Could not parse Firebase Storage URL:', originalUrl);
+        return originalUrl;
+      }
 
-    // Extract filename from various URL patterns
-    let filename = '';
-    if (decodedUrl.includes('/o/images/')) {
-      // Pattern: /o/images/filename.ext
-      filename = decodedUrl.split('/o/images/').pop();
-    } else if (urlParts.includes('o%2Fimages%2F')) {
-      // Pattern: o%2Fimages%2Ffilename.ext
-      filename = urlParts.split('o%2Fimages%2F').pop();
-    } else {
+      const filenameWithExt = pathMatch[1];
+
+      // Remove extension to get base filename
+      const nameWithoutExt = filenameWithExt.replace(/\.(jpg|jpeg|png|gif)$/i, '');
+
+      if (!nameWithoutExt) {
+        return originalUrl;
+      }
+
+      // Build WebP filename
+      const webpFilename = `${nameWithoutExt}_${size}.webp`;
+
+      // Construct new Firebase Storage URL
+      const baseUrl = baseUrlWithPath.split('/o/')[0];
+      const webpPath = `images%2Fresized%2F${webpFilename}`;
+      const webpUrl = `${baseUrl}/o/${webpPath}`;
+
+      console.log('Transforming URL:', {
+        original: originalUrl,
+        webp: webpUrl + '?alt=media'
+      });
+
+      return webpUrl + '?alt=media';
+    } catch (error) {
+      console.error('Error transforming to WebP:', error);
       return originalUrl;
     }
-
-    // Get filename without extension
-    const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
-
-    // Skip if no valid image extension
-    if (!filename.match(/\.(jpg|jpeg|png|gif)$/i)) {
-      return originalUrl;
-    }
-
-    // Build WebP filename
-    const webpFilename = `${nameWithoutExt}_${size}.webp`;
-
-    // Construct new Firebase Storage URL with proper encoding
-    const baseUrl = urlParts.split('/o/')[0];
-    const webpPath = `images%2Fresized%2F${encodeURIComponent(webpFilename)}`;
-    const webpUrl = `${baseUrl}/o/${webpPath}`;
-
-    // Add token if present in original URL
-    const tokenMatch = originalUrl.match(/[?&]token=([^&]+)/);
-    if (tokenMatch) {
-      return `${webpUrl}?alt=media&token=${tokenMatch[1]}`;
-    }
-
-    return `${webpUrl}?alt=media`;
   }
 
   // Get appropriate image size based on context

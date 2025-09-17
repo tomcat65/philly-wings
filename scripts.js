@@ -135,7 +135,7 @@ window.initFoodImageZoom = function initFoodImageZoom() {
         const openZoomModal = function() {
             modal.style.display = 'block';
 
-            // Get the current image source (which should be WebP if supported)
+            // Get the current image source
             const currentSrc = img.src || img.getAttribute('src');
             const originalSrc = img.dataset.originalSrc || currentSrc;
 
@@ -143,11 +143,24 @@ window.initFoodImageZoom = function initFoodImageZoom() {
             modalImg.onerror = null;
             modalImg.onload = null;
 
+            // For zoom, we want to use a larger size WebP if available
+            let zoomSrc = currentSrc;
+
+            // If WebP service is available, get a larger size for the zoom
+            if (window.webpService && window.webpService.webpSupported) {
+                // Transform to larger size for zoom
+                zoomSrc = window.webpService.transformToWebP(originalSrc, '1920x1080');
+                console.log('Using WebP zoom image:', zoomSrc);
+            }
+
             // Add error handler for image loading
             modalImg.onerror = function() {
-                console.error('Failed to load WebP zoom image:', currentSrc);
-                // Fall back to original image if WebP fails
-                if (originalSrc !== currentSrc) {
+                console.error('Failed to load zoom image:', zoomSrc);
+                // Fall back to current src, then original if both fail
+                if (zoomSrc !== currentSrc) {
+                    console.log('Falling back to current image:', currentSrc);
+                    modalImg.src = currentSrc;
+                } else if (currentSrc !== originalSrc) {
                     console.log('Falling back to original image:', originalSrc);
                     modalImg.src = originalSrc;
                 }
@@ -160,8 +173,8 @@ window.initFoodImageZoom = function initFoodImageZoom() {
                 modalImg.style.visibility = 'visible';
             };
 
-            // Use the current src (which should be WebP if available)
-            modalImg.src = currentSrc;
+            // Use the zoom src
+            modalImg.src = zoomSrc;
 
             // Force image to display
             modalImg.style.display = 'block';
