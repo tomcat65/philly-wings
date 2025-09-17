@@ -1,5 +1,72 @@
 # Completed UX Work
 
+## Sep 16-17, 2025 - Major UX Overhaul Session
+
+### Sauce Images Correction
+- [X] Fixed Duplicate Sauce Images
+  - Status: COMPLETE
+  - Issue: Multiple sauces using same buffalo-sauced.png image
+  - Fixed BROAD & PATTISON BURN: Uploaded unique Nashville hot sauce image (broad-pattison-burn.png)
+  - Fixed Gritty's Revenge: Uploaded unique scorpion pepper sauce image (grittys-revenge.png)
+  - Result: Each signature sauce now has unique, appropriate imagery
+
+## Sep 16-17, 2025 - Earlier UX Fixes
+
+### Favicon Visibility Enhancement
+- [X] Browser Tab Favicon Fix
+  - Status: COMPLETE
+  - Issue: Favicon appeared tiny compared to other tabs (40% of canvas)
+  - Solution: Replaced all favicons with better-cropped version
+  - Files updated: favicon-192x192.png, favicon-32x32.png, favicon-16x16.png, apple-touch-icon.png, favicon.ico
+  - Added favicon-source.png for future reference
+  - Result: Favicon now matches professional sizing standards
+
+### Gallery Section Updates
+- [X] Text & Image Corrections
+  - Status: COMPLETE
+  - Fixed "Every. Damn. Time." → "Every God luvin' time."
+  - Gritty's Garlic Parm: Fixed duplicate image, now shows garlic-parmesan-dry-rub.png
+  - MVP Meal: Renamed to "MVP Meal Combo"
+  - MVP Meal: Changed image from party-pack to combo-platter.png
+  - MVP Meal: Updated description to "12 Wings, Mozzarella Sticks, Loaded Fries"
+  - Result: Unique, accurate images for all gallery items
+
+### Wing Type Zoom Enhancement
+- [X] Focused Zoom Feature
+  - Status: COMPLETE
+  - Problem: Zoom showed full image with lots of empty space
+  - Solution: Implemented object-fit: cover with custom positioning
+  - Drums: Focus at center 35% where wings are located
+  - Flats: Focus at center 40% for optimal view
+  - Boneless: Standard center (they fill the frame)
+  - JavaScript: Detects wing type and applies appropriate zoom class
+  - Result: Close-up view of actual wings when zoomed
+
+### Navigation & CTA Improvements
+- [X] Site-wide Navigation Fix
+  - Status: COMPLETE
+  - Fixed all "Order This" buttons in Popular Combos → scroll to Order section
+  - Converted all "ORDER ON APP" text to clickable buttons
+  - Exit-intent popup: Added X close button with hover effect
+  - Exit-intent popup: "Lemme Get That Deal" now scrolls to Order section
+  - Result: Consistent, functional navigation throughout site
+
+### Popular Combos Image Overhaul
+- [X] Unique Images for Each Combo
+  - Status: COMPLETE
+  - Game Day 30: Uploaded and implemented game-day-30-wings.png
+  - Party Pack 50: Uploaded and implemented party-pack-50-wings.png
+  - Party Pack 50: Added "Mozzarella Sticks • Fries" to description
+  - Date Night Dozen: Kept classic buffalo (no change requested)
+  - Result: Each combo has unique, appropriate imagery
+
+### Wings Menu Visual Cleanup
+- [X] Removed Redundant Images
+  - Status: COMPLETE
+  - Removed duplicate images from all wing size cards (6, 12, 24, 30, 50)
+  - Kept hero banner image for category identification
+  - Result: Cleaner, less repetitive menu layout
+
 ## Sep 15, 2025 - Evening Session Updates
 
 ### Sides Images Correction

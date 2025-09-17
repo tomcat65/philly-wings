@@ -1,5 +1,40 @@
 # Design Decisions Log
 
+## Sep 16-17, 2025 - Sauce Image Differentiation
+**Decision:** Give each signature sauce unique imagery
+**Why:** Four different sauces using same buffalo image looked lazy/unprofessional
+**Changes:**
+- BROAD & PATTISON BURN: Nashville hot sauce visual
+- Gritty's Revenge: Scorpion pepper sauce visual
+- Kept buffalo for Mild Buffalo and Philly Classic Hot (both are buffalo-based)
+**Result:** Visual differentiation matches flavor profiles
+**Evidence:** Each sauce now tells its own story
+
+## Sep 16-17, 2025 - UX Polish & Navigation Consistency
+**Decision:** Complete navigation overhaul for conversion optimization
+**Changes Made:**
+- All CTAs now functional - "Order This", "ORDER ON APP" all scroll to Order section
+- Exit popup enhanced with close button and working navigation
+- Wings menu images removed to reduce visual repetition
+**Why:** Dead buttons = lost conversions. Users expect every CTA to work
+**Result:** Clear path to conversion from any point on site
+**Evidence:** Reduces user frustration, improves conversion funnel
+
+## Sep 16-17, 2025 - Zoom Focus Enhancement
+**Decision:** Crop zoomed images to focus on actual product
+**Why:** Users clicking zoom want to see wings detail, not empty plate space
+**Implementation:**
+- object-fit: cover with custom positioning per wing type
+- Drums at 35%, Flats at 40% vertical position
+**Result:** Professional product photography experience
+**Evidence:** Standard e-commerce practice for product zoom
+
+## Sep 16-17, 2025 - Favicon Size Fix
+**Decision:** Replace all favicons with better-cropped version
+**Why:** Tiny favicon looked unprofessional next to other tabs
+**Result:** Logo fills canvas like GitHub, Terminal, other professional sites
+**Evidence:** Visual consistency with industry standards
+
 ## Dec 14, 2024 - ChatGPT Feedback Implementation COMPLETE
 **Decision:** Major content overhaul based on ChatGPT UX audit
 **Changes Made:**
