@@ -150,13 +150,15 @@ window.initFoodImageZoom = function initFoodImageZoom() {
             modalImg.onerror = null;
             modalImg.onload = null;
 
-            // Use the original source if available, otherwise use current
-            let zoomSrc = originalSrc || currentSrc;
+            // For zoom modal, use the current WebP source (already transformed)
+            // Don't use the original PNG source which would get re-transformed
+            let zoomSrc = currentSrc;
 
             // Make sure we have a valid URL
             if (!zoomSrc || zoomSrc === 'undefined' || zoomSrc === 'null') {
                 console.error('No valid image source found for zoom');
-                zoomSrc = currentSrc;
+                // Fall back to original if current is not available
+                zoomSrc = originalSrc || currentSrc;
             }
 
             console.log('Zoom modal will use:', zoomSrc);
@@ -182,6 +184,11 @@ window.initFoodImageZoom = function initFoodImageZoom() {
                 modalImg.style.display = 'block';
                 modalImg.style.visibility = 'visible';
             };
+
+            // Prevent WebP service from re-transforming if already WebP
+            if (zoomSrc.includes('.webp') || zoomSrc.includes('/resized/')) {
+                modalImg.dataset.noWebp = 'true';
+            }
 
             // Set the source and try to load
             modalImg.src = zoomSrc;
@@ -246,19 +253,28 @@ window.initFoodImageZoom = function initFoodImageZoom() {
         }
     });
 
+    // Function to close modal and clean up
+    function closeModal() {
+        modal.style.display = 'none';
+        // Clean up the noWebp flag
+        if (modalImg) {
+            delete modalImg.dataset.noWebp;
+        }
+    }
+
     // Close modal handlers
     if (closeBtn) {
         // Add both click and touch events for mobile compatibility
-        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        closeBtn.addEventListener('click', closeModal);
         closeBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
-            modal.style.display = 'none';
+            closeModal();
         }, { passive: false });
     }
 
     modal?.addEventListener('click', function(e) {
         if (e.target === modal || e.target === closeBtn) {
-            modal.style.display = 'none';
+            closeModal();
         }
     });
 
@@ -266,13 +282,13 @@ window.initFoodImageZoom = function initFoodImageZoom() {
     modal?.addEventListener('touchend', function(e) {
         if (e.target === modal) {
             e.preventDefault();
-            modal.style.display = 'none';
+            closeModal();
         }
     }, { passive: false });
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal?.style.display === 'block') {
-            modal.style.display = 'none';
+            closeModal();
         }
     });
 }
