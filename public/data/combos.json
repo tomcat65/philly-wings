@@ -1,0 +1,38 @@
+[
+  {
+    "id": "combo-tailgater",
+    "name": "The Tailgater",
+    "description": "30 wings (mix up to 3 sauces), large fries, 6 mozzarella sticks",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings-c03aa.appspot.com/o/menu-images%2Fgame-day-30-wings.webp?alt=media",
+    "sortOrder": 1,
+    "active": true,
+    "featured": true,
+    "items": ["30-wings", "fries-large", "mozzarella-sticks-6"],
+    "badges": ["Best for sharing", "Fan favorite"],
+    "updatedAt": 1737000000000
+  },
+  {
+    "id": "combo-mvp",
+    "name": "MVP Meal",
+    "description": "12 wings, regular fries, 4 mozzarella sticks",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings-c03aa.appspot.com/o/menu-images%2Fparty-pack-50-wings.webp?alt=media",
+    "sortOrder": 2,
+    "active": true,
+    "featured": true,
+    "items": ["12-wings", "fries-regular", "mozzarella-sticks-4"],
+    "badges": ["Game day essential"],
+    "updatedAt": 1737000000000
+  },
+  {
+    "id": "combo-sampler",
+    "name": "Sampler Platter",
+    "description": "6 wings, 4 tenders, regular fries, onion rings",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings-c03aa.appspot.com/o/menu-images%2Fsampler-platter.webp?alt=media",
+    "sortOrder": 3,
+    "active": true,
+    "featured": false,
+    "items": ["6-wings", "4-tenders", "fries-regular", "onion-rings"],
+    "badges": ["Try everything"],
+    "updatedAt": 1737000000000
+  }
+]
