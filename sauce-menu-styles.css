@@ -164,6 +164,27 @@
     object-position: center center;
 }
 
+/* Smart crop for different food types */
+.zoom-content.combo-zoom {
+    object-position: 60% center; /* Focus on right side where food usually is */
+}
+
+.zoom-content.sauce-zoom {
+    object-position: center 45%; /* Focus on sauce detail */
+}
+
+.zoom-content.side-zoom {
+    object-position: center 30%; /* Focus on top where food is plated */
+}
+
+.zoom-content.wings-zoom {
+    object-position: center 40%; /* Standard wings position */
+}
+
+.zoom-content.default-zoom {
+    object-position: center center; /* Default center */
+}
+
 @keyframes zoomScale {
     from {
         transform: scale(0.8);
@@ -358,24 +379,50 @@
 
     /* Zoom Modal on Mobile */
     .zoom-modal {
-        padding-top: 30px;
+        padding-top: 20px;
+        background-color: rgba(0, 0, 0, 0.95); /* Darker background for better focus */
     }
 
     .zoom-content {
-        width: 95%;
+        width: 100%;
         max-width: none;
-        height: 70vh;
+        height: auto;
+        max-height: 85vh;
+        /* Enable pinch to zoom on mobile */
+        touch-action: pinch-zoom;
+    }
+
+    /* Ensure smart crop works on mobile too */
+    .zoom-content.combo-zoom,
+    .zoom-content.sauce-zoom,
+    .zoom-content.side-zoom,
+    .zoom-content.wings-zoom {
+        min-height: 50vh;
+        width: 100%;
     }
 
     .zoom-close {
         top: 10px;
-        right: 20px;
-        font-size: 35px;
+        right: 15px;
+        font-size: 40px;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 50%;
+        /* Touch-friendly target size */
     }
 
     .zoom-caption {
         font-size: 0.9rem;
-        padding: 5px 10px;
+        padding: 8px 15px;
+        background-color: rgba(0, 0, 0, 0.8);
+        bottom: 0;
+        position: fixed;
+        width: 100%;
+        text-align: center;
     }
 
     .heat-indicator {

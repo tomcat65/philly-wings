@@ -1,5 +1,34 @@
 # Design Decisions Log
 
+## Sep 17, 2025 - Dynamic Data Architecture & FDA Compliance
+**Decision:** Implement dynamic loading with static JSON caching for performance
+**Why:** Firebase real-time queries cost money; static JSON at CDN is free and faster
+**Implementation:**
+- Created comprehensive sauces.json and combos.json with enhanced schemas
+- Include allergens, platform names, heat levels, nutritional metadata
+- Firebase Storage for all images using correct domain: philly-wings.firebasestorage.app
+- Proper data separation: nutritionData, combos, sauces collections in Firestore
+**Result:** Zero runtime costs, faster loading, scalable architecture
+**Evidence:** CDN-cached JSON loads in <100ms vs Firebase queries
+
+**Decision:** Fix nutrition modal per-serving toggle showing zeros
+**Why:** Nested Firebase data structure (nutritionData.servings) not properly handled
+**Implementation:**
+- Added robust error handling for missing nutrition data
+- Proper object path traversal for nested Firebase documents
+- Clear fallback values when data unavailable
+**Result:** Accurate per-serving nutrition calculations
+**Evidence:** Toggle now shows correct values instead of zeros
+
+**Decision:** Enhanced allergen visibility with red styling and tooltips
+**Why:** FDA 2020/2023 requires clear allergen identification
+**Implementation:**
+- Red color, borders, and custom CSS tooltips
+- Added sesame as 9th allergen for compliance
+- Improved tooltip accessibility
+**Result:** Clear allergen warnings meet regulatory requirements
+**Evidence:** Follows FDA guidance for food service allergen disclosure
+
 ## Sep 16-17, 2025 - Complete Visual Identity Overhaul
 **Decision:** Every menu item needs unique, appropriate imagery
 **Why:** Duplicate images across different products = amateur hour

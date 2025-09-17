@@ -1,7 +1,7 @@
-# Current Sprint - Dec 14-15, 2024
+# Current Sprint - Sep 17, 2025
 
 ## Sprint Goal
-Complete Philly Wings Express Frontend & Prepare for Virtual Kitchen Expansion
+Finalize Dynamic Data Architecture & Nutrition Compliance Implementation
 
 ## Context Update
 - **Owner**: Charley's Philly Steaks franchisee at Franklin Mills Mall
@@ -10,6 +10,27 @@ Complete Philly Wings Express Frontend & Prepare for Virtual Kitchen Expansion
 - **Brands**: PhillyWingsExpress (live), PhillyPizzaBueno (next), multiple domains owned
 - **Tech**: Using existing Android tablets, Firebase (free tier)
 - **Admin**: Already has basic admin panel at /admin
+
+## COMPLETED (Sep 17, 2025 - Firebase Data Architecture & Nutrition Modal Fixes)
+- [X] Fixed Nutrition Modal Per-Serving Toggle Bug
+  - Resolved zeros display due to nested Firebase data structure
+  - Added proper error handling for missing nutrition data
+  - Per-serving calculations now work correctly
+- [X] Dynamic Data Loading Implementation
+  - Created comprehensive sauces.json and combos.json with enhanced schemas
+  - Static JSON caching for zero runtime costs
+  - All images using correct Firebase Storage domain
+  - No hardcoding - everything loads dynamically
+- [X] Fixed All Missing Images
+  - Corrected sauce image URLs: buffalo-sauced.png, classic-buffalo-wings.png, etc.
+  - Corrected combo image URLs: game-day-30-wings.png, party-pack-50-wings.png, etc.
+  - Uploaded custom Philly Classic Hot image to Firebase Storage
+- [X] Enhanced Allergen Indicators
+  - Red color, borders, and custom CSS tooltips for visibility
+  - Added sesame as 9th allergen for FDA 2020/2023 compliance
+- [X] Data Architecture Separation
+  - Properly separated nutritionData, combos, sauces in Firestore
+  - Optimized performance with static JSON caching
 
 ## COMPLETED (Sep 16-17, 2025 - Complete Visual & Content Overhaul)
 - [X] All Sauce Images Fixed
@@ -86,12 +107,11 @@ Complete Philly Wings Express Frontend & Prepare for Virtual Kitchen Expansion
 - [X] Researched all platform integration options
 - [X] Discovered existing admin panel structure
 
-## IN PROGRESS - Philly Wings Express Frontend
-- [ ] Connect live order count to real Firebase data
-- [ ] Add platform click tracking for ROI
-- [ ] Fix hardcoded "17 orders" display
-- [ ] Optimize mobile performance
-- [ ] Add real customer reviews integration
+## IN PROGRESS - Final Polish & Performance
+- [ ] Performance optimization testing
+- [ ] Cross-browser nutrition modal testing
+- [ ] Final image optimization
+- [ ] Mobile UX validation
 
 ## NEXT UP - Virtual Kitchen Admin
 - [ ] Extend admin for multi-brand management

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initHeroVideoOptimization();
     initSoundEffects();
     initWingStyleSelector();
+    initFoodImageZoom();
     trackPageView();
 });
 
@@ -113,19 +114,80 @@ function initLiveOrders() {
     }, 20000);
 }
 
-// Wing Style Selector
-function initWingStyleSelector() {
-    const wingStyleCards = document.querySelectorAll('.wing-style-card');
+// Universal Food Image Zoom
+function initFoodImageZoom() {
     const modal = document.getElementById('imageZoomModal');
     const modalImg = document.getElementById('zoomedImage');
     const captionText = document.getElementById('zoomCaption');
     const closeBtn = document.querySelector('.zoom-close');
 
-    // Handle card selection
+    // Add zoom to all food images
+    const foodImages = document.querySelectorAll('.combo-image, .sauce-image, .side-image, .gallery-item img, .wing-style-img.zoomable');
+
+    foodImages.forEach(img => {
+        // Add cursor pointer and title if not already there
+        img.style.cursor = 'pointer';
+        if (!img.title) img.title = 'Click to zoom';
+
+        img.addEventListener('click', function(e) {
+            e.stopPropagation();
+            modal.style.display = 'block';
+            modalImg.src = this.src;
+            captionText.innerHTML = this.alt || 'Zoomed view';
+
+            // Reset and apply appropriate zoom class
+            modalImg.className = 'zoom-content';
+
+            // Determine food type and apply smart crop
+            if (this.classList.contains('combo-image')) {
+                // Combos: focus on the center-right where food usually is
+                modalImg.classList.add('combo-zoom');
+            } else if (this.classList.contains('sauce-image')) {
+                // Sauces: focus on center where sauce detail is
+                modalImg.classList.add('sauce-zoom');
+            } else if (this.classList.contains('side-image')) {
+                // Sides: focus on center-top
+                modalImg.classList.add('side-zoom');
+            } else if (this.closest('.wing-style-card')) {
+                // Wing types: use existing positioning
+                const wingStyle = this.closest('.wing-style-card').dataset.style;
+                modalImg.classList.add(`${wingStyle}-zoom`);
+            } else if (this.alt && this.alt.toLowerCase().includes('wing')) {
+                // Gallery wings: smart detect and position
+                modalImg.classList.add('wings-zoom');
+            } else {
+                // Default: center focus
+                modalImg.classList.add('default-zoom');
+            }
+        });
+    });
+
+    // Close modal handlers
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    }
+
+    modal?.addEventListener('click', function(e) {
+        if (e.target === modal || e.target === closeBtn) {
+            modal.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal?.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+// Wing Style Selector (separated from zoom)
+function initWingStyleSelector() {
+    const wingStyleCards = document.querySelectorAll('.wing-style-card');
+
     wingStyleCards.forEach(card => {
         card.addEventListener('click', function(e) {
             // If clicking on the image, don't change selection
-            if (e.target.classList.contains('zoomable')) {
+            if (e.target.tagName === 'IMG') {
                 return;
             }
 
@@ -140,46 +202,6 @@ function initWingStyleSelector() {
                 style: style
             });
         });
-    });
-
-    // Handle image zoom
-    const zoomableImages = document.querySelectorAll('.zoomable');
-    zoomableImages.forEach(img => {
-        img.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent card selection
-            modal.style.display = 'block';
-            modalImg.src = this.src;
-            captionText.innerHTML = this.alt;
-
-            // Apply specific zoom class based on wing type
-            modalImg.className = 'zoom-content'; // Reset classes
-            const parentCard = this.closest('.wing-style-card');
-            if (parentCard) {
-                const wingStyle = parentCard.dataset.style;
-                modalImg.classList.add(`${wingStyle}-zoom`);
-            }
-        });
-    });
-
-    // Close modal when clicking X
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-    }
-
-    // Close modal when clicking outside the image
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal || e.target === closeBtn) {
-            modal.style.display = 'none';
-        }
-    });
-
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.style.display === 'block') {
-            modal.style.display = 'none';
-        }
     });
 }
 
