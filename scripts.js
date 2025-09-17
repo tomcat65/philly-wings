@@ -124,42 +124,73 @@ function initFoodImageZoom() {
     // Add zoom to all food images
     const foodImages = document.querySelectorAll('.combo-image, .sauce-image, .side-image, .gallery-item img, .wing-style-img.zoomable');
 
-    foodImages.forEach(img => {
-        // Add cursor pointer and title if not already there
-        img.style.cursor = 'pointer';
-        if (!img.title) img.title = 'Click to zoom';
+    // Check if device is mobile/tablet
+    const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
 
-        img.addEventListener('click', function(e) {
-            e.stopPropagation();
+    foodImages.forEach(img => {
+        // Add cursor pointer and title
+        img.style.cursor = 'pointer';
+
+        // Function to open zoom modal
+        const openZoomModal = function() {
             modal.style.display = 'block';
-            modalImg.src = this.src;
-            captionText.innerHTML = this.alt || 'Zoomed view';
+            modalImg.src = img.src;
+            captionText.innerHTML = img.alt || 'Zoomed view';
 
             // Reset and apply appropriate zoom class
             modalImg.className = 'zoom-content';
 
             // Determine food type and apply smart crop
-            if (this.classList.contains('combo-image')) {
+            if (img.classList.contains('combo-image')) {
                 // Combos: focus on the center-right where food usually is
                 modalImg.classList.add('combo-zoom');
-            } else if (this.classList.contains('sauce-image')) {
+            } else if (img.classList.contains('sauce-image')) {
                 // Sauces: focus on center where sauce detail is
                 modalImg.classList.add('sauce-zoom');
-            } else if (this.classList.contains('side-image')) {
+            } else if (img.classList.contains('side-image')) {
                 // Sides: focus on center-top
                 modalImg.classList.add('side-zoom');
-            } else if (this.closest('.wing-style-card')) {
+            } else if (img.closest('.wing-style-card')) {
                 // Wing types: use existing positioning
-                const wingStyle = this.closest('.wing-style-card').dataset.style;
+                const wingStyle = img.closest('.wing-style-card').dataset.style;
                 modalImg.classList.add(`${wingStyle}-zoom`);
-            } else if (this.alt && this.alt.toLowerCase().includes('wing')) {
+            } else if (img.alt && img.alt.toLowerCase().includes('wing')) {
                 // Gallery wings: smart detect and position
                 modalImg.classList.add('wings-zoom');
             } else {
                 // Default: center focus
                 modalImg.classList.add('default-zoom');
             }
-        });
+        };
+
+        if (isMobile) {
+            // Mobile: Double-tap to zoom
+            img.title = 'Double-tap to zoom';
+            let lastTap = 0;
+
+            img.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const currentTime = new Date().getTime();
+                const tapDelay = currentTime - lastTap;
+
+                if (tapDelay < 500 && tapDelay > 0) {
+                    // Double tap detected
+                    openZoomModal();
+                }
+
+                lastTap = currentTime;
+            });
+        } else {
+            // Desktop: Single click to zoom
+            img.title = 'Click to zoom';
+
+            img.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openZoomModal();
+            });
+        }
     });
 
     // Close modal handlers
