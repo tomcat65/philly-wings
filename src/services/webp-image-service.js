@@ -52,7 +52,7 @@ export class WebPImageService {
         return originalUrl;
       }
 
-      const filenameWithExt = pathMatch[1];
+      const filenameWithExt = decodeURIComponent(pathMatch[1]);
 
       // Remove extension to get base filename
       const nameWithoutExt = filenameWithExt.replace(/\.(jpg|jpeg|png|gif)$/i, '');
@@ -66,7 +66,7 @@ export class WebPImageService {
 
       // Construct new Firebase Storage URL
       const baseUrl = baseUrlWithPath.split('/o/')[0];
-      const webpPath = `images%2Fresized%2F${webpFilename}`;
+      const webpPath = `images%2Fresized%2F${encodeURIComponent(webpFilename)}`;
       const webpUrl = `${baseUrl}/o/${webpPath}`;
 
       console.log('Transforming URL:', {
