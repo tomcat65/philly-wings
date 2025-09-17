@@ -4,6 +4,13 @@
 echo "🔥 Philly Wings Local Testing Setup 🔥"
 echo "======================================"
 
+# Check if data files exist
+if [ ! -f "data/sauces.json" ] || [ ! -f "data/combos.json" ]; then
+    echo "⚠️  Missing data files - dynamic content won't load!"
+    echo "   Run: git pull origin my-new-feature"
+    echo ""
+fi
+
 # Stop any existing container
 echo "Stopping existing container if running..."
 docker stop philly-test 2>/dev/null

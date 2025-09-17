@@ -1,0 +1,123 @@
+{
+  "dryRubs": [
+    {
+      "id": "classic-lemon-pepper",
+      "name": "Classic Lemon Pepper",
+      "description": "Classic lemon pepper - zesty citrus, cracked black pepper",
+      "heatLevel": 1,
+      "heatLabel": "Mild",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-lemon-pepper-dry-rub.png?alt=media",
+      "allergens": []
+    },
+    {
+      "id": "northeast-hot-lemon",
+      "name": "Northeast Hot Lemon",
+      "description": "Spicy lemon pepper with cayenne kick",
+      "heatLevel": 2,
+      "heatLabel": "Medium",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fnortheast-hot-lemon-pepper.png?alt=media",
+      "allergens": []
+    },
+    {
+      "id": "frankford-cajun",
+      "name": "Frankford Cajun",
+      "description": "Bold Cajun blend - paprika, garlic, herbs",
+      "heatLevel": 2,
+      "heatLabel": "Medium",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ffrankford-cajun-dry-rub.png?alt=media",
+      "allergens": []
+    },
+    {
+      "id": "garlic-parmesan",
+      "name": "Garlic Parmesan",
+      "description": "Creamy garlic butter with aged parmesan",
+      "heatLevel": 0,
+      "heatLabel": "No Heat",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgarlic-parmesan-dry-rub.png?alt=media",
+      "allergens": ["dairy"]
+    }
+  ],
+  "sauces": [
+    {
+      "id": "sweet-teriyaki",
+      "name": "Sweet Teriyaki",
+      "description": "Teriyaki glaze - soy, ginger, sesame",
+      "heatLevel": 0,
+      "heatLabel": "No Heat",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fsweet-teriyaki-wings.png?alt=media",
+      "allergens": ["soy", "sesame"]
+    },
+    {
+      "id": "tailgate-bbq",
+      "name": "Tailgate BBQ",
+      "description": "Classic BBQ - sweet, tangy, smoky",
+      "heatLevel": 0,
+      "heatLabel": "No Heat",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ftailgate-bbq-wings.png?alt=media",
+      "allergens": []
+    },
+    {
+      "id": "mild-buffalo",
+      "name": "Mild Buffalo",
+      "description": "Mild buffalo - all flavor, easy heat",
+      "heatLevel": 1,
+      "heatLabel": "Mild",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbuffalo-sauced.png?alt=media",
+      "allergens": ["dairy"]
+    },
+    {
+      "id": "philly-classic-hot",
+      "name": "Philly Classic Hot",
+      "description": "Traditional hot buffalo - the perfect heat",
+      "heatLevel": 3,
+      "heatLabel": "Hot",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fphilly-classic-hot-new.png?alt=media",
+      "allergens": ["dairy"]
+    },
+    {
+      "id": "broad-pattison-burn",
+      "name": "Broad & Pattison Burn",
+      "description": "Nashville-style hot - cayenne, brown sugar",
+      "heatLevel": 4,
+      "heatLabel": "Extra Hot",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbroad-pattison-burn.png?alt=media",
+      "allergens": []
+    },
+    {
+      "id": "grittys-revenge",
+      "name": "Gritty's Revenge",
+      "description": "Scorpion pepper sauce - NOT for rookies!",
+      "heatLevel": 5,
+      "heatLabel": "INSANE",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgrittys-revenge-scorpion.png?alt=media",
+      "allergens": [],
+      "warning": "NOT for rookies!"
+    }
+  ],
+  "dippingSauces": [
+    {
+      "id": "ranch",
+      "name": "Ranch",
+      "description": "Cool & creamy",
+      "allergens": ["dairy", "egg"]
+    },
+    {
+      "id": "honey-mustard",
+      "name": "Honey Mustard",
+      "description": "Sweet & tangy",
+      "allergens": []
+    },
+    {
+      "id": "blue-cheese",
+      "name": "Blue Cheese",
+      "description": "Classic chunky",
+      "allergens": ["dairy"]
+    },
+    {
+      "id": "cheese-sauce",
+      "name": "Cheese Sauce",
+      "description": "Warm & melty",
+      "allergens": ["dairy"]
+    }
+  ]
+}
