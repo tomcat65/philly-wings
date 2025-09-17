@@ -164,9 +164,17 @@ window.initFoodImageZoom = function initFoodImageZoom() {
         };
 
         if (isMobile) {
-            // Mobile: Single tap to zoom
+            // Mobile: Single tap to zoom (use touchend for better mobile support)
             img.title = 'Tap to zoom';
 
+            // Add both touch and click events for better mobile compatibility
+            img.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openZoomModal();
+            }, { passive: false });
+
+            // Fallback click event for devices that don't fire touchend
             img.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -185,7 +193,12 @@ window.initFoodImageZoom = function initFoodImageZoom() {
 
     // Close modal handlers
     if (closeBtn) {
+        // Add both click and touch events for mobile compatibility
         closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        closeBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            modal.style.display = 'none';
+        }, { passive: false });
     }
 
     modal?.addEventListener('click', function(e) {
@@ -193,6 +206,14 @@ window.initFoodImageZoom = function initFoodImageZoom() {
             modal.style.display = 'none';
         }
     });
+
+    // Also handle touch on modal background for mobile
+    modal?.addEventListener('touchend', function(e) {
+        if (e.target === modal) {
+            e.preventDefault();
+            modal.style.display = 'none';
+        }
+    }, { passive: false });
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal?.style.display === 'block') {
