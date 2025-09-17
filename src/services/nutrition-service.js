@@ -7,7 +7,7 @@ export const NutritionService = {
   // Get nutrition data by item ID
   async getById(itemId) {
     try {
-      // First try to find by the id field
+      // First try to find by the id field in nutritionData collection
       const items = await FirebaseService.getAll('nutritionData', {
         where: ['id', '==', itemId],
         limit: 1

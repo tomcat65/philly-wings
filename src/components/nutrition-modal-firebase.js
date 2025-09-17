@@ -296,7 +296,9 @@ export class NutritionModalFirebase {
     if (perServingToggle) {
       perServingToggle.addEventListener('change', (e) => {
         this.showPerServing = e.target.checked;
+        console.log('Toggle changed - showPerServing:', this.showPerServing);
         if (this.currentItem) {
+          console.log('Re-populating modal with current item:', this.currentItem.name);
           this.populateModal(this.currentItem);
         }
       });
@@ -394,38 +396,60 @@ export class NutritionModalFirebase {
     // Determine if we should show per-serving data
     const hasMultipleServings = nutrition.servingsPerContainer && nutrition.servingsPerContainer > 1;
 
-    // Extract nutrients - handle both nested and flat structures
-    const nutrients = nutrition.nutrients || nutrition;
+    // Extract the nutrition values - handle both nested and flat structures
+    const getNutrientValue = (nutrient) => {
+      if (typeof nutrient === 'object' && nutrient !== null && 'amount' in nutrient) {
+        return nutrient.amount;
+      }
+      return nutrient || 0;
+    };
+
+    // Get base nutrition values (these are PER SERVING from Firebase)
+    const perServingNutrients = {
+      calories: nutrition.nutrients?.calories || nutrition.calories || 0,
+      totalFat: getNutrientValue(nutrition.nutrients?.totalFat || nutrition.totalFat),
+      saturatedFat: getNutrientValue(nutrition.nutrients?.saturatedFat || nutrition.saturatedFat),
+      transFat: getNutrientValue(nutrition.nutrients?.transFat || nutrition.transFat),
+      cholesterol: getNutrientValue(nutrition.nutrients?.cholesterol || nutrition.cholesterol),
+      sodium: getNutrientValue(nutrition.nutrients?.sodium || nutrition.sodium),
+      totalCarbs: getNutrientValue(nutrition.nutrients?.totalCarbs || nutrition.totalCarbs),
+      dietaryFiber: getNutrientValue(nutrition.nutrients?.dietaryFiber || nutrition.dietaryFiber),
+      totalSugars: getNutrientValue(nutrition.nutrients?.totalSugars || nutrition.totalSugars),
+      addedSugars: getNutrientValue(nutrition.nutrients?.addedSugars || nutrition.addedSugars),
+      protein: getNutrientValue(nutrition.nutrients?.protein || nutrition.protein),
+      vitaminD: getNutrientValue(nutrition.nutrients?.vitaminD || nutrition.vitaminD),
+      calcium: getNutrientValue(nutrition.nutrients?.calcium || nutrition.calcium),
+      iron: getNutrientValue(nutrition.nutrients?.iron || nutrition.iron),
+      potassium: getNutrientValue(nutrition.nutrients?.potassium || nutrition.potassium)
+    };
 
     // Calculate display data based on toggle state
     let displayData;
-    if (this.showPerServing && hasMultipleServings) {
-      // Use perServing data if available, otherwise calculate from total
-      if (nutrition.perServing) {
-        displayData = nutrition.perServing;
-      } else {
-        // Calculate per serving values
-        const servings = nutrition.servingsPerContainer;
-        displayData = {
-          calories: Math.round(nutrients.calories / servings),
-          totalFat: Math.round(nutrients.totalFat / servings * 10) / 10,
-          saturatedFat: Math.round(nutrients.saturatedFat / servings * 10) / 10,
-          transFat: Math.round(nutrients.transFat / servings * 10) / 10,
-          cholesterol: Math.round(nutrients.cholesterol / servings),
-          sodium: Math.round(nutrients.sodium / servings),
-          totalCarbs: Math.round(nutrients.totalCarbs / servings),
-          dietaryFiber: Math.round(nutrients.dietaryFiber / servings),
-          totalSugars: Math.round(nutrients.totalSugars / servings),
-          addedSugars: Math.round(nutrients.addedSugars / servings),
-          protein: Math.round(nutrients.protein / servings),
-          vitaminD: Math.round(nutrients.vitaminD / servings * 10) / 10,
-          calcium: Math.round(nutrients.calcium / servings),
-          iron: Math.round(nutrients.iron / servings * 10) / 10,
-          potassium: Math.round(nutrients.potassium / servings)
-        };
-      }
+    if (this.showPerServing || !hasMultipleServings) {
+      // Show per-serving values (raw data from Firebase)
+      displayData = perServingNutrients;
+      console.log('Showing per-serving nutrition:', displayData);
     } else {
-      displayData = nutrients;
+      // Show TOTAL values (multiply per-serving by servings)
+      const servings = nutrition.servingsPerContainer;
+      displayData = {
+        calories: Math.round(perServingNutrients.calories * servings),
+        totalFat: Math.round(perServingNutrients.totalFat * servings * 10) / 10,
+        saturatedFat: Math.round(perServingNutrients.saturatedFat * servings * 10) / 10,
+        transFat: Math.round(perServingNutrients.transFat * servings * 10) / 10,
+        cholesterol: Math.round(perServingNutrients.cholesterol * servings),
+        sodium: Math.round(perServingNutrients.sodium * servings),
+        totalCarbs: Math.round(perServingNutrients.totalCarbs * servings),
+        dietaryFiber: Math.round(perServingNutrients.dietaryFiber * servings),
+        totalSugars: Math.round(perServingNutrients.totalSugars * servings),
+        addedSugars: Math.round(perServingNutrients.addedSugars * servings),
+        protein: Math.round(perServingNutrients.protein * servings),
+        vitaminD: Math.round(perServingNutrients.vitaminD * servings * 10) / 10,
+        calcium: Math.round(perServingNutrients.calcium * servings),
+        iron: Math.round(perServingNutrients.iron * servings * 10) / 10,
+        potassium: Math.round(perServingNutrients.potassium * servings)
+      };
+      console.log('Showing TOTAL nutrition (per-serving × servings):', displayData);
     }
 
     // Title
@@ -436,14 +460,36 @@ export class NutritionModalFirebase {
     if (hasMultipleServings) {
       servingToggle.style.display = 'block';
       document.getElementById('servingsPerContainer').textContent = nutrition.servingsPerContainer;
-      document.getElementById('servingsCount').textContent =
-        this.showPerServing ? '1 serving • ' : `${nutrition.servingsPerContainer} servings • `;
+
+      // Update the serving count text based on toggle state
+      const servingsCount = document.getElementById('servingsCount');
+      if (this.showPerServing) {
+        servingsCount.textContent = '1 serving • ';
+      } else {
+        servingsCount.textContent = `${nutrition.servingsPerContainer} servings • `;
+      }
+
+      // Update the toggle checkbox state
+      const toggleCheckbox = document.getElementById('perServingToggle');
+      if (toggleCheckbox) {
+        toggleCheckbox.checked = this.showPerServing;
+      }
     } else {
       servingToggle.style.display = 'none';
       document.getElementById('servingsCount').textContent = '';
     }
 
-    document.getElementById('servingSize').textContent = nutrition.servingSize || nutrition.serving?.size || '';
+    // Show appropriate serving size
+    const servingSizeElement = document.getElementById('servingSize');
+    if (this.showPerServing && nutrition.perServing?.servingSize) {
+      servingSizeElement.textContent = nutrition.perServing.servingSize;
+    } else if (nutrition.servingSize) {
+      servingSizeElement.textContent = nutrition.servingSize;
+    } else if (nutrition.serving?.size) {
+      servingSizeElement.textContent = nutrition.serving.size;
+    } else {
+      servingSizeElement.textContent = '';
+    }
 
     // Helper function to extract value from nutrient object or return direct value
     const getNutrientValue = (nutrient) => {
@@ -457,20 +503,20 @@ export class NutritionModalFirebase {
     document.getElementById('calories').textContent = getNutrientValue(displayData.calories);
     document.getElementById('totalFat').textContent = getNutrientValue(displayData.totalFat);
     document.getElementById('saturatedFat').textContent = getNutrientValue(displayData.saturatedFat);
-    document.getElementById('transFat').textContent = getNutrientValue(displayData.transFat !== undefined ? displayData.transFat : (this.showPerServing ? 0 : nutrients.transFat));
+    document.getElementById('transFat').textContent = getNutrientValue(displayData.transFat || 0);
     document.getElementById('cholesterol').textContent = getNutrientValue(displayData.cholesterol);
     document.getElementById('sodium').textContent = getNutrientValue(displayData.sodium);
     document.getElementById('totalCarbs').textContent = getNutrientValue(displayData.totalCarbs);
-    document.getElementById('dietaryFiber').textContent = getNutrientValue(displayData.dietaryFiber !== undefined ? displayData.dietaryFiber : (this.showPerServing ? 0 : nutrients.dietaryFiber));
-    document.getElementById('totalSugars').textContent = getNutrientValue(displayData.totalSugars !== undefined ? displayData.totalSugars : (this.showPerServing ? 0 : nutrients.totalSugars)) || getNutrientValue(displayData.sugars);
-    document.getElementById('addedSugars').textContent = getNutrientValue(displayData.addedSugars !== undefined ? displayData.addedSugars : (this.showPerServing ? 0 : nutrients.addedSugars));
+    document.getElementById('dietaryFiber').textContent = getNutrientValue(displayData.dietaryFiber || 0);
+    document.getElementById('totalSugars').textContent = getNutrientValue(displayData.totalSugars || 0) || getNutrientValue(displayData.sugars);
+    document.getElementById('addedSugars').textContent = getNutrientValue(displayData.addedSugars || 0);
     document.getElementById('protein').textContent = getNutrientValue(displayData.protein);
 
     // FDA 2020 Required Nutrients - use display data for vitamins too
-    const vitaminD = getNutrientValue(displayData.vitaminD !== undefined ? displayData.vitaminD : nutrients.vitaminD);
-    const calcium = getNutrientValue(displayData.calcium !== undefined ? displayData.calcium : nutrients.calcium);
-    const iron = getNutrientValue(displayData.iron !== undefined ? displayData.iron : nutrients.iron);
-    const potassium = getNutrientValue(displayData.potassium !== undefined ? displayData.potassium : nutrients.potassium);
+    const vitaminD = getNutrientValue(displayData.vitaminD || 0);
+    const calcium = getNutrientValue(displayData.calcium || 0);
+    const iron = getNutrientValue(displayData.iron || 0);
+    const potassium = getNutrientValue(displayData.potassium || 0);
 
     document.getElementById('vitaminD').textContent = vitaminD;
     document.getElementById('calcium').textContent = calcium;
@@ -546,10 +592,16 @@ export class NutritionModalFirebase {
       'tree-nut': { icon: '🌰', label: 'Tree Nuts', severity: 'critical' },
       'fish': { icon: '🐟', label: 'Fish', severity: 'medium' },
       'shellfish': { icon: '🦐', label: 'Shellfish', severity: 'high' },
-      'sesame': { icon: '🌱', label: 'Sesame (NEW)', severity: 'medium' }
+      'sesame': { icon: '🌱', label: 'Sesame (FDA 2023)', severity: 'medium' }
     };
 
     const formattedAllergens = NutritionService.formatAllergens(nutrition.allergens);
+
+    // Add SESAME for wings and fried items (FDA 2023 requirement)
+    if (formattedAllergens && !formattedAllergens.includes('sesame') &&
+        (nutrition.category === 'wings' || nutrition.category === 'sides')) {
+      formattedAllergens.push('sesame');
+    }
 
     if (formattedAllergens && formattedAllergens.length > 0) {
       if (formattedAllergens.includes('sesame')) {
@@ -606,10 +658,17 @@ export class NutritionModalFirebase {
     const formattedAllergens = NutritionService.formatAllergens(nutrition.allergens);
     let allergenText = '';
     if (formattedAllergens && formattedAllergens.length > 0) {
+      // Add SESAME to allergens if not already included (FDA 2023 requirement)
+      if (!formattedAllergens.includes('sesame') &&
+          (nutrition.category === 'wings' || nutrition.category === 'sides')) {
+        formattedAllergens.push('sesame');
+      }
       allergenText = `Warning: Contains ${formattedAllergens.join(', ')}. `;
     }
 
-    announcement.textContent = `Nutrition information for ${nutrition.name}. ${allergenText}${nutrition.calories} calories per serving.`;
+    // Get calories from the nested structure
+    const calories = nutrition.nutrients?.calories || nutrition.calories || 0;
+    announcement.textContent = `Nutrition information for ${nutrition.name}. ${allergenText}${calories} calories per serving.`;
 
     document.body.appendChild(announcement);
     setTimeout(() => announcement.remove(), 3000);
@@ -619,12 +678,13 @@ export class NutritionModalFirebase {
     this.modal.style.display = 'none';
     document.body.style.overflow = '';
     this.currentItem = null;
+
+    // Reset toggle state
     this.showPerServing = false;
-
-    this.switchTab('nutrition');
-
     const toggle = document.getElementById('perServingToggle');
     if (toggle) toggle.checked = false;
+
+    this.switchTab('nutrition');
   }
 }
 
