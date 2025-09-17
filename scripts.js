@@ -135,25 +135,33 @@ window.initFoodImageZoom = function initFoodImageZoom() {
         const openZoomModal = function() {
             modal.style.display = 'block';
 
-            // Ensure the image src is properly set
-            const imageSrc = img.src || img.getAttribute('src');
+            // Get the current image source (which should be WebP if supported)
+            const currentSrc = img.src || img.getAttribute('src');
+            const originalSrc = img.dataset.originalSrc || currentSrc;
+
+            // Clear any previous error handlers
+            modalImg.onerror = null;
+            modalImg.onload = null;
 
             // Add error handler for image loading
             modalImg.onerror = function() {
-                console.error('Failed to load zoom image:', imageSrc);
-                // Try to reload the image
-                setTimeout(() => {
-                    modalImg.src = imageSrc;
-                }, 100);
+                console.error('Failed to load WebP zoom image:', currentSrc);
+                // Fall back to original image if WebP fails
+                if (originalSrc !== currentSrc) {
+                    console.log('Falling back to original image:', originalSrc);
+                    modalImg.src = originalSrc;
+                }
             };
 
             modalImg.onload = function() {
                 // Image loaded successfully
+                console.log('Zoom image loaded successfully');
                 modalImg.style.display = 'block';
                 modalImg.style.visibility = 'visible';
             };
 
-            modalImg.src = imageSrc;
+            // Use the current src (which should be WebP if available)
+            modalImg.src = currentSrc;
 
             // Force image to display
             modalImg.style.display = 'block';

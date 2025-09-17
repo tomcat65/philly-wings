@@ -40,28 +40,40 @@ export class WebPImageService {
       return originalUrl;
     }
 
-    // Extract image path and filename
+    // Extract the filename from the URL
+    // Handle both encoded (%2F) and unencoded (/) paths
     const urlParts = originalUrl.split('?')[0];
-    const matches = urlParts.match(/o\/(.+?)(\.[^.]+)$/);
 
-    if (!matches) return originalUrl;
+    // Decode the URL to work with the actual path
+    const decodedUrl = decodeURIComponent(urlParts);
 
-    const [, imagePath, extension] = matches;
-    const filename = imagePath.split('/').pop();
-
-    // Skip if no valid image extension
-    if (!['.jpg', '.jpeg', '.png', '.gif'].includes(extension.toLowerCase())) {
+    // Extract filename from various URL patterns
+    let filename = '';
+    if (decodedUrl.includes('/o/images/')) {
+      // Pattern: /o/images/filename.ext
+      filename = decodedUrl.split('/o/images/').pop();
+    } else if (urlParts.includes('o%2Fimages%2F')) {
+      // Pattern: o%2Fimages%2Ffilename.ext
+      filename = urlParts.split('o%2Fimages%2F').pop();
+    } else {
       return originalUrl;
     }
 
-    // Build WebP URL with resized path
-    const basePath = imagePath.substring(0, imagePath.lastIndexOf('/'));
+    // Get filename without extension
     const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
+
+    // Skip if no valid image extension
+    if (!filename.match(/\.(jpg|jpeg|png|gif)$/i)) {
+      return originalUrl;
+    }
+
+    // Build WebP filename
     const webpFilename = `${nameWithoutExt}_${size}.webp`;
 
-    // Construct new Firebase Storage URL
-    const webpPath = `${basePath}/resized/${webpFilename}`;
-    const webpUrl = urlParts.replace(imagePath + extension, webpPath);
+    // Construct new Firebase Storage URL with proper encoding
+    const baseUrl = urlParts.split('/o/')[0];
+    const webpPath = `images%2Fresized%2F${encodeURIComponent(webpFilename)}`;
+    const webpUrl = `${baseUrl}/o/${webpPath}`;
 
     // Add token if present in original URL
     const tokenMatch = originalUrl.match(/[?&]token=([^&]+)/);
