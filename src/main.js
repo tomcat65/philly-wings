@@ -4,6 +4,7 @@ import './components/menu-navigation';
 import './components/nutrition-modal-firebase';
 import { MenuService, ReviewService, LiveOrderService, FirebaseService } from './services/firebase-service';
 import { initAnalytics, setupSectionObservers, setupBounceTracking } from './analytics';
+import './services/webp-image-service';
 
 // Dynamic content loaders
 class PhillyWingsApp {
