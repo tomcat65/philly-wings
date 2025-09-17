@@ -2,15 +2,31 @@
 
 ## Sep 16-17, 2025 - Major UX Overhaul Session
 
-### Sauce Images Correction
+### Complete Image & Content Overhaul
 - [X] Fixed Duplicate Sauce Images
   - Status: COMPLETE
-  - Issue: Multiple sauces using same buffalo-sauced.png image
-  - Fixed BROAD & PATTISON BURN: Uploaded unique Nashville hot sauce image (broad-pattison-burn.png)
-  - Fixed Gritty's Revenge: Uploaded unique scorpion pepper sauce image (grittys-revenge.png)
-  - Result: Each signature sauce now has unique, appropriate imagery
+  - Fixed BROAD & PATTISON BURN: Uploaded unique Nashville hot sauce image
+  - Fixed Gritty's Revenge: Uploaded unique scorpion pepper sauce image
+  - Result: Each signature sauce now has unique imagery
 
-## Sep 16-17, 2025 - Earlier UX Fixes
+- [X] Wing Pack & Combo Updates
+  - Status: COMPLETE
+  - 50 Wing Party Pack: Changed to "Mix up to 4 sauces" (was 3)
+  - The Tailgater: Updated to "30 wings, large fries, mozzarella sticks" (was 20 wings, 4 drinks)
+  - The Tailgater: Now uses Game Day 30 wings image
+  - MVP Meal: Changed to "12 wings, fries, mozzarella sticks" (removed drink)
+  - MVP Meal: Uploaded unique combo image (mvp-meal-combo.png)
+  - Sampler Platter: Changed "loaded fries" to "fries"
+  - Sampler Platter: Uploaded unique image
+  - Result: Accurate descriptions, unique images for all combos
+
+- [X] Dry Rub Image Differentiation
+  - Status: COMPLETE
+  - Northeast Hot Lemon: Uploaded unique spicy lemon pepper image
+  - Fixed duplicate with Classic Lemon Pepper
+  - Result: Each dry rub has distinct visual identity
+
+## Sep 16-17, 2025 - Earlier Session Fixes
 
 ### Favicon Visibility Enhancement
 - [X] Browser Tab Favicon Fix

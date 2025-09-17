@@ -396,7 +396,37 @@ export class NutritionModalFirebase {
 
     // Extract nutrients - handle both nested and flat structures
     const nutrients = nutrition.nutrients || nutrition;
-    const displayData = (this.showPerServing && nutrition.perServing) ? nutrition.perServing : nutrients;
+
+    // Calculate display data based on toggle state
+    let displayData;
+    if (this.showPerServing && hasMultipleServings) {
+      // Use perServing data if available, otherwise calculate from total
+      if (nutrition.perServing) {
+        displayData = nutrition.perServing;
+      } else {
+        // Calculate per serving values
+        const servings = nutrition.servingsPerContainer;
+        displayData = {
+          calories: Math.round(nutrients.calories / servings),
+          totalFat: Math.round(nutrients.totalFat / servings * 10) / 10,
+          saturatedFat: Math.round(nutrients.saturatedFat / servings * 10) / 10,
+          transFat: Math.round(nutrients.transFat / servings * 10) / 10,
+          cholesterol: Math.round(nutrients.cholesterol / servings),
+          sodium: Math.round(nutrients.sodium / servings),
+          totalCarbs: Math.round(nutrients.totalCarbs / servings),
+          dietaryFiber: Math.round(nutrients.dietaryFiber / servings),
+          totalSugars: Math.round(nutrients.totalSugars / servings),
+          addedSugars: Math.round(nutrients.addedSugars / servings),
+          protein: Math.round(nutrients.protein / servings),
+          vitaminD: Math.round(nutrients.vitaminD / servings * 10) / 10,
+          calcium: Math.round(nutrients.calcium / servings),
+          iron: Math.round(nutrients.iron / servings * 10) / 10,
+          potassium: Math.round(nutrients.potassium / servings)
+        };
+      }
+    } else {
+      displayData = nutrients;
+    }
 
     // Title
     document.getElementById('nutritionTitle').textContent = `Nutrition Information - ${nutrition.name}`;
@@ -423,24 +453,24 @@ export class NutritionModalFirebase {
       return nutrient || 0;
     };
 
-    // Populate nutrition values from nutrients object
+    // Populate nutrition values from display data
     document.getElementById('calories').textContent = getNutrientValue(displayData.calories);
     document.getElementById('totalFat').textContent = getNutrientValue(displayData.totalFat);
     document.getElementById('saturatedFat').textContent = getNutrientValue(displayData.saturatedFat);
-    document.getElementById('transFat').textContent = getNutrientValue(displayData.transFat);
+    document.getElementById('transFat').textContent = getNutrientValue(displayData.transFat !== undefined ? displayData.transFat : (this.showPerServing ? 0 : nutrients.transFat));
     document.getElementById('cholesterol').textContent = getNutrientValue(displayData.cholesterol);
     document.getElementById('sodium').textContent = getNutrientValue(displayData.sodium);
     document.getElementById('totalCarbs').textContent = getNutrientValue(displayData.totalCarbs);
-    document.getElementById('dietaryFiber').textContent = getNutrientValue(displayData.dietaryFiber);
-    document.getElementById('totalSugars').textContent = getNutrientValue(displayData.totalSugars) || getNutrientValue(displayData.sugars);
-    document.getElementById('addedSugars').textContent = getNutrientValue(displayData.addedSugars);
+    document.getElementById('dietaryFiber').textContent = getNutrientValue(displayData.dietaryFiber !== undefined ? displayData.dietaryFiber : (this.showPerServing ? 0 : nutrients.dietaryFiber));
+    document.getElementById('totalSugars').textContent = getNutrientValue(displayData.totalSugars !== undefined ? displayData.totalSugars : (this.showPerServing ? 0 : nutrients.totalSugars)) || getNutrientValue(displayData.sugars);
+    document.getElementById('addedSugars').textContent = getNutrientValue(displayData.addedSugars !== undefined ? displayData.addedSugars : (this.showPerServing ? 0 : nutrients.addedSugars));
     document.getElementById('protein').textContent = getNutrientValue(displayData.protein);
 
-    // FDA 2020 Required Nutrients - extract from nutrients object
-    const vitaminD = getNutrientValue(nutrients.vitaminD);
-    const calcium = getNutrientValue(nutrients.calcium);
-    const iron = getNutrientValue(nutrients.iron);
-    const potassium = getNutrientValue(nutrients.potassium);
+    // FDA 2020 Required Nutrients - use display data for vitamins too
+    const vitaminD = getNutrientValue(displayData.vitaminD !== undefined ? displayData.vitaminD : nutrients.vitaminD);
+    const calcium = getNutrientValue(displayData.calcium !== undefined ? displayData.calcium : nutrients.calcium);
+    const iron = getNutrientValue(displayData.iron !== undefined ? displayData.iron : nutrients.iron);
+    const potassium = getNutrientValue(displayData.potassium !== undefined ? displayData.potassium : nutrients.potassium);
 
     document.getElementById('vitaminD').textContent = vitaminD;
     document.getElementById('calcium').textContent = calcium;
@@ -453,8 +483,8 @@ export class NutritionModalFirebase {
     document.getElementById('ironMobile').textContent = iron;
     document.getElementById('potassiumMobile').textContent = potassium;
 
-    // Calculate Daily Values - use the nutrients object
-    const dailyValues = NutritionService.calculateDailyValues(nutrients);
+    // Calculate Daily Values - use the display data for correct per-serving calculations
+    const dailyValues = NutritionService.calculateDailyValues(displayData);
 
     // Apply Daily Values
     this.setDailyValue('totalFatDV', dailyValues.totalFatDV);

@@ -169,28 +169,19 @@
         <div class="container">
             <h2 class="section-headline chalk-text">The <span class="text-eagles">Real Story</span></h2>
             <div class="story-content">
-                <div class="story-text">
-                    <h3>Fed Up with Frozen Wings</h3>
-                    <p>Look, I'm Arleth. Born and raised in Northeast Philly. Oxford Circle, to be exact. And I was TIRED of it.</p>
+                <div class="story-text" id="storyContent">
+                    <h3>By Arleth (Oxford Circle, NE Philly)</h3>
 
-                    <p>Tired of every "wing spot" serving the same frozen, sysco-truck garbage. Tired of places claiming "best wings in Philly" while microwaving pre-sauced sadness. Tired of paying $15 for wings that taste like they came from a school cafeteria.</p>
+                    <p>I was done with soggy, freezer-burned wings. So I built the spot I wanted: wings brined overnight, double-fried to a shattering crunch, and sauces we make at 7 a.m. — from classic Buffalo to Lemon Pepper and our Gritty Garlic Parm. Dry rubs? Blended in-house.</p>
 
-                    <p>You know what I'm talking about. Those franchise joints where everything's pre-portioned, pre-cooked, pre-disappointed. Where "buffalo sauce" is just Frank's from a gallon jug. Where they act like throwing some Old Bay on frozen fries makes them "gourmet."</p>
+                    <p>This isn't a franchise play. It's Northeast Philly standards: do it right or don't do it. Every order is cooked to order, with "sauce on the side" and "extra crispy" always an option. We pack in vented, tamper-evident boxes so your wings land hot and crisp — even after the ride.</p>
 
-                    <h3>So I Did Something About It</h3>
-                    <p>2023. Franklin Mills Mall food court. I saw an opportunity.</p>
-
-                    <p>Not to open another mediocre wing joint. But to show Northeast Philly what REAL wings taste like. Wings that are brined for 24 hours. Double-fried at exactly 375°. Sauces made from scratch every morning. Dry rubs we blend ourselves.</p>
-
-                    <p>Every single order? I'm back there watching. Making sure your wings get the full 14 minutes they deserve. Making sure that buffalo sauce has the right tang. Making sure those drums are crispy enough to make you forget every disappointing wing you've ever had.</p>
-
-                    <h3>This Ain't a Franchise</h3>
-                    <p>This is personal. This is Northeast Philly proving we don't need some corporate chain to tell us how to make wings. This is every late-night craving, every Eagles tailgate, every "I need real food" moment - answered with RESPECT.</p>
-
-                    <p>We're not trying to be Buffalo. We're not trying to be trendy. We're Northeast Philly - where we do things right or we don't do them at all.</p>
+                    <p>No shortcuts. No pre-cooked sadness. Just wings that taste like someone cared.</p>
 
                     <p class="story-signature">Every. Single. Wing. Matters.<br>
                     <span>- Arleth</span></p>
+
+                    <p class="story-cta">Order on DoorDash • Uber Eats • Grubhub</p>
                 </div>
             </div>
         </div>
@@ -806,10 +797,15 @@
     <!-- Scripts -->
     <script type="module" src="scripts.js"></script>
     <script type="module" src="src/components/nutrition-modal-firebase.js"></script>
+    <script type="module" src="src/components/story-loader.js"></script>
     <script type="module">
         // Initialize the nutrition modal
         import { NutritionModalFirebase } from './src/components/nutrition-modal-firebase.js';
         window.nutritionModal = new NutritionModalFirebase();
+
+        // Initialize story loader
+        import { StoryLoader } from './src/components/story-loader.js';
+        window.storyLoader = new StoryLoader();
     </script>
     <script>
         // Nutrition Info Modal Functions

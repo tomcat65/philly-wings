@@ -11,6 +11,47 @@ Complete Philly Wings Express Frontend & Prepare for Virtual Kitchen Expansion
 - **Tech**: Using existing Android tablets, Firebase (free tier)
 - **Admin**: Already has basic admin panel at /admin
 
+## COMPLETED (Sep 16-17, 2025 - Complete Visual & Content Overhaul)
+- [X] All Sauce Images Fixed
+  - BROAD & PATTISON BURN: Unique Nashville hot image
+  - Gritty's Revenge: Unique scorpion pepper image
+  - Northeast Hot Lemon: Unique spicy lemon pepper image
+- [X] All Combo Updates Complete
+  - 50 Wing Party Pack: Now allows 4 sauce mix
+  - Tailgater: 30 wings (not 20), mozz sticks, large fries
+  - MVP Meal: 12 wings, fries, mozz sticks (no drink)
+  - Sampler Platter: Regular fries (not loaded)
+  - All combos have unique images now
+- [X] Gallery Section Fixed
+  - MVP Meal Combo image updated
+  - Description corrected (regular fries)
+
+## COMPLETED (Sep 16-17, 2025 - Earlier UX Fixes)
+- [X] Favicon Visibility Fix
+  - Replaced all favicon files with better-cropped version (fills canvas)
+  - Now matches size of other professional sites in browser tabs
+  - Added favicon-source.png for future reference
+- [X] Gallery Content Fixes
+  - Changed "Every. Damn. Time." to "Every God luvin' time."
+  - Fixed Gritty's Garlic Parm image (now uses garlic-parmesan-dry-rub.png)
+  - Updated MVP Meal to "MVP Meal Combo" with combo-platter.png
+  - Description: "12 Wings, Mozzarella Sticks, Loaded Fries"
+- [X] Wing Image Zoom Enhancement
+  - Added object-fit: cover to crop zoomed images
+  - Custom zoom positions for drums (35%) and flats (40%)
+  - Shows close-up of wings instead of full image with empty space
+- [X] Navigation & CTA Fixes
+  - All "Order This" buttons in Popular Combos scroll to Order section
+  - All "ORDER ON APP" links now clickable and functional
+  - Exit-intent popup: Added close button, fixed "Lemme Get That Deal" navigation
+- [X] Popular Combos Image Updates
+  - Game Day 30: New dedicated game-day-30-wings.png
+  - Party Pack 50: New party-pack-50-wings.png with sides in description
+  - Date Night Dozen: Still using classic buffalo (unchanged)
+- [X] Wings Menu Cleanup
+  - Removed all duplicate images from wing size cards
+  - Kept hero banner image only for cleaner layout
+
 ## COMPLETED (Sep 15, 2025 - Evening Session 2)
 - [X] Fixed Mozzarella Sticks & Fries Images
   - Corrected wrong images (was showing buffalo wings)

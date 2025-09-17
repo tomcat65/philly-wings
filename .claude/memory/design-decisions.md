@@ -1,14 +1,28 @@
 # Design Decisions Log
 
-## Sep 16-17, 2025 - Sauce Image Differentiation
-**Decision:** Give each signature sauce unique imagery
-**Why:** Four different sauces using same buffalo image looked lazy/unprofessional
-**Changes:**
-- BROAD & PATTISON BURN: Nashville hot sauce visual
-- Gritty's Revenge: Scorpion pepper sauce visual
-- Kept buffalo for Mild Buffalo and Philly Classic Hot (both are buffalo-based)
-**Result:** Visual differentiation matches flavor profiles
-**Evidence:** Each sauce now tells its own story
+## Sep 16-17, 2025 - Complete Visual Identity Overhaul
+**Decision:** Every menu item needs unique, appropriate imagery
+**Why:** Duplicate images across different products = amateur hour
+**What We Fixed:**
+
+**Sauces:**
+- BROAD & PATTISON BURN: Unique Nashville hot visual
+- Gritty's Revenge: Unique scorpion pepper visual
+- Northeast Hot Lemon: Unique spicy lemon pepper (was duplicate)
+
+**Combos:**
+- The Tailgater: Uses Game Day 30 image (matches 30 wing count)
+- MVP Meal: Unique combo image showing actual items
+- Sampler Platter: Unique platter visual
+
+**Content Accuracy:**
+- 50 Wing Party Pack: "Mix up to 4 sauces" (more flexibility)
+- Tailgater: 30 wings, mozzarella sticks (no drinks)
+- MVP Meal: 12 wings, fries, mozz sticks (no drink)
+- Sampler: Regular fries (not loaded)
+
+**Result:** Professional product differentiation
+**Evidence:** Each item visually distinct, descriptions accurate
 
 ## Sep 16-17, 2025 - UX Polish & Navigation Consistency
 **Decision:** Complete navigation overhaul for conversion optimization

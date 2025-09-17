@@ -1884,6 +1884,18 @@ section {
     font-size: 1.1rem;
 }
 
+.story-cta {
+    margin-top: 30px !important;
+    padding: 20px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.2rem !important;
+    color: #FFD700 !important;
+    font-weight: bold;
+}
+
 /* Nutrition Info Modal */
 .info-modal {
     display: none;
