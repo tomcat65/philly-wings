@@ -74,6 +74,11 @@ export class SauceMenu {
       const card = this.createSauceCard(sauce);
       this.dryRubsContainer.appendChild(card);
     });
+
+    // Re-initialize zoom for dynamically loaded images
+    if (typeof window.initFoodImageZoom === 'function') {
+      setTimeout(() => window.initFoodImageZoom(), 100);
+    }
   }
 
   renderSignatures(sauces) {
@@ -87,6 +92,11 @@ export class SauceMenu {
       const card = this.createSauceCard(sauce);
       this.signaturesContainer.appendChild(card);
     });
+
+    // Re-initialize zoom for dynamically loaded images
+    if (typeof window.initFoodImageZoom === 'function') {
+      setTimeout(() => window.initFoodImageZoom(), 100);
+    }
   }
 
   renderDipping(sauces) {

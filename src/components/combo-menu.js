@@ -36,6 +36,11 @@ export class ComboMenu {
       const card = this.createComboCard(combo);
       this.container.appendChild(card);
     });
+
+    // Re-initialize zoom for dynamically loaded images
+    if (typeof window.initFoodImageZoom === 'function') {
+      setTimeout(() => window.initFoodImageZoom(), 100);
+    }
   }
 
   createComboCard(combo) {

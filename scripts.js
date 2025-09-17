@@ -115,14 +115,14 @@ function initLiveOrders() {
 }
 
 // Universal Food Image Zoom
-function initFoodImageZoom() {
+window.initFoodImageZoom = function initFoodImageZoom() {
     const modal = document.getElementById('imageZoomModal');
     const modalImg = document.getElementById('zoomedImage');
     const captionText = document.getElementById('zoomCaption');
     const closeBtn = document.querySelector('.zoom-close');
 
-    // Add zoom to all food images
-    const foodImages = document.querySelectorAll('.combo-image, .sauce-image, .side-image, .gallery-item img, .wing-style-img.zoomable');
+    // Add zoom to all food images including limited time deals, sauces, and dynamically loaded content
+    const foodImages = document.querySelectorAll('.combo-image, .sauce-image, .side-image, .gallery-item img, .wing-style-img.zoomable, .hero-banner, .menu-card img, .menu-card-img');
 
     // Check if device is mobile/tablet
     const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
@@ -164,23 +164,13 @@ function initFoodImageZoom() {
         };
 
         if (isMobile) {
-            // Mobile: Double-tap to zoom
-            img.title = 'Double-tap to zoom';
-            let lastTap = 0;
+            // Mobile: Single tap to zoom
+            img.title = 'Tap to zoom';
 
-            img.addEventListener('touchend', function(e) {
+            img.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-
-                const currentTime = new Date().getTime();
-                const tapDelay = currentTime - lastTap;
-
-                if (tapDelay < 500 && tapDelay > 0) {
-                    // Double tap detected
-                    openZoomModal();
-                }
-
-                lastTap = currentTime;
+                openZoomModal();
             });
         } else {
             // Desktop: Single click to zoom
