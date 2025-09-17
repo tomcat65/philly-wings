@@ -134,7 +134,31 @@ window.initFoodImageZoom = function initFoodImageZoom() {
         // Function to open zoom modal
         const openZoomModal = function() {
             modal.style.display = 'block';
-            modalImg.src = img.src;
+
+            // Ensure the image src is properly set
+            const imageSrc = img.src || img.getAttribute('src');
+
+            // Add error handler for image loading
+            modalImg.onerror = function() {
+                console.error('Failed to load zoom image:', imageSrc);
+                // Try to reload the image
+                setTimeout(() => {
+                    modalImg.src = imageSrc;
+                }, 100);
+            };
+
+            modalImg.onload = function() {
+                // Image loaded successfully
+                modalImg.style.display = 'block';
+                modalImg.style.visibility = 'visible';
+            };
+
+            modalImg.src = imageSrc;
+
+            // Force image to display
+            modalImg.style.display = 'block';
+            modalImg.style.visibility = 'visible';
+
             captionText.innerHTML = img.alt || 'Zoomed view';
 
             // Reset and apply appropriate zoom class

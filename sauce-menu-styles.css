@@ -388,6 +388,9 @@
         max-width: none;
         height: auto;
         max-height: 85vh;
+        min-height: 200px; /* Ensure minimum height */
+        display: block !important;
+        visibility: visible !important;
         /* Enable pinch to zoom on mobile */
         touch-action: pinch-zoom;
     }
