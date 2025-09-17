@@ -150,27 +150,34 @@ window.initFoodImageZoom = function initFoodImageZoom() {
             modalImg.onerror = null;
             modalImg.onload = null;
 
-            // For zoom modal, prioritize the original source since WebP transformation
-            // may not include the required token parameter
-            let zoomSrc = originalSrc || currentSrc;
+            // CRITICAL: Set noWebp flag BEFORE setting src to prevent transformation
+            modalImg.dataset.noWebp = 'true';
 
-            // Make sure we have a valid URL
+            // Use the ACTUAL src attribute which contains the working WebP URL with token
+            let zoomSrc = img.getAttribute('src');
+
+            console.log('Zoom modal debugging:', {
+                imgSrc: img.src,
+                imgGetAttribute: img.getAttribute('src'),
+                currentSrc: currentSrc,
+                originalSrc: originalSrc,
+                zoomSrc: zoomSrc
+            });
+
+            // Fallback logic if no src found
             if (!zoomSrc || zoomSrc === 'undefined' || zoomSrc === 'null') {
-                console.error('No valid image source found for zoom');
-                zoomSrc = currentSrc;
+                console.error('No src attribute, trying currentSrc');
+                zoomSrc = currentSrc || originalSrc || '';
             }
-
-            console.log('Zoom modal will use:', zoomSrc);
 
             // Add error handler for image loading
             modalImg.onerror = function() {
                 console.error('Failed to load zoom image:', zoomSrc);
-                // Try alternatives
-                if (zoomSrc !== currentSrc && currentSrc) {
-                    console.log('Trying current src as fallback:', currentSrc);
-                    modalImg.src = currentSrc;
-                } else if (originalSrc && originalSrc !== zoomSrc) {
+                // Try original as ultimate fallback
+                if (originalSrc && originalSrc !== zoomSrc) {
                     console.log('Trying original src as fallback:', originalSrc);
+                    // Make sure noWebp is still set
+                    modalImg.dataset.noWebp = 'true';
                     modalImg.src = originalSrc;
                 } else {
                     console.error('All image sources failed to load');
@@ -179,16 +186,12 @@ window.initFoodImageZoom = function initFoodImageZoom() {
 
             modalImg.onload = function() {
                 // Image loaded successfully
-                console.log('Zoom image loaded successfully');
+                console.log('Zoom image loaded successfully:', modalImg.src);
                 modalImg.style.display = 'block';
                 modalImg.style.visibility = 'visible';
             };
 
-            // Disable WebP transformation for the zoom modal
-            // The original images work fine and WebP URLs need proper tokens
-            modalImg.dataset.noWebp = 'true';
-
-            // Set the source and try to load
+            // Set the source - this should use the exact WebP URL that's working on the page
             modalImg.src = zoomSrc;
 
             // Force image to display
