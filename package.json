@@ -11,7 +11,12 @@
     "deploy": "npm run build && firebase deploy",
     "serve:firebase": "firebase serve",
     "emulators": "firebase emulators:start",
-    "optimize-images": "bash optimize-images.sh"
+    "optimize-images": "bash optimize-images.sh",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "docker:simple": "docker build -f Dockerfile.simple -t philly-wings-simple . && docker run -p 8080:80 philly-wings-simple",
+    "docker:test": "docker run -p 8080:80 -v $(pwd):/usr/share/nginx/html nginx:alpine"
   },
   "keywords": [
     "restaurant",
