@@ -150,15 +150,14 @@ window.initFoodImageZoom = function initFoodImageZoom() {
             modalImg.onerror = null;
             modalImg.onload = null;
 
-            // For zoom modal, use the current WebP source (already transformed)
-            // Don't use the original PNG source which would get re-transformed
-            let zoomSrc = currentSrc;
+            // For zoom modal, prioritize the original source since WebP transformation
+            // may not include the required token parameter
+            let zoomSrc = originalSrc || currentSrc;
 
             // Make sure we have a valid URL
             if (!zoomSrc || zoomSrc === 'undefined' || zoomSrc === 'null') {
                 console.error('No valid image source found for zoom');
-                // Fall back to original if current is not available
-                zoomSrc = originalSrc || currentSrc;
+                zoomSrc = currentSrc;
             }
 
             console.log('Zoom modal will use:', zoomSrc);
@@ -185,10 +184,9 @@ window.initFoodImageZoom = function initFoodImageZoom() {
                 modalImg.style.visibility = 'visible';
             };
 
-            // Prevent WebP service from re-transforming if already WebP
-            if (zoomSrc.includes('.webp') || zoomSrc.includes('/resized/')) {
-                modalImg.dataset.noWebp = 'true';
-            }
+            // Disable WebP transformation for the zoom modal
+            // The original images work fine and WebP URLs need proper tokens
+            modalImg.dataset.noWebp = 'true';
 
             // Set the source and try to load
             modalImg.src = zoomSrc;
