@@ -46,17 +46,5 @@
     "items": ["50-wings", "fries-large", "mozzarella-sticks-10"],
     "badges": ["Best value", "Feeds 5-6"],
     "updatedAt": 1737000000000
-  },
-  {
-    "id": "combo-date-night",
-    "name": "Date Night Dozen",
-    "description": "12 wings, choose 2 sauces, perfect for 2",
-    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media",
-    "sortOrder": 5,
-    "active": true,
-    "featured": false,
-    "items": ["12-wings"],
-    "badges": ["Perfect for 2"],
-    "updatedAt": 1737000000000
   }
 ]
