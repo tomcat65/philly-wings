@@ -491,14 +491,6 @@ export class NutritionModalFirebase {
       servingSizeElement.textContent = '';
     }
 
-    // Helper function to extract value from nutrient object or return direct value
-    const getNutrientValue = (nutrient) => {
-      if (typeof nutrient === 'object' && nutrient !== null && 'amount' in nutrient) {
-        return nutrient.amount;
-      }
-      return nutrient || 0;
-    };
-
     // Populate nutrition values from display data
     document.getElementById('calories').textContent = getNutrientValue(displayData.calories);
     document.getElementById('totalFat').textContent = getNutrientValue(displayData.totalFat);
