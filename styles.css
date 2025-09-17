@@ -1145,8 +1145,8 @@ section {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--charcoal);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--sauce-red);
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -1156,13 +1156,54 @@ section {
     font-size: 14px;
     cursor: help;
     font-weight: bold;
+    border: 1px solid var(--sauce-red);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.allergen-info:hover {
+    transform: scale(1.1);
+}
+
+/* Allergen tooltip on hover */
+.allergen-info:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 30px;
+    right: 0;
+    background: var(--charcoal);
+    color: var(--chalk-white);
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: normal;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.allergen-info:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 24px;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--charcoal);
+    z-index: 1001;
 }
 
 .allergen-mark {
     color: var(--sauce-red);
-    font-size: 12px;
+    font-size: 14px;
     cursor: help;
     font-weight: bold;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0 4px;
+    border-radius: 3px;
+    border: 1px solid var(--sauce-red);
 }
 
 /* Print Styles */
