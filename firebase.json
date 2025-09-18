@@ -7,12 +7,7 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
-      {
-        "source": "!(/admin/**|/assets/**|/images/**|/data/**|/*.js|/*.css|/*.ico|/*.png|/*.jpg|/*.webp)",
-        "destination": "/index.html"
-      }
-    ],
+    "rewrites": [],
     "headers": [
       {
         "source": "**/*.@(jpg|jpeg|gif|png|webp)",

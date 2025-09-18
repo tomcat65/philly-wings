@@ -115,15 +115,27 @@ async function loadMenuData() {
     try {
         showLoading(true);
 
-        // Load wings
-        const wingsSnap = await getDocs(query(collection(db, 'wings'), orderBy('sortOrder')));
-        menuData.wings = wingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Load all menu items and categorize them
+        const menuItemsSnap = await getDocs(query(collection(db, 'menuItems'), orderBy('sortOrder')));
 
-        // Load sides
-        const sidesSnap = await getDocs(query(collection(db, 'sides'), orderBy('sortOrder')));
-        menuData.sides = sidesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Reset data
+        menuData.wings = [];
+        menuData.sides = [];
 
-        // Load combos
+        // Categorize menu items
+        menuItemsSnap.docs.forEach(doc => {
+            const item = { id: doc.id, ...doc.data() };
+
+            // Check category field or name to categorize
+            if (item.category === 'wings' || item.name?.toLowerCase().includes('wing')) {
+                menuData.wings.push(item);
+            } else if (item.category === 'sides' || item.name?.toLowerCase().includes('fries') ||
+                       item.name?.toLowerCase().includes('mozzarella') || item.name?.toLowerCase().includes('onion')) {
+                menuData.sides.push(item);
+            }
+        });
+
+        // Load combos from separate collection
         const combosSnap = await getDocs(query(collection(db, 'combos'), orderBy('sortOrder')));
         menuData.combos = combosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -131,11 +143,15 @@ async function loadMenuData() {
         const saucesSnap = await getDocs(query(collection(db, 'sauces'), orderBy('sortOrder')));
         menuData.sauces = saucesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Load modifier groups
-        const modifiersSnap = await getDocs(collection(db, 'modifierGroups'));
-        modifiersSnap.docs.forEach(doc => {
-            menuData.modifiers[doc.id] = doc.data();
-        });
+        // Try to load modifier groups (may not exist)
+        try {
+            const modifiersSnap = await getDocs(collection(db, 'modifierGroups'));
+            modifiersSnap.docs.forEach(doc => {
+                menuData.modifiers[doc.id] = doc.data();
+            });
+        } catch (e) {
+            console.log('ModifierGroups collection not found');
+        }
 
         // Display menu items
         displayMenuItems();

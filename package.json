@@ -33,6 +33,7 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
+    "express": "^5.1.0",
     "firebase": "^10.7.0",
     "firebase-admin": "^12.7.0"
   }
