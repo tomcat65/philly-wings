@@ -1,61 +1,47 @@
 {
-  "hosting": [
-    {
-      "target": "main",
-      "public": "dist",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "!/admin/**",
-          "destination": "/index.html"
-        }
-      ],
-      "headers": [
-        {
-          "source": "**/*.@(jpg|jpeg|gif|png|webp)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "max-age=7200"
-            }
-          ]
-        },
-        {
-          "source": "**/*.@(js|css)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "max-age=3600"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "target": "admin",
-      "public": "admin",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "headers": [
-        {
-          "source": "**/*.@(js|css|html)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "max-age=3600"
-            }
-          ]
-        }
-      ]
-    }
-  ],
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "!(/admin/**|/assets/**|/images/**|/data/**|/*.js|/*.css|/*.ico|/*.png|/*.jpg|/*.webp)",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(jpg|jpeg|gif|png|webp)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=7200"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/admin/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          }
+        ]
+      }
+    ]
+  },
   "firestore": {
     "database": "(default)",
     "location": "nam5",

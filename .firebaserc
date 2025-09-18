@@ -2,17 +2,5 @@
   "projects": {
     "default": "philly-wings"
   },
-  "targets": {
-    "philly-wings": {
-      "hosting": {
-        "main": [
-          "philly-wings"
-        ],
-        "admin": [
-          "philly-wings-admin"
-        ]
-      }
-    }
-  },
   "etags": {}
 }
