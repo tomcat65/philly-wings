@@ -28,3 +28,4 @@ The key insight: This is already a well-built application. Sally's job is to opt
 - preview url: https://philly-wings--pr1-my-new-feature-13zb8iwz.web.app/
 - remember our preview url is https://philly-wings--pr1-my-new-feature-13zb8iwz.web.app/#whoWeAre
 - the site is in production now at www.phillywingsexpress.com
+- preview url: https://philly-wings--pr2-admin-ryoe43se.web.app

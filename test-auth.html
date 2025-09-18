@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Firebase Auth</title>
+</head>
+<body>
+    <h1>Firebase Auth Test</h1>
+    <div id="status">Loading...</div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail
+        } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlgREVsAU_Mf85cPyYvj_KQicaLRw2oVY",
+            authDomain: "philly-wings.firebaseapp.com",
+            projectId: "philly-wings",
+            storageBucket: "philly-wings.firebasestorage.app",
+            messagingSenderId: "960679107650",
+            appId: "1:960679107650:web:e8b0a8eaa0b37c5b3ce993"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const status = document.getElementById('status');
+
+        // Test login
+        async function testLogin() {
+            const email = 'admin@phillywingsexpress.com';
+            const password = 'Brun0@77494';
+
+            try {
+                const result = await signInWithEmailAndPassword(auth, email, password);
+                status.innerHTML = '✅ Login successful! User: ' + result.user.email;
+            } catch (error) {
+                status.innerHTML = '❌ Login failed: ' + error.message + '<br><br>';
+                status.innerHTML += 'Attempting to send password reset email...<br>';
+
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    status.innerHTML += '✅ Password reset email sent to ' + email;
+                } catch (resetError) {
+                    status.innerHTML += '❌ Could not send reset email: ' + resetError.message;
+                }
+            }
+        }
+
+        testLogin();
+    </script>
+</body>
+</html>

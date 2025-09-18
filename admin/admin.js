@@ -1,5 +1,5 @@
 import { auth } from '../src/firebase-config';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { 
   FirebaseService, 
   GameDayBannerService, 
@@ -36,6 +36,12 @@ class AdminPanel {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
       loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+    }
+
+    // Forgot password link
+    const forgotPasswordLink = document.getElementById('forgotPassword');
+    if (forgotPasswordLink) {
+      forgotPasswordLink.addEventListener('click', (e) => this.handlePasswordReset(e));
     }
 
     // Logout button
@@ -91,6 +97,33 @@ class AdminPanel {
     } catch (error) {
       errorDiv.textContent = 'Invalid login credentials';
       console.error('Login error:', error);
+    }
+  }
+
+  async handlePasswordReset(e) {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    const errorDiv = document.getElementById('loginError');
+    const resetMessage = document.getElementById('resetMessage');
+
+    if (!email) {
+      errorDiv.textContent = 'Please enter your email address first';
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      errorDiv.textContent = '';
+      resetMessage.style.display = 'block';
+      resetMessage.textContent = `Password reset email sent to ${email}. Check your inbox!`;
+
+      // Hide message after 5 seconds
+      setTimeout(() => {
+        resetMessage.style.display = 'none';
+      }, 5000);
+    } catch (error) {
+      errorDiv.textContent = 'Error sending reset email: ' + error.message;
+      console.error('Password reset error:', error);
     }
   }
 
