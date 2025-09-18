@@ -27,3 +27,4 @@ The key insight: This is already a well-built application. Sally's job is to opt
 - you can commit if I give you permission to, and only then
 - preview url: https://philly-wings--pr1-my-new-feature-13zb8iwz.web.app/
 - remember our preview url is https://philly-wings--pr1-my-new-feature-13zb8iwz.web.app/#whoWeAre
+- the site is in production now at www.phillywingsexpress.com

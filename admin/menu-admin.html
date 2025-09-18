@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philly Wings Express - Master Menu Management</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #D32F2F, #B71C1C);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .platform-selector {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .platform-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .platform-tab {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .platform-tab.active {
+            background: #D32F2F;
+            color: white;
+            border-color: #D32F2F;
+        }
+
+        .platform-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .info-card {
+            text-align: center;
+        }
+
+        .info-card .label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #D32F2F;
+        }
+
+        .menu-sections {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .menu-category {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .items-grid {
+            display: grid;
+            gap: 1px;
+            background: #f0f0f0;
+        }
+
+        .menu-item {
+            background: white;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .item-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .item-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .meta-tag {
+            padding: 0.25rem 0.75rem;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .meta-tag.heat-1 { background: #FFE0B2; }
+        .meta-tag.heat-2 { background: #FFCC80; }
+        .meta-tag.heat-3 { background: #FFB74D; }
+        .meta-tag.heat-4 { background: #FFA726; }
+        .meta-tag.heat-5 { background: #FF7043; }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            min-width: 300px;
+        }
+
+        .price-box {
+            padding: 0.75rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .price-box.current-platform {
+            background: #E8F5E9;
+            border: 2px solid #4CAF50;
+        }
+
+        .price-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .margin-indicator {
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .margin-good { color: #4CAF50; }
+        .margin-ok { color: #FFA500; }
+        .margin-low { color: #D32F2F; }
+
+        .modifiers-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .modifier-group {
+            margin-bottom: 1rem;
+        }
+
+        .modifier-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        .modifier-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .modifier-item {
+            padding: 0.25rem 0.75rem;
+            background: #E3F2FD;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #1976D2;
+        }
+
+        .btn-sync {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-sync:hover {
+            background: #388E3C;
+        }
+
+        .export-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-export {
+            flex: 1;
+            padding: 1rem;
+            background: linear-gradient(135deg, #673AB7, #512DA8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(103, 58, 183, 0.3);
+        }
+
+        .stats-bar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #D32F2F;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-item {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍗 Master Menu Management</h1>
+        <div class="subtitle">Platform Pricing & Modifier Configuration</div>
+    </div>
+
+    <div class="container">
+        <!-- Platform Selector -->
+        <div class="platform-selector">
+            <h3 style="margin-bottom: 1rem;">Select Platform for Pricing View</h3>
+            <div class="platform-tabs">
+                <button class="platform-tab active" data-platform="doordash">DoorDash</button>
+                <button class="platform-tab" data-platform="ubereats">UberEats</button>
+                <button class="platform-tab" data-platform="grubhub">Grubhub</button>
+                <button class="platform-tab" data-platform="direct">Direct (Website)</button>
+            </div>
+            <div class="platform-info">
+                <div class="info-card">
+                    <div class="label">Platform Fee</div>
+                    <div class="value" id="platformFee">30%</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Avg Margin</div>
+                    <div class="value" id="avgMargin">48.5%</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Target Margin</div>
+                    <div class="value" id="targetMargin">35%+</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Price Multiplier</div>
+                    <div class="value" id="priceMultiplier">1.43x</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalItems">0</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="avgPrice">$0</div>
+                <div class="stat-label">Avg Price</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="bestMargin">0%</div>
+                <div class="stat-label">Best Margin</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="modifierCount">0</div>
+                <div class="stat-label">Modifiers</div>
+            </div>
+        </div>
+
+        <!-- Menu Sections -->
+        <div class="menu-sections" id="menuSections">
+            <!-- Menu items will be dynamically loaded here -->
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+            <h3>Export Menu for Delivery Platforms</h3>
+            <p style="color: #666; margin-top: 0.5rem;">Generate formatted menus for upload to each platform</p>
+            <div class="export-buttons">
+                <button class="btn-export" onclick="exportForPlatform('doordash')">
+                    📱 Export for DoorDash
+                </button>
+                <button class="btn-export" onclick="exportForPlatform('ubereats')">
+                    🚗 Export for UberEats
+                </button>
+                <button class="btn-export" onclick="exportForPlatform('grubhub')">
+                    🍔 Export for Grubhub
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { masterMenu, calculateMargin, getMenuForPlatform, getModifiersWithPricing, PLATFORM_FEES } from './menu-master.js';
+
+        let currentPlatform = 'doordash';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMenu();
+            setupEventListeners();
+            updateStats();
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('.platform-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentPlatform = e.target.dataset.platform;
+                    updatePlatformInfo();
+                    renderMenu();
+                    updateStats();
+                });
+            });
+        }
+
+        function updatePlatformInfo() {
+            const fee = PLATFORM_FEES[currentPlatform];
+            document.getElementById('platformFee').textContent = `${(fee * 100).toFixed(1)}%`;
+
+            const multiplier = 1 / (1 - fee - 0.35); // 35% target margin
+            document.getElementById('priceMultiplier').textContent = `${multiplier.toFixed(2)}x`;
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menuSections');
+            container.innerHTML = '';
+
+            Object.keys(masterMenu).forEach(categoryKey => {
+                const category = masterMenu[categoryKey];
+                if (!category.items) return;
+
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'menu-category';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'category-header';
+                headerDiv.innerHTML = `
+                    <h2>${category.category}</h2>
+                    <span>${category.items.length} items</span>
+                `;
+                categoryDiv.appendChild(headerDiv);
+
+                const itemsGrid = document.createElement('div');
+                itemsGrid.className = 'items-grid';
+
+                category.items.forEach(item => {
+                    const itemDiv = createMenuItem(item, categoryKey);
+                    itemsGrid.appendChild(itemDiv);
+                });
+
+                categoryDiv.appendChild(itemsGrid);
+                container.appendChild(categoryDiv);
+            });
+        }
+
+        function createMenuItem(item, category) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'menu-item';
+
+            // Calculate margins for all platforms
+            const margins = {};
+            if (item.platformPrices) {
+                Object.keys(item.platformPrices).forEach(platform => {
+                    margins[platform] = calculateMargin(item, platform);
+                });
+            }
+
+            const currentMargin = margins[currentPlatform];
+            const marginClass = currentMargin?.marginPercent >= 45 ? 'margin-good' :
+                               currentMargin?.marginPercent >= 35 ? 'margin-ok' : 'margin-low';
+
+            itemDiv.innerHTML = `
+                <div class="item-details">
+                    <h3>${item.name}</h3>
+                    <div class="item-description">${item.description || ''}</div>
+                    <div class="item-meta">
+                        ${item.featured ? '<span class="meta-tag" style="background: #FFD700;">⭐ Featured</span>' : ''}
+                        ${item.bestValue ? '<span class="meta-tag" style="background: #4CAF50; color: white;">Best Value</span>' : ''}
+                        ${item.calories ? `<span class="meta-tag">🔥 ${item.calories} cal</span>` : ''}
+                        ${item.prepTime ? `<span class="meta-tag">⏱️ ${item.prepTime} min</span>` : ''}
+                        ${item.heatLevel ? `<span class="meta-tag heat-${item.heatLevel}">🌶️ Heat ${item.heatLevel}</span>` : ''}
+                        ${item.feeds ? `<span class="meta-tag">👥 Feeds ${item.feeds}</span>` : ''}
+                    </div>
+                    ${item.modifiers ? renderModifiers(item.modifiers) : ''}
+                    <div class="action-buttons">
+                        <button class="btn btn-edit" onclick="editItem('${item.id}')">Edit</button>
+                        <button class="btn btn-sync" onclick="syncToFirestore('${item.id}')">Sync to Firestore</button>
+                    </div>
+                </div>
+                <div class="pricing-grid">
+                    ${Object.keys(item.platformPrices || {}).map(platform => `
+                        <div class="price-box ${platform === currentPlatform ? 'current-platform' : ''}">
+                            <div class="price-label">${platform.charAt(0).toUpperCase() + platform.slice(1)}</div>
+                            <div class="price-value">$${item.platformPrices[platform]}</div>
+                            ${margins[platform] ? `
+                                <div class="margin-indicator ${
+                                    margins[platform].marginPercent >= 45 ? 'margin-good' :
+                                    margins[platform].marginPercent >= 35 ? 'margin-ok' : 'margin-low'
+                                }">
+                                    ${margins[platform].marginPercent}% margin
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                    ${item.directPrice ? `
+                        <div class="price-box ${currentPlatform === 'direct' ? 'current-platform' : ''}">
+                            <div class="price-label">Direct</div>
+                            <div class="price-value">$${item.directPrice}</div>
+                            <div class="margin-indicator margin-good">No fees!</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            return itemDiv;
+        }
+
+        function renderModifiers(modifiers) {
+            let html = '<div class="modifiers-section">';
+
+            if (modifiers.sauces) {
+                html += `
+                    <div class="modifier-group">
+                        <div class="modifier-title">Sauces (${modifiers.sauces.required ? 'Required' : 'Optional'}, Limit: ${modifiers.sauces.limit || 'N/A'})</div>
+                        ${modifiers.sauces.preset ?
+                            `<div class="modifier-list">${modifiers.sauces.preset.map(s =>
+                                `<span class="modifier-item">${s}</span>`
+                            ).join('')}</div>` :
+                            '<div class="modifier-list"><span class="modifier-item">All available sauces</span></div>'
+                        }
+                    </div>
+                `;
+            }
+
+            if (modifiers.extras) {
+                html += `
+                    <div class="modifier-group">
+                        <div class="modifier-title">Extras</div>
+                        <div class="modifier-list">
+                            ${modifiers.extras.options.map(extra =>
+                                `<span class="modifier-item">${extra.name} +$${extra.price}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        function updateStats() {
+            let totalItems = 0;
+            let totalPrice = 0;
+            let bestMargin = 0;
+            let modifierCount = 0;
+
+            Object.keys(masterMenu).forEach(categoryKey => {
+                const category = masterMenu[categoryKey];
+                if (!category.items) return;
+
+                category.items.forEach(item => {
+                    totalItems++;
+                    if (item.platformPrices && item.platformPrices[currentPlatform]) {
+                        totalPrice += item.platformPrices[currentPlatform];
+                        const margin = calculateMargin(item, currentPlatform);
+                        if (margin && parseFloat(margin.marginPercent) > bestMargin) {
+                            bestMargin = parseFloat(margin.marginPercent);
+                        }
+                    }
+                    if (item.modifiers) {
+                        Object.keys(item.modifiers).forEach(mod => {
+                            if (item.modifiers[mod].options) {
+                                modifierCount += item.modifiers[mod].options.length;
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Count sauces as modifiers
+            if (masterMenu.sauces && masterMenu.sauces.items) {
+                modifierCount += masterMenu.sauces.items.length;
+            }
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('avgPrice').textContent = `$${(totalPrice / totalItems).toFixed(2)}`;
+            document.getElementById('bestMargin').textContent = `${bestMargin.toFixed(1)}%`;
+            document.getElementById('modifierCount').textContent = modifierCount;
+        }
+
+        // Make functions global for onclick handlers
+        window.editItem = (itemId) => {
+            alert(`Edit functionality for ${itemId} - This would open an edit modal`);
+        };
+
+        window.syncToFirestore = async (itemId) => {
+            alert(`Syncing ${itemId} to Firestore - Implementation needed`);
+        };
+
+        window.exportForPlatform = (platform) => {
+            const menu = getMenuForPlatform(platform);
+            const modifiers = getModifiersWithPricing(platform);
+
+            const exportData = {
+                platform: platform,
+                exportDate: new Date().toISOString(),
+                menu: menu,
+                modifiers: modifiers,
+                metadata: {
+                    totalItems: 0,
+                    categories: Object.keys(menu)
+                }
+            };
+
+            // Count items
+            Object.keys(menu).forEach(cat => {
+                if (menu[cat].items) {
+                    exportData.metadata.totalItems += menu[cat].items.length;
+                }
+            });
+
+            // Download as JSON
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `philly-wings-menu-${platform}-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+
+            alert(`Menu exported for ${platform}! Check your downloads.`);
+        };
+    </script>
+</body>
+</html>

@@ -2,13 +2,13 @@
   {
     "id": "combo-tailgater",
     "name": "The Tailgater",
-    "description": "30 wings (mix up to 3 sauces), large fries, 6 mozzarella sticks",
+    "description": "24 wings (mix up to 3 sauces), 8 mozzarella sticks, 1 large fries",
     "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media",
     "sortOrder": 1,
     "active": true,
     "featured": true,
-    "items": ["30-wings", "fries-large", "mozzarella-sticks-6"],
-    "badges": ["Best for sharing", "Fan favorite"],
+    "items": ["24-wings", "mozzarella-sticks-8", "fries-large"],
+    "badges": ["Best for sharing", "Feeds 3-5"],
     "updatedAt": 1737000000000
   },
   {
@@ -26,25 +26,25 @@
   {
     "id": "combo-sampler",
     "name": "Sampler Platter",
-    "description": "6 wings, 4 tenders, regular fries, onion rings",
+    "description": "6 wings, 4 mozzarella sticks, regular fries",
     "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fsampler-platter.png?alt=media",
     "sortOrder": 3,
     "active": true,
     "featured": false,
-    "items": ["6-wings", "4-tenders", "fries-regular", "onion-rings"],
+    "items": ["6-wings", "mozzarella-sticks-4", "fries-regular"],
     "badges": ["Try everything"],
     "updatedAt": 1737000000000
   },
   {
     "id": "combo-party-pack",
     "name": "Party Pack 50",
-    "description": "50 wings (mix up to 4 sauces), large fries, 10 mozzarella sticks",
+    "description": "50 wings (mix up to 4 sauces), 3 large fries, 16 mozzarella sticks",
     "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fparty-pack-50-wings.png?alt=media",
     "sortOrder": 4,
     "active": true,
     "featured": true,
-    "items": ["50-wings", "fries-large", "mozzarella-sticks-10"],
-    "badges": ["Best value", "Feeds 5-6"],
+    "items": ["50-wings", "fries-large-3", "mozzarella-sticks-16"],
+    "badges": ["Best value", "Feeds 8-10"],
     "updatedAt": 1737000000000
   }
 ]

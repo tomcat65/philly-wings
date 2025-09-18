@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philly Wings Express - Platform Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .menu-header {
+            background: #004c54;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .menu-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .restaurant-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .restaurant-info p {
+            margin: 0.25rem 0;
+        }
+
+        .menu-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .menu-category {
+            margin-bottom: 3rem;
+        }
+
+        .category-header {
+            background: #00703c;
+            color: white;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .category-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .category-description {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .menu-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .item-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #004c54;
+        }
+
+        .item-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #00703c;
+        }
+
+        .item-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .item-modifiers {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modifier-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .modifier-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .modifier-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .modifier-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .modifier-option {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .modifier-price {
+            color: #00703c;
+            font-weight: 600;
+            margin-left: 0.25rem;
+        }
+
+        .allergen-info {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .allergen-badge {
+            background: #ffebee;
+            color: #c62828;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .heat-level {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .heat-indicator {
+            color: #ff6b35;
+        }
+
+        .portion-info {
+            background: #e8f5e9;
+            border-left: 3px solid #00703c;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .portion-info strong {
+            color: #00703c;
+        }
+
+        .combo-components {
+            background: #fff3e0;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .component-list {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+
+        .component-list li {
+            padding: 0.25rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .component-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #00703c;
+            font-weight: bold;
+        }
+
+        .nutrition-link {
+            display: inline-block;
+            margin-top: 0.75rem;
+            color: #00703c;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nutrition-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #004c54;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer p {
+            margin: 0.5rem 0;
+        }
+
+        @media print {
+            .menu-item {
+                page-break-inside: avoid;
+            }
+
+            .menu-category {
+                page-break-inside: avoid;
+            }
+
+            .item-image {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-container {
+                padding: 1rem;
+            }
+
+            .menu-item {
+                flex-direction: column;
+            }
+
+            .item-image {
+                width: 100%;
+                height: 200px;
+            }
+
+            .item-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .modifier-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="menu-header">
+        <h1>Philly Wings Express</h1>
+        <p>Real Wings for Real Ones - Made in Philly</p>
+    </header>
+
+    <div class="restaurant-info">
+        <p><strong>📍 Location:</strong> South Philadelphia, PA</p>
+        <p><strong>📞 Catering:</strong> (267) 376-3113</p>
+        <p><strong>⏰ Hours:</strong> 11:00 AM - 11:00 PM Daily</p>
+        <p><strong>🚚 Delivery:</strong> 5 mile radius | 20-30 minute average</p>
+    </div>
+
+    <div class="menu-container" id="menuContainer">
+        <!-- Menu will be dynamically loaded here -->
+        <div style="text-align: center; padding: 3rem;">
+            <p>Loading menu...</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 Philly Wings Express</p>
+        <p>This menu was generated for platform integration</p>
+        <p>For updates, please contact: admin@phillywingsexpress.com</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "philly-wings.firebaseapp.com",
+            projectId: "philly-wings",
+            storageBucket: "philly-wings.firebasestorage.app",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get menu ID from URL
+        const pathParts = window.location.pathname.split('/');
+        const platform = pathParts[2];
+        const menuId = pathParts[3];
+
+        // Load menu data
+        async function loadMenu() {
+            try {
+                const menuDoc = await getDoc(doc(db, 'publicMenus', menuId));
+
+                if (!menuDoc.exists()) {
+                    showError('Menu not found');
+                    return;
+                }
+
+                const menuData = menuDoc.data();
+                displayMenu(menuData);
+
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                showError('Error loading menu');
+            }
+        }
+
+        // Display menu
+        function displayMenu(menuData) {
+            const container = document.getElementById('menuContainer');
+            let html = '';
+
+            menuData.categories.forEach(category => {
+                html += `
+                    <div class="menu-category">
+                        <div class="category-header">
+                            <h2>${category.name}</h2>
+                            <p class="category-description">${category.description}</p>
+                        </div>
+                        ${category.items.map(item => createMenuItem(item, menuData)).join('')}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Create menu item HTML
+        function createMenuItem(item, menuData) {
+            let html = `<div class="menu-item">`;
+
+            // Add image if included
+            if (menuData.includeImages && item.image) {
+                html += `<img src="${item.image}" alt="${item.name}" class="item-image">`;
+            }
+
+            html += `
+                <div class="item-details">
+                    <div class="item-header">
+                        <h3 class="item-name">${item.name}</h3>
+                        <span class="item-price">$${item.price.toFixed(2)}</span>
+                    </div>
+                    <p class="item-description">${item.description}</p>
+            `;
+
+            // Add portion details
+            if (item.portionDetails) {
+                html += `
+                    <div class="portion-info">
+                        <strong>Portion:</strong>
+                        ${item.portionDetails.count ? `${item.portionDetails.count} pieces` : ''}
+                        ${item.portionDetails.weight ? `(${item.portionDetails.weight})` : ''}
+                        ${item.portionDetails.includes ? `<br>Includes: ${item.portionDetails.includes.join(', ')}` : ''}
+                    </div>
+                `;
+            }
+
+            // Add combo components
+            if (item.components) {
+                html += `
+                    <div class="combo-components">
+                        <strong>This combo includes:</strong>
+                        <ul class="component-list">
+                            ${item.components.map(comp => `<li>${comp}</li>`).join('')}
+                        </ul>
+                        ${item.feedsCount ? `<p style="margin-top: 0.5rem"><strong>Feeds ${item.feedsCount}</strong></p>` : ''}
+                    </div>
+                `;
+            }
+
+            // Add modifiers
+            if (item.modifiers && item.modifiers.length > 0) {
+                html += `<div class="item-modifiers">`;
+
+                item.modifiers.forEach(modifier => {
+                    html += `
+                        <div class="modifier-group">
+                            <div class="modifier-title">
+                                ${modifier.name}
+                                ${modifier.required ? '(Required)' : '(Optional)'}
+                            </div>
+                            <div class="modifier-options">
+                                ${modifier.options.map(option => `
+                                    <div class="modifier-option">
+                                        ${option.name}
+                                        ${option.priceModifier > 0 ? `<span class="modifier-price">+$${option.priceModifier.toFixed(2)}</span>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+
+            // Add heat level for sauces
+            if (item.heatLevel !== undefined) {
+                const heat = '🔥'.repeat(item.heatLevel) + '○'.repeat(5 - item.heatLevel);
+                html += `
+                    <div class="heat-level">
+                        <span>Heat Level:</span>
+                        <span class="heat-indicator">${heat}</span>
+                    </div>
+                `;
+            }
+
+            // Add allergens
+            if (menuData.includeAllergens && item.allergens && item.allergens.length > 0) {
+                html += `
+                    <div class="allergen-info">
+                        ${item.allergens.map(allergen =>
+                            `<span class="allergen-badge">Contains: ${allergen}</span>`
+                        ).join('')}
+                    </div>
+                `;
+            }
+
+            // Add nutrition link
+            if (menuData.includeNutrition) {
+                html += `<a href="#" class="nutrition-link">View Nutrition Information</a>`;
+            }
+
+            html += `</div></div>`;
+            return html;
+        }
+
+        // Show error message
+        function showError(message) {
+            document.getElementById('menuContainer').innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <h2>Oops!</h2>
+                    <p>${message}</p>
+                    <p style="margin-top: 1rem;">Please contact admin@phillywingsexpress.com for assistance.</p>
+                </div>
+            `;
+        }
+
+        // Load menu on page load
+        loadMenu();
+    </script>
+</body>
+</html>

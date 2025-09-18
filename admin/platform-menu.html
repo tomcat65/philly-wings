@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Platform Menu Manager - Philly Wings Express</title>
+    <link rel="stylesheet" href="platform-menu.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>🍗 Platform Menu Manager</h1>
+                <div class="header-actions">
+                    <span id="lastSaved" class="save-status">All changes saved</span>
+                    <button class="btn-secondary" onclick="location.href='/admin'">← Back to Admin</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Platform Tabs -->
+        <div class="platform-tabs">
+            <button class="platform-tab active" data-platform="doordash">
+                <img src="/images/logos/doordash-logo.svg" alt="DoorDash">
+                <span>DoorDash</span>
+            </button>
+            <button class="platform-tab" data-platform="ubereats">
+                <img src="/images/logos/ubereats-logo.svg" alt="UberEats">
+                <span>UberEats</span>
+            </button>
+            <button class="platform-tab" data-platform="grubhub">
+                <img src="/images/logos/grubhub-logo.svg" alt="Grubhub">
+                <span>Grubhub</span>
+            </button>
+            <button class="platform-tab" data-platform="all">
+                <span>📊 All Platforms</span>
+            </button>
+        </div>
+
+        <!-- Quick Actions Bar -->
+        <div class="quick-actions">
+            <button class="btn-primary" onclick="generateMenuLink()">
+                🔗 Generate Menu Link
+            </button>
+            <button class="btn-secondary" onclick="previewMenu()">
+                👁️ Preview Menu
+            </button>
+            <button class="btn-secondary" onclick="exportMenuPDF()">
+                📄 Export PDF
+            </button>
+            <button class="btn-warning" onclick="syncPrices()">
+                🔄 Sync Prices
+            </button>
+            <div class="margin-indicator">
+                <span>Avg Margin:</span>
+                <span id="avgMargin" class="margin-value good">45.2%</span>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="admin-grid">
+            <!-- Left Panel: Categories & Items -->
+            <div class="menu-panel">
+                <div class="panel-header">
+                    <h2>Menu Items</h2>
+                    <button class="btn-small" onclick="addNewItem()">+ Add Item</button>
+                </div>
+
+                <!-- Wings Section -->
+                <div class="menu-category" data-category="wings">
+                    <div class="category-header">
+                        <h3>🍗 Wings</h3>
+                        <span class="item-count">5 items</span>
+                    </div>
+                    <div class="menu-items" id="wings-items">
+                        <!-- Items will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Sides Section -->
+                <div class="menu-category" data-category="sides">
+                    <div class="category-header">
+                        <h3>🍟 Sides</h3>
+                        <span class="item-count">7 items</span>
+                    </div>
+                    <div class="menu-items" id="sides-items">
+                        <!-- Items will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Combos Section -->
+                <div class="menu-category" data-category="combos">
+                    <div class="category-header">
+                        <h3>🎉 Combos</h3>
+                        <span class="item-count">5 items</span>
+                    </div>
+                    <div class="menu-items" id="combos-items">
+                        <!-- Items will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Sauces Section -->
+                <div class="menu-category" data-category="sauces">
+                    <div class="category-header">
+                        <h3>🌶️ Sauces & Rubs</h3>
+                        <span class="item-count">14 items</span>
+                    </div>
+                    <div class="menu-items" id="sauces-items">
+                        <!-- Items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Item Editor -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <h2>Item Details</h2>
+                    <button class="btn-danger btn-small" onclick="deleteItem()" id="deleteBtn" style="display:none">
+                        🗑️ Delete
+                    </button>
+                </div>
+
+                <div id="itemEditor" class="item-editor">
+                    <!-- Default state -->
+                    <div class="empty-state">
+                        <p>Select an item to edit or add a new one</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modifier Groups Modal -->
+        <div id="modifierModal" class="modal" style="display:none">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Modifier Groups</h2>
+                    <button class="close-modal" onclick="closeModifierModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Wing Style Modifiers -->
+                    <div class="modifier-group">
+                        <h3>Wing Style</h3>
+                        <div class="modifier-options">
+                            <div class="modifier-item">
+                                <label>Regular Mix</label>
+                                <input type="number" value="0" step="0.50" class="price-input">
+                            </div>
+                            <div class="modifier-item">
+                                <label>All Drums</label>
+                                <input type="number" value="1.50" step="0.50" class="price-input">
+                            </div>
+                            <div class="modifier-item">
+                                <label>All Flats</label>
+                                <input type="number" value="1.50" step="0.50" class="price-input">
+                            </div>
+                            <div class="modifier-item">
+                                <label>Boneless</label>
+                                <input type="number" value="0" step="0.50" class="price-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dipping Sauces -->
+                    <div class="modifier-group">
+                        <h3>Dipping Sauces (1.5oz cups)</h3>
+                        <div class="modifier-options">
+                            <div class="modifier-item">
+                                <label>Ranch</label>
+                                <input type="number" value="1.25" step="0.25" class="price-input">
+                            </div>
+                            <div class="modifier-item">
+                                <label>Blue Cheese</label>
+                                <input type="number" value="1.25" step="0.25" class="price-input">
+                            </div>
+                            <div class="modifier-item">
+                                <label>Honey Mustard</label>
+                                <input type="number" value="1.25" step="0.25" class="price-input">
+                            </div>
+                            <div class="modifier-item">
+                                <label>Cheese Sauce</label>
+                                <input type="number" value="1.25" step="0.25" class="price-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="saveModifiers()">Save Changes</button>
+                    <button class="btn-secondary" onclick="closeModifierModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Link Generator Modal -->
+        <div id="linkModal" class="modal" style="display:none">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Generate Platform Menu Link</h2>
+                    <button class="close-modal" onclick="closeLinkModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="link-options">
+                        <label>
+                            <input type="checkbox" id="includeImages" checked>
+                            Include Images
+                        </label>
+                        <label>
+                            <input type="checkbox" id="includeNutrition">
+                            Include Nutrition Info
+                        </label>
+                        <label>
+                            <input type="checkbox" id="includeAllergens" checked>
+                            Include Allergen Info
+                        </label>
+                    </div>
+                    <div class="generated-link">
+                        <input type="text" id="generatedLink" readonly>
+                        <button onclick="copyLink()">📋 Copy</button>
+                    </div>
+                    <div class="qr-code" id="qrCode">
+                        <!-- QR code will be generated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="sendToPlatform()">📧 Email to Platform</button>
+                    <button class="btn-secondary" onclick="closeLinkModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "philly-wings.firebaseapp.com",
+            projectId: "philly-wings",
+            storageBucket: "philly-wings.firebasestorage.app",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        window.auth = getAuth(app);
+        window.db = getFirestore(app);
+        window.storage = getStorage(app);
+
+        // Check authentication
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = '/admin/login.html';
+            } else {
+                window.currentUser = user;
+                loadMenuData();
+            }
+        });
+    </script>
+
+    <!-- Main JavaScript -->
+    <script src="platform-menu.js"></script>
+</body>
+</html>

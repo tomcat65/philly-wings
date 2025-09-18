@@ -27,7 +27,7 @@
     {
       "id": "sampler-platter",
       "name": "Sampler Platter",
-      "description": "6 wings, regular fries",
+      "description": "6 wings, 4 mozzarella sticks, regular fries",
       "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fsampler-platter.png?alt=media",
       "tags": ["Try everything"]
     },
