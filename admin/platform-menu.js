@@ -1,4 +1,6 @@
 // Platform Menu Management System
+import { auth, db } from '../src/firebase-config';
+import { onAuthStateChanged } from 'firebase/auth';
 import {
     collection,
     doc,
@@ -10,7 +12,7 @@ import {
     serverTimestamp,
     query,
     orderBy
-} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+} from 'firebase/firestore';
 
 // State Management
 let currentPlatform = 'doordash';
@@ -59,8 +61,16 @@ const mozzStickRatios = {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    setupEventListeners();
-    // loadMenuData is called after Firebase auth check in HTML
+    // Check authentication
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = '/admin/';
+        } else {
+            window.currentUser = user;
+            setupEventListeners();
+            loadMenuData();
+        }
+    });
 });
 
 // Setup Event Listeners
@@ -106,23 +116,23 @@ async function loadMenuData() {
         showLoading(true);
 
         // Load wings
-        const wingsSnap = await getDocs(query(collection(window.db, 'wings'), orderBy('sortOrder')));
+        const wingsSnap = await getDocs(query(collection(db, 'wings'), orderBy('sortOrder')));
         menuData.wings = wingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Load sides
-        const sidesSnap = await getDocs(query(collection(window.db, 'sides'), orderBy('sortOrder')));
+        const sidesSnap = await getDocs(query(collection(db, 'sides'), orderBy('sortOrder')));
         menuData.sides = sidesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Load combos
-        const combosSnap = await getDocs(query(collection(window.db, 'combos'), orderBy('sortOrder')));
+        const combosSnap = await getDocs(query(collection(db, 'combos'), orderBy('sortOrder')));
         menuData.combos = combosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Load sauces
-        const saucesSnap = await getDocs(query(collection(window.db, 'sauces'), orderBy('sortOrder')));
+        const saucesSnap = await getDocs(query(collection(db, 'sauces'), orderBy('sortOrder')));
         menuData.sauces = saucesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Load modifier groups
-        const modifiersSnap = await getDocs(collection(window.db, 'modifierGroups'));
+        const modifiersSnap = await getDocs(collection(db, 'modifierGroups'));
         modifiersSnap.docs.forEach(doc => {
             menuData.modifiers[doc.id] = doc.data();
         });
@@ -387,7 +397,7 @@ async function saveItem(event) {
         const category = findItemCategory(selectedItem.id);
 
         // Save to Firebase
-        await updateDoc(doc(window.db, category, selectedItem.id), updatedItem);
+        await updateDoc(doc(db, category, selectedItem.id), updatedItem);
 
         // Update local data
         const categoryData = menuData[category];
@@ -444,7 +454,7 @@ async function generateMenuLink() {
         };
 
         // Save to Firebase
-        await setDoc(doc(window.db, 'publicMenus', menuId), menuDoc);
+        await setDoc(doc(db, 'publicMenus', menuId), menuDoc);
 
         // Generate link
         const menuLink = `https://phillywingsexpress.com/menu/${platform}/${menuId}`;
@@ -625,7 +635,7 @@ async function syncPrices() {
                     });
 
                     // Save to Firebase
-                    await updateDoc(doc(window.db, category, item.id), {
+                    await updateDoc(doc(db, category, item.id), {
                         platformPricing: item.platformPricing,
                         updatedAt: serverTimestamp()
                     });
@@ -656,7 +666,7 @@ async function deleteItem() {
         showSaving();
 
         const category = findItemCategory(selectedItem.id);
-        await deleteDoc(doc(window.db, category, selectedItem.id));
+        await deleteDoc(doc(db, category, selectedItem.id));
 
         // Remove from local data
         const categoryData = menuData[category];
