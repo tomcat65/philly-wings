@@ -115,23 +115,53 @@ async function loadMenuData() {
     try {
         showLoading(true);
 
-        // Load all menu items and categorize them
+        // Load all menu items with variant structure
         const menuItemsSnap = await getDocs(query(collection(db, 'menuItems'), orderBy('sortOrder')));
 
         // Reset data
         menuData.wings = [];
         menuData.sides = [];
+        menuData.drinks = [];
+        menuData.items = {};
 
-        // Categorize menu items
+        // Process menu items with variants
         menuItemsSnap.docs.forEach(doc => {
             const item = { id: doc.id, ...doc.data() };
 
-            // Check category field or name to categorize
-            if (item.category === 'wings' || item.name?.toLowerCase().includes('wing')) {
-                menuData.wings.push(item);
-            } else if (item.category === 'sides' || item.name?.toLowerCase().includes('fries') ||
-                       item.name?.toLowerCase().includes('mozzarella') || item.name?.toLowerCase().includes('onion')) {
-                menuData.sides.push(item);
+            // Store in items lookup
+            menuData.items[item.id] = item;
+
+            // If item has variants, expand them for display
+            if (item.variants && item.variants.length > 0) {
+                item.variants.forEach(variant => {
+                    const expandedItem = {
+                        ...variant,
+                        parentId: item.id,
+                        parentName: item.name,
+                        baseItem: false,
+                        category: item.category,
+                        modifierGroups: item.modifierGroups || [],
+                        images: item.images
+                    };
+
+                    // Categorize by parent category
+                    if (item.category === 'wings') {
+                        menuData.wings.push(expandedItem);
+                    } else if (item.category === 'sides') {
+                        menuData.sides.push(expandedItem);
+                    } else if (item.category === 'drinks') {
+                        menuData.drinks.push(expandedItem);
+                    }
+                });
+            } else {
+                // Old format compatibility
+                if (item.category === 'wings') {
+                    menuData.wings.push(item);
+                } else if (item.category === 'sides') {
+                    menuData.sides.push(item);
+                } else if (item.category === 'drinks') {
+                    menuData.drinks.push(item);
+                }
             }
         });
 
@@ -169,19 +199,37 @@ async function loadMenuData() {
 function displayMenuItems() {
     // Display Wings
     const wingsContainer = document.getElementById('wings-items');
-    wingsContainer.innerHTML = menuData.wings.map(item => createMenuItem(item, 'wings')).join('');
+    if (wingsContainer) {
+        wingsContainer.innerHTML = menuData.wings.map(item => createMenuItem(item, 'wings')).join('');
+        updateCategoryCount('wings', menuData.wings.length);
+    }
 
     // Display Sides
     const sidesContainer = document.getElementById('sides-items');
-    sidesContainer.innerHTML = menuData.sides.map(item => createMenuItem(item, 'sides')).join('');
+    if (sidesContainer) {
+        sidesContainer.innerHTML = menuData.sides.map(item => createMenuItem(item, 'sides')).join('');
+        updateCategoryCount('sides', menuData.sides.length);
+    }
+
+    // Display Drinks
+    const drinksContainer = document.getElementById('drinks-items');
+    if (drinksContainer) {
+        drinksContainer.innerHTML = menuData.drinks.map(item => createMenuItem(item, 'drinks')).join('');
+        updateCategoryCount('drinks', menuData.drinks.length);
+    }
 
     // Display Combos
     const combosContainer = document.getElementById('combos-items');
-    combosContainer.innerHTML = menuData.combos.map(item => createMenuItem(item, 'combos')).join('');
+    if (combosContainer) {
+        combosContainer.innerHTML = menuData.combos.map(item => createMenuItem(item, 'combos')).join('');
+        updateCategoryCount('combos', menuData.combos.length);
+    }
 
-    // Display Sauces
+    // Display Sauces (if container exists)
     const saucesContainer = document.getElementById('sauces-items');
-    saucesContainer.innerHTML = menuData.sauces.map(item => createMenuItem(item, 'sauces')).join('');
+    if (saucesContainer) {
+        saucesContainer.innerHTML = menuData.sauces.map(item => createMenuItem(item, 'sauces')).join('');
+    }
 
     // Add click handlers
     document.querySelectorAll('.menu-item').forEach(item => {
@@ -189,19 +237,39 @@ function displayMenuItems() {
     });
 }
 
+// Update Category Count
+function updateCategoryCount(category, count) {
+    const categoryElement = document.querySelector(`[data-category="${category}"] .item-count`);
+    if (categoryElement) {
+        categoryElement.textContent = `${count} items`;
+    }
+}
+
 // Create Menu Item HTML
 function createMenuItem(item, category) {
-    const platformPrice = item.platformPricing?.[currentPlatform]?.price || item.basePrice || 0;
+    // Handle variant structure - platformPricing is directly on variant
+    const platformPrice = item.platformPricing?.[currentPlatform] || item.basePrice || 0;
     const margin = calculateMargin(item.basePrice, platformPrice, currentPlatform);
 
+    // Show parent name if this is a variant
+    const displayName = item.parentName ? `${item.name}` : item.name;
+    const showCategory = item.parentName ? `(${item.parentName})` : '';
+
     return `
-        <div class="menu-item" data-id="${item.id}" data-category="${category}">
+        <div class="menu-item" data-id="${item.id}" data-category="${category}" data-parent="${item.parentId || ''}">
             <div class="item-info">
-                <div class="item-name">${item.name}</div>
+                <div class="item-name">${displayName} ${showCategory}</div>
                 <div class="item-description">${item.description || ''}</div>
+                ${item.portionDetails ? `
+                    <div class="item-portion">
+                        ${item.portionDetails.count ? `${item.portionDetails.count} pieces` : ''}
+                        ${item.portionDetails.weight ? item.portionDetails.weight : ''}
+                        ${item.portionDetails.feeds ? ` • Feeds ${item.portionDetails.feeds}` : ''}
+                    </div>
+                ` : ''}
                 <div class="item-prices">
                     ${Object.entries(platforms).map(([key, platform]) => {
-                        const price = item.platformPricing?.[key]?.price || item.basePrice || 0;
+                        const price = item.platformPricing?.[key] || item.basePrice || 0;
                         return `
                             <div class="price-badge">
                                 <img src="/images/logos/${key}-logo.svg" alt="${platform.name}">
@@ -442,7 +510,7 @@ function findItemCategory(itemId) {
     return null;
 }
 
-// Generate Menu Link
+// Generate Menu Link - Creates Immutable Published Menu
 async function generateMenuLink() {
     const modal = document.getElementById('linkModal');
     modal.style.display = 'flex';
@@ -450,30 +518,69 @@ async function generateMenuLink() {
     const platform = currentPlatform === 'all' ? 'doordash' : currentPlatform;
 
     try {
-        // Generate unique ID
-        const menuId = `menu_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        // Generate unique ID with date for easy identification
+        const timestamp = new Date().toISOString().split('T')[0];
+        const uniqueId = Math.random().toString(36).substring(2, 9);
+        const menuId = `${platform}-${timestamp}-${uniqueId}`;
 
-        // Create public menu document
-        const menuDoc = {
+        // Create complete frozen menu snapshot for publishedMenus collection
+        const publishedMenu = {
+            // Metadata
             platform: platform,
+            menuId: menuId,
+            url: `/menu/${platform}/${menuId}`,
+            publishedAt: serverTimestamp(),
+            publishedBy: window.currentUser?.email || 'admin',
+            status: 'active',
+
+            // Restaurant Info
             restaurant: {
                 name: 'Philly Wings Express',
                 description: 'Real Wings for Real Ones - Made in Philly',
-                address: 'South Philadelphia, PA',
-                phone: '(267) 376-3113'
+                address: '1455 Franklin Mills Circle, Philadelphia, PA 19154',
+                phone: '(267) 579-2040',
+                hours: {
+                    monday: '11:00 AM - 10:00 PM',
+                    tuesday: '11:00 AM - 10:00 PM',
+                    wednesday: '11:00 AM - 10:00 PM',
+                    thursday: '11:00 AM - 10:00 PM',
+                    friday: '11:00 AM - 11:00 PM',
+                    saturday: '11:00 AM - 11:00 PM',
+                    sunday: '12:00 PM - 9:00 PM'
+                }
             },
-            categories: await buildMenuCategories(platform),
-            generated: serverTimestamp(),
+
+            // Platform Configuration
+            platformConfig: {
+                name: platforms[platform].name,
+                commission: platforms[platform].commission,
+                processing: platforms[platform].processing,
+                fixed: platforms[platform].fixed
+            },
+
+            // Complete Frozen Menu Data
+            frozenData: await buildCompleteMenuSnapshot(platform),
+
+            // Display Options
             includeImages: document.getElementById('includeImages')?.checked ?? true,
             includeNutrition: document.getElementById('includeNutrition')?.checked ?? false,
             includeAllergens: document.getElementById('includeAllergens')?.checked ?? true
         };
 
-        // Save to Firebase
-        await setDoc(doc(db, 'publicMenus', menuId), menuDoc);
+        // Save to publishedMenus collection (immutable)
+        await setDoc(doc(db, 'publishedMenus', menuId), publishedMenu);
+
+        // Also save simplified version to publicMenus for backward compatibility
+        const publicMenu = {
+            platform: platform,
+            restaurant: publishedMenu.restaurant,
+            categories: await buildMenuCategories(platform),
+            generated: serverTimestamp()
+        };
+        await setDoc(doc(db, 'publicMenus', menuId), publicMenu);
 
         // Generate link
-        const menuLink = `https://phillywingsexpress.com/menu/${platform}/${menuId}`;
+        const menuLink = `${window.location.origin}/menu/${platform}/${menuId}`;
         document.getElementById('generatedLink').value = menuLink;
 
         // Generate QR code (placeholder - would use QR library)
@@ -481,14 +588,169 @@ async function generateMenuLink() {
             <p>QR Code for:</p>
             <code>${menuLink}</code>
             <p style="margin-top: 1rem; color: #666;">
-                [QR code would be generated here using qrcode.js library]
+                Share this link with ${platforms[platform].name}
             </p>
         `;
+
+        // Log success
+        console.log(`Menu published successfully: ${menuLink}`);
 
     } catch (error) {
         console.error('Error generating menu link:', error);
         showError('Failed to generate menu link');
     }
+}
+
+// Build Complete Menu Snapshot for Immutable Storage
+async function buildCompleteMenuSnapshot(platform) {
+    const snapshot = {
+        categories: [],
+        items: {},
+        modifiers: {},
+        sauces: []
+    };
+
+    // Process Wings with variant structure
+    const wingsItems = [];
+    menuData.wings.forEach(variant => {
+        const itemId = variant.id;
+        const platformPrice = variant.platformPricing?.[platform] || variant.basePrice || 0;
+
+        snapshot.items[itemId] = {
+            id: itemId,
+            name: variant.name,
+            description: variant.description || '',
+            category: 'wings',
+            price: platformPrice,
+            basePrice: variant.basePrice || 0,
+            parentId: variant.parentId,
+            image: variant.images?.hero || '',
+            modifierGroups: variant.modifierGroups || ['sauce_choice', 'wing_style', 'extra_sauces'],
+            portionDetails: variant.portionDetails || {},
+            nutrition: variant.nutrition || null,
+            allergens: variant.allergens || [],
+            active: true,
+            sortOrder: variant.sortOrder || 999
+        };
+        wingsItems.push(itemId);
+    });
+
+    // Process Sides with variant structure
+    const sidesItems = [];
+    menuData.sides.forEach(variant => {
+        const itemId = variant.id;
+        const platformPrice = variant.platformPricing?.[platform] || variant.basePrice || 0;
+
+        snapshot.items[itemId] = {
+            id: itemId,
+            name: variant.name,
+            description: variant.description || '',
+            category: 'sides',
+            price: platformPrice,
+            basePrice: variant.basePrice || 0,
+            parentId: variant.parentId,
+            image: variant.images?.hero || '',
+            modifierGroups: variant.modifierGroups || [],
+            portionDetails: variant.portionDetails || {},
+            nutrition: variant.nutrition || null,
+            allergens: variant.allergens || [],
+            active: true,
+            sortOrder: variant.sortOrder || 999
+        };
+        sidesItems.push(itemId);
+    });
+
+    // Process Drinks with variant structure
+    const drinksItems = [];
+    menuData.drinks.forEach(variant => {
+        const itemId = variant.id;
+        const platformPrice = variant.platformPricing?.[platform] || variant.basePrice || 0;
+
+        snapshot.items[itemId] = {
+            id: itemId,
+            name: variant.name,
+            description: variant.description || '',
+            category: 'drinks',
+            price: platformPrice,
+            basePrice: variant.basePrice || 0,
+            parentId: variant.parentId,
+            image: variant.images?.hero || '',
+            modifierGroups: variant.modifierGroups || [],
+            portionDetails: variant.portionDetails || {},
+            allergens: variant.allergens || [],
+            active: true,
+            sortOrder: variant.sortOrder || 999
+        };
+        drinksItems.push(itemId);
+    });
+
+    // Process Combos
+    const combosItems = [];
+    menuData.combos.filter(item => item.active).forEach(item => {
+        const itemId = item.id;
+        const platformPrice = item.platformPricing?.[platform] || item.basePrice || 0;
+
+        snapshot.items[itemId] = {
+            id: itemId,
+            name: item.name,
+            description: item.description || '',
+            category: 'combos',
+            price: platformPrice,
+            basePrice: item.basePrice || 0,
+            image: item.images?.original || '',
+            components: item.components || [],
+            modifierGroups: item.modifierGroups || [],
+            feedsCount: item.feedsCount || '',
+            nutrition: item.nutrition || null,
+            allergens: item.allergens || [],
+            active: true,
+            sortOrder: item.sortOrder || 999
+        };
+        combosItems.push(itemId);
+    });
+
+    // Build Categories with item references
+    snapshot.categories = [
+        {
+            id: 'wings',
+            name: 'Wings',
+            description: 'Fresh, never frozen wings with your choice of our signature sauces',
+            sortOrder: 1,
+            items: wingsItems
+        },
+        {
+            id: 'sides',
+            name: 'Sides',
+            description: 'Perfect sides to complete your meal',
+            sortOrder: 2,
+            items: sidesItems
+        },
+        {
+            id: 'drinks',
+            name: 'Drinks',
+            description: 'Refreshing beverages',
+            sortOrder: 3,
+            items: drinksItems
+        },
+        {
+            id: 'combos',
+            name: 'Combos & Deals',
+            description: 'Save with our combo meals',
+            sortOrder: 4,
+            items: combosItems
+        }
+    ];
+
+    // Copy modifier groups
+    snapshot.modifiers = { ...menuData.modifiers };
+
+    // Copy active sauces
+    snapshot.sauces = menuData.sauces.filter(s => s.active).map(sauce => ({
+        ...sauce,
+        platformAvailable: sauce.platformAvailability?.includes(platform)
+    }));
+
+    return snapshot;
 }
 
 // Build Menu Categories for Export

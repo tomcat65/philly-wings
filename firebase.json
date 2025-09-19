@@ -7,7 +7,12 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [],
+    "rewrites": [
+      {
+        "source": "/menu/**",
+        "destination": "/menu/platform/index.html"
+      }
+    ],
     "headers": [
       {
         "source": "**/*.@(jpg|jpeg|gif|png|webp)",

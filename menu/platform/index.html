@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philly Wings Express - Platform Menu</title>
+
+    <!-- Structured Data for Platform Crawlers -->
+    <script type="application/ld+json" id="menuStructuredData"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .platform-header {
+            background: #004c54;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 4px solid #00703c;
+        }
+
+        .platform-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .platform-badge {
+            display: inline-block;
+            background: white;
+            color: #004c54;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .restaurant-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .restaurant-info p {
+            margin: 0.25rem 0;
+        }
+
+        .business-hours {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            max-width: 800px;
+            margin: 1rem auto 0;
+            text-align: left;
+        }
+
+        .menu-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .menu-category {
+            margin-bottom: 3rem;
+        }
+
+        .category-header {
+            background: #00703c;
+            color: white;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .category-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .category-description {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .menu-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .item-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #004c54;
+        }
+
+        .item-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00703c;
+        }
+
+        .item-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .item-modifiers {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modifier-group {
+            margin-bottom: 1rem;
+        }
+
+        .modifier-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .modifier-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .modifier-required {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        .modifier-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .modifier-option {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .modifier-price {
+            color: #00703c;
+            margin-left: 0.25rem;
+            font-weight: 600;
+        }
+
+        .allergen-info {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .allergen-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #000;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .nutrition-info {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .portion-info {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        .menu-footer {
+            background: #f8f9fa;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+            border-top: 2px solid #dee2e6;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .menu-item {
+                flex-direction: column;
+            }
+
+            .item-image {
+                width: 100%;
+                height: 200px;
+            }
+
+            .business-hours {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            .platform-header {
+                background: none;
+                color: black;
+                border: 2px solid #000;
+            }
+
+            .menu-item {
+                page-break-inside: avoid;
+            }
+
+            .item-image {
+                display: none;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 4rem;
+            color: #dc3545;
+        }
+
+        .error h2 {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="loading">Loading menu...</div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0H8YVJhF5RTxNPdLWVVD0RwBszLkgPs8",
+            authDomain: "philly-wings.firebaseapp.com",
+            projectId: "philly-wings",
+            storageBucket: "philly-wings.firebasestorage.app",
+            messagingSenderId: "568455923870",
+            appId: "1:568455923870:web:ac722e66e7fe19f3bc5e08"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Extract menu ID from URL
+        function getMenuIdFromUrl() {
+            const pathParts = window.location.pathname.split('/');
+            const menuIndex = pathParts.indexOf('menu');
+            if (menuIndex !== -1 && pathParts[menuIndex + 2]) {
+                return pathParts[menuIndex + 2];
+            }
+            return null;
+        }
+
+        // Format price
+        function formatPrice(price) {
+            return '$' + (price || 0).toFixed(2);
+        }
+
+        // Generate structured data for SEO
+        function generateStructuredData(menuData) {
+            const structuredData = {
+                "@context": "http://schema.org",
+                "@type": "Menu",
+                "name": `${menuData.restaurant.name} Menu`,
+                "description": menuData.restaurant.description,
+                "hasMenuSection": menuData.frozenData.categories.map(category => ({
+                    "@type": "MenuSection",
+                    "name": category.name,
+                    "description": category.description,
+                    "hasMenuItem": category.items.map(itemId => {
+                        const item = menuData.frozenData.items[itemId];
+                        return {
+                            "@type": "MenuItem",
+                            "name": item.name,
+                            "description": item.description,
+                            "offers": {
+                                "@type": "Offer",
+                                "price": item.price,
+                                "priceCurrency": "USD"
+                            }
+                        };
+                    })
+                }))
+            };
+
+            document.getElementById('menuStructuredData').textContent = JSON.stringify(structuredData);
+        }
+
+        // Render modifier group
+        function renderModifierGroup(modifierId, modifiers) {
+            const modifier = modifiers[modifierId];
+            if (!modifier || !modifier.active) return '';
+
+            return `
+                <div class="modifier-group">
+                    <div class="modifier-title">
+                        ${modifier.name}
+                        ${modifier.required ? '<span class="modifier-required">*Required</span>' : ''}
+                    </div>
+                    <div class="modifier-options">
+                        ${modifier.options.map(option => `
+                            <div class="modifier-option">
+                                ${option.name}
+                                ${option.price > 0 ? `<span class="modifier-price">+${formatPrice(option.price)}</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render menu item
+        function renderMenuItem(item, modifiers, includeImages) {
+            const allergens = item.allergens || [];
+            const hasModifiers = item.modifierGroups && item.modifierGroups.length > 0;
+
+            return `
+                <div class="menu-item">
+                    ${includeImages && item.image ? `
+                        <img src="${item.image}" alt="${item.name}" class="item-image">
+                    ` : ''}
+                    <div class="item-details">
+                        <div class="item-header">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-price">${formatPrice(item.price)}</div>
+                        </div>
+                        ${item.description ? `
+                            <div class="item-description">${item.description}</div>
+                        ` : ''}
+
+                        ${item.portionDetails ? `
+                            <div class="portion-info">
+                                ${item.portionDetails.count ? `${item.portionDetails.count} pieces` : ''}
+                                ${item.portionDetails.weight ? ` • ${item.portionDetails.weight}` : ''}
+                            </div>
+                        ` : ''}
+
+                        ${hasModifiers ? `
+                            <div class="item-modifiers">
+                                ${item.modifierGroups.map(modId =>
+                                    renderModifierGroup(modId, modifiers)
+                                ).join('')}
+                            </div>
+                        ` : ''}
+
+                        ${allergens.length > 0 ? `
+                            <div class="allergen-info">
+                                ${allergens.map(allergen =>
+                                    `<span class="allergen-badge">${allergen}</span>`
+                                ).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render menu
+        async function renderMenu() {
+            const menuId = getMenuIdFromUrl();
+            const appDiv = document.getElementById('app');
+
+            if (!menuId) {
+                appDiv.innerHTML = `
+                    <div class="error">
+                        <h2>Menu Not Found</h2>
+                        <p>Invalid menu URL</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                // Load menu from publishedMenus collection
+                const menuDoc = await getDoc(doc(db, 'publishedMenus', menuId));
+
+                if (!menuDoc.exists()) {
+                    // Try legacy publicMenus collection
+                    const legacyDoc = await getDoc(doc(db, 'publicMenus', menuId));
+                    if (legacyDoc.exists()) {
+                        // Handle legacy format
+                        const data = legacyDoc.data();
+                        renderLegacyMenu(data);
+                        return;
+                    }
+
+                    throw new Error('Menu not found');
+                }
+
+                const menuData = menuDoc.data();
+
+                // Set page title
+                document.title = `${menuData.restaurant.name} - ${menuData.platformConfig.name} Menu`;
+
+                // Generate structured data
+                generateStructuredData(menuData);
+
+                // Render the menu
+                const html = `
+                    <div class="platform-header">
+                        <h1>${menuData.restaurant.name}</h1>
+                        <p>${menuData.restaurant.description}</p>
+                        <div class="platform-badge">${menuData.platformConfig.name} Menu</div>
+                    </div>
+
+                    <div class="restaurant-info">
+                        <p><strong>${menuData.restaurant.address}</strong></p>
+                        <p>📞 ${menuData.restaurant.phone}</p>
+
+                        ${menuData.restaurant.hours ? `
+                            <div class="business-hours">
+                                ${Object.entries(menuData.restaurant.hours).map(([day, hours]) => `
+                                    <div><strong>${day.charAt(0).toUpperCase() + day.slice(1)}:</strong> ${hours}</div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="menu-container">
+                        ${menuData.frozenData.categories.map(category => `
+                            <div class="menu-category">
+                                <div class="category-header">
+                                    <h2>${category.name}</h2>
+                                    ${category.description ? `
+                                        <div class="category-description">${category.description}</div>
+                                    ` : ''}
+                                </div>
+                                ${category.items.map(itemId =>
+                                    renderMenuItem(
+                                        menuData.frozenData.items[itemId],
+                                        menuData.frozenData.modifiers,
+                                        menuData.includeImages
+                                    )
+                                ).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="menu-footer">
+                        <p class="timestamp">
+                            Menu published: ${new Date(menuData.publishedAt?.seconds * 1000).toLocaleDateString()}
+                        </p>
+                        <p>Menu ID: ${menuId}</p>
+                    </div>
+                `;
+
+                appDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                appDiv.innerHTML = `
+                    <div class="error">
+                        <h2>Error Loading Menu</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render legacy menu format
+        function renderLegacyMenu(data) {
+            // Simplified render for backward compatibility
+            const appDiv = document.getElementById('app');
+            appDiv.innerHTML = `
+                <div class="platform-header">
+                    <h1>${data.restaurant.name}</h1>
+                    <p>${data.restaurant.description}</p>
+                </div>
+                <div class="menu-container">
+                    ${data.categories.map(category => `
+                        <div class="menu-category">
+                            <div class="category-header">
+                                <h2>${category.name}</h2>
+                            </div>
+                            ${category.items.map(item => `
+                                <div class="menu-item">
+                                    <div class="item-details">
+                                        <div class="item-header">
+                                            <div class="item-name">${item.name}</div>
+                                            <div class="item-price">${formatPrice(item.price)}</div>
+                                        </div>
+                                        <div class="item-description">${item.description || ''}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Initialize
+        renderMenu();
+    </script>
+</body>
+</html>

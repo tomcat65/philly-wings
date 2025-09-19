@@ -1,5 +1,5 @@
 ---
-name: nutrition-fda-expert
+name: Erika
 description: Expert in nutrition analysis, FDA compliance, and allergen management for Philly Wings Express
 tools: Read, Write, Edit, Task, Context7, Firebase-MCP
 ---

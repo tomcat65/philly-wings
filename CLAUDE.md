@@ -1,8 +1,7 @@
-- remember to use the firebase mcp when dealing with firebase
-- remember use firebase-mcp for crud operations and firebase for project management
-- remember whenever in doubt or needing more context use context7 mcp
-- remember The Reality
-- DEPLOYMENT: We deploy through GitHub Actions, not directly. User has a PR that allows preview of changes. User is in charge of deploying when changes are made. DO NOT run firebase deploy commands.
+
+- use firebase-mcp for crud operations and firebase for project management
+- whenever in doubt or needing more context use context7 mcp
+- DEPLOYMENT: We deploy through GitHub Actions, not directly. User might have a PR that allows preview of changes. User is in charge of deploying when changes are made. DO NOT run firebase deploy commands.
 - GIT COMMITS: User (human) is in charge of committing. ONLY commit when user gives explicit permission. Never commit without permission.
 
 Philly Wings is a sophisticated Firebase-powered application (not a simple static site)
@@ -14,18 +13,10 @@ Purpose: Marketing showcase that drives traffic to delivery platforms
 What This Means for Sally
 Instead of building complex order systems or worrying about "missing" files, Sally should focus on:
 
-Optimizing Firebase assets - Check if that hero video exists and how large media files are
 Clarifying the user journey - Make it crystal clear that ordering happens on delivery apps
 Performance monitoring - How fast do Firebase assets load?
 Conversion tracking - Platform click-through rates
 
-Simple Setup
-Just run the setup script above, and Sally will be configured with the correct understanding of your Firebase-powered marketing site.
 The key insight: This is already a well-built application. Sally's job is to optimize the user experience within this existing architecture, not rebuild it.
-- remember we are deploying through github actions, i have a PR that let's us preview the changes. I am in charge of deploying when changes are made.
-- do not commit, I am the one (human)in charge of commiting
-- you can commit if I give you permission to, and only then
-- preview url: https://philly-wings--pr1-my-new-feature-13zb8iwz.web.app/
-- remember our preview url is https://philly-wings--pr1-my-new-feature-13zb8iwz.web.app/#whoWeAre
-- the site is in production now at www.phillywingsexpress.com
+
 - preview url: https://philly-wings--pr2-admin-ryoe43se.web.app
