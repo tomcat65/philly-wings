@@ -9,9 +9,7 @@ import {
     setDoc,
     updateDoc,
     deleteDoc,
-    serverTimestamp,
-    query,
-    orderBy
+    serverTimestamp
 } from 'firebase/firestore';
 
 // State Management
@@ -116,7 +114,7 @@ async function loadMenuData() {
         showLoading(true);
 
         // Load all menu items with variant structure
-        const menuItemsSnap = await getDocs(query(collection(db, 'menuItems'), orderBy('sortOrder')));
+        const menuItemsSnap = await getDocs(collection(db, 'menuItems'));
 
         // Reset data
         menuData.wings = [];
@@ -166,11 +164,11 @@ async function loadMenuData() {
         });
 
         // Load combos from separate collection
-        const combosSnap = await getDocs(query(collection(db, 'combos'), orderBy('sortOrder')));
+        const combosSnap = await getDocs(collection(db, 'combos'));
         menuData.combos = combosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Load sauces
-        const saucesSnap = await getDocs(query(collection(db, 'sauces'), orderBy('sortOrder')));
+        const saucesSnap = await getDocs(collection(db, 'sauces'));
         menuData.sauces = saucesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Try to load modifier groups (may not exist)
