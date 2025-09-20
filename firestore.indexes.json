@@ -46,6 +46,47 @@
   //     ]
   //   },
   // ]
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "featured", "mode": "ASCENDING" },
+        { "fieldPath": "createdAt", "mode": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "gameDayBanners",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "priority", "mode": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "liveOrders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "display", "mode": "ASCENDING" },
+        { "fieldPath": "timestamp", "mode": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "combos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "sortOrder", "mode": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "menuItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "category", "mode": "ASCENDING" },
+        { "fieldPath": "sortOrder", "mode": "ASCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

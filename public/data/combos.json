@@ -2,12 +2,12 @@
   {
     "id": "combo-game-day-30",
     "name": "Game Day 30",
-    "description": "30 wings (mix up to 3 sauces) (Feeds 5-6)",
+    "description": "30 wings (mix up to 3 sauces), 2 large fries, 8 mozzarella sticks (Feeds 5-6)",
     "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media",
     "sortOrder": 0,
     "active": true,
     "featured": true,
-    "items": ["30-wings"],
+    "items": ["30-wings", "fries-large-2", "mozzarella-sticks-8"],
     "badges": ["Most Popular", "Feeds 5-6"],
     "updatedAt": 1737000000000
   },
@@ -15,7 +15,7 @@
     "id": "combo-tailgater",
     "name": "The Tailgater",
     "description": "24 wings (mix up to 3 sauces), 8 mozzarella sticks, 1 large fries",
-    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcombo-platter.png?alt=media",
     "sortOrder": 1,
     "active": true,
     "featured": true,

@@ -96,18 +96,14 @@ const COMBOS = [
     id: 'game_day_30',
     name: 'Game Day 30',
     category: 'combos',
-    description: '30 wings with your choice of up to 3 sauces. Perfect for game day!',
+    description: '30 wings (mix up to 3 sauces), 2 large fries, 8 mozzarella sticks. Perfect for game day!',
     active: true,
     featured: true,
     sortOrder: 1,
     components: [
-      {
-        type: 'wings',
-        itemId: 'wings',
-        variantId: 'wings_30',
-        quantity: 1,
-        customizable: true
-      }
+      { type: 'wings', itemId: 'wings', variantId: 'wings_30', quantity: 1, customizable: true },
+      { type: 'sides', itemId: 'fries', variantId: 'fries_large', quantity: 2 },
+      { type: 'sides', itemId: 'mozzarella_sticks', variantId: 'mozz_8', quantity: 1 }
     ],
     basePrice: 24.99,
     platformPricing: {

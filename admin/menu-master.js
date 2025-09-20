@@ -187,7 +187,7 @@ export const masterMenu = {
       {
         id: 'game-day-30',
         name: 'Game Day 30',
-        description: '30 wings (mix up to 3 sauces)',
+        description: '30 wings (mix up to 3 sauces), 2 large fries, 8 mozzarella sticks',
         baseCost: 19.25,
         directPrice: 34.99,
         platformPrices: {
@@ -195,7 +195,7 @@ export const masterMenu = {
           ubereats: 52.99,
           grubhub: 51.99
         },
-        includes: ['30 wings'],
+        includes: ['30 wings', '2 large fries', '8 mozzarella sticks'],
         modifiers: {
           wingFlavors: { required: true, limit: 3 }
         },

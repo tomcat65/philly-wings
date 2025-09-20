@@ -41,6 +41,9 @@
           }
         ]
       }
+    ],
+    "redirects": [
+      { "source": "/android-chrome-192x192.png", "destination": "/assets/favicon-FBpmixRJ.ico", "type": 302 }
     ]
   },
   "firestore": {

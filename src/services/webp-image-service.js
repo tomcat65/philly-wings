@@ -120,12 +120,28 @@ export class WebPImageService {
         }
 
         const service = window.webpService;
-        if (service && service.webpSupported && !this.dataset.noWebp) {
+        // Guard rails to avoid recursion and invalid transforms
+        const val = String(value);
+        if (
+          !service ||
+          !service.webpSupported ||
+          this.dataset.noWebp === 'true' ||
+          val.startsWith('data:') ||
+          val.endsWith('.webp') ||
+          val.includes('/resized/') ||
+          this.dataset.webpApplied === '1'
+        ) {
+          originalSrcSetter.call(this, value);
+          return;
+        }
+
+        if (service && service.webpSupported) {
           const size = service.getOptimalSize(this);
           const webpUrl = service.transformToWebP(value, size);
 
           // Set original as fallback
           this.dataset.originalSrc = value;
+          this.dataset.webpApplied = '1';
 
           // Try loading WebP with fallback
           const testImg = new Image();
@@ -135,6 +151,8 @@ export class WebPImageService {
           testImg.onerror = () => {
             console.warn(`WebP not found, using original: ${value}`);
             originalSrcSetter.call(this, value);
+            // allow future attempts
+            this.dataset.webpApplied = '';
           };
           testImg.src = webpUrl;
         } else {
@@ -154,20 +172,31 @@ export class WebPImageService {
   processExistingImages() {
     const images = document.querySelectorAll('img[src]');
     images.forEach(img => {
-      if (!img.dataset.noWebp && img.src.includes('firebasestorage')) {
+      const s = img.getAttribute('src') || '';
+      if (
+        !img.dataset.noWebp &&
+        s.includes('firebasestorage') &&
+        !s.endsWith('.webp') &&
+        !s.includes('/resized/') &&
+        !s.startsWith('data:') &&
+        img.dataset.webpApplied !== '1'
+      ) {
         const size = this.getOptimalSize(img);
-        const webpUrl = this.transformToWebP(img.src, size);
+        const webpUrl = this.transformToWebP(s, size);
 
         // Store original
-        img.dataset.originalSrc = img.src;
+        img.dataset.originalSrc = s;
+        img.dataset.webpApplied = '1';
 
         // Try WebP with fallback
         const testImg = new Image();
         testImg.onload = () => {
-          img.src = webpUrl;
+          // Use attribute to minimize interference
+          img.setAttribute('src', webpUrl);
         };
         testImg.onerror = () => {
           console.warn(`WebP not found for existing image: ${img.src}`);
+          img.dataset.webpApplied = '';
         };
         testImg.src = webpUrl;
       }
