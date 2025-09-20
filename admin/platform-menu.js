@@ -18,6 +18,31 @@ import { ref as storageRef, uploadBytes } from 'firebase/storage';
 // Feature flags (Vite env)
 const ENABLE_NUTRITION_FEED_UPLOAD = (import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === 'true' || import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === true);
 
+// Remove undefined/NaN/Infinity recursively to satisfy Firestore constraints
+function sanitizeForFirestore(value) {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    if (Array.isArray(value)) {
+        const arr = value
+            .map((v) => sanitizeForFirestore(v))
+            .filter((v) => v !== undefined);
+        return arr;
+    }
+    if (typeof value === 'number') {
+        if (!Number.isFinite(value)) return 0;
+        return value;
+    }
+    if (typeof value === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(value)) {
+            const sv = sanitizeForFirestore(v);
+            if (sv !== undefined) out[k] = sv;
+        }
+        return out;
+    }
+    return value;
+}
+
 // State Management
 let currentPlatform = 'doordash';
 let selectedItem = null;
@@ -1477,7 +1502,8 @@ async function uploadCombosNutritionFeed() {
         if (cn) {
             // Persist back to Firestore so the modal can read computedNutrition directly
             try {
-                await updateDoc(doc(db, 'combos', docSnap.id), { computedNutrition: cn, updatedAt: serverTimestamp() });
+                const safe = sanitizeForFirestore(cn);
+                await updateDoc(doc(db, 'combos', docSnap.id), { computedNutrition: safe, updatedAt: serverTimestamp() });
             } catch (e) {
                 console.warn('Failed to update combo computedNutrition', docSnap.id, e);
             }
