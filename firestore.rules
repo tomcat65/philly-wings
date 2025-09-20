@@ -27,23 +27,37 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Menu items - public read, admin write
+    // Menu items - public read, admin write (variant-based schema)
     match /menuItems/{itemId} {
       allow read: if true; // Public menu
       allow create, update: if isAdmin() &&
-        request.resource.data.keys().hasAll(['name', 'price', 'category']) &&
-        request.resource.data.price is number &&
-        request.resource.data.price >= 0;
+        // Required core fields
+        request.resource.data.keys().hasAll(['name', 'category']) &&
+        request.resource.data.name is string &&
+        request.resource.data.category is string &&
+        // Optional basePrice allowed on some docs
+        (!('basePrice' in request.resource.data) ||
+          (request.resource.data.basePrice is number && request.resource.data.basePrice >= 0)) &&
+        // If variants present, ensure it's a list (deep validation kept light for flexibility)
+        (!('variants' in request.resource.data) ||
+          (request.resource.data.variants is list));
       allow delete: if isAdmin();
     }
 
-    // Combos - public read, admin write
+    // Combos - public read, admin write (supports items[] or components[] and basePrice)
     match /combos/{comboId} {
       allow read: if true; // Public combos
       allow create, update: if isAdmin() &&
-        request.resource.data.keys().hasAll(['name', 'price', 'items']) &&
-        request.resource.data.price is number &&
-        request.resource.data.price >= 0;
+        request.resource.data.keys().hasAll(['name']) &&
+        request.resource.data.name is string &&
+        // Optional basePrice allowed
+        (!('basePrice' in request.resource.data) ||
+          (request.resource.data.basePrice is number && request.resource.data.basePrice >= 0)) &&
+        // Must include either items[] or components[]
+        (
+          (('items' in request.resource.data) && request.resource.data.items is list) ||
+          (('components' in request.resource.data) && request.resource.data.components is list)
+        );
       allow delete: if isAdmin();
     }
 

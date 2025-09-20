@@ -79,6 +79,10 @@ serviceAccountKey.json
 firebase-admin-sdk.json
 *-firebase-adminsdk-*.json
 
+# Local gcloud credentials (never commit)
+.gcloud/
+.gcloud/**
+
 # Assets (served from Firebase Storage)
 assets/
 /assets
