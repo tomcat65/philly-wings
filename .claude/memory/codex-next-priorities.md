@@ -37,7 +37,7 @@
 
 ### 4) Storage Manifest & WebP Audit
 - Done: Manifest + audits generated; nested Storage rule deployed for `/images/**`.
-- Next: homepage-specific derivative generation (1920x1080/800x800/200x200) for any remaining filenames to maximize WebP swaps.
+- Done: homepage derivative coverage verified; direct WebP links patched in `index.html`, `public/data/sauces.json`, and `public/data/combos.json`. Preview audit shows 0 non‑WebP, 0 broken.
 
 ### 5) Hosting Canonical Redirect
 - In Firebase Hosting → Custom domains, set 301 from apex `phillywingsexpress.com` → `https://www.phillywingsexpress.com` (preserve path & query) or via `firebase.json`.
@@ -57,12 +57,12 @@
 - Add a GH Action to run: storage manifest, link 404 audit, WebP audit on PR.
 
 ## Proposed Next Steps (Execution Plan)
-1) Seed remaining `menuItems` (fries, mozzarella sticks, drinks).
-2) Patch `public/data/combos.json` for parity (Game Day 30, Date Night Dozen) and sync Firestore combo docs.
-3) Verify/create missing `nutritionData` docs for 12/24/30/50.
-4) Generate storage manifest via `gsutil ls -r` (requires approval) or wait for Official MCP.
-5) Configure 301 apex → www redirect in Hosting UI (or `firebase.json`).
+1) Configure 301 apex → www redirect in Hosting UI (or `firebase.json`).
+2) Verify/create missing `nutritionData` docs for 12/24/30/50 and sides/combos.
+3) CI: add PR audit job (manifest, link 404s, WebP coverage).
+4) Backups: export Firestore collections (`menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`).
+5) (If needed) Seed any straggler `menuItems` variants via admin panel.
 
 ---
 Owner: Codex
-Last updated: 2025‑09‑20 (Combos synced; WebP path enabled; audits)
+Last updated: 2025‑09‑20 (WebP coverage 100% on preview; favicon/manifest fixed)
