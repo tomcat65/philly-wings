@@ -1,4 +1,5 @@
 // Platform Menu Management System
+// bump: no-op change to trigger preview rebuild
 import { auth, db, storage } from '../src/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
