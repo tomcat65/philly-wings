@@ -6,7 +6,7 @@
       "description": "Classic lemon pepper - zesty citrus, cracked black pepper",
       "heatLevel": 1,
       "heatLabel": "Mild",
-      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-lemon-pepper-dry-rub.png?alt=media",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Flemon-pepper-dry-rub.png?alt=media",
       "allergens": []
     },
     {
@@ -15,7 +15,7 @@
       "description": "Spicy lemon pepper with cayenne kick",
       "heatLevel": 2,
       "heatLabel": "Medium",
-      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fnortheast-hot-lemon-pepper.png?alt=media",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fnortheast-hot-lemon.png?alt=media",
       "allergens": []
     },
     {
@@ -24,7 +24,7 @@
       "description": "Bold Cajun blend - paprika, garlic, herbs",
       "heatLevel": 2,
       "heatLabel": "Medium",
-      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ffrankford-cajun-dry-rub.png?alt=media",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcajun-dry-rub.png?alt=media",
       "allergens": []
     },
     {
@@ -44,7 +44,7 @@
       "description": "Teriyaki glaze - soy, ginger, sesame",
       "heatLevel": 0,
       "heatLabel": "No Heat",
-      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fsweet-teriyaki-wings.png?alt=media",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fteriyaki-sauced.png?alt=media",
       "allergens": ["soy", "sesame"]
     },
     {
@@ -53,7 +53,7 @@
       "description": "Classic BBQ - sweet, tangy, smoky",
       "heatLevel": 0,
       "heatLabel": "No Heat",
-      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ftailgate-bbq-wings.png?alt=media",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbbq-sauced.png?alt=media",
       "allergens": []
     },
     {
@@ -89,7 +89,7 @@
       "description": "Scorpion pepper sauce - NOT for rookies!",
       "heatLevel": 5,
       "heatLabel": "INSANE",
-      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgrittys-revenge-scorpion.png?alt=media",
+      "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgrittys-revenge.png?alt=media",
       "allergens": [],
       "warning": "NOT for rookies!"
     }

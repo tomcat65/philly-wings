@@ -283,6 +283,12 @@ body {
     height: 16px;
 }
 
+.price-badge.active {
+    background: var(--primary-color);
+    color: var(--white);
+    font-weight: 600;
+}
+
 /* Item Editor */
 .item-editor {
     padding: 1.25rem;

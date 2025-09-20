@@ -285,20 +285,28 @@
         <div class="loading">Loading menu...</div>
     </div>
 
+    <!-- Firebase runtime configuration (populated outside version control) -->
+    <script src="/menu/platform/firebase-config.js" defer></script>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyD0H8YVJhF5RTxNPdLWVVD0RwBszLkgPs8",
-            authDomain: "philly-wings.firebaseapp.com",
-            projectId: "philly-wings",
-            storageBucket: "philly-wings.firebasestorage.app",
-            messagingSenderId: "568455923870",
-            appId: "1:568455923870:web:ac722e66e7fe19f3bc5e08"
-        };
+        const firebaseConfig = window.__PHILLY_WINGS_FIREBASE_CONFIG__;
+
+        if (!firebaseConfig) {
+            const appContainer = document.getElementById('app');
+            if (appContainer) {
+                appContainer.innerHTML = `
+                    <div class="error">
+                        <h2>Configuration Missing</h2>
+                        <p>Firebase configuration was not loaded. Please add <code>menu/platform/firebase-config.js</code> based on the provided example.</p>
+                    </div>
+                `;
+            }
+            throw new Error('Firebase configuration not found. Create menu/platform/firebase-config.js that sets window.__PHILLY_WINGS_FIREBASE_CONFIG__.');
+        }
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);

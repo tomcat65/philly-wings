@@ -11,12 +11,22 @@
     "deploy": "npm run build && firebase deploy",
     "serve:firebase": "firebase serve",
     "emulators": "firebase emulators:start",
+    "emulators:bg": "firebase emulators:start &",
     "optimize-images": "bash optimize-images.sh",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up",
     "docker:down": "docker-compose down",
     "docker:simple": "docker build -f Dockerfile.simple -t philly-wings-simple . && docker run -p 8080:80 philly-wings-simple",
-    "docker:test": "docker run -p 8080:80 -v $(pwd):/usr/share/nginx/html nginx:alpine"
+    "docker:test": "docker run -p 8080:80 -v $(pwd):/usr/share/nginx/html nginx:alpine",
+    "test": "node scripts/run-tests.js",
+    "test:menu": "node test/admin-menu.test.js",
+    "migrate:menu": "node scripts/fix-production-data.js",
+    "migrate:menu-old": "node scripts/fix-menu-data.js",
+    "migrate:menu:emulator": "node scripts/fix-menu-data.js --emulator",
+    "seed:test": "node scripts/seed-with-admin.js",
+    "seed:test-old": "node scripts/seed-test-data.js",
+    "dev:full": "npm run emulators:bg && sleep 5 && npm run seed:test && npm run dev",
+    "test:docker": "docker-compose up -d && npm run test && docker-compose down"
   },
   "keywords": [
     "restaurant",

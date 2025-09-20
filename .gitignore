@@ -92,3 +92,8 @@ Dockerfile.simple
 docker-compose.yml
 .dockerignore
 test-local.sh
+menu/platform/firebase-config.js
+
+# Playwright (local state)
+.playwright-profiles/
+/screenshots/

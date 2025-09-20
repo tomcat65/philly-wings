@@ -1,0 +1,179 @@
+{
+  "projectId": "philly-wings",
+  "generatedAt": "2025-09-20T00:00:00Z",
+  "firestore": {
+    "collections": {
+      "combos": {
+        "count": 9,
+        "documents": [
+          {"path": "combos/3yhbryADluFsEx8O2xdU", "id": "sampler_platter", "name": "Sampler Platter"},
+          {"path": "combos/D1F7cvfjgfMyEfPrdvBE", "id": "mvp_meal", "name": "MVP Meal"},
+          {"path": "combos/LHVOJwNbXNuXOZbpHtGO", "id": "combo-mvp", "name": "MVP Meal"},
+          {"path": "combos/Mwp2hJceFkGrFKgmIQKX", "id": "combo-game-day-30", "name": "Game Day 30"},
+          {"path": "combos/Qzhmx3q9twaSR62M0R7l", "id": "combo-sampler", "name": "Sampler Platter"},
+          {"path": "combos/TkYtV7xlPbM06W71Ex8D", "id": "party_pack_50", "name": "Party Pack 50"},
+          {"path": "combos/VQBQJsNsTPSdM3jUSuFm", "id": "combo-tailgater", "name": "The Tailgater"},
+          {"path": "combos/fEAlRAD4aWoWGlf6PCiy", "id": "the_tailgater", "name": "The Tailgater"},
+          {"path": "combos/m8XgnkYctZlA44j4wJbo", "id": "game_day_30", "name": "Game Day 30"}
+        ]
+      },
+      "content": {
+        "count": 1,
+        "documents": [
+          {"path": "content/IPQOEiPz2D7M9nRQcRbE", "id": "our-story", "type": "story", "title": "The Real Story"}
+        ]
+      },
+      "emailSubscribers": {
+        "count": 1,
+        "documents": [
+          {"path": "emailSubscribers/YeW8gmnHpFd7tpIc4zj1"}
+        ]
+      },
+      "gameDayBanners": {
+        "count": 2,
+        "documents": [
+          {"path": "gameDayBanners/3oGij8jk8yeFuXGY0K0b"},
+          {"path": "gameDayBanners/nPge6IvwxjK4M5k4Mfaa", "active": true}
+        ]
+      },
+      "liveOrders": {
+        "count": 4,
+        "documents": [
+          {"path": "liveOrders/7QQUsMXT1fUkRZmNPDaP"},
+          {"path": "liveOrders/BYuqtMnkDOR8Kb4tE9QR", "id": "order-1"},
+          {"path": "liveOrders/k2S3NIFksfhq74NZSNg3", "id": "order-3"},
+          {"path": "liveOrders/uSeaDa1ztlldRWMn0Zw9", "id": "order-2"}
+        ]
+      },
+      "menu-sections": {
+        "count": 3,
+        "documents": [
+          {"path": "menu-sections/U19DGObfEmHipcyIiHgy", "sectionName": "Dinner Plates"},
+          {"path": "menu-sections/fgWrmTLzp8Pvqri4BtFG", "sectionName": "Game Day Specials"},
+          {"path": "menu-sections/kBHUmuMGK0Ya12grbTBN", "sectionName": "Wings & Appetizers"}
+        ]
+      },
+      "modifierGroups": {
+        "count": 5,
+        "documents": [
+          {"path": "modifierGroups/9Bd6eBqtAkNzkUINSooX", "id": "sauce_choice_combo"},
+          {"path": "modifierGroups/9aEK0tOxvcgBmMVruNaG", "id": "extra_sauces"},
+          {"path": "modifierGroups/GbXROVAslHRfgar9prhI", "id": "wing_style"},
+          {"path": "modifierGroups/MuminHzf2D3FqKNT7gxy", "id": "sauce_choice_party"},
+          {"path": "modifierGroups/apvZlly9nA0mTz1mVCvt", "id": "sauce_choice"}
+        ]
+      },
+      "nutrition": {
+        "count": 16,
+        "documents": [
+          {"path": "nutrition/7xQtgthiqwGQwmR6acII", "id": "the-tailgater"},
+          {"path": "nutrition/AVfgJPNvZgQFgE0fdzMB", "id": "blue-cheese"},
+          {"path": "nutrition/E2wO6wYdUlDHhd3s9001", "id": "mild-buffalo"},
+          {"path": "nutrition/HsJVodv6qITIlUcIdYtj", "id": "loaded-fries"},
+          {"path": "nutrition/IafhgOLIraI6qwZczj5L", "id": "mvp-meal"},
+          {"path": "nutrition/JCkQtSwUSsBIZNddKZQc", "id": "6-wings"},
+          {"path": "nutrition/KZC057UpleAXUaT0yRDg", "id": "24-wings"},
+          {"path": "nutrition/Oot40DL3AFrm8raDewp7", "id": "french-fries"},
+          {"path": "nutrition/UoewjNpdqfEl61fbjcHV", "id": "50-wings"},
+          {"path": "nutrition/YNv9hWVwdXPu6M2AJ3ue", "id": "mozzarella-sticks"},
+          {"path": "nutrition/b1Q4RJ5pc5QK1v2rk3yP", "id": "single-serving"},
+          {"path": "nutrition/c7sILCkL00SDOueyf1NI", "id": "12-wings"},
+          {"path": "nutrition/cBgO3mUkRrmiQ5VZaSY8", "id": "30-wings"},
+          {"path": "nutrition/eXkLB3VL5CuslwfnaKP7", "id": "northeast-hot-lemon"},
+          {"path": "nutrition/inY4fURMOjnkoH1VPW3B", "id": "classic-lemon-pepper"},
+          {"path": "nutrition/jI7Km7HN2u7ig1wDLFp3", "id": "sweet-teriyaki"}
+        ]
+      },
+      "nutritionData": {
+        "count": 11,
+        "documents": [
+          {"path": "nutritionData/4XK2ObzGtoNeWoDHmVm0", "id": "6-wings"},
+          {"path": "nutritionData/BJurpTxq8WNmYlfckh7X", "id": "french-fries"},
+          {"path": "nutritionData/G3xHveUvu6PnPTpalZgD", "id": "loaded-fries"},
+          {"path": "nutritionData/Ip5L1t5SxClLyoUcLUSV", "id": "mozzarella-sticks"},
+          {"path": "nutritionData/MwAbFgzhGG0ymfpUQ4yA", "id": "mvp-meal"},
+          {"path": "nutritionData/VGcZmTOaQbwrzYnvxFuq", "id": "24-wings"},
+          {"path": "nutritionData/VkSImINXOyYhj40SgXmn", "id": "sampler-platter"},
+          {"path": "nutritionData/bnxCgYCBR9TybDmnT8AT", "id": "12-wings"},
+          {"path": "nutritionData/oG8BevI5fhV3B5dgUuuw", "id": "the-tailgater"},
+          {"path": "nutritionData/wbIFP3KVvRoXAcFsXu0A", "id": "50-wings"},
+          {"path": "nutritionData/yKPOv6rKXVe4E6W4UKcg", "id": "30-wings"}
+        ]
+      },
+      "reviews": {
+        "count": 4,
+        "documents": [
+          {"path": "reviews/6XRx1muGzQLEDmuXqkSF"},
+          {"path": "reviews/9KaLYz8kiLalqP1giBFB", "id": "review-3"},
+          {"path": "reviews/V69Pg2QlhoFHsztUEeJl", "id": "review-1"},
+          {"path": "reviews/aBtoVUz2i7m5xJHh5xJr", "id": "review-2"}
+        ]
+      },
+      "sauces": {
+        "count": 14,
+        "documents": [
+          {"path": "sauces/2PAdlDji0fcqtW6dA4x0", "id": "mild-buffalo"},
+          {"path": "sauces/3jX5Ssg1EY3y4Tu3xYeP", "id": "classic-lemon-pepper"},
+          {"path": "sauces/9fcr3w96Pp53Nws9rUzD", "id": "philly-classic-hot"},
+          {"path": "sauces/AVljTzvAotNu7el3DPeZ", "id": "sweet-teriyaki"},
+          {"path": "sauces/BSzumIgiQaaH3Ikypcnj", "id": "tailgate-bbq"},
+          {"path": "sauces/DTsnoamlb5vLucKG15Zu", "id": "northeast-hot-lemon"},
+          {"path": "sauces/DYovogfcNhfmP2U6z0we", "id": "honey-mustard"},
+          {"path": "sauces/F2uYVpcAdTT4qjKSpPyy", "id": "broad-pattison-burn"},
+          {"path": "sauces/S5xs5JlP7PX7xXawcws7", "id": "blue-cheese"},
+          {"path": "sauces/XA4xFGglC7PuDoTVasLo", "id": "cheese-sauce"},
+          {"path": "sauces/ahic9I4NYqopvEK2SOYb", "id": "grittys-revenge"},
+          {"path": "sauces/dAAFxYK7VBbhQyaXCP10", "id": "frankford-cajun"},
+          {"path": "sauces/kneJI5aBIdc1eY12B1T0", "id": "ranch"},
+          {"path": "sauces/mRFZlCuw3gYWO0gvaPNI", "id": "garlic-parmesan"}
+        ]
+      },
+      "settings": {
+        "count": 1,
+        "documents": [
+          {"path": "settings/main"}
+        ]
+      },
+      "menuItems": {
+        "count": 4,
+        "documents": [
+          {"path": "menuItems/RLhhyuaE4rxKj47Puu3W", "id": "wings", "name": "Wings"},
+          {"path": "menuItems/f6aCNjRZ277NliIo1Hmz", "id": "fries", "name": "Fries"},
+          {"path": "menuItems/GmXfuczi4k4hUPBGDXJx", "id": "mozzarella_sticks", "name": "Mozzarella Sticks"},
+          {"path": "menuItems/kEJTNxzMmNApCqqkwYpO", "id": "drinks", "name": "Drinks"}
+        ]
+      }
+    }
+  },
+  "storage": {
+    "bucket": "philly-wings.firebasestorage.app",
+    "listing": {
+      "status": "error",
+      "message": "The specified bucket does not exist."
+    },
+    "inferredPaths": {
+      "files": [
+        "images/mvp-meal-combo.png",
+        "images/game-day-30-wings.png",
+        "images/sampler-platter.png",
+        "images/party-pack-50-wings.png",
+        "images/bbq-sauced.png",
+        "images/northeast-hot-lemon.png",
+        "images/teriyaki-sauced.png",
+        "images/lemon-pepper-dry-rub.png",
+        "images/menu/philly-classic-hot.jpg",
+        "images/ranch-dip.png",
+        "images/cheese-sauce.png",
+        "images/blue-cheese.png",
+        "images/garlic-parmesan-dry-rub.png",
+        "images/nashville-hot.png",
+        "images/cajun-dry-rub.png"
+      ],
+      "expectedDirectories": [
+        "images/",
+        "images/resized/",
+        "images/menu/"
+      ]
+    }
+  }
+}

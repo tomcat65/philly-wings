@@ -59,11 +59,18 @@ const mozzStickRatios = {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    // Check authentication
+    console.log('Platform Menu Manager initializing...');
+
+    // Check authentication with better error handling
     onAuthStateChanged(auth, (user) => {
         if (!user) {
-            window.location.href = '/admin/';
+            console.log('User not authenticated, redirecting to admin login');
+            // Add a small delay to prevent redirect loops
+            setTimeout(() => {
+                window.location.href = '/admin/';
+            }, 1000);
         } else {
+            console.log('User authenticated:', user.email);
             window.currentUser = user;
             setupEventListeners();
             loadMenuData();
@@ -108,78 +115,216 @@ function switchPlatform(platform) {
     calculateAverageMargin();
 }
 
+// Helper function to safely get platform price
+function getPlatformPrice(item, platform) {
+    if (!item.platformPricing) return item.basePrice || 0;
+
+    const platformPricing = item.platformPricing[platform];
+
+    // Handle different pricing formats
+    if (typeof platformPricing === 'number') {
+        return platformPricing;
+    } else if (typeof platformPricing === 'object' && platformPricing?.price) {
+        return platformPricing.price;
+    } else {
+        return item.basePrice || 0;
+    }
+}
+
+// Validate item data structure
+function validateItemData(item) {
+    const errors = [];
+
+    if (!item.name) errors.push('Missing name');
+    if (!item.category) errors.push('Missing category');
+    if (typeof item.basePrice !== 'number') errors.push('Invalid basePrice');
+
+    // Check if variants is malformed string
+    if (typeof item.variants === 'string') {
+        errors.push('Variants stored as string (data corruption)');
+    }
+
+    return errors;
+}
+
 // Load Menu Data from Firebase
 async function loadMenuData() {
     try {
         showLoading(true);
+        console.log('🔄 Loading menu data...');
 
-        // Load all menu items with variant structure
-        const menuItemsSnap = await getDocs(collection(db, 'menuItems'));
-
-        // Reset data
+        // Reset data structure
         menuData.wings = [];
         menuData.sides = [];
         menuData.drinks = [];
+        menuData.combos = [];
+        menuData.sauces = [];
         menuData.items = {};
+        menuData.modifiers = {};
 
-        // Process menu items with variants
-        menuItemsSnap.docs.forEach(doc => {
-            const item = { id: doc.id, ...doc.data() };
+        // Load menu items with enhanced error handling
+        try {
+            console.log('📦 Fetching menuItems collection...');
+            const menuItemsSnap = await getDocs(collection(db, 'menuItems'));
+            console.log(`✅ Found ${menuItemsSnap.docs.length} menu items`);
 
-            // Store in items lookup
-            menuData.items[item.id] = item;
+            if (menuItemsSnap.docs.length === 0) {
+                console.warn('⚠️  No menu items found in database');
+                showError('No menu items found. Please seed test data or run migration script.');
+                return;
+            }
 
-            // If item has variants, expand them for display
-            if (item.variants && item.variants.length > 0) {
-                item.variants.forEach(variant => {
-                    const expandedItem = {
-                        ...variant,
-                        parentId: item.id,
-                        parentName: item.name,
-                        baseItem: false,
-                        category: item.category,
-                        modifierGroups: item.modifierGroups || [],
-                        images: item.images
+            menuItemsSnap.docs.forEach(docSnap => {
+                const item = { id: docSnap.id, ...docSnap.data() };
+
+                // Validate item data
+                const validationErrors = validateItemData(item);
+                if (validationErrors.length > 0) {
+                    console.error(`❌ Item ${item.name || item.id} has errors:`, validationErrors);
+
+                    // If variants is corrupted, show specific error
+                    if (validationErrors.includes('Variants stored as string (data corruption)')) {
+                        showError(`Data corruption detected in ${item.name}. Please run migration script.`);
+                        return;
+                    }
+                }
+
+                console.log(`🔍 Processing item: ${item.name} (${item.category})`);
+                console.log(`   - Has variants: ${Array.isArray(item.variants) ? item.variants.length : 'No'}`);
+
+                // Store in items lookup
+                menuData.items[item.id] = item;
+
+                // If item has variants, expand them for display
+                if (item.variants && Array.isArray(item.variants) && item.variants.length > 0) {
+                    console.log(`   - Expanding ${item.variants.length} variants`);
+
+                    item.variants.forEach((variant, index) => {
+                        // Use variant's own ID if available, otherwise generate one
+                        const variantId = variant.id || `${item.id}_variant_${index}`;
+
+                        const expandedItem = {
+                            ...variant,
+                            id: variantId,
+                            parentId: item.id,
+                            parentName: item.name,
+                            baseItem: false,
+                            category: item.category,
+                            modifierGroups: item.modifierGroups || [],
+                            images: item.images || {},
+                            basePrice: variant.basePrice || item.basePrice || 0,
+                            platformPricing: variant.platformPricing || {},
+                            // Preserve original item properties
+                            allergens: variant.allergens || item.allergens || [],
+                            active: variant.active !== undefined ? variant.active : item.active
+                        };
+
+                        // Categorize by parent category
+                        if (item.category === 'wings') {
+                            menuData.wings.push(expandedItem);
+                        } else if (item.category === 'sides') {
+                            menuData.sides.push(expandedItem);
+                        } else if (item.category === 'drinks') {
+                            menuData.drinks.push(expandedItem);
+                        }
+
+                        console.log(`     ✓ Added variant: ${variant.name} ($${variant.basePrice})`);
+                    });
+                } else {
+                    // Single item (no variants) or legacy format
+                    console.log(`   - Single item (no variants)`);
+
+                    const singleItem = {
+                        ...item,
+                        baseItem: true,
+                        platformPricing: item.platformPricing || {},
+                        active: item.active !== undefined ? item.active : true
                     };
 
-                    // Categorize by parent category
                     if (item.category === 'wings') {
-                        menuData.wings.push(expandedItem);
+                        menuData.wings.push(singleItem);
                     } else if (item.category === 'sides') {
-                        menuData.sides.push(expandedItem);
+                        menuData.sides.push(singleItem);
                     } else if (item.category === 'drinks') {
-                        menuData.drinks.push(expandedItem);
+                        menuData.drinks.push(singleItem);
                     }
-                });
-            } else {
-                // Old format compatibility
-                if (item.category === 'wings') {
-                    menuData.wings.push(item);
-                } else if (item.category === 'sides') {
-                    menuData.sides.push(item);
-                } else if (item.category === 'drinks') {
-                    menuData.drinks.push(item);
                 }
-            }
-        });
+            });
+        } catch (menuError) {
+            console.error('❌ Error loading menuItems:', menuError);
+            showError('Failed to load menu items: ' + menuError.message);
+            return;
+        }
 
         // Load combos from separate collection
-        const combosSnap = await getDocs(collection(db, 'combos'));
-        menuData.combos = combosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        try {
+            const combosSnap = await getDocs(collection(db, 'combos'));
+            menuData.combos = combosSnap.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                platformPricing: doc.data().platformPricing || {}
+            }));
+            console.log(`Loaded ${menuData.combos.length} combos`);
+        } catch (comboError) {
+            console.error('Error loading combos:', comboError);
+        }
 
         // Load sauces
-        const saucesSnap = await getDocs(collection(db, 'sauces'));
-        menuData.sauces = saucesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        try {
+            const saucesSnap = await getDocs(collection(db, 'sauces'));
+            menuData.sauces = saucesSnap.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                platformPricing: doc.data().platformPricing || {}
+            }));
+            console.log(`Loaded ${menuData.sauces.length} sauces`);
+        } catch (sauceError) {
+            console.error('Error loading sauces:', sauceError);
+        }
 
-        // Try to load modifier groups (may not exist)
+        // Try to load modifier groups (may not exist yet)
         try {
             const modifiersSnap = await getDocs(collection(db, 'modifierGroups'));
             modifiersSnap.docs.forEach(doc => {
                 menuData.modifiers[doc.id] = doc.data();
             });
-        } catch (e) {
-            console.log('ModifierGroups collection not found');
+            console.log(`Loaded ${Object.keys(menuData.modifiers).length} modifier groups`);
+        } catch (modifierError) {
+            console.log('ModifierGroups collection not found, creating default structure');
+            // Create default modifier structure
+            menuData.modifiers = {
+                sauce_choice: {
+                    name: 'Sauce Choice',
+                    type: 'single',
+                    required: true,
+                    options: menuData.sauces.map(sauce => ({
+                        id: sauce.id,
+                        name: sauce.name,
+                        price: 0
+                    }))
+                },
+                wing_style: {
+                    name: 'Wing Style',
+                    type: 'single',
+                    required: false,
+                    options: [
+                        { id: 'regular', name: 'Regular Mix', price: 0 },
+                        { id: 'drums', name: 'All Drums', price: 1.50 },
+                        { id: 'flats', name: 'All Flats', price: 1.50 },
+                        { id: 'boneless', name: 'Boneless', price: 0 }
+                    ]
+                }
+            };
         }
+
+        console.log('Menu data loaded successfully:', {
+            wings: menuData.wings.length,
+            sides: menuData.sides.length,
+            drinks: menuData.drinks.length,
+            combos: menuData.combos.length,
+            sauces: menuData.sauces.length,
+            modifiers: Object.keys(menuData.modifiers).length
+        });
 
         // Display menu items
         displayMenuItems();
@@ -187,7 +332,7 @@ async function loadMenuData() {
 
     } catch (error) {
         console.error('Error loading menu data:', error);
-        showError('Failed to load menu data');
+        showError('Failed to load menu data: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -245,9 +390,24 @@ function updateCategoryCount(category, count) {
 
 // Create Menu Item HTML
 function createMenuItem(item, category) {
-    // Handle variant structure - platformPricing is directly on variant
-    const platformPrice = item.platformPricing?.[currentPlatform] || item.basePrice || 0;
-    const margin = calculateMargin(item.basePrice, platformPrice, currentPlatform);
+    if (!item || !item.name) {
+        console.warn('Invalid item passed to createMenuItem:', item);
+        return '';
+    }
+
+    // Handle platform pricing - could be object with price property or direct number
+    const getPlatformPrice = (platform) => {
+        const platformData = item.platformPricing?.[platform];
+        if (typeof platformData === 'object' && platformData.price !== undefined) {
+            return platformData.price;
+        } else if (typeof platformData === 'number') {
+            return platformData;
+        }
+        return item.basePrice || 0;
+    };
+
+    const platformPrice = getPlatformPrice(currentPlatform);
+    const margin = calculateMargin(item.basePrice || 0, platformPrice, currentPlatform);
 
     // Show parent name if this is a variant
     const displayName = item.parentName ? `${item.name}` : item.name;
@@ -267,10 +427,11 @@ function createMenuItem(item, category) {
                 ` : ''}
                 <div class="item-prices">
                     ${Object.entries(platforms).map(([key, platform]) => {
-                        const price = item.platformPricing?.[key] || item.basePrice || 0;
+                        const price = getPlatformPrice(key);
+                        const isActive = currentPlatform === key;
                         return `
-                            <div class="price-badge">
-                                <img src="/images/logos/${key}-logo.svg" alt="${platform.name}">
+                            <div class="price-badge ${isActive ? 'active' : ''}">
+                                <img src="/images/logos/${key}-logo.svg" alt="${platform.name}" onerror="this.style.display='none'">
                                 <span>$${price.toFixed(2)}</span>
                             </div>
                         `;
@@ -334,20 +495,31 @@ function displayItemEditor(item) {
                 <label>Platform Pricing</label>
                 <div class="platform-pricing">
                     ${Object.entries(platforms).map(([key, platform]) => {
-                        const platformPrice = item.platformPricing?.[key]?.price || item.basePrice || 0;
-                        const margin = calculateMargin(item.basePrice, platformPrice, key);
+                        // Handle both object and number formats for platform pricing
+                        const platformData = item.platformPricing?.[key];
+                        let platformPrice = 0;
+
+                        if (typeof platformData === 'object' && platformData.price !== undefined) {
+                            platformPrice = platformData.price;
+                        } else if (typeof platformData === 'number') {
+                            platformPrice = platformData;
+                        } else {
+                            platformPrice = item.basePrice || 0;
+                        }
+
+                        const margin = calculateMargin(item.basePrice || 0, platformPrice, key);
                         const marginClass = margin >= 40 ? 'good' : margin >= 30 ? 'warning' : 'bad';
 
                         return `
                             <div class="platform-price-card">
                                 <h4>
-                                    <img src="/images/logos/${key}-logo.svg" alt="${platform.name}">
+                                    <img src="/images/logos/${key}-logo.svg" alt="${platform.name}" onerror="this.style.display='none'">
                                     ${platform.name}
                                 </h4>
                                 <div class="price-input-group">
                                     <span>$</span>
                                     <input type="number" class="price-input" id="price_${key}"
-                                           value="${platformPrice}" step="0.50"
+                                           value="${platformPrice.toFixed(2)}" step="0.50"
                                            onchange="updateMargin('${key}')">
                                 </div>
                                 <div class="margin-display ${marginClass}" id="margin_${key}">
@@ -498,14 +670,30 @@ async function saveItem(event) {
     }
 }
 
-// Find Item Category
+// Find Item Category and Collection
 function findItemCategory(itemId) {
-    for (const category of ['wings', 'sides', 'combos', 'sauces']) {
+    // Check if it's a variant (has _variant_ in ID)
+    if (itemId.includes('_variant_')) {
+        const parentId = itemId.split('_variant_')[0];
+        if (menuData.items[parentId]) {
+            return 'menuItems'; // Variants are stored in parent items
+        }
+    }
+
+    // Check direct collections
+    for (const category of ['combos', 'sauces']) {
         if (menuData[category].some(item => item.id === itemId)) {
             return category;
         }
     }
-    return null;
+
+    // Check if it's in menuItems
+    if (menuData.items[itemId]) {
+        return 'menuItems';
+    }
+
+    console.warn('Could not find collection for item:', itemId);
+    return 'menuItems'; // Default fallback
 }
 
 // Generate Menu Link - Creates Immutable Published Menu
