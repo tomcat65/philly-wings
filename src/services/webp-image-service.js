@@ -169,44 +169,80 @@ export class WebPImageService {
 
     // Process existing images
     this.processExistingImages();
+
+    // Observe dynamically added images or src attribute changes
+    try {
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(m => {
+          // Handle attribute changes on <img src>
+          if (m.type === 'attributes' && m.attributeName === 'src' && m.target && m.target.tagName === 'IMG') {
+            this.processImage(m.target);
+          }
+          // Handle newly added nodes containing images
+          if (m.type === 'childList' && (m.addedNodes && m.addedNodes.length)) {
+            m.addedNodes.forEach(node => {
+              if (!node) return;
+              if (node.tagName === 'IMG') {
+                this.processImage(node);
+              } else if (node.querySelectorAll) {
+                node.querySelectorAll('img[src]').forEach(img => this.processImage(img));
+              }
+            });
+          }
+        });
+      });
+      observer.observe(document.documentElement || document.body, {
+        attributes: true,
+        attributeFilter: ['src'],
+        childList: true,
+        subtree: true
+      });
+      this._observer = observer;
+    } catch (_) {
+      // MutationObserver not available; skip
+    }
   }
 
   // Process images already on the page
   processExistingImages() {
     const images = document.querySelectorAll('img[src]');
     images.forEach(img => {
+      this.processImage(img);
+    });
+  }
+
+  // Process a single <img> element safely
+  processImage(img) {
+    try {
+      if (!this.webpSupported || !img) return;
       const s = img.getAttribute('src') || '';
       if (
-        !img.dataset.noWebp &&
-        s.includes('firebasestorage') &&
-        !s.endsWith('.webp') &&
-        !s.includes('/resized/') &&
-        !s.startsWith('data:') &&
-        img.dataset.webpApplied !== '1'
+        img.dataset.noWebp === 'true' ||
+        !s.includes('firebasestorage') ||
+        s.endsWith('.webp') ||
+        s.includes('/resized/') ||
+        s.startsWith('data:') ||
+        img.dataset.webpApplied === '1'
       ) {
-        const size = this.getOptimalSize(img);
-        const webpUrl = this.transformToWebP(s, size);
-
-        // Store original
-        img.dataset.originalSrc = s;
-        img.dataset.webpApplied = '1';
-
-        // Try WebP with fallback
-        const testImg = new Image();
-        // Prevent our interceptor from re-processing the probe image
-        try { testImg.dataset.noWebp = 'true'; } catch (_) {}
-        testImg.onload = () => {
-          // Use attribute to minimize interference
-          img.setAttribute('src', webpUrl);
-        };
-        testImg.onerror = () => {
-          console.warn(`WebP not found for existing image: ${img.src}`);
-          img.dataset.webpApplied = '';
-        };
-        // Use setAttribute to bypass overridden src setter
-        testImg.setAttribute('src', webpUrl);
+        return;
       }
-    });
+
+      const size = this.getOptimalSize(img);
+      const webpUrl = this.transformToWebP(s, size);
+      img.dataset.originalSrc = s;
+      img.dataset.webpApplied = '1';
+
+      const testImg = new Image();
+      try { testImg.dataset.noWebp = 'true'; } catch (_) {}
+      testImg.onload = () => {
+        img.setAttribute('src', webpUrl);
+      };
+      testImg.onerror = () => {
+        // Fallback to original if WebP missing
+        img.dataset.webpApplied = '';
+      };
+      testImg.setAttribute('src', webpUrl);
+    } catch (_) { /* no-op */ }
   }
 
   // Manual method to convert URL (for dynamic content)
