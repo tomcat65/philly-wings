@@ -10,7 +10,7 @@ export class ComboMenu {
 
     try {
       // Load combos from CDN-cached JSON
-      const response = await fetch('/data/combos.json');
+      const response = await fetch(`/data/combos.json?v=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Failed to load combos');
 
       this.combos = await response.json();
