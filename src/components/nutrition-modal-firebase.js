@@ -2,6 +2,7 @@
 // Updated by Sally for dynamic nutrition data management
 
 import { NutritionService } from '../services/nutrition-service.js';
+import { FirebaseService } from '../services/firebase-service.js';
 
 export class NutritionModalFirebase {
   constructor() {
@@ -200,6 +201,14 @@ export class NutritionModalFirebase {
                   <p>* The % Daily Value tells you how much a nutrient in a serving of food contributes to a daily diet. 2,000 calories a day is used for general nutrition advice.</p>
                 </div>
 
+                <!-- What's Inside (computed combos) -->
+                <div id="comboBreakdownSection" class="combo-breakdown" style="display:none; margin-top: 16px;">
+                  <h4 style="margin: 8px 0;">What’s inside</h4>
+                  <div id="comboBreakdownList"></div>
+                  <p id="comboSauceNote" class="sauce-note" style="margin-top:8px; display:none;"></p>
+                  <p id="comboDisclaimer" class="disclaimer-note" style="margin-top:8px; color:#555; display:none;"></p>
+                </div>
+
                 <!-- Dietary Claims (if applicable) -->
                 <div id="dietaryClaims" class="dietary-claims" style="display: none;">
                   <div class="claims-list"></div>
@@ -337,12 +346,196 @@ export class NutritionModalFirebase {
       // Fetch nutrition data from Firebase
       let nutrition;
 
-      if (sauceId) {
-        // Get combined nutrition with sauce
-        nutrition = await NutritionService.getNutritionWithSauce(itemId, sauceId);
-      } else {
-        // Get single item nutrition
-        nutrition = await NutritionService.getById(itemId);
+      // Special handling for combos: prefer computedNutrition; support docId or field id lookup
+      if (category === 'combos' && itemId) {
+        let comboDoc = await FirebaseService.getById('combos', itemId);
+        if (!comboDoc) {
+          const matches = await FirebaseService.getAll('combos', { where: ['id', '==', itemId], limit: 1 });
+          comboDoc = matches && matches.length ? matches[0] : null;
+        }
+        if (comboDoc && comboDoc.computedNutrition) {
+          const cn = comboDoc.computedNutrition;
+          // Normalize into a structure compatible with populateModal
+          nutrition = {
+            _computed: true,
+            name: comboDoc.name || 'Combo',
+            servingsPerContainer: cn.servingsPerCombo || cn.servingsPerContainer || 1,
+            perServing: cn.perServing || {},
+            perCombo: cn.perCombo || {},
+            allergens: cn.allergens || [],
+            disclaimer: cn.disclaimer || comboDoc.disclaimer || '',
+            breakdown: cn.breakdown || [],
+            sauceNote: cn.sauceNote || null,
+          };
+        } else if (comboDoc && Array.isArray(comboDoc.items) && comboDoc.items.length) {
+          // Fallback: client-side compute by summing referenced nutritionData docs (no sauce/range logic)
+          try {
+            const refs = comboDoc.items;
+            const chunks = (arr, n) => arr.length ? [arr.slice(0, n), ...chunks(arr.slice(n), n)] : [];
+            const pulls = [];
+            for (const c of chunks(refs, 10)) {
+              pulls.push(FirebaseService.getAll('nutritionData', { where: ['id', '==', c[0]], limit: 1 }));
+              for (let i = 1; i < c.length; i++) {
+                pulls.push(FirebaseService.getAll('nutritionData', { where: ['id', '==', c[i]], limit: 1 }));
+              }
+            }
+            const results = (await Promise.all(pulls)).flat().filter(Boolean);
+            const byId = {};
+            results.forEach(d => { byId[d.id] = d; });
+            const fields = ['calories','totalFat','saturatedFat','transFat','cholesterol','sodium','totalCarbs','dietaryFiber','totalSugars','addedSugars','protein','vitaminD','calcium','iron','potassium'];
+            const totals = Object.fromEntries(fields.map(f => [f, 0]));
+            const breakdown = [];
+            const allergens = new Set();
+            refs.forEach(refId => {
+              const item = byId[refId];
+              if (!item) return;
+              const n = item.nutrients || item;
+              totals.calories += n.calories || 0;
+              totals.totalFat += n.totalFat?.amount ?? n.totalFat ?? 0;
+              totals.saturatedFat += n.saturatedFat?.amount ?? n.saturatedFat ?? 0;
+              totals.transFat += n.transFat?.amount ?? n.transFat ?? 0;
+              totals.cholesterol += n.cholesterol?.amount ?? n.cholesterol ?? 0;
+              totals.sodium += n.sodium?.amount ?? n.sodium ?? 0;
+              totals.totalCarbs += n.totalCarbs?.amount ?? n.totalCarbs ?? 0;
+              totals.dietaryFiber += n.dietaryFiber?.amount ?? n.dietaryFiber ?? 0;
+              totals.totalSugars += n.totalSugars?.amount ?? n.totalSugars ?? 0;
+              totals.addedSugars += n.addedSugars?.amount ?? n.addedSugars ?? 0;
+              totals.protein += n.protein?.amount ?? n.protein ?? 0;
+              totals.vitaminD += n.vitaminD?.amount ?? n.vitaminD ?? 0;
+              totals.calcium += n.calcium?.amount ?? n.calcium ?? 0;
+              totals.iron += n.iron?.amount ?? n.iron ?? 0;
+              totals.potassium += n.potassium?.amount ?? n.potassium ?? 0;
+              breakdown.push({ refId, name: item.name, qty: 1, calories: Math.round(n.calories || 0) });
+              NutritionService.formatAllergens(item.allergens).forEach(a => allergens.add(a));
+            });
+            const servings = comboDoc.servingsPerCombo || comboDoc.feedsCount || 1;
+            const round1 = (v) => Math.round((v + Number.EPSILON) * 10) / 10;
+            const round0 = (v) => Math.round(v);
+            const perCombo = {
+              calories: round0(totals.calories),
+              totalFat: round1(totals.totalFat),
+              saturatedFat: round1(totals.saturatedFat),
+              transFat: round1(totals.transFat || 0),
+              cholesterol: round0(totals.cholesterol),
+              sodium: round0(totals.sodium),
+              totalCarbs: round0(totals.totalCarbs),
+              dietaryFiber: round0(totals.dietaryFiber || 0),
+              totalSugars: round0(totals.totalSugars || 0),
+              addedSugars: round0(totals.addedSugars || 0),
+              protein: round0(totals.protein),
+              vitaminD: round1(totals.vitaminD || 0),
+              calcium: round0(totals.calcium || 0),
+              iron: round1(totals.iron || 0),
+              potassium: round0(totals.potassium || 0)
+            };
+            const perServing = {};
+            Object.entries(perCombo).forEach(([k, v]) => {
+              perServing[k] = (k === 'totalFat' || k === 'saturatedFat' || k === 'transFat' || k === 'vitaminD' || k === 'iron')
+                ? round1(v / servings)
+                : round0(v / servings);
+            });
+            nutrition = {
+              _computed: true,
+              name: comboDoc.name || 'Combo',
+              servingsPerContainer: servings,
+              perServing,
+              perCombo,
+              allergens: Array.from(allergens),
+              breakdown,
+              disclaimer: comboDoc.disclaimer || ''
+            };
+          } catch (e) {
+            console.warn('Fallback combo nutrition compute failed:', e);
+          }
+        } else {
+          // Final fallback: try static JSON feed at /data/combos.json
+          try {
+            const res = await fetch(`/data/combos.json?v=${Date.now()}`, { cache: 'no-store' });
+            if (res.ok) {
+              const list = await res.json();
+              const combo = Array.isArray(list) ? list.find(c => c.id === itemId) : null;
+              if (combo && Array.isArray(combo.items) && combo.items.length) {
+                // Reuse the same lightweight local compute path
+                const refs = combo.items;
+                const pulls = refs.map(r => FirebaseService.getAll('nutritionData', { where: ['id', '==', r], limit: 1 }));
+                const results = (await Promise.all(pulls)).flat().filter(Boolean);
+                const byId = {};
+                results.forEach(d => { byId[d.id] = d; });
+                const fields = ['calories','totalFat','saturatedFat','transFat','cholesterol','sodium','totalCarbs','dietaryFiber','totalSugars','addedSugars','protein','vitaminD','calcium','iron','potassium'];
+                const totals = Object.fromEntries(fields.map(f => [f, 0]));
+                const breakdown = [];
+                const allergens = new Set();
+                refs.forEach(refId => {
+                  const item = byId[refId];
+                  if (!item) return;
+                  const n = item.nutrients || item;
+                  totals.calories += n.calories || 0;
+                  totals.totalFat += n.totalFat?.amount ?? n.totalFat ?? 0;
+                  totals.saturatedFat += n.saturatedFat?.amount ?? n.saturatedFat ?? 0;
+                  totals.transFat += n.transFat?.amount ?? n.transFat ?? 0;
+                  totals.cholesterol += n.cholesterol?.amount ?? n.cholesterol ?? 0;
+                  totals.sodium += n.sodium?.amount ?? n.sodium ?? 0;
+                  totals.totalCarbs += n.totalCarbs?.amount ?? n.totalCarbs ?? 0;
+                  totals.dietaryFiber += n.dietaryFiber?.amount ?? n.dietaryFiber ?? 0;
+                  totals.totalSugars += n.totalSugars?.amount ?? n.totalSugars ?? 0;
+                  totals.addedSugars += n.addedSugars?.amount ?? n.addedSugars ?? 0;
+                  totals.protein += n.protein?.amount ?? n.protein ?? 0;
+                  totals.vitaminD += n.vitaminD?.amount ?? n.vitaminD ?? 0;
+                  totals.calcium += n.calcium?.amount ?? n.calcium ?? 0;
+                  totals.iron += n.iron?.amount ?? n.iron ?? 0;
+                  totals.potassium += n.potassium?.amount ?? n.potassium ?? 0;
+                  breakdown.push({ refId, name: item.name, qty: 1, calories: Math.round(n.calories || 0) });
+                  NutritionService.formatAllergens(item.allergens).forEach(a => allergens.add(a));
+                });
+                const servings = combo.servingsPerCombo || combo.feedsCount || 1;
+                const round1 = (v) => Math.round((v + Number.EPSILON) * 10) / 10;
+                const round0 = (v) => Math.round(v);
+                const perCombo = {
+                  calories: round0(totals.calories),
+                  totalFat: round1(totals.totalFat),
+                  saturatedFat: round1(totals.saturatedFat),
+                  transFat: round1(totals.transFat || 0),
+                  cholesterol: round0(totals.cholesterol),
+                  sodium: round0(totals.sodium),
+                  totalCarbs: round0(totals.totalCarbs),
+                  dietaryFiber: round0(totals.dietaryFiber || 0),
+                  totalSugars: round0(totals.totalSugars || 0),
+                  addedSugars: round0(totals.addedSugars || 0),
+                  protein: round0(totals.protein),
+                  vitaminD: round1(totals.vitaminD || 0),
+                  calcium: round0(totals.calcium || 0),
+                  iron: round1(totals.iron || 0),
+                  potassium: round0(totals.potassium || 0)
+                };
+                const perServing = {};
+                Object.entries(perCombo).forEach(([k, v]) => {
+                  perServing[k] = (k === 'totalFat' || k === 'saturatedFat' || k === 'transFat' || k === 'vitaminD' || k === 'iron')
+                    ? round1(v / servings)
+                    : round0(v / servings);
+                });
+                nutrition = {
+                  _computed: true,
+                  name: combo.name || 'Combo',
+                  servingsPerContainer: servings,
+                  perServing,
+                  perCombo,
+                  allergens: Array.from(allergens),
+                  breakdown,
+                  disclaimer: combo.disclaimer || ''
+                };
+              }
+            }
+          } catch (_) {}
+        }
+      }
+
+      // Fallback to item/nutritionData lookup (wings/sides/sauces)
+      if (!nutrition) {
+        if (sauceId) {
+          nutrition = await NutritionService.getNutritionWithSauce(itemId, sauceId);
+        } else {
+          nutrition = await NutritionService.getById(itemId);
+        }
       }
 
       if (!nutrition) {
@@ -404,28 +597,36 @@ export class NutritionModalFirebase {
       return nutrient || 0;
     };
 
-    // Get base nutrition values (these are PER SERVING from Firebase)
+    // Get base nutrition values
+    // For computed combos, select data based on toggle state
+    const baseData = nutrition._computed
+      ? (this.showPerServing ? (nutrition.perServing || {}) : (nutrition.perCombo || {}))
+      : (nutrition.nutrients || nutrition);
+
     const perServingNutrients = {
-      calories: nutrition.nutrients?.calories || nutrition.calories || 0,
-      totalFat: getNutrientValue(nutrition.nutrients?.totalFat || nutrition.totalFat),
-      saturatedFat: getNutrientValue(nutrition.nutrients?.saturatedFat || nutrition.saturatedFat),
-      transFat: getNutrientValue(nutrition.nutrients?.transFat || nutrition.transFat),
-      cholesterol: getNutrientValue(nutrition.nutrients?.cholesterol || nutrition.cholesterol),
-      sodium: getNutrientValue(nutrition.nutrients?.sodium || nutrition.sodium),
-      totalCarbs: getNutrientValue(nutrition.nutrients?.totalCarbs || nutrition.totalCarbs),
-      dietaryFiber: getNutrientValue(nutrition.nutrients?.dietaryFiber || nutrition.dietaryFiber),
-      totalSugars: getNutrientValue(nutrition.nutrients?.totalSugars || nutrition.totalSugars),
-      addedSugars: getNutrientValue(nutrition.nutrients?.addedSugars || nutrition.addedSugars),
-      protein: getNutrientValue(nutrition.nutrients?.protein || nutrition.protein),
-      vitaminD: getNutrientValue(nutrition.nutrients?.vitaminD || nutrition.vitaminD),
-      calcium: getNutrientValue(nutrition.nutrients?.calcium || nutrition.calcium),
-      iron: getNutrientValue(nutrition.nutrients?.iron || nutrition.iron),
-      potassium: getNutrientValue(nutrition.nutrients?.potassium || nutrition.potassium)
+      calories: baseData.calories || 0,
+      totalFat: getNutrientValue(baseData.totalFat),
+      saturatedFat: getNutrientValue(baseData.saturatedFat),
+      transFat: getNutrientValue(baseData.transFat),
+      cholesterol: getNutrientValue(baseData.cholesterol),
+      sodium: getNutrientValue(baseData.sodium),
+      totalCarbs: getNutrientValue(baseData.totalCarbs),
+      dietaryFiber: getNutrientValue(baseData.dietaryFiber),
+      totalSugars: getNutrientValue(baseData.totalSugars),
+      addedSugars: getNutrientValue(baseData.addedSugars),
+      protein: getNutrientValue(baseData.protein),
+      vitaminD: getNutrientValue(baseData.vitaminD),
+      calcium: getNutrientValue(baseData.calcium),
+      iron: getNutrientValue(baseData.iron),
+      potassium: getNutrientValue(baseData.potassium)
     };
 
     // Calculate display data based on toggle state
     let displayData;
-    if (this.showPerServing || !hasMultipleServings) {
+    if (nutrition._computed) {
+      // Already selected appropriate per-serving or per-combo values in baseData
+      displayData = perServingNutrients;
+    } else if (this.showPerServing || !hasMultipleServings) {
       // Show per-serving values (raw data from Firebase)
       displayData = perServingNutrients;
       console.log('Showing per-serving nutrition:', displayData);
@@ -549,6 +750,37 @@ export class NutritionModalFirebase {
 
     // Dietary claims
     this.displayDietaryClaims(nutrition);
+
+    // Combo breakdown (if computed)
+    const breakdownSection = document.getElementById('comboBreakdownSection');
+    const breakdownList = document.getElementById('comboBreakdownList');
+    const sauceNoteEl = document.getElementById('comboSauceNote');
+    const disclaimerEl = document.getElementById('comboDisclaimer');
+    if (nutrition._computed && Array.isArray(nutrition.breakdown) && nutrition.breakdown.length) {
+      breakdownSection.style.display = 'block';
+      breakdownList.innerHTML = nutrition.breakdown.map(b => {
+        const qtyText = typeof b.qty === 'string' ? b.qty : `x${b.qty}`;
+        return `<div class="breakdown-row"><span>${qtyText} ${b.name || b.refId}</span><span>${b.calories ?? 0} cal</span></div>`;
+      }).join('');
+      if (nutrition.sauceNote) {
+        sauceNoteEl.style.display = 'block';
+        if (nutrition.sauceNote.policy === 'representative') {
+          sauceNoteEl.textContent = `Includes representative sauce (${nutrition.sauceNote.representativeId || 'sauce'}) at ${nutrition.sauceNote.portion || ''}.`;
+        } else if (nutrition.sauceNote.policy === 'range') {
+          sauceNoteEl.textContent = `Sauce adds variable calories.`;
+        }
+      } else {
+        sauceNoteEl.style.display = 'none';
+      }
+      if (nutrition.disclaimer) {
+        disclaimerEl.style.display = 'block';
+        disclaimerEl.textContent = nutrition.disclaimer;
+      } else {
+        disclaimerEl.style.display = 'none';
+      }
+    } else {
+      breakdownSection.style.display = 'none';
+    }
   }
 
   setDailyValue(elementId, value, warnIfHigh = false, goodIfHigh = false) {

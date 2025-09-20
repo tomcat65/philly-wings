@@ -39,9 +39,8 @@
 - Done: Manifest + audits generated; nested Storage rule deployed for `/images/**`.
 - Done: homepage derivative coverage verified; direct WebP links patched in `index.html`, `public/data/sauces.json`, and `public/data/combos.json`. Preview audit shows 0 non‑WebP, 0 broken.
 
-### 5) Hosting Canonical Redirect
-- In Firebase Hosting → Custom domains, set 301 from apex `phillywingsexpress.com` → `https://www.phillywingsexpress.com` (preserve path & query) or via `firebase.json`.
-- Confirm both apex and www SSL “Provisioned”.
+### 5) Hosting Canonical Redirect — Resolved
+- Decision: Keep apex serving directly (no apex→www 301). SSL for both apex and www is provisioned.
 
 ### 6) Backups / Guardrails
 - Export Firestore after seeding: `menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`.
@@ -57,11 +56,10 @@
 - Add a GH Action to run: storage manifest, link 404 audit, WebP audit on PR.
 
 ## Proposed Next Steps (Execution Plan)
-1) Configure 301 apex → www redirect in Hosting UI (or `firebase.json`).
-2) Verify/create missing `nutritionData` docs for 12/24/30/50 and sides/combos.
-3) CI: add PR audit job (manifest, link 404s, WebP coverage).
-4) Backups: export Firestore collections (`menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`).
-5) (If needed) Seed any straggler `menuItems` variants via admin panel.
+1) Verify/create missing `nutritionData` docs for 12/24/30/50 and sides/combos.
+2) CI: add PR audit job (manifest, link 404s, WebP coverage).
+3) Backups: export Firestore collections (`menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`).
+4) (If needed) Seed any straggler `menuItems` variants via admin panel.
 
 ---
 Owner: Codex
