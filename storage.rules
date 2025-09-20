@@ -104,6 +104,12 @@ service firebase.storage {
         (request.auth.uid == userId || isAdmin());
     }
 
+    // Platform menus JSON — public read; admin write (functions bypass rules)
+    match /platform-menus/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Default deny all other paths
     match /{allPaths=**} {
       allow read, write: if false;

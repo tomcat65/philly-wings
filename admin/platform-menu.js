@@ -1,6 +1,7 @@
 // Platform Menu Management System
 // bump: no-op change to trigger preview rebuild
-import { auth, db, storage } from '../src/firebase-config';
+import { auth, db, storage, functions } from '../src/firebase-config';
+import { httpsCallable } from 'firebase/functions';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
     collection,
@@ -1121,6 +1122,79 @@ async function generateMenuLink() {
     }
 }
 
+// Preview Platform JSON (Admin-only helper; no writes)
+async function previewPlatformJSON() {
+    try {
+        showLoading(true);
+        const platform = currentPlatform === 'all' ? 'doordash' : currentPlatform;
+        const snapshot = await buildCompleteMenuSnapshot(platform);
+        const modal = document.getElementById('linkModal');
+        modal.style.display = 'flex';
+        document.querySelector('#linkModal .modal-header h2').textContent = 'Preview Platform JSON';
+        const linkInput = document.getElementById('generatedLink');
+        linkInput.value = JSON.stringify(snapshot.platformExport || snapshot, null, 2);
+        // Switch copy button to select-all
+        document.getElementById('qrCode').innerHTML = '';
+    } catch (e) {
+        console.error('Error generating preview:', e);
+        showError('Failed to generate preview JSON');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Publish to Storage via callable function
+async function publishToStorage() {
+    try {
+        showLoading(true);
+        const platform = currentPlatform === 'all' ? 'doordash' : currentPlatform;
+        const snapshot = await buildCompleteMenuSnapshot(platform);
+        const payload = snapshot.platformExport || snapshot;
+        const callable = httpsCallable(functions, 'publishPlatformMenu');
+        const result = await callable({ platform, snapshot: payload });
+        const { versionedUrl, latestUrl } = (result && result.data) || {};
+
+        const modal = document.getElementById('linkModal');
+        modal.style.display = 'flex';
+        document.querySelector('#linkModal .modal-header h2').textContent = 'Published Platform Menu';
+        const linkInput = document.getElementById('generatedLink');
+        linkInput.value = latestUrl || versionedUrl || '';
+        document.getElementById('qrCode').innerHTML = `
+            <p>Versioned URL:</p>
+            <code>${versionedUrl || ''}</code>
+            <p style="margin-top: 0.5rem;">Latest URL:</p>
+            <code>${latestUrl || ''}</code>
+        `;
+        showSaved('Published to Storage');
+    } catch (e) {
+        console.error('Error publishing to Storage:', e);
+        showError('Failed to publish to Storage: ' + (e.message || 'unknown error'));
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Download platform JSON to file
+async function downloadPlatformJSON() {
+    try {
+        const platform = currentPlatform === 'all' ? 'doordash' : currentPlatform;
+        const snapshot = await buildCompleteMenuSnapshot(platform);
+        const payload = snapshot.platformExport || snapshot;
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `platform-menu-${platform}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('Error downloading JSON:', e);
+        showError('Failed to download JSON');
+    }
+}
+
 // Build Complete Menu Snapshot for Immutable Storage
 async function buildCompleteMenuSnapshot(platform) {
     const snapshot = {
@@ -1806,6 +1880,9 @@ window.syncPrices = syncPrices;
 window.previewMenu = previewMenu;
 window.exportMenuPDF = exportMenuPDF;
 window.updateMargin = updateMargin;
+window.previewPlatformJSON = previewPlatformJSON;
+window.publishToStorage = publishToStorage;
+window.downloadPlatformJSON = downloadPlatformJSON;
 // Expose utility to recompute/upload nutrition feed from console
 window.uploadCombosNutritionFeed = uploadCombosNutritionFeed;
 
