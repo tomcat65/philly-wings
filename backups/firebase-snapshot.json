@@ -4,17 +4,13 @@
   "firestore": {
     "collections": {
       "combos": {
-        "count": 9,
+        "count": 5,
         "documents": [
-          {"path": "combos/3yhbryADluFsEx8O2xdU", "id": "sampler_platter", "name": "Sampler Platter"},
-          {"path": "combos/D1F7cvfjgfMyEfPrdvBE", "id": "mvp_meal", "name": "MVP Meal"},
           {"path": "combos/LHVOJwNbXNuXOZbpHtGO", "id": "combo-mvp", "name": "MVP Meal"},
           {"path": "combos/Mwp2hJceFkGrFKgmIQKX", "id": "combo-game-day-30", "name": "Game Day 30"},
           {"path": "combos/Qzhmx3q9twaSR62M0R7l", "id": "combo-sampler", "name": "Sampler Platter"},
-          {"path": "combos/TkYtV7xlPbM06W71Ex8D", "id": "party_pack_50", "name": "Party Pack 50"},
           {"path": "combos/VQBQJsNsTPSdM3jUSuFm", "id": "combo-tailgater", "name": "The Tailgater"},
-          {"path": "combos/fEAlRAD4aWoWGlf6PCiy", "id": "the_tailgater", "name": "The Tailgater"},
-          {"path": "combos/m8XgnkYctZlA44j4wJbo", "id": "game_day_30", "name": "Game Day 30"}
+          {"path": "combos/iKGdzL0l3zjB3JZ6VegH", "id": "combo-party-pack", "name": "Party Pack 50"}
         ]
       },
       "content": {

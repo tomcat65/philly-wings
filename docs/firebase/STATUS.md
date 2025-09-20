@@ -11,16 +11,12 @@ Project: philly-wings
 
 ## Firestore — Collections & Documents
 
-### combos (9 docs)
-- combos/3yhbryADluFsEx8O2xdU — Sampler Platter (id: sampler_platter)
-- combos/D1F7cvfjgfMyEfPrdvBE — MVP Meal (id: mvp_meal)
+### combos (5 docs)
 - combos/LHVOJwNbXNuXOZbpHtGO — MVP Meal (id: combo-mvp)
 - combos/Mwp2hJceFkGrFKgmIQKX — Game Day 30 (id: combo-game-day-30)
 - combos/Qzhmx3q9twaSR62M0R7l — Sampler Platter (id: combo-sampler)
-- combos/TkYtV7xlPbM06W71Ex8D — Party Pack 50 (id: party_pack_50)
 - combos/VQBQJsNsTPSdM3jUSuFm — The Tailgater (id: combo-tailgater)
-- combos/fEAlRAD4aWoWGlf6PCiy — The Tailgater (id: the_tailgater)
-- combos/m8XgnkYctZlA44j4wJbo — Game Day 30 (id: game_day_30)
+- combos/iKGdzL0l3zjB3JZ6VegH — Party Pack 50 (id: combo-party-pack)
 
 ### content (1 doc)
 - content/IPQOEiPz2D7M9nRQcRbE — Story (id: our-story)

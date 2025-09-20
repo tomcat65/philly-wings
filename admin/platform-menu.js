@@ -19,6 +19,56 @@ import { ref as storageRef, uploadBytes } from 'firebase/storage';
 // Feature flags (Vite env)
 const ENABLE_NUTRITION_FEED_UPLOAD = (import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === 'true' || import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === true);
 
+// ---------- Modifier/Allowance Helpers (Platform menus) ----------
+function getWingsCountFromItem(item) {
+    // Prefer explicit portionDetails.count
+    const count = item?.portionDetails?.count || item?.count;
+    if (typeof count === 'number' && count > 0) return count;
+
+    // Try parse from name like "12 Wings"
+    if (item?.name) {
+        const m = item.name.match(/(\d+)\s*Wings?/i);
+        if (m) return parseInt(m[1], 10);
+    }
+    return 0;
+}
+
+function getWingsCountFromComboItems(itemsField) {
+    // itemsField is often a string like "[30-wings, fries-large-2, mozzarella-sticks-8]"
+    if (!itemsField) return 0;
+    const text = Array.isArray(itemsField) ? itemsField.join(',') : String(itemsField);
+    let total = 0;
+    const re = /(\d+)\s*-\s*wings/gi;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+        total += parseInt(m[1], 10);
+    }
+    return total;
+}
+
+function computeWingAllowancesByCount(wingsCount) {
+    const setsOf6 = Math.floor((wingsCount || 0) / 6);
+    const allowedSauces = setsOf6; // 1 per 6
+    const includedDipCups = setsOf6 * 2; // 2 per 6
+    const includedSauceCups = setsOf6 * 1; // 1 per 6 (sauce-on-side)
+
+    return {
+        perUnit: '6-wings',
+        wingsCount,
+        setsOf6,
+        allowedSauces,
+        includedDipCups,
+        includedSauceCups
+    };
+}
+
+function getModifierPricingMeta() {
+    const extraSaucePrice = menuData?.modifiers?.extra_sauces?.pricePerCup ?? 1.00;
+    const extraDipPrice = menuData?.modifiers?.extra_dips?.pricePerExtra ?? 1.25;
+    const cutSurchargePer6 = menuData?.modifiers?.wing_cut?.surchargePer6 ?? 1.50;
+    return { extraSaucePrice, extraDipPrice, cutSurchargePer6 };
+}
+
 // Remove undefined/NaN/Infinity recursively to satisfy Firestore constraints
 function sanitizeForFirestore(value) {
     if (value === undefined) return undefined;
@@ -52,6 +102,7 @@ let menuData = {
     sides: [],
     combos: [],
     sauces: [],
+    dips: [],
     modifiers: {}
 };
 
@@ -242,7 +293,7 @@ async function loadMenuData() {
                             parentName: item.name,
                             baseItem: false,
                             category: item.category,
-                            modifierGroups: item.modifierGroups || [],
+                            modifierGroups: item.modifierGroups || (item.category === 'wings' ? ['wing_type', 'wing_cut', 'sauce_choice', 'extra_sauces', 'extra_dips'] : []),
                             images: item.images || {},
                             basePrice: variant.basePrice || item.basePrice || 0,
                             platformPricing: variant.platformPricing || {},
@@ -291,11 +342,14 @@ async function loadMenuData() {
         // Load combos from separate collection
         try {
             const combosSnap = await getDocs(collection(db, 'combos'));
-            menuData.combos = combosSnap.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                platformPricing: doc.data().platformPricing || {}
-            }));
+            menuData.combos = combosSnap.docs
+                .map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    platformPricing: doc.data().platformPricing || {}
+                }))
+                // Ensure stable UI order: sort ascending by sortOrder
+                .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
             console.log(`Loaded ${menuData.combos.length} combos`);
         } catch (comboError) {
             console.error('Error loading combos:', comboError);
@@ -304,12 +358,17 @@ async function loadMenuData() {
         // Load sauces
         try {
             const saucesSnap = await getDocs(collection(db, 'sauces'));
-            menuData.sauces = saucesSnap.docs.map(doc => ({
+            const allSauces = saucesSnap.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
                 platformPricing: doc.data().platformPricing || {}
             }));
-            console.log(`Loaded ${menuData.sauces.length} sauces`);
+
+            // Classify dips vs sauces: prefer explicit category, fallback to id/name heuristics
+            menuData.dips = allSauces.filter(s => (s.category === 'dipping-sauce') || s.type === 'dip' || /dip|dipping/i.test(`${s.id} ${s.name}`));
+            menuData.sauces = allSauces.filter(s => !menuData.dips.find(d => d.id === s.id));
+
+            console.log(`Loaded ${allSauces.length} sauces total → ${menuData.sauces.length} sauces, ${menuData.dips.length} dips`);
         } catch (sauceError) {
             console.error('Error loading sauces:', sauceError);
         }
@@ -320,7 +379,109 @@ async function loadMenuData() {
             modifiersSnap.docs.forEach(doc => {
                 menuData.modifiers[doc.id] = doc.data();
             });
-            console.log(`Loaded ${Object.keys(menuData.modifiers).length} modifier groups`);
+
+            // Always ensure we have an extra_dips group sourced from dips list
+            const dipOptions = (menuData.dips || []).map(dip => ({ id: dip.id, name: dip.name, price: 1.25 }));
+            if (dipOptions.length > 0) {
+                menuData.modifiers['extra_dips'] = {
+                    name: 'Extra Dips',
+                    type: 'multiple',
+                    required: false,
+                    min: 0,
+                    max: 6,
+                    options: dipOptions,
+                    perUnit: '6-wings',
+                    includedPerUnit: 2,
+                    pricePerExtra: 1.25
+                };
+
+                // Upsert the modifier group document so it's available to other clients
+                try {
+                    await setDoc(doc(db, 'modifierGroups', 'extra_dips'), menuData.modifiers['extra_dips'], { merge: true });
+                    console.log('Ensured modifierGroups/extra_dips exists');
+                } catch (e) {
+                    console.warn('Could not upsert extra_dips modifier group:', e);
+                }
+            }
+
+            // Sauce choice group (1 per 6 wings, includes Original, sauce-on-side included per 6)
+            const sauceOptions = (menuData.sauces || []).map(s => ({ id: s.id, name: s.name, price: 0 }));
+            // Add explicit 'original' option
+            sauceOptions.unshift({ id: 'original', name: 'Original (No Sauce)', price: 0 });
+            menuData.modifiers['sauce_choice'] = {
+                name: 'Sauce Choice',
+                type: 'single',
+                required: false,
+                perUnit: '6-wings',
+                maxPerUnit: 1,
+                includedSauceCupsPerUnit: 1,
+                sauceOnSideDoesNotCountAgainstDips: true,
+                options: sauceOptions
+            };
+            try {
+                await setDoc(doc(db, 'modifierGroups', 'sauce_choice'), menuData.modifiers['sauce_choice'], { merge: true });
+                console.log('Ensured modifierGroups/sauce_choice exists');
+            } catch (e) {
+                console.warn('Could not upsert sauce_choice modifier group:', e);
+            }
+
+            // Extra sauce cups (paid)
+            const extraSauceOptions = (menuData.sauces || []).map(s => ({ id: s.id, name: s.name, price: 1.00 }));
+            menuData.modifiers['extra_sauces'] = {
+                name: 'Extra Sauce Cups',
+                type: 'multiple',
+                required: false,
+                perUnit: '6-wings',
+                includedPerUnit: 0,
+                pricePerCup: 1.00,
+                options: extraSauceOptions
+            };
+            try {
+                await setDoc(doc(db, 'modifierGroups', 'extra_sauces'), menuData.modifiers['extra_sauces'], { merge: true });
+                console.log('Ensured modifierGroups/extra_sauces exists');
+            } catch (e) {
+                console.warn('Could not upsert extra_sauces modifier group:', e);
+            }
+
+            // Wing type (classic or boneless)
+            menuData.modifiers['wing_type'] = {
+                name: 'Wing Type',
+                type: 'single',
+                required: true,
+                options: [
+                    { id: 'classic', name: 'Classic', price: 0 },
+                    { id: 'boneless', name: 'Boneless', price: 0 }
+                ]
+            };
+            try {
+                await setDoc(doc(db, 'modifierGroups', 'wing_type'), menuData.modifiers['wing_type'], { merge: true });
+                console.log('Ensured modifierGroups/wing_type exists');
+            } catch (e) {
+                console.warn('Could not upsert wing_type modifier group:', e);
+            }
+
+            // Wing cut for classic (mix default; all drums/flats add surcharge per 6 wings)
+            menuData.modifiers['wing_cut'] = {
+                name: 'Wing Cut (Classic Only)',
+                type: 'single',
+                required: false,
+                appliesTo: 'classic',
+                surchargePer6: 1.50,
+                perUnit: '6-wings',
+                options: [
+                    { id: 'mix', name: 'Mix (Drums & Flats)', price: 0 },
+                    { id: 'all_drums', name: 'All Drums', pricePer6: 1.50 },
+                    { id: 'all_flats', name: 'All Flats', pricePer6: 1.50 }
+                ]
+            };
+            try {
+                await setDoc(doc(db, 'modifierGroups', 'wing_cut'), menuData.modifiers['wing_cut'], { merge: true });
+                console.log('Ensured modifierGroups/wing_cut exists');
+            } catch (e) {
+                console.warn('Could not upsert wing_cut modifier group:', e);
+            }
+
+            console.log(`Loaded ${Object.keys(menuData.modifiers).length} modifier groups (including extra_dips)`);
         } catch (modifierError) {
             console.log('ModifierGroups collection not found, creating default structure');
             // Create default modifier structure
@@ -345,6 +506,14 @@ async function loadMenuData() {
                         { id: 'flats', name: 'All Flats', price: 1.50 },
                         { id: 'boneless', name: 'Boneless', price: 0 }
                     ]
+                },
+                extra_dips: {
+                    name: 'Extra Dips',
+                    type: 'multiple',
+                    required: false,
+                    min: 0,
+                    max: 6,
+                    options: (menuData.dips || []).map(dip => ({ id: dip.id, name: dip.name, price: 1.25 }))
                 }
             };
         }
@@ -355,6 +524,7 @@ async function loadMenuData() {
             drinks: menuData.drinks.length,
             combos: menuData.combos.length,
             sauces: menuData.sauces.length,
+            dips: menuData.dips.length,
             modifiers: Object.keys(menuData.modifiers).length
         });
 
@@ -393,17 +563,25 @@ function displayMenuItems() {
         updateCategoryCount('drinks', menuData.drinks.length);
     }
 
-    // Display Combos
+    // Display Combos (ensure stable sort by sortOrder)
     const combosContainer = document.getElementById('combos-items');
     if (combosContainer) {
-        combosContainer.innerHTML = menuData.combos.map(item => createMenuItem(item, 'combos')).join('');
-        updateCategoryCount('combos', menuData.combos.length);
+        const sortedCombos = [...menuData.combos].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+        combosContainer.innerHTML = sortedCombos.map(item => createMenuItem(item, 'combos')).join('');
+        updateCategoryCount('combos', sortedCombos.length);
     }
 
     // Display Sauces (if container exists)
     const saucesContainer = document.getElementById('sauces-items');
     if (saucesContainer) {
         saucesContainer.innerHTML = menuData.sauces.map(item => createMenuItem(item, 'sauces')).join('');
+    }
+
+    // Display Dips (if container exists)
+    const dipsContainer = document.getElementById('dips-items');
+    if (dipsContainer) {
+        dipsContainer.innerHTML = menuData.dips.map(item => createMenuItem(item, 'dips')).join('');
+        updateCategoryCount('dips', menuData.dips.length);
     }
 
     // Add click handlers
@@ -506,6 +684,35 @@ function displayItemEditor(item) {
     document.getElementById('deleteBtn').style.display = 'block';
 
     const isCombo = findItemCategory(item.id) === 'combos';
+    const isWings = (item.category === 'wings') || /wings/i.test(item.name || '');
+
+    // Compute allowances for inline validation (platform menus only)
+    let allowanceInfo = null;
+    if (isWings) {
+        const wingsCount = getWingsCountFromItem(item);
+        const base = computeWingAllowancesByCount(wingsCount);
+        const pricingMeta = getModifierPricingMeta();
+        allowanceInfo = { ...base, ...pricingMeta };
+    } else if (isCombo) {
+        const wingsCount = getWingsCountFromComboItems(item.items);
+        const base = computeWingAllowancesByCount(wingsCount);
+        const pricingMeta = getModifierPricingMeta();
+        allowanceInfo = { ...base, ...pricingMeta };
+    }
+    const isWings = item.category === 'wings' || /wings/i.test(item.name || '');
+
+    let allowanceInfo = null;
+    if (isWings) {
+        const wingsCount = getWingsCountFromItem(item);
+        const base = computeWingAllowancesByCount(wingsCount);
+        const pricingMeta = getModifierPricingMeta();
+        allowanceInfo = { ...base, ...pricingMeta };
+    } else if (isCombo) {
+        const wingsCount = getWingsCountFromComboItems(item.items);
+        const base = computeWingAllowancesByCount(wingsCount);
+        const pricingMeta = getModifierPricingMeta();
+        allowanceInfo = { ...base, ...pricingMeta };
+    }
 
     // Build editor form
     editorContainer.innerHTML = `
@@ -558,8 +765,25 @@ function displayItemEditor(item) {
                                 </div>
                                 <div class="margin-display ${marginClass}" id="margin_${key}">
                                     ${margin.toFixed(1)}% margin
-                                </div>
-                            </div>
+            </div>
+        </div>
+
+        ${allowanceInfo ? `
+        <div class="form-group">
+            <label>Platform Modifiers — Allowances (computed)</label>
+            <div class="allowances-grid">
+                <div class="allowance-card"><strong>Wings Count</strong><div>${allowanceInfo.wingsCount}</div></div>
+                <div class="allowance-card"><strong>Sets of 6</strong><div>${allowanceInfo.setsOf6}</div></div>
+                <div class="allowance-card"><strong>Allowed Sauces</strong><div>${allowanceInfo.allowedSauces} (1 per 6)</div></div>
+                <div class="allowance-card"><strong>Included Sauce Cups</strong><div>${allowanceInfo.includedSauceCups} (on the side free)</div></div>
+                <div class="allowance-card"><strong>Included Dips</strong><div>${allowanceInfo.includedDipCups} (2 per 6)</div></div>
+                <div class="allowance-card"><strong>Extra Sauce Cup</strong><div>$${allowanceInfo.extraSaucePrice.toFixed(2)} each</div></div>
+                <div class="allowance-card"><strong>Extra Dip</strong><div>$${allowanceInfo.extraDipPrice.toFixed(2)} each</div></div>
+                <div class="allowance-card"><strong>All Drums/Flats Surcharge</strong><div>$${allowanceInfo.cutSurchargePer6.toFixed(2)} per 6</div></div>
+            </div>
+            <small>Applies to platform menus only; the main site is showcase only.</small>
+        </div>
+        ` : ''}
                         `;
                     }).join('')}
                 </div>
@@ -591,6 +815,24 @@ function displayItemEditor(item) {
                 <label>Disclaimer</label>
                 <textarea class="form-control" id="comboDisclaimer" rows="2" placeholder="Nutrition varies by sauce selection">${item.disclaimer || ''}</textarea>
             </div>
+            ` : ''}
+
+            ${allowanceInfo ? `
+                <div class="form-group">
+                    <label>Platform Modifiers — Allowances</label>
+                    <div class="allowances-grid">
+                        <div class="allowance-card"><strong>Wings Count</strong><div>${allowanceInfo.wingsCount}</div></div>
+                        <div class="allowance-card"><strong>Sets of 6</strong><div>${allowanceInfo.setsOf6}</div></div>
+                        <div class="allowance-card"><strong>Allowed Sauces</strong><div>${allowanceInfo.allowedSauces} (1 per 6)</div></div>
+                        <div class="allowance-card"><strong>Included Sauce Cups</strong><div>${allowanceInfo.includedSauceCups} (on the side free)</div></div>
+                        <div class="allowance-card"><strong>Included Dips</strong><div>${allowanceInfo.includedDipCups} (2 per 6)</div></div>
+                        <div class="allowance-card"><strong>Extra Sauce Cup</strong><div>$${allowanceInfo.extraSaucePrice.toFixed(2)} each</div></div>
+                        <div class="allowance-card"><strong>Extra Dip</strong><div>$${allowanceInfo.extraDipPrice.toFixed(2)} each</div></div>
+                        <div class="allowance-card"><strong>All Drums/Flats Surcharge</strong><div>$${allowanceInfo.cutSurchargePer6.toFixed(2)} per 6</div></div>
+                    </div>
+                    ${((allowanceInfo.wingsCount || 0) % 6 !== 0) ? `<small>Floor rule applies: allowances use ${allowanceInfo.setsOf6 * 6} wings (remainder does not increase allowances).</small>` : ''}
+                    <small>Applies to platform menus only; main site is showcase.</small>
+                </div>
             ` : ''}
 
             ${item.portionDetails ? `
@@ -853,8 +1095,9 @@ async function generateMenuLink() {
             includeAllergens: document.getElementById('includeAllergens')?.checked ?? true
         };
 
-        // Save to publishedMenus collection (immutable)
-        await setDoc(doc(db, 'publishedMenus', menuId), publishedMenu);
+        // Save to publishedMenus collection (immutable) with deep sanitize
+        const publishedMenuClean = sanitizeForFirestore(publishedMenu);
+        await setDoc(doc(db, 'publishedMenus', menuId), publishedMenuClean);
 
         // Also save simplified version to publicMenus for backward compatibility
         const publicMenu = {
@@ -863,7 +1106,8 @@ async function generateMenuLink() {
             categories: await buildMenuCategories(platform),
             generated: serverTimestamp()
         };
-        await setDoc(doc(db, 'publicMenus', menuId), publicMenu);
+        const publicMenuClean = sanitizeForFirestore(publicMenu);
+        await setDoc(doc(db, 'publicMenus', menuId), publicMenuClean);
 
         // Generate link
         const menuLink = `${window.location.origin}/menu/${platform}/${menuId}`;
@@ -902,6 +1146,10 @@ async function buildCompleteMenuSnapshot(platform) {
         const itemId = variant.id;
         const platformPrice = variant.platformPricing?.[platform] || variant.basePrice || 0;
 
+        // Compute allowances for this wings variant
+        const wingsAllow = computeWingAllowancesByCount(getWingsCountFromItem(variant));
+        const pricingMeta = getModifierPricingMeta();
+
         snapshot.items[itemId] = {
             id: itemId,
             name: variant.name,
@@ -911,12 +1159,18 @@ async function buildCompleteMenuSnapshot(platform) {
             basePrice: variant.basePrice || 0,
             parentId: variant.parentId,
             image: variant.images?.hero || '',
-            modifierGroups: variant.modifierGroups || ['sauce_choice', 'wing_style', 'extra_sauces'],
+            modifierGroups: variant.modifierGroups || ['wing_type','wing_cut','sauce_choice','extra_sauces','extra_dips'],
             portionDetails: variant.portionDetails || {},
             nutrition: variant.nutrition || null,
             allergens: variant.allergens || [],
             active: true,
-            sortOrder: variant.sortOrder || 999
+            sortOrder: variant.sortOrder || 999,
+            allowances: {
+                ...wingsAllow,
+                extraSauceCupPrice: pricingMeta.extraSaucePrice,
+                extraDipPrice: pricingMeta.extraDipPrice,
+                wingCutSurchargePer6: pricingMeta.cutSurchargePer6
+            }
         };
         wingsItems.push(itemId);
     });
@@ -976,6 +1230,10 @@ async function buildCompleteMenuSnapshot(platform) {
         const itemId = item.id;
         const platformPrice = item.platformPricing?.[platform] || item.basePrice || 0;
 
+        const comboWingsCount = getWingsCountFromComboItems(item.items);
+        const comboAllow = computeWingAllowancesByCount(comboWingsCount);
+        const comboPricing = getModifierPricingMeta();
+
         snapshot.items[itemId] = {
             id: itemId,
             name: item.name,
@@ -985,12 +1243,18 @@ async function buildCompleteMenuSnapshot(platform) {
             basePrice: item.basePrice || 0,
             image: item.images?.original || '',
             components: item.components || [],
-            modifierGroups: item.modifierGroups || [],
+            modifierGroups: item.modifierGroups || ['extra_dips','extra_sauces'],
             feedsCount: item.feedsCount || '',
             nutrition: item.nutrition || null,
             allergens: item.allergens || [],
             active: true,
-            sortOrder: item.sortOrder || 999
+            sortOrder: item.sortOrder || 999,
+            allowances: {
+                ...comboAllow,
+                extraSauceCupPrice: comboPricing.extraSaucePrice,
+                extraDipPrice: comboPricing.extraDipPrice,
+                wingCutSurchargePer6: comboPricing.cutSurchargePer6
+            }
         };
         combosItems.push(itemId);
     });
@@ -1146,7 +1410,55 @@ function closeLinkModal() {
 }
 
 // Open Modifier Modal
+function renderModifierModal() {
+    const body = document.querySelector('#modifierModal .modal-body');
+    if (!body) return;
+
+    const dips = (menuData.dips || []).map(d => `<div class="modifier-item"><label>${d.name}</label><input type="number" id="extra_dips_option_${d.id}" value="${1.25}" step="0.25" class="price-input"></div>`).join('');
+    const sauces = (menuData.sauces || []).map(s => `<div class="modifier-item"><label>${s.name}</label></div>`).join('');
+
+    body.innerHTML = `
+        <div class="modifier-group">
+            <h3>Wing Type</h3>
+            <div class="modifier-options">
+                <label><input type="radio" name="wing_type_default" value="classic" checked> Classic</label>
+                <label><input type="radio" name="wing_type_default" value="boneless"> Boneless</label>
+            </div>
+        </div>
+        <div class="modifier-group">
+            <h3>Wing Cut (Classic Only)</h3>
+            <div class="modifier-options">
+                <div class="modifier-item"><label>All Drums surcharge per 6 ($)</label><input type="number" id="wing_cut_all_drums_pricePer6" value="1.50" step="0.25" class="price-input"></div>
+                <div class="modifier-item"><label>All Flats surcharge per 6 ($)</label><input type="number" id="wing_cut_all_flats_pricePer6" value="1.50" step="0.25" class="price-input"></div>
+            </div>
+        </div>
+        <div class="modifier-group">
+            <h3>Sauce Choice</h3>
+            <div class="modifier-options">
+                <div class="modifier-item"><label>Max per 6</label><input type="number" id="sauce_choice_maxPerUnit" value="1" min="0" step="1" class="price-input"></div>
+                <div class="modifier-item"><label>Included sauce cups per 6</label><input type="number" id="sauce_choice_includedSauceCupsPerUnit" value="1" min="0" step="1" class="price-input"></div>
+                <div class="modifier-item"><label>Options</label><div class="modifier-list">${sauces}</div></div>
+            </div>
+        </div>
+        <div class="modifier-group">
+            <h3>Extra Sauce Cups</h3>
+            <div class="modifier-options">
+                <div class="modifier-item"><label>Price per cup ($)</label><input type="number" id="extra_sauces_pricePerCup" value="1.00" step="0.25" class="price-input"></div>
+            </div>
+        </div>
+        <div class="modifier-group">
+            <h3>Extra Dips</h3>
+            <div class="modifier-options">
+                <div class="modifier-item"><label>Included dips per 6</label><input type="number" id="extra_dips_includedPerUnit" value="2" min="0" step="1" class="price-input"></div>
+                <div class="modifier-item"><label>Price per extra dip ($)</label><input type="number" id="extra_dips_pricePerExtra" value="1.25" step="0.25" class="price-input"></div>
+                <div class="modifier-item"><label>Dip Options (price per cup)</label><div class="modifier-list">${dips}</div></div>
+            </div>
+        </div>
+    `;
+}
+
 function openModifierModal() {
+    renderModifierModal();
     document.getElementById('modifierModal').style.display = 'flex';
 }
 
@@ -1157,12 +1469,64 @@ function closeModifierModal() {
 
 // Save Modifiers
 async function saveModifiers() {
-    // Implementation for saving modifier changes
     try {
         showSaving();
 
-        // Gather modifier data and save to Firebase
-        // ... implementation details
+        // Read values
+        const maxPerUnit = parseInt(document.getElementById('sauce_choice_maxPerUnit')?.value || '1', 10);
+        const includedSauceCupsPerUnit = parseInt(document.getElementById('sauce_choice_includedSauceCupsPerUnit')?.value || '1', 10);
+        const extraSaucePrice = parseFloat(document.getElementById('extra_sauces_pricePerCup')?.value || '1.00');
+        const extraDipsIncluded = parseInt(document.getElementById('extra_dips_includedPerUnit')?.value || '2', 10);
+        const extraDipPrice = parseFloat(document.getElementById('extra_dips_pricePerExtra')?.value || '1.25');
+        const drumsPricePer6 = parseFloat(document.getElementById('wing_cut_all_drums_pricePer6')?.value || '1.50');
+        const flatsPricePer6 = parseFloat(document.getElementById('wing_cut_all_flats_pricePer6')?.value || '1.50');
+
+        // Build updated groups
+        const sauce_choice = {
+            ...(menuData.modifiers['sauce_choice'] || {}),
+            name: 'Sauce Choice', type: 'single', required: false,
+            perUnit: '6-wings', maxPerUnit, includedSauceCupsPerUnit,
+            sauceOnSideDoesNotCountAgainstDips: true
+        };
+        const extra_sauces = {
+            ...(menuData.modifiers['extra_sauces'] || {}),
+            name: 'Extra Sauce Cups', type: 'multiple', required: false,
+            perUnit: '6-wings', includedPerUnit: 0, pricePerCup: extraSaucePrice,
+            options: (menuData.sauces || []).map(s => ({ id: s.id, name: s.name }))
+        };
+        const extra_dips = {
+            ...(menuData.modifiers['extra_dips'] || {}),
+            name: 'Extra Dips', type: 'multiple', required: false,
+            perUnit: '6-wings', includedPerUnit: extraDipsIncluded, pricePerExtra: extraDipPrice,
+            options: (menuData.dips || []).map(d => ({ id: d.id, name: d.name, price: parseFloat(document.getElementById(`extra_dips_option_${d.id}`)?.value || extraDipPrice) }))
+        };
+        const wing_type = {
+            ...(menuData.modifiers['wing_type'] || {}),
+            name: 'Wing Type', type: 'single', required: true,
+            options: [ { id: 'classic', name: 'Classic' }, { id: 'boneless', name: 'Boneless' } ]
+        };
+        const wing_cut = {
+            ...(menuData.modifiers['wing_cut'] || {}),
+            name: 'Wing Cut (Classic Only)', type: 'single', required: false,
+            appliesTo: 'classic', perUnit: '6-wings', surchargePer6: drumsPricePer6,
+            options: [
+                { id: 'mix', name: 'Mix (Drums & Flats)', price: 0 },
+                { id: 'all_drums', name: 'All Drums', pricePer6: drumsPricePer6 },
+                { id: 'all_flats', name: 'All Flats', pricePer6: flatsPricePer6 }
+            ]
+        };
+
+        // Persist to Firestore
+        await Promise.all([
+            setDoc(doc(db, 'modifierGroups', 'sauce_choice'), sauce_choice, { merge: true }),
+            setDoc(doc(db, 'modifierGroups', 'extra_sauces'), extra_sauces, { merge: true }),
+            setDoc(doc(db, 'modifierGroups', 'extra_dips'), extra_dips, { merge: true }),
+            setDoc(doc(db, 'modifierGroups', 'wing_type'), wing_type, { merge: true }),
+            setDoc(doc(db, 'modifierGroups', 'wing_cut'), wing_cut, { merge: true })
+        ]);
+
+        // Update local cache
+        menuData.modifiers = { ...menuData.modifiers, sauce_choice, extra_sauces, extra_dips, wing_type, wing_cut };
 
         showSaved();
         closeModifierModal();

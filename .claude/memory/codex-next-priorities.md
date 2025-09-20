@@ -71,3 +71,29 @@ Last updated: 2025‑09‑20 (WebP coverage 100% on preview; favicon/manifest fi
     - onWrite(combos/*, nutritionData/*): recompute `computedNutrition` and publish feed; bump version.
     - callable: manual recompute/publish from Admin.
   - Optional: always prefer Firestore for modal; keep static JSON as final fallback only.
+
+## 2025‑09‑20 — Nutrition Preview Updates (Deployed)
+
+What we shipped
+- Admin flag gating for combos nutrition feed upload (skips Storage; Firestore only).
+- Toast UX replacing alert on recompute (success even when upload skipped).
+- Deep sanitizer before Firestore `updateDoc` to remove undefined/NaN/Infinity.
+- Logos for platform tabs added to `public/images/logos/` (removes 404s).
+
+Files modified
+- `admin/platform-menu.js` — gating, sanitizer, toast, serialization fix.
+- `GITHUB_ACTIONS_SETUP.md` — doc for `VITE_ENABLE_NUTRITION_FEED_UPLOAD`.
+- `public/images/logos/{doordash,ubereats,grubhub}-logo.svg` — added.
+
+Verification (Preview pr3)
+- Recompute updates `combos/*`.computedNutrition without client Storage; no updateDoc warnings.
+- Upload skip logs present; no Storage PUTs.
+- Platform logos render in UI.
+
+Next tasks
+1) Cloud Functions
+   - `onWrite` triggers for `combos/*` and `nutritionData/*` to recompute `computedNutrition` and publish JSON atomically; bump a version.
+   - `callable` function to allow Admin button to run server‑side recompute/publish.
+2) CI audits on PR (Storage manifest diff, link 404 check, WebP coverage report).
+3) Backups: export core collections (`menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`).
+4) Optional: Admin import/export tools for menus; content seeding automation.
