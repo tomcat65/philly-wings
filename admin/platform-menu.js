@@ -1083,8 +1083,10 @@ async function generateMenuLink() {
         };
 
         // Save to publishedMenus collection (immutable) with deep sanitize
-        const publishedMenuClean = sanitizeForFirestore(publishedMenu);
-        await setDoc(doc(db, 'publishedMenus', menuId), publishedMenuClean);
+        // Important: don't sanitize away FieldValue serverTimestamp; set it after sanitize
+        const { publishedAt, ...restPublished } = publishedMenu;
+        const publishedMenuClean = sanitizeForFirestore(restPublished);
+        await setDoc(doc(db, 'publishedMenus', menuId), { ...publishedMenuClean, publishedAt: serverTimestamp() });
 
         // Also save simplified version to publicMenus for backward compatibility
         const publicMenu = {
@@ -1093,8 +1095,9 @@ async function generateMenuLink() {
             categories: await buildMenuCategories(platform),
             generated: serverTimestamp()
         };
-        const publicMenuClean = sanitizeForFirestore(publicMenu);
-        await setDoc(doc(db, 'publicMenus', menuId), publicMenuClean);
+        const { generated, ...restPublic } = publicMenu;
+        const publicMenuClean = sanitizeForFirestore(restPublic);
+        await setDoc(doc(db, 'publicMenus', menuId), { ...publicMenuClean, generated: serverTimestamp() });
 
         // Generate link
         const menuLink = `${window.location.origin}/menu/${platform}/${menuId}`;
@@ -1124,7 +1127,15 @@ async function buildCompleteMenuSnapshot(platform) {
         categories: [],
         items: {},
         modifiers: {},
-        sauces: []
+        sauces: [],
+        // Platform-focused consolidated view for partner ingestion
+        platformExport: {
+            consolidated: {
+                sides: [],
+                wingsSplitRules: {},
+                combos: []
+            }
+        }
     };
 
     // Process Wings with variant structure
@@ -1287,6 +1298,125 @@ async function buildCompleteMenuSnapshot(platform) {
         platformAvailable: sauce.platformAvailability?.includes(platform)
     }));
 
+    // Copy dips (priced per cup)
+    snapshot.dips = (menuData.dips || []).map(dip => ({
+        id: dip.id,
+        name: dip.name,
+        price: 1.25,
+        imageUrl: dip.imageUrl || ''
+    }));
+
+    // ---------- Platform Export (Consolidated) ----------
+    // 1) Consolidate Sides with Portion Size modifier
+    try {
+        const consolidatedSides = [];
+        // Use original parent docs from menuData.items to access variants
+        Object.values(menuData.items || {}).forEach(parent => {
+            if (parent.category !== 'sides' || !Array.isArray(parent.variants)) return;
+            const variants = parent.variants;
+            // Determine base as the lowest platform price for this platform
+            const priced = variants.map(v => {
+                const p = (v.platformPricing && v.platformPricing[platform]) || v.basePrice || 0;
+                return { v, price: typeof p === 'number' ? p : (p?.price || 0) };
+            }).sort((a, b) => a.price - b.price);
+            if (priced.length === 0) return;
+
+            const base = priced[0];
+            const options = priced.map(({ v, price }) => {
+                // compute price delta vs base
+                const delta = Math.max(0, (price - base.price));
+                // try to infer count from name or portionDetails
+                const m = (v.name || '').match(/(\d+)/);
+                const count = v?.portionDetails?.count || (m ? parseInt(m[1], 10) : undefined);
+                return {
+                    id: v.id,
+                    name: v.name,
+                    count: count || null,
+                    priceDelta: parseFloat(delta.toFixed(2))
+                };
+            });
+
+            consolidatedSides.push({
+                id: parent.id,
+                name: parent.name,
+                basePrice: parseFloat(base.price.toFixed(2)),
+                image: parent.images?.hero || '',
+                portionSizeGroup: {
+                    id: 'portion_size',
+                    name: 'Portion Size',
+                    type: 'single',
+                    required: true,
+                    options
+                }
+            });
+        });
+        snapshot.platformExport.consolidated.sides = consolidatedSides;
+    } catch (e) {
+        console.warn('Failed to consolidate sides for platform export:', e);
+    }
+
+    // 2) Wings split rules (per 6)
+    snapshot.platformExport.consolidated.wingsSplitRules = {
+        perUnit: '6-wings',
+        sauceChoice: { maxPerUnit: 1, includedSauceCupsPerUnit: 1, onSideDoesNotCountAgainstDips: true },
+        extraSauces: { pricePerCup: (menuData.modifiers?.extra_sauces?.pricePerCup) || 1.0 },
+        dips: { includedPerUnit: (menuData.modifiers?.extra_dips?.includedPerUnit) || 2, pricePerExtra: (menuData.modifiers?.extra_dips?.pricePerExtra) || 1.25 },
+        wingType: ['classic','boneless'],
+        wingCut: {
+            appliesTo: 'classic',
+            surchargePer6: (menuData.modifiers?.wing_cut?.surchargePer6) || 1.5,
+            options: ['mix','all_drums','all_flats']
+        }
+    };
+
+    // 3) Combos with flexible component rules (price deltas applied)
+    try {
+        snapshot.platformExport.consolidated.combos = (menuData.combos || []).filter(c => c.active).map(c => {
+            // Parse items list to identify wings and fries counts
+            const itemsText = Array.isArray(c.items) ? c.items.join(',') : String(c.items || '');
+            const wingsCountMatch = itemsText.match(/(\d+)\s*-\s*wings/i);
+            const wingsCount = wingsCountMatch ? parseInt(wingsCountMatch[1], 10) : 0;
+            // Build a basic substitution map for fries
+            const friesPrices = {
+                regular:  (menuData.items?.fries?.variants?.find(v => /Regular/i.test(v.name))?.platformPricing?.[platform]) || 4.99,
+                large:    (menuData.items?.fries?.variants?.find(v => /Large/i.test(v.name))?.platformPricing?.[platform]) || 7.99,
+                loaded:   (menuData.items?.fries?.variants?.find(v => /Loaded/i.test(v.name))?.platformPricing?.[platform]) || 13.99
+            };
+            const friesSubstitutions = [
+                { id: 'fries-regular', name: 'Regular Fries', price: typeof friesPrices.regular === 'number' ? friesPrices.regular : (friesPrices.regular?.price || 0) },
+                { id: 'fries-large', name: 'Large Fries', price: typeof friesPrices.large === 'number' ? friesPrices.large : (friesPrices.large?.price || 0) },
+                { id: 'loaded-fries', name: 'Loaded Fries', price: typeof friesPrices.loaded === 'number' ? friesPrices.loaded : (friesPrices.loaded?.price || 0) }
+            ];
+
+            return {
+                id: c.id,
+                name: c.name,
+                basePrice: (typeof c.platformPricing?.[platform] === 'number' ? c.platformPricing[platform] : (c.basePrice || 0)),
+                items: c.items,
+                wingsCount,
+                flexibleComponents: [
+                    {
+                        role: 'fries',
+                        allowQuantityChange: true,
+                        substitutions: friesSubstitutions
+                    },
+                    {
+                        role: 'sides',
+                        allowAddRemove: true,
+                        catalogRef: 'sides' // use consolidatedSides for pricing
+                    },
+                    {
+                        role: 'drinks',
+                        allowAddRemove: true,
+                        catalogRef: 'drinks'
+                    }
+                ]
+            };
+        });
+    } catch (e) {
+        console.warn('Failed to build flexible combos for platform export:', e);
+    }
+
     return snapshot;
 }
 
@@ -1294,7 +1424,7 @@ async function buildCompleteMenuSnapshot(platform) {
 async function buildMenuCategories(platform) {
     const categories = [];
 
-    // Wings
+    // Order: Wings, Sauces, Dips, Sides, Drinks, Combos
     categories.push({
         name: 'Wings',
         description: 'Double-fried, hand-tossed perfection',
@@ -1309,7 +1439,31 @@ async function buildMenuCategories(platform) {
         }))
     });
 
-    // Sides
+    categories.push({
+        name: 'Sauces & Rubs',
+        description: 'From sweet to scorching - all made in-house',
+        items: menuData.sauces.filter(item => item.active).map(item => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            heatLevel: item.heatLevel,
+            allergens: item.allergens,
+            isDryRub: item.isDryRub
+        }))
+    });
+
+    categories.push({
+        name: 'Dips',
+        description: 'Perfect for dunking',
+        items: (menuData.dips || []).filter(item => item.active !== false).map(item => ({
+            id: item.id,
+            name: item.name,
+            description: item.description || '',
+            price: 1.25,
+            image: item.imageUrl || '',
+        }))
+    });
+
     categories.push({
         name: 'Sides',
         description: 'The perfect wingman for your wings',
@@ -1323,7 +1477,18 @@ async function buildMenuCategories(platform) {
         }))
     });
 
-    // Combos
+    categories.push({
+        name: 'Drinks',
+        description: 'Refreshing beverages',
+        items: menuData.drinks.filter(item => item.active).map(item => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            price: item.platformPricing[platform]?.price || item.basePrice,
+            image: item.images?.original || ''
+        }))
+    });
+
     categories.push({
         name: 'Combo Deals',
         description: 'More bang for your buck',
@@ -1335,20 +1500,6 @@ async function buildMenuCategories(platform) {
             image: item.images?.original || '',
             components: item.components,
             feedsCount: item.feedsCount
-        }))
-    });
-
-    // Sauces
-    categories.push({
-        name: 'Sauces & Rubs',
-        description: 'From sweet to scorching - all made in-house',
-        items: menuData.sauces.filter(item => item.active).map(item => ({
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            heatLevel: item.heatLevel,
-            allergens: item.allergens,
-            isDryRub: item.isDryRub
         }))
     });
 
