@@ -201,6 +201,14 @@ export class NutritionModalFirebase {
                   <p>* The % Daily Value tells you how much a nutrient in a serving of food contributes to a daily diet. 2,000 calories a day is used for general nutrition advice.</p>
                 </div>
 
+                <!-- What's Inside (computed combos) -->
+                <div id="comboBreakdownSection" class="combo-breakdown" style="display:none; margin-top: 16px;">
+                  <h4 style="margin: 8px 0;">What’s inside</h4>
+                  <div id="comboBreakdownList"></div>
+                  <p id="comboSauceNote" class="sauce-note" style="margin-top:8px; display:none;"></p>
+                  <p id="comboDisclaimer" class="disclaimer-note" style="margin-top:8px; color:#555; display:none;"></p>
+                </div>
+
                 <!-- Dietary Claims (if applicable) -->
                 <div id="dietaryClaims" class="dietary-claims" style="display: none;">
                   <div class="claims-list"></div>
@@ -352,6 +360,8 @@ export class NutritionModalFirebase {
             perCombo: cn.perCombo || {},
             allergens: cn.allergens || [],
             disclaimer: cn.disclaimer || comboDoc.disclaimer || '',
+            breakdown: cn.breakdown || [],
+            sauceNote: cn.sauceNote || null,
           };
         }
       }
@@ -577,6 +587,37 @@ export class NutritionModalFirebase {
 
     // Dietary claims
     this.displayDietaryClaims(nutrition);
+
+    // Combo breakdown (if computed)
+    const breakdownSection = document.getElementById('comboBreakdownSection');
+    const breakdownList = document.getElementById('comboBreakdownList');
+    const sauceNoteEl = document.getElementById('comboSauceNote');
+    const disclaimerEl = document.getElementById('comboDisclaimer');
+    if (nutrition._computed && Array.isArray(nutrition.breakdown) && nutrition.breakdown.length) {
+      breakdownSection.style.display = 'block';
+      breakdownList.innerHTML = nutrition.breakdown.map(b => {
+        const qtyText = typeof b.qty === 'string' ? b.qty : `x${b.qty}`;
+        return `<div class="breakdown-row"><span>${qtyText} ${b.name || b.refId}</span><span>${b.calories ?? 0} cal</span></div>`;
+      }).join('');
+      if (nutrition.sauceNote) {
+        sauceNoteEl.style.display = 'block';
+        if (nutrition.sauceNote.policy === 'representative') {
+          sauceNoteEl.textContent = `Includes representative sauce (${nutrition.sauceNote.representativeId || 'sauce'}) at ${nutrition.sauceNote.portion || ''}.`;
+        } else if (nutrition.sauceNote.policy === 'range') {
+          sauceNoteEl.textContent = `Sauce adds variable calories.`;
+        }
+      } else {
+        sauceNoteEl.style.display = 'none';
+      }
+      if (nutrition.disclaimer) {
+        disclaimerEl.style.display = 'block';
+        disclaimerEl.textContent = nutrition.disclaimer;
+      } else {
+        disclaimerEl.style.display = 'none';
+      }
+    } else {
+      breakdownSection.style.display = 'none';
+    }
   }
 
   setDailyValue(elementId, value, warnIfHigh = false, goodIfHigh = false) {

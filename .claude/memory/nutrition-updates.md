@@ -99,3 +99,22 @@ All nutrition modals are displaying correctly with:
 - Good contrast for accessibility
 - Correct allergen information
 - Real-time data updates from Firestore
+
+## Sauce Nutrition Addition (2025-09-20)
+
+### Critical Gap Resolved
+Added missing sauce nutrition data to `nutritionData` collection to fix combo calculations:
+
+#### Sauce Nutrition Documents Added
+- `mild-buffalo-1oz` (UlWDjybuwmZG9wjBz7Q9) - 15 cal, contains milk
+- `bbq-1oz` (xCXqb4VqIcJq5zwtMRCn) - 25 cal, may contain soy
+- `garlic-parm-1oz` (9aK3qAC5r9a3n7z3ZHt4) - 45 cal, contains milk
+- `honey-mustard-1oz` (GTdzRqiaUbPSokL79efD) - 30 cal, may contain egg/soy
+- `ranch-1oz` (eSfI6vt8HK7Zv6YFLvJ0) - 60 cal, contains milk/egg
+- `blue-cheese-1oz` (wgOXaiZo4o2xN0BEvO3m) - 70 cal, contains milk
+
+#### Technical Implementation
+- Standard 1 fl oz (30ml) serving sizes per FDA requirements
+- Full FDA 2020 nutrient profile with proper DV calculations
+- Complete allergen declarations including Sesame compliance
+- Ready for `representativeSauceId` references in combo calculations
