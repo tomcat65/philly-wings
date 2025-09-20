@@ -15,6 +15,9 @@ import {
 } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes } from 'firebase/storage';
 
+// Feature flags (Vite env)
+const ENABLE_NUTRITION_FEED_UPLOAD = (import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === 'true' || import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === true);
+
 // State Management
 let currentPlatform = 'doordash';
 let selectedItem = null;
@@ -1282,9 +1285,14 @@ window.uploadCombosNutritionFeed = uploadCombosNutritionFeed;
 async function recomputeComboNutrition() {
     try {
         showSaving();
-        await uploadCombosNutritionFeed();
+        const result = await uploadCombosNutritionFeed();
         showSaved();
-        alert('Combo nutrition recomputed and uploaded.');
+        if (result?.uploaded) {
+            showToast('Combo nutrition recomputed. Feed uploaded.', 'success');
+        } else {
+            console.info('Nutrition feed upload skipped (flag disabled).');
+            showToast('Combo nutrition recomputed. Feed upload skipped.', 'success');
+        }
     } catch (e) {
         console.error('Recompute nutrition failed:', e);
         showError('Failed to recompute combo nutrition');
@@ -1474,12 +1482,66 @@ async function uploadCombosNutritionFeed() {
         }
     }
 
+    // Gate Storage upload behind feature flag
+    if (!ENABLE_NUTRITION_FEED_UPLOAD) {
+        console.info('VITE_ENABLE_NUTRITION_FEED_UPLOAD=false — skipping Storage upload.');
+        return { uploaded: false, updatedCount: combos.length };
+    }
+
     const json = new TextEncoder().encode(JSON.stringify(combos));
     const ref = storageRef(storage, 'public/combos-nutrition.json');
     try {
         await uploadBytes(ref, json, { contentType: 'application/json' });
+        return { uploaded: true, updatedCount: combos.length };
     } catch (e) {
         console.warn('Skipping Storage upload (continuing):', e?.message || e);
         // Do not throw; Firestore docs were updated successfully.
+        return { uploaded: false, updatedCount: combos.length };
     }
 }
+
+// --- Lightweight toast helper ---
+function ensureToastContainer() {
+    let el = document.getElementById('toast-container');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'toast-container';
+        el.style.position = 'fixed';
+        el.style.right = '16px';
+        el.style.bottom = '16px';
+        el.style.display = 'flex';
+        el.style.flexDirection = 'column';
+        el.style.gap = '8px';
+        el.style.zIndex = '9999';
+        document.body.appendChild(el);
+    }
+    return el;
+}
+
+function showToast(message, type = 'info') {
+    const container = ensureToastContainer();
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.padding = '12px 16px';
+    toast.style.borderRadius = '8px';
+    toast.style.color = '#fff';
+    toast.style.fontWeight = '600';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.style.background = type === 'success' ? '#16a34a' : (type === 'error' ? '#dc2626' : '#374151');
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+    toast.style.transition = 'opacity 160ms ease, transform 160ms ease';
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 200);
+    }, 3000);
+}
+
+// Expose for debugging if needed
+window.showToast = showToast;

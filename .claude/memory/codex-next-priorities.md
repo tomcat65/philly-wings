@@ -64,3 +64,10 @@
 ---
 Owner: Codex
 Last updated: 2025‑09‑20 (WebP coverage 100% on preview; favicon/manifest fixed)
+- Nutrition combos rollout (admin + site)
+  - Gate JSON feed upload via `VITE_ENABLE_NUTRITION_FEED_UPLOAD` (default false in preview).
+  - Replace recompute alert with toast; show success even if feed skipped.
+  - Implement Cloud Function:
+    - onWrite(combos/*, nutritionData/*): recompute `computedNutrition` and publish feed; bump version.
+    - callable: manual recompute/publish from Admin.
+  - Optional: always prefer Firestore for modal; keep static JSON as final fallback only.

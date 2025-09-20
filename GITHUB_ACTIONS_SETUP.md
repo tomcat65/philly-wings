@@ -20,6 +20,7 @@ https://github.com/tomcat65/philly-wings/settings/secrets/actions
 - `VITE_FIREBASE_MESSAGING_SENDER_ID` - Your sender ID
 - `VITE_FIREBASE_APP_ID` - Your app ID
 - `VITE_FIREBASE_MEASUREMENT_ID` - Your measurement ID
+ - `VITE_ENABLE_NUTRITION_FEED_UPLOAD` - Optional. Set to `true` to allow client to upload `public/combos-nutrition.json`. Default is disabled; Firestore `computedNutrition` remains the source of truth.
 
 #### Service Account Secret:
 - `FIREBASE_SERVICE_ACCOUNT` - (See instructions below)
