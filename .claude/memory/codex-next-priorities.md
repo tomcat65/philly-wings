@@ -13,40 +13,31 @@
 - Markdown report: `docs/firebase/STATUS.md`
 - JSON snapshot: `backups/firebase-snapshot.json`
 
-## Session Summary (2025‑09‑19)
+## Session Summary (2025‑09‑20)
 - Official Firebase MCP did not load in this run; Community MCP worked.
 - Verified Firestore connectivity and listed root collections.
-- Seeded `menuItems/wings` with 5 variants and modifier groups: `sauce_choice`, `wing_style`, `extra_sauces`.
-- Updated docs: `docs/firebase/STATUS.md` now shows `menuItems (1 doc)` and includes the new path.
-- Updated backup: `backups/firebase-snapshot.json` now reflects 1 `menuItems` doc.
-- Storage list via Community returned empty (likely listing blocked). Known assets still referenced and load via public URLs.
+- Seeded menuItems: kept `wings`; added `fries`, `mozzarella_sticks` (incl. 4/6/8/12/16), `drinks` (water-bottle). Synced IDs with web JSON.
+- Docs/backups updated to reflect 4 menu items.
+- Generated full Storage manifest via gcloud and audits (link and WebP). Uploaded dips (blue-cheese/cheese-sauce/honey-mustard/ranch-dip) and correct sport‑cap water-bottle; fixed stale images.
+- Fixed repo references (remaps) so live content 404 audit is green. Added tiny content endpoint `public/api/content/our-story`.
+- Combos: added Game Day 30 to web JSON, corrected Tailgater image, updated Game Day 30 copy (adds 2 large fries + 8 mozz sticks) across site components, seeds, and menu PDF; updated Firestore combo doc.
+- WebP rollout: hardened client interceptor; enabled nested Storage rule `/images/**`; prepared homepage derivative sweep; manifest now shows many WebP derivatives present.
 
 ## To‑Dos
 
 ### 1) Seed Menu Items (Firestore)
-- Done: `wings` created with variants `6/12/24/30/50` and modifier groups attached.
-- Next: add remaining base items using same schema:
-  - `fries` variants: `fries-regular`, `fries-large`, `loaded-fries`
-  - `mozzarella_sticks` variants: `mozzarella-sticks-4`, `-8`, `-12`, `-16`
-  - `drinks` variants: `water-bottle`
+- Done: `wings`, `fries`, `mozzarella_sticks` (4/6/8/12/16), `drinks` (water-bottle) seeded and verified.
 
 ### 2) Combos — Align JSON + Firestore
-- Ensure `public/data/combos.json` includes all visible combos:
-  - Add “Game Day 30” (present in Firestore, missing in JSON if so).
-  - Add “Date Night Dozen” (if desired for web).
-- Verify Tailgater image URL; keep badges/descriptions consistent.
-- Keep Firestore combos in sync (IDs and imageUrl match web JSON).
+- Done: Game Day 30 added and copy synced; Tailgater image fixed; Firestore combo updated. Optional: add Date Night Dozen.
 
 ### 3) Nutrition Data
 - Verify docs exist in `nutritionData` for: `12-wings`, `24-wings`, `30-wings`, `50-wings` (6‑wings present).
 - Confirm sides/combos entries: `french-fries`, `loaded-fries`, `mozzarella-sticks`, `mvp-meal`.
 
 ### 4) Storage Manifest & WebP Audit
-- Now that bucket is fixed, attempt full object listing using Community MCP (temporary) to produce manifest:
-  - `docs/firebase/storage-manifest.json` and `.md`
-- Verify for every referenced image there is a WebP in `images/resized/`:
-  - `_1920x1080.webp` hero/banners; `_800x800.webp` cards; `_200x200.webp` thumbs.
-- Upload missing WebP assets; keep originals as fallback.
+- Done: Manifest + audits generated; nested Storage rule deployed for `/images/**`.
+- Next: homepage-specific derivative generation (1920x1080/800x800/200x200) for any remaining filenames to maximize WebP swaps.
 
 ### 5) Hosting Canonical Redirect
 - In Firebase Hosting → Custom domains, set 301 from apex `phillywingsexpress.com` → `https://www.phillywingsexpress.com` (preserve path & query) or via `firebase.json`.
@@ -55,6 +46,15 @@
 ### 6) Backups / Guardrails
 - Export Firestore after seeding: `menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`.
 - (Optional) Add admin export/import for menus (admin‑only) for quick restore.
+
+### 7) Admin Writes / Rules / Indexes
+- Done: firestore.rules updated for variant schema; composite indexes added; storage.rules nested path enabled. Ensure admin customClaims.
+
+### 8) PWA Icons & Manifest
+- Done: copied icons to `public/`. Next: align manifest icon paths with these filenames to remove warnings.
+
+### 9) CI Audits
+- Add a GH Action to run: storage manifest, link 404 audit, WebP audit on PR.
 
 ## Proposed Next Steps (Execution Plan)
 1) Seed remaining `menuItems` (fries, mozzarella sticks, drinks).
@@ -65,4 +65,4 @@
 
 ---
 Owner: Codex
-Last updated: 2025‑09‑19 (Community MCP seeded wings)
+Last updated: 2025‑09‑20 (Combos synced; WebP path enabled; audits)

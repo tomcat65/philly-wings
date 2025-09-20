@@ -27,8 +27,8 @@ service firebase.storage {
         isValidSize(5); // 5MB limit for public images
     }
 
-    // Images folder - public read for website
-    match /images/{fileName} {
+    // Images folder (and nested paths) - public read for website
+    match /images/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin() &&
         isImageFile() &&
