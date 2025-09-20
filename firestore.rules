@@ -9,7 +9,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        request.auth.token.admin == true;
+        (request.auth.token.admin == true || request.auth.token.admin == 'true');
     }
 
     function isOwner(userId) {

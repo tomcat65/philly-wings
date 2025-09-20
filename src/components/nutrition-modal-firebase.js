@@ -447,6 +447,85 @@ export class NutritionModalFirebase {
           } catch (e) {
             console.warn('Fallback combo nutrition compute failed:', e);
           }
+        } else {
+          // Final fallback: try static JSON feed at /data/combos.json
+          try {
+            const res = await fetch(`/data/combos.json?v=${Date.now()}`, { cache: 'no-store' });
+            if (res.ok) {
+              const list = await res.json();
+              const combo = Array.isArray(list) ? list.find(c => c.id === itemId) : null;
+              if (combo && Array.isArray(combo.items) && combo.items.length) {
+                // Reuse the same lightweight local compute path
+                const refs = combo.items;
+                const pulls = refs.map(r => FirebaseService.getAll('nutritionData', { where: ['id', '==', r], limit: 1 }));
+                const results = (await Promise.all(pulls)).flat().filter(Boolean);
+                const byId = {};
+                results.forEach(d => { byId[d.id] = d; });
+                const fields = ['calories','totalFat','saturatedFat','transFat','cholesterol','sodium','totalCarbs','dietaryFiber','totalSugars','addedSugars','protein','vitaminD','calcium','iron','potassium'];
+                const totals = Object.fromEntries(fields.map(f => [f, 0]));
+                const breakdown = [];
+                const allergens = new Set();
+                refs.forEach(refId => {
+                  const item = byId[refId];
+                  if (!item) return;
+                  const n = item.nutrients || item;
+                  totals.calories += n.calories || 0;
+                  totals.totalFat += n.totalFat?.amount ?? n.totalFat ?? 0;
+                  totals.saturatedFat += n.saturatedFat?.amount ?? n.saturatedFat ?? 0;
+                  totals.transFat += n.transFat?.amount ?? n.transFat ?? 0;
+                  totals.cholesterol += n.cholesterol?.amount ?? n.cholesterol ?? 0;
+                  totals.sodium += n.sodium?.amount ?? n.sodium ?? 0;
+                  totals.totalCarbs += n.totalCarbs?.amount ?? n.totalCarbs ?? 0;
+                  totals.dietaryFiber += n.dietaryFiber?.amount ?? n.dietaryFiber ?? 0;
+                  totals.totalSugars += n.totalSugars?.amount ?? n.totalSugars ?? 0;
+                  totals.addedSugars += n.addedSugars?.amount ?? n.addedSugars ?? 0;
+                  totals.protein += n.protein?.amount ?? n.protein ?? 0;
+                  totals.vitaminD += n.vitaminD?.amount ?? n.vitaminD ?? 0;
+                  totals.calcium += n.calcium?.amount ?? n.calcium ?? 0;
+                  totals.iron += n.iron?.amount ?? n.iron ?? 0;
+                  totals.potassium += n.potassium?.amount ?? n.potassium ?? 0;
+                  breakdown.push({ refId, name: item.name, qty: 1, calories: Math.round(n.calories || 0) });
+                  NutritionService.formatAllergens(item.allergens).forEach(a => allergens.add(a));
+                });
+                const servings = combo.servingsPerCombo || combo.feedsCount || 1;
+                const round1 = (v) => Math.round((v + Number.EPSILON) * 10) / 10;
+                const round0 = (v) => Math.round(v);
+                const perCombo = {
+                  calories: round0(totals.calories),
+                  totalFat: round1(totals.totalFat),
+                  saturatedFat: round1(totals.saturatedFat),
+                  transFat: round1(totals.transFat || 0),
+                  cholesterol: round0(totals.cholesterol),
+                  sodium: round0(totals.sodium),
+                  totalCarbs: round0(totals.totalCarbs),
+                  dietaryFiber: round0(totals.dietaryFiber || 0),
+                  totalSugars: round0(totals.totalSugars || 0),
+                  addedSugars: round0(totals.addedSugars || 0),
+                  protein: round0(totals.protein),
+                  vitaminD: round1(totals.vitaminD || 0),
+                  calcium: round0(totals.calcium || 0),
+                  iron: round1(totals.iron || 0),
+                  potassium: round0(totals.potassium || 0)
+                };
+                const perServing = {};
+                Object.entries(perCombo).forEach(([k, v]) => {
+                  perServing[k] = (k === 'totalFat' || k === 'saturatedFat' || k === 'transFat' || k === 'vitaminD' || k === 'iron')
+                    ? round1(v / servings)
+                    : round0(v / servings);
+                });
+                nutrition = {
+                  _computed: true,
+                  name: combo.name || 'Combo',
+                  servingsPerContainer: servings,
+                  perServing,
+                  perCombo,
+                  allergens: Array.from(allergens),
+                  breakdown,
+                  disclaimer: combo.disclaimer || ''
+                };
+              }
+            }
+          } catch (_) {}
         }
       }
 
