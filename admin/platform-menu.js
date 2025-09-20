@@ -1,16 +1,47 @@
 // Platform Menu Management System
-import { auth, db } from '../src/firebase-config';
+import { auth, db, storage } from '../src/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
     collection,
     doc,
     getDocs,
     getDoc,
+    query,
+    where,
     setDoc,
     updateDoc,
     deleteDoc,
     serverTimestamp
 } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes } from 'firebase/storage';
+
+// Feature flags (Vite env)
+const ENABLE_NUTRITION_FEED_UPLOAD = (import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === 'true' || import.meta?.env?.VITE_ENABLE_NUTRITION_FEED_UPLOAD === true);
+
+// Remove undefined/NaN/Infinity recursively to satisfy Firestore constraints
+function sanitizeForFirestore(value) {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    if (Array.isArray(value)) {
+        const arr = value
+            .map((v) => sanitizeForFirestore(v))
+            .filter((v) => v !== undefined);
+        return arr;
+    }
+    if (typeof value === 'number') {
+        if (!Number.isFinite(value)) return 0;
+        return value;
+    }
+    if (typeof value === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(value)) {
+            const sv = sanitizeForFirestore(v);
+            if (sv !== undefined) out[k] = sv;
+        }
+        return out;
+    }
+    return value;
+}
 
 // State Management
 let currentPlatform = 'doordash';
@@ -473,6 +504,8 @@ function displayItemEditor(item) {
 
     document.getElementById('deleteBtn').style.display = 'block';
 
+    const isCombo = findItemCategory(item.id) === 'combos';
+
     // Build editor form
     editorContainer.innerHTML = `
         <form class="editor-form" onsubmit="saveItem(event)">
@@ -530,6 +563,34 @@ function displayItemEditor(item) {
                     }).join('')}
                 </div>
             </div>
+
+            ${isCombo ? `
+            <div class="form-group">
+                <label>Servings Per Combo</label>
+                <input type="number" min="1" class="form-control" id="servingsPerCombo" value="${item.servingsPerCombo || item.feedsCount || 1}" step="1">
+            </div>
+            <div class="form-group">
+                <label>Sauce Policy</label>
+                <select class="form-control" id="saucePolicy">
+                    <option value="none" ${item.saucePolicy === 'none' || !item.saucePolicy ? 'selected' : ''}>None</option>
+                    <option value="representative" ${item.saucePolicy === 'representative' ? 'selected' : ''}>Representative Sauce</option>
+                    <option value="range" ${item.saucePolicy === 'range' ? 'selected' : ''}>Range Note Only</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Representative Sauce ID (nutritionData id)</label>
+                <input type="text" class="form-control" id="representativeSauceId" value="${item.representativeSauceId || ''}" placeholder="e.g., mild-buffalo">
+            </div>
+            <div class="form-group">
+                <label>Sauce Portion Rule (JSON)</label>
+                <textarea class="form-control" id="saucePortionRule" rows="3" placeholder='{"unit":"oz","per":"wings","qtyPerUnit":1,"perCount":6}'>${item.saucePortionRule ? JSON.stringify(item.saucePortionRule) : ''}</textarea>
+                <small>Example: 1 oz per 6 wings. For per order: {"unit":"oz","per":"order","qtyPerUnit":1}</small>
+            </div>
+            <div class="form-group">
+                <label>Disclaimer</label>
+                <textarea class="form-control" id="comboDisclaimer" rows="2" placeholder="Nutrition varies by sauce selection">${item.disclaimer || ''}</textarea>
+            </div>
+            ` : ''}
 
             ${item.portionDetails ? `
                 <div class="form-group">
@@ -650,6 +711,35 @@ async function saveItem(event) {
         // Determine collection based on item category
         const category = findItemCategory(selectedItem.id);
 
+        // Read extra combo fields
+        if (category === 'combos') {
+            const servingsEl = document.getElementById('servingsPerCombo');
+            const saucePolicyEl = document.getElementById('saucePolicy');
+            const repSauceEl = document.getElementById('representativeSauceId');
+            const ruleEl = document.getElementById('saucePortionRule');
+            const disclaimerEl = document.getElementById('comboDisclaimer');
+
+            updatedItem.servingsPerCombo = Math.max(1, parseInt(servingsEl?.value || (selectedItem.servingsPerCombo || selectedItem.feedsCount || 1)) || 1);
+            updatedItem.saucePolicy = saucePolicyEl?.value || 'none';
+            updatedItem.representativeSauceId = repSauceEl?.value?.trim() || '';
+            try {
+                updatedItem.saucePortionRule = ruleEl?.value ? JSON.parse(ruleEl.value) : undefined;
+            } catch (_) {
+                if (selectedItem.saucePortionRule) updatedItem.saucePortionRule = selectedItem.saucePortionRule;
+            }
+            updatedItem.disclaimer = (disclaimerEl?.value || '').trim();
+        }
+
+        // If this is a combo, compute computedNutrition before save
+        if (category === 'combos') {
+            try {
+                const cn = await computeComboNutrition({ ...selectedItem, ...updatedItem });
+                updatedItem.computedNutrition = cn;
+            } catch (err) {
+                console.warn('Could not compute combo nutrition:', err);
+            }
+        }
+
         // Save to Firebase
         await updateDoc(doc(db, category, selectedItem.id), updatedItem);
 
@@ -663,6 +753,15 @@ async function saveItem(event) {
         // Refresh display
         displayMenuItems();
         showSaved();
+
+        // If combo updated, also upload the combos nutrition feed
+        if (category === 'combos') {
+            try {
+                await uploadCombosNutritionFeed();
+            } catch (e) {
+                console.warn('Failed to upload combos-nutrition.json:', e);
+            }
+        }
 
     } catch (error) {
         console.error('Error saving item:', error);
@@ -1204,3 +1303,274 @@ window.syncPrices = syncPrices;
 window.previewMenu = previewMenu;
 window.exportMenuPDF = exportMenuPDF;
 window.updateMargin = updateMargin;
+// Expose utility to recompute/upload nutrition feed from console
+window.uploadCombosNutritionFeed = uploadCombosNutritionFeed;
+
+// UI action: recompute and upload combo nutrition feed
+async function recomputeComboNutrition() {
+    try {
+        showSaving();
+        const result = await uploadCombosNutritionFeed();
+        showSaved();
+        if (result?.uploaded) {
+            showToast('Combo nutrition recomputed. Feed uploaded.', 'success');
+        } else {
+            console.info('Nutrition feed upload skipped (flag disabled).');
+            showToast('Combo nutrition recomputed. Feed upload skipped.', 'success');
+        }
+    } catch (e) {
+        console.error('Recompute nutrition failed:', e);
+        showError('Failed to recompute combo nutrition');
+    }
+}
+window.recomputeComboNutrition = recomputeComboNutrition;
+
+// --- Nutrition Computation & Feed Upload Helpers ---
+
+// Compute combo nutrition by summing referenced nutritionData items
+async function computeComboNutrition(combo) {
+    const components = (combo.components && Array.isArray(combo.components) && combo.components.length)
+        ? combo.components
+        : (Array.isArray(combo.items) ? combo.items.map(id => ({ refId: id, qty: 1 })) : []);
+
+    if (!components.length) {
+        throw new Error('Combo has no components to compute nutrition');
+    }
+
+    const refIds = components.map(c => c.refId);
+    const nutritionItems = await fetchNutritionByIds(refIds);
+
+    const byId = {};
+    nutritionItems.forEach(item => { if (item?.id) byId[item.id] = item; });
+
+    const fields = ['calories','totalFat','saturatedFat','transFat','cholesterol','sodium','totalCarbs','dietaryFiber','totalSugars','addedSugars','protein','vitaminD','calcium','iron','potassium'];
+    const totals = Object.fromEntries(fields.map(f => [f, 0]));
+    const breakdown = [];
+    const allergensSet = new Set();
+
+    components.forEach(({ refId, qty = 1 }) => {
+        const item = byId[refId];
+        if (!item) return;
+        const nutrients = item.nutrients || item;
+
+        fields.forEach(f => {
+            const val = typeof nutrients[f] === 'object' && nutrients[f] !== null && 'amount' in nutrients[f]
+                ? (nutrients[f].amount || 0)
+                : (nutrients[f] || 0);
+            totals[f] += (val || 0) * qty;
+        });
+
+        const cal = (nutrients.calories || 0) * qty;
+        breakdown.push({ refId, qty, name: item.name || refId, calories: Math.round(cal) });
+
+        const allergens = formatAllergens(item.allergens);
+        allergens.forEach(a => allergensSet.add(a));
+    });
+
+    const servingsPerCombo = combo.servingsPerCombo || combo.feedsCount || 1;
+
+    const round1 = (v) => Math.round((v + Number.EPSILON) * 10) / 10; // 1 decimal
+    const round0 = (v) => Math.round(v);
+
+    const perCombo = {
+        calories: round0(totals.calories),
+        totalFat: round1(totals.totalFat),
+        saturatedFat: round1(totals.saturatedFat),
+        transFat: round1(totals.transFat || 0),
+        cholesterol: round0(totals.cholesterol),
+        sodium: round0(totals.sodium),
+        totalCarbs: round0(totals.totalCarbs),
+        dietaryFiber: round0(totals.dietaryFiber || 0),
+        totalSugars: round0(totals.totalSugars || 0),
+        addedSugars: round0(totals.addedSugars || 0),
+        protein: round0(totals.protein),
+        vitaminD: round1(totals.vitaminD || 0),
+        calcium: round0(totals.calcium || 0),
+        iron: round1(totals.iron || 0),
+        potassium: round0(totals.potassium || 0)
+    };
+
+    // Sauce handling (representative): add sauce nutrition to totals if configured
+    let sauceNote = undefined;
+    if (combo.saucePolicy === 'representative' && combo.representativeSauceId) {
+        try {
+            const [sauceItem] = await fetchNutritionByIds([combo.representativeSauceId]);
+            if (sauceItem) {
+                // Determine portion multiplier based on rule
+                const rule = combo.saucePortionRule || { unit: 'oz', per: 'wings', qtyPerUnit: 1, perCount: 6 };
+                let totalOz = rule.qtyPerUnit || 1;
+                if (rule.per === 'wings') {
+                    // estimate wings count from components like "12-wings"
+                    const wingCount = components.reduce((acc, c) => {
+                        const m = /^(\d+)-wings$/.exec(c.refId);
+                        return acc + (m ? (parseInt(m[1], 10) * (c.qty || 1)) : 0);
+                    }, 0);
+                    const perCount = rule.perCount || 6;
+                    totalOz = (wingCount / perCount) * (rule.qtyPerUnit || 1);
+                } else if (rule.per === 'order') {
+                    totalOz = rule.qtyPerUnit || 1;
+                }
+
+                const s = sauceItem.nutrients || sauceItem;
+                const fieldsSauce = ['calories','totalFat','saturatedFat','transFat','cholesterol','sodium','totalCarbs','dietaryFiber','totalSugars','addedSugars','protein','vitaminD','calcium','iron','potassium'];
+                const adders = {};
+                fieldsSauce.forEach(f => {
+                    const val = typeof s[f] === 'object' && s[f] !== null && 'amount' in s[f] ? (s[f].amount || 0) : (s[f] || 0);
+                    adders[f] = val * totalOz; // assume per 1 oz base
+                });
+                // Apply to totals/perCombo
+                perCombo.calories = round0(perCombo.calories + adders.calories);
+                perCombo.totalFat = round1(perCombo.totalFat + adders.totalFat);
+                perCombo.saturatedFat = round1(perCombo.saturatedFat + adders.saturatedFat);
+                perCombo.transFat = round1(perCombo.transFat + (adders.transFat || 0));
+                perCombo.cholesterol = round0(perCombo.cholesterol + adders.cholesterol);
+                perCombo.sodium = round0(perCombo.sodium + adders.sodium);
+                perCombo.totalCarbs = round0(perCombo.totalCarbs + adders.totalCarbs);
+                perCombo.dietaryFiber = round0(perCombo.dietaryFiber + (adders.dietaryFiber || 0));
+                perCombo.totalSugars = round0(perCombo.totalSugars + (adders.totalSugars || 0));
+                perCombo.addedSugars = round0(perCombo.addedSugars + (adders.addedSugars || 0));
+                perCombo.protein = round0(perCombo.protein + adders.protein);
+                perCombo.vitaminD = round1(perCombo.vitaminD + (adders.vitaminD || 0));
+                perCombo.calcium = round0(perCombo.calcium + (adders.calcium || 0));
+                perCombo.iron = round1(perCombo.iron + (adders.iron || 0));
+                perCombo.potassium = round0(perCombo.potassium + (adders.potassium || 0));
+
+                // Add to breakdown and allergens
+                breakdown.push({ refId: combo.representativeSauceId, qty: `${totalOz} oz`, name: sauceItem.name || 'Sauce', calories: round0(adders.calories) });
+                formatAllergens(sauceItem.allergens).forEach(a => allergensSet.add(a));
+
+                sauceNote = { policy: 'representative', representativeId: combo.representativeSauceId, portion: `${totalOz} oz` };
+            }
+        } catch (_) {}
+    }
+
+    const perServing = {};
+    Object.entries(perCombo).forEach(([k, v]) => {
+        perServing[k] = (k === 'totalFat' || k === 'saturatedFat' || k === 'transFat' || k === 'vitaminD' || k === 'iron')
+            ? round1(v / servingsPerCombo)
+            : round0(v / servingsPerCombo);
+    });
+
+    const result = {
+        perCombo,
+        perServing,
+        allergens: Array.from(allergensSet),
+        breakdown,
+        servingsPerCombo,
+        lastComputedAt: Date.now(),
+        disclaimer: combo.disclaimer || ''
+    };
+    if (sauceNote !== undefined) {
+        result.sauceNote = sauceNote;
+    }
+    return result;
+}
+
+async function fetchNutritionByIds(ids) {
+    const chunk = (arr, size) => arr.length ? [arr.slice(0, size), ...chunk(arr.slice(size), size)] : [];
+    const chunks = chunk(ids, 10);
+    const results = [];
+    for (const c of chunks) {
+        const q = query(collection(db, 'nutritionData'), where('id', 'in', c));
+        const snap = await getDocs(q);
+        snap.forEach(d => results.push(d.data()));
+    }
+    return results;
+}
+
+function formatAllergens(allergens) {
+    if (!allergens) return [];
+    if (Array.isArray(allergens)) return allergens;
+    if (typeof allergens === 'object') {
+        return [...(allergens.contains || []), ...(allergens.mayContain || [])];
+    }
+    if (typeof allergens === 'string') {
+        const clean = allergens.replace(/[\[\]]/g, '');
+        return clean.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+}
+
+async function uploadCombosNutritionFeed() {
+    const combosSnap = await getDocs(collection(db, 'combos'));
+    const combos = [];
+    for (const docSnap of combosSnap.docs) {
+        const data = { id: docSnap.id, ...docSnap.data() };
+        // Always recompute to incorporate latest nutritionData (e.g., sauces)
+        let cn = null;
+        try { cn = await computeComboNutrition(data); } catch (_) {}
+        if (cn) {
+            // Persist back to Firestore so the modal can read computedNutrition directly
+            try {
+                const safe = sanitizeForFirestore(cn);
+                await updateDoc(doc(db, 'combos', docSnap.id), { computedNutrition: safe, updatedAt: serverTimestamp() });
+            } catch (e) {
+                console.warn('Failed to update combo computedNutrition', docSnap.id, e);
+            }
+            combos.push({ id: data.id, name: data.name, computedNutrition: cn, updatedAt: Date.now() });
+        }
+    }
+
+    // Gate Storage upload behind feature flag
+    if (!ENABLE_NUTRITION_FEED_UPLOAD) {
+        console.info('VITE_ENABLE_NUTRITION_FEED_UPLOAD=false — skipping Storage upload.');
+        return { uploaded: false, updatedCount: combos.length };
+    }
+
+    const json = new TextEncoder().encode(JSON.stringify(combos));
+    const ref = storageRef(storage, 'public/combos-nutrition.json');
+    try {
+        await uploadBytes(ref, json, { contentType: 'application/json' });
+        return { uploaded: true, updatedCount: combos.length };
+    } catch (e) {
+        console.warn('Skipping Storage upload (continuing):', e?.message || e);
+        // Do not throw; Firestore docs were updated successfully.
+        return { uploaded: false, updatedCount: combos.length };
+    }
+}
+
+// --- Lightweight toast helper ---
+function ensureToastContainer() {
+    let el = document.getElementById('toast-container');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'toast-container';
+        el.style.position = 'fixed';
+        el.style.right = '16px';
+        el.style.bottom = '16px';
+        el.style.display = 'flex';
+        el.style.flexDirection = 'column';
+        el.style.gap = '8px';
+        el.style.zIndex = '9999';
+        document.body.appendChild(el);
+    }
+    return el;
+}
+
+function showToast(message, type = 'info') {
+    const container = ensureToastContainer();
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.padding = '12px 16px';
+    toast.style.borderRadius = '8px';
+    toast.style.color = '#fff';
+    toast.style.fontWeight = '600';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.style.background = type === 'success' ? '#16a34a' : (type === 'error' ? '#dc2626' : '#374151');
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+    toast.style.transition = 'opacity 160ms ease, transform 160ms ease';
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 200);
+    }, 3000);
+}
+
+// Expose for debugging if needed
+window.showToast = showToast;
