@@ -1426,16 +1426,19 @@ async function computeComboNutrition(combo) {
             : round0(v / servingsPerCombo);
     });
 
-    return {
+    const result = {
         perCombo,
         perServing,
         allergens: Array.from(allergensSet),
         breakdown,
-        sauceNote,
         servingsPerCombo,
         lastComputedAt: Date.now(),
         disclaimer: combo.disclaimer || ''
     };
+    if (sauceNote !== undefined) {
+        result.sauceNote = sauceNote;
+    }
+    return result;
 }
 
 async function fetchNutritionByIds(ids) {
