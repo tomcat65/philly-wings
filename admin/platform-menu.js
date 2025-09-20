@@ -699,20 +699,7 @@ function displayItemEditor(item) {
         const pricingMeta = getModifierPricingMeta();
         allowanceInfo = { ...base, ...pricingMeta };
     }
-    const isWings = item.category === 'wings' || /wings/i.test(item.name || '');
-
-    let allowanceInfo = null;
-    if (isWings) {
-        const wingsCount = getWingsCountFromItem(item);
-        const base = computeWingAllowancesByCount(wingsCount);
-        const pricingMeta = getModifierPricingMeta();
-        allowanceInfo = { ...base, ...pricingMeta };
-    } else if (isCombo) {
-        const wingsCount = getWingsCountFromComboItems(item.items);
-        const base = computeWingAllowancesByCount(wingsCount);
-        const pricingMeta = getModifierPricingMeta();
-        allowanceInfo = { ...base, ...pricingMeta };
-    }
+    // (Removed duplicate isWings/allowanceInfo computation)
 
     // Build editor form
     editorContainer.innerHTML = `
