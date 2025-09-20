@@ -63,9 +63,9 @@ function computeWingAllowancesByCount(wingsCount) {
 }
 
 function getModifierPricingMeta() {
-    const extraSaucePrice = menuData?.modifiers?.extra_sauces?.pricePerCup ?? 1.00;
-    const extraDipPrice = menuData?.modifiers?.extra_dips?.pricePerExtra ?? 1.25;
-    const cutSurchargePer6 = menuData?.modifiers?.wing_cut?.surchargePer6 ?? 1.50;
+    const extraSaucePrice = (menuData && menuData.modifiers && menuData.modifiers.extra_sauces && menuData.modifiers.extra_sauces.pricePerCup) || 1.00;
+    const extraDipPrice = (menuData && menuData.modifiers && menuData.modifiers.extra_dips && menuData.modifiers.extra_dips.pricePerExtra) || 1.25;
+    const cutSurchargePer6 = (menuData && menuData.modifiers && menuData.modifiers.wing_cut && menuData.modifiers.wing_cut.surchargePer6) || 1.50;
     return { extraSaucePrice, extraDipPrice, cutSurchargePer6 };
 }
 
