@@ -26,6 +26,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Clear build cache
+        run: |
+          rm -rf dist/
+          rm -rf node_modules/.vite
+          rm -rf node_modules/.cache
+
       - name: Install dependencies
         run: npm ci
 
@@ -39,6 +45,14 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
+
+      - name: Verify asset hashes
+        run: |
+          echo "=== Built Assets ==="
+          ls -la dist/assets/ | grep platformMenu
+          echo "=== Admin HTML Script Tags ==="
+          grep -n "platformMenu" dist/admin/platform-menu.html
+          echo "=== Asset Hash Verification Complete ==="
 
       - name: Deploy to Firebase Hosting (Preview)
         if: github.event_name == 'pull_request'
