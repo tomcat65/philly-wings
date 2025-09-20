@@ -1,16 +1,19 @@
 // Platform Menu Management System
-import { auth, db } from '../src/firebase-config';
+import { auth, db, storage } from '../src/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
     collection,
     doc,
     getDocs,
     getDoc,
+    query,
+    where,
     setDoc,
     updateDoc,
     deleteDoc,
     serverTimestamp
 } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes } from 'firebase/storage';
 
 // State Management
 let currentPlatform = 'doordash';
@@ -650,6 +653,16 @@ async function saveItem(event) {
         // Determine collection based on item category
         const category = findItemCategory(selectedItem.id);
 
+        // If this is a combo, compute computedNutrition before save
+        if (category === 'combos') {
+            try {
+                const cn = await computeComboNutrition({ ...selectedItem, ...updatedItem });
+                updatedItem.computedNutrition = cn;
+            } catch (err) {
+                console.warn('Could not compute combo nutrition:', err);
+            }
+        }
+
         // Save to Firebase
         await updateDoc(doc(db, category, selectedItem.id), updatedItem);
 
@@ -663,6 +676,15 @@ async function saveItem(event) {
         // Refresh display
         displayMenuItems();
         showSaved();
+
+        // If combo updated, also upload the combos nutrition feed
+        if (category === 'combos') {
+            try {
+                await uploadCombosNutritionFeed();
+            } catch (e) {
+                console.warn('Failed to upload combos-nutrition.json:', e);
+            }
+        }
 
     } catch (error) {
         console.error('Error saving item:', error);
@@ -1204,3 +1226,130 @@ window.syncPrices = syncPrices;
 window.previewMenu = previewMenu;
 window.exportMenuPDF = exportMenuPDF;
 window.updateMargin = updateMargin;
+
+// --- Nutrition Computation & Feed Upload Helpers ---
+
+// Compute combo nutrition by summing referenced nutritionData items
+async function computeComboNutrition(combo) {
+    const components = (combo.components && Array.isArray(combo.components) && combo.components.length)
+        ? combo.components
+        : (Array.isArray(combo.items) ? combo.items.map(id => ({ refId: id, qty: 1 })) : []);
+
+    if (!components.length) {
+        throw new Error('Combo has no components to compute nutrition');
+    }
+
+    const refIds = components.map(c => c.refId);
+    const nutritionItems = await fetchNutritionByIds(refIds);
+
+    const byId = {};
+    nutritionItems.forEach(item => { if (item?.id) byId[item.id] = item; });
+
+    const fields = ['calories','totalFat','saturatedFat','transFat','cholesterol','sodium','totalCarbs','dietaryFiber','totalSugars','addedSugars','protein','vitaminD','calcium','iron','potassium'];
+    const totals = Object.fromEntries(fields.map(f => [f, 0]));
+    const breakdown = [];
+    const allergensSet = new Set();
+
+    components.forEach(({ refId, qty = 1 }) => {
+        const item = byId[refId];
+        if (!item) return;
+        const nutrients = item.nutrients || item;
+
+        fields.forEach(f => {
+            const val = typeof nutrients[f] === 'object' && nutrients[f] !== null && 'amount' in nutrients[f]
+                ? (nutrients[f].amount || 0)
+                : (nutrients[f] || 0);
+            totals[f] += (val || 0) * qty;
+        });
+
+        const cal = (nutrients.calories || 0) * qty;
+        breakdown.push({ refId, qty, calories: Math.round(cal) });
+
+        const allergens = formatAllergens(item.allergens);
+        allergens.forEach(a => allergensSet.add(a));
+    });
+
+    const servingsPerCombo = combo.servingsPerCombo || combo.feedsCount || 1;
+
+    const round1 = (v) => Math.round((v + Number.EPSILON) * 10) / 10; // 1 decimal
+    const round0 = (v) => Math.round(v);
+
+    const perCombo = {
+        calories: round0(totals.calories),
+        totalFat: round1(totals.totalFat),
+        saturatedFat: round1(totals.saturatedFat),
+        transFat: round1(totals.transFat || 0),
+        cholesterol: round0(totals.cholesterol),
+        sodium: round0(totals.sodium),
+        totalCarbs: round0(totals.totalCarbs),
+        dietaryFiber: round0(totals.dietaryFiber || 0),
+        totalSugars: round0(totals.totalSugars || 0),
+        addedSugars: round0(totals.addedSugars || 0),
+        protein: round0(totals.protein),
+        vitaminD: round1(totals.vitaminD || 0),
+        calcium: round0(totals.calcium || 0),
+        iron: round1(totals.iron || 0),
+        potassium: round0(totals.potassium || 0)
+    };
+
+    const perServing = {};
+    Object.entries(perCombo).forEach(([k, v]) => {
+        perServing[k] = (k === 'totalFat' || k === 'saturatedFat' || k === 'transFat' || k === 'vitaminD' || k === 'iron')
+            ? round1(v / servingsPerCombo)
+            : round0(v / servingsPerCombo);
+    });
+
+    return {
+        perCombo,
+        perServing,
+        allergens: Array.from(allergensSet),
+        breakdown,
+        servingsPerCombo,
+        lastComputedAt: Date.now(),
+        disclaimer: combo.disclaimer || ''
+    };
+}
+
+async function fetchNutritionByIds(ids) {
+    const chunk = (arr, size) => arr.length ? [arr.slice(0, size), ...chunk(arr.slice(size), size)] : [];
+    const chunks = chunk(ids, 10);
+    const results = [];
+    for (const c of chunks) {
+        const q = query(collection(db, 'nutritionData'), where('id', 'in', c));
+        const snap = await getDocs(q);
+        snap.forEach(d => results.push(d.data()));
+    }
+    return results;
+}
+
+function formatAllergens(allergens) {
+    if (!allergens) return [];
+    if (Array.isArray(allergens)) return allergens;
+    if (typeof allergens === 'object') {
+        return [...(allergens.contains || []), ...(allergens.mayContain || [])];
+    }
+    if (typeof allergens === 'string') {
+        const clean = allergens.replace(/[\[\]]/g, '');
+        return clean.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+}
+
+async function uploadCombosNutritionFeed() {
+    const combosSnap = await getDocs(collection(db, 'combos'));
+    const combos = [];
+    for (const docSnap of combosSnap.docs) {
+        const data = { id: docSnap.id, ...docSnap.data() };
+        let cn = data.computedNutrition;
+        if (!cn) {
+            try { cn = await computeComboNutrition(data); } catch (_) {}
+        }
+        if (cn) {
+            combos.push({ id: data.id, name: data.name, computedNutrition: cn, updatedAt: Date.now() });
+        }
+    }
+
+    const json = new TextEncoder().encode(JSON.stringify(combos));
+    const ref = storageRef(storage, 'public/combos-nutrition.json');
+    await uploadBytes(ref, json, { contentType: 'application/json' });
+}

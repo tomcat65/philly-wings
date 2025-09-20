@@ -47,8 +47,8 @@ export class ComboMenu {
     const card = document.createElement('div');
     card.className = `menu-card${combo.featured ? ' featured' : ''}`;
 
-    // Generate nutrition button ID based on combo ID
-    const nutritionId = combo.id.replace('combo-', '');
+    // Use combo ID directly for nutrition lookup (matches Firestore combos/{id})
+    const nutritionId = combo.id;
 
     card.innerHTML = `
       <img src="${combo.imageUrl}"

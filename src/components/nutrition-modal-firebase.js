@@ -2,6 +2,7 @@
 // Updated by Sally for dynamic nutrition data management
 
 import { NutritionService } from '../services/nutrition-service.js';
+import { FirebaseService } from '../services/firebase-service.js';
 
 export class NutritionModalFirebase {
   constructor() {
@@ -337,12 +338,31 @@ export class NutritionModalFirebase {
       // Fetch nutrition data from Firebase
       let nutrition;
 
-      if (sauceId) {
-        // Get combined nutrition with sauce
-        nutrition = await NutritionService.getNutritionWithSauce(itemId, sauceId);
-      } else {
-        // Get single item nutrition
-        nutrition = await NutritionService.getById(itemId);
+      // Special handling for combos: prefer computedNutrition from combos/{id}
+      if (category === 'combos' && itemId) {
+        const comboDoc = await FirebaseService.getById('combos', itemId);
+        if (comboDoc && comboDoc.computedNutrition) {
+          const cn = comboDoc.computedNutrition;
+          // Normalize into a structure compatible with populateModal
+          nutrition = {
+            _computed: true,
+            name: comboDoc.name || 'Combo',
+            servingsPerContainer: cn.servingsPerCombo || cn.servingsPerContainer || 1,
+            perServing: cn.perServing || {},
+            perCombo: cn.perCombo || {},
+            allergens: cn.allergens || [],
+            disclaimer: cn.disclaimer || comboDoc.disclaimer || '',
+          };
+        }
+      }
+
+      // Fallback to item/nutritionData lookup (wings/sides/sauces)
+      if (!nutrition) {
+        if (sauceId) {
+          nutrition = await NutritionService.getNutritionWithSauce(itemId, sauceId);
+        } else {
+          nutrition = await NutritionService.getById(itemId);
+        }
       }
 
       if (!nutrition) {
@@ -404,28 +424,36 @@ export class NutritionModalFirebase {
       return nutrient || 0;
     };
 
-    // Get base nutrition values (these are PER SERVING from Firebase)
+    // Get base nutrition values
+    // For computed combos, select data based on toggle state
+    const baseData = nutrition._computed
+      ? (this.showPerServing ? (nutrition.perServing || {}) : (nutrition.perCombo || {}))
+      : (nutrition.nutrients || nutrition);
+
     const perServingNutrients = {
-      calories: nutrition.nutrients?.calories || nutrition.calories || 0,
-      totalFat: getNutrientValue(nutrition.nutrients?.totalFat || nutrition.totalFat),
-      saturatedFat: getNutrientValue(nutrition.nutrients?.saturatedFat || nutrition.saturatedFat),
-      transFat: getNutrientValue(nutrition.nutrients?.transFat || nutrition.transFat),
-      cholesterol: getNutrientValue(nutrition.nutrients?.cholesterol || nutrition.cholesterol),
-      sodium: getNutrientValue(nutrition.nutrients?.sodium || nutrition.sodium),
-      totalCarbs: getNutrientValue(nutrition.nutrients?.totalCarbs || nutrition.totalCarbs),
-      dietaryFiber: getNutrientValue(nutrition.nutrients?.dietaryFiber || nutrition.dietaryFiber),
-      totalSugars: getNutrientValue(nutrition.nutrients?.totalSugars || nutrition.totalSugars),
-      addedSugars: getNutrientValue(nutrition.nutrients?.addedSugars || nutrition.addedSugars),
-      protein: getNutrientValue(nutrition.nutrients?.protein || nutrition.protein),
-      vitaminD: getNutrientValue(nutrition.nutrients?.vitaminD || nutrition.vitaminD),
-      calcium: getNutrientValue(nutrition.nutrients?.calcium || nutrition.calcium),
-      iron: getNutrientValue(nutrition.nutrients?.iron || nutrition.iron),
-      potassium: getNutrientValue(nutrition.nutrients?.potassium || nutrition.potassium)
+      calories: baseData.calories || 0,
+      totalFat: getNutrientValue(baseData.totalFat),
+      saturatedFat: getNutrientValue(baseData.saturatedFat),
+      transFat: getNutrientValue(baseData.transFat),
+      cholesterol: getNutrientValue(baseData.cholesterol),
+      sodium: getNutrientValue(baseData.sodium),
+      totalCarbs: getNutrientValue(baseData.totalCarbs),
+      dietaryFiber: getNutrientValue(baseData.dietaryFiber),
+      totalSugars: getNutrientValue(baseData.totalSugars),
+      addedSugars: getNutrientValue(baseData.addedSugars),
+      protein: getNutrientValue(baseData.protein),
+      vitaminD: getNutrientValue(baseData.vitaminD),
+      calcium: getNutrientValue(baseData.calcium),
+      iron: getNutrientValue(baseData.iron),
+      potassium: getNutrientValue(baseData.potassium)
     };
 
     // Calculate display data based on toggle state
     let displayData;
-    if (this.showPerServing || !hasMultipleServings) {
+    if (nutrition._computed) {
+      // Already selected appropriate per-serving or per-combo values in baseData
+      displayData = perServingNutrients;
+    } else if (this.showPerServing || !hasMultipleServings) {
       // Show per-serving values (raw data from Firebase)
       displayData = perServingNutrients;
       console.log('Showing per-serving nutrition:', displayData);
