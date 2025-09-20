@@ -26,7 +26,7 @@
 ## Sides
 - Regular Fries (1lb in paper cup/canoe)
 - Large Fries (2lb in takeout box)
-- Loaded Fries (cheese sauce & bacon - NOT just cheese fries)
+- Loaded Fries (cheese sauce & bacon - NOT just cheese fries) they are allways large
 - Mozzarella Sticks (follow ratio system: 4, 8, 12, or 16 pieces)
 
 ### Mozzarella Stick Ratio System
@@ -72,7 +72,7 @@
 - Loaded fries have cheese AND bacon (not just cheese)
 - 14 total sauces/flavors
 - Mozzarella sticks ALWAYS follow ratio system (4, 8, 12, 16)
-- All dips/sauces come in 1.5oz containers
+- All dips/sauces come in 1.5oz containers 2 per 6 wings, additional at {$}
 - Fries: Regular = 1lb, Large = 2lb
 
 ## Admin Menu System

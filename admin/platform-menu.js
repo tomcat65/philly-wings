@@ -1464,11 +1464,22 @@ async function uploadCombosNutritionFeed() {
         let cn = null;
         try { cn = await computeComboNutrition(data); } catch (_) {}
         if (cn) {
+            // Persist back to Firestore so the modal can read computedNutrition directly
+            try {
+                await updateDoc(doc(db, 'combos', docSnap.id), { computedNutrition: cn, updatedAt: serverTimestamp() });
+            } catch (e) {
+                console.warn('Failed to update combo computedNutrition', docSnap.id, e);
+            }
             combos.push({ id: data.id, name: data.name, computedNutrition: cn, updatedAt: Date.now() });
         }
     }
 
     const json = new TextEncoder().encode(JSON.stringify(combos));
     const ref = storageRef(storage, 'public/combos-nutrition.json');
-    await uploadBytes(ref, json, { contentType: 'application/json' });
+    try {
+        await uploadBytes(ref, json, { contentType: 'application/json' });
+    } catch (e) {
+        console.warn('Skipping Storage upload (continuing):', e?.message || e);
+        // Do not throw; Firestore docs were updated successfully.
+    }
 }
