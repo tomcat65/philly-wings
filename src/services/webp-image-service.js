@@ -145,6 +145,8 @@ export class WebPImageService {
 
           // Try loading WebP with fallback
           const testImg = new Image();
+          // Prevent our interceptor from re-processing the probe image
+          try { testImg.dataset.noWebp = 'true'; } catch (_) {}
           testImg.onload = () => {
             originalSrcSetter.call(this, webpUrl);
           };
@@ -154,7 +156,8 @@ export class WebPImageService {
             // allow future attempts
             this.dataset.webpApplied = '';
           };
-          testImg.src = webpUrl;
+          // Use setAttribute to bypass overridden src setter
+          testImg.setAttribute('src', webpUrl);
         } else {
           originalSrcSetter.call(this, value);
         }
@@ -190,6 +193,8 @@ export class WebPImageService {
 
         // Try WebP with fallback
         const testImg = new Image();
+        // Prevent our interceptor from re-processing the probe image
+        try { testImg.dataset.noWebp = 'true'; } catch (_) {}
         testImg.onload = () => {
           // Use attribute to minimize interference
           img.setAttribute('src', webpUrl);
@@ -198,7 +203,8 @@ export class WebPImageService {
           console.warn(`WebP not found for existing image: ${img.src}`);
           img.dataset.webpApplied = '';
         };
-        testImg.src = webpUrl;
+        // Use setAttribute to bypass overridden src setter
+        testImg.setAttribute('src', webpUrl);
       }
     });
   }
