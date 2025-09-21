@@ -1138,13 +1138,41 @@ async function generateMenuLink() {
             frozenDataKeys: publishedMenuClean.frozenData ? Object.keys(publishedMenuClean.frozenData) : 'missing'
         });
 
+        // Deep search for undefined values before Firestore write
+        function findUndefinedValues(obj, path = '') {
+            const undefinedPaths = [];
+
+            if (typeof obj === 'object' && obj !== null) {
+                for (const [key, value] of Object.entries(obj)) {
+                    const currentPath = path ? `${path}.${key}` : key;
+
+                    if (value === undefined) {
+                        undefinedPaths.push(currentPath);
+                    } else if (typeof value === 'object' && value !== null) {
+                        undefinedPaths.push(...findUndefinedValues(value, currentPath));
+                    }
+                }
+            }
+
+            return undefinedPaths;
+        }
+
+        const undefinedPaths = findUndefinedValues(publishedMenuClean);
+        if (undefinedPaths.length > 0) {
+            console.error('🚨 Found undefined values at paths:', undefinedPaths);
+            undefinedPaths.forEach(path => {
+                console.error(`Undefined at: ${path}`);
+            });
+        }
+
         try {
             await setDoc(doc(db, 'publishedMenus', menuId), { ...publishedMenuClean, publishedAt: serverTimestamp() });
         } catch (error) {
             console.error('🚨 Firestore setDoc error details:', {
                 error: error.message,
                 code: error.code,
-                data: publishedMenuClean
+                undefinedPaths: undefinedPaths,
+                sampleData: JSON.stringify(publishedMenuClean).substring(0, 500)
             });
             throw error;
         }
@@ -1174,13 +1202,24 @@ async function generateMenuLink() {
         }
         finalPublicMenu.generated = serverTimestamp();
 
+        // Check for undefined values in public menu before write
+        const { generated, ...publicMenuForCheck } = finalPublicMenu;
+        const publicUndefinedPaths = findUndefinedValues(publicMenuForCheck);
+        if (publicUndefinedPaths.length > 0) {
+            console.error('🚨 Found undefined values in publicMenu at paths:', publicUndefinedPaths);
+            publicUndefinedPaths.forEach(path => {
+                console.error(`PublicMenu undefined at: ${path}`);
+            });
+        }
+
         try {
             await setDoc(doc(db, 'publicMenus', menuId), finalPublicMenu);
         } catch (error) {
             console.error('🚨 PublicMenus setDoc error details:', {
                 error: error.message,
                 code: error.code,
-                data: finalPublicMenu
+                undefinedPaths: publicUndefinedPaths,
+                sampleData: JSON.stringify(publicMenuForCheck).substring(0, 500)
             });
             throw error;
         }
@@ -1594,7 +1633,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice,
+            price: item.platformPricing[platform]?.price || item.basePrice || 0,
             image: item.images?.original || '',
             modifiers: buildItemModifiers(item),
             portionDetails: item.portionDetails
@@ -1633,7 +1672,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice,
+            price: item.platformPricing[platform]?.price || item.basePrice || 0,
             image: item.images?.original || '',
             portionDetails: item.portionDetails
         }))
@@ -1646,7 +1685,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice,
+            price: item.platformPricing[platform]?.price || item.basePrice || 0,
             image: item.images?.original || ''
         }))
     });
@@ -1658,7 +1697,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice,
+            price: item.platformPricing[platform]?.price || item.basePrice || 0,
             image: item.images?.original || '',
             components: item.components,
             feedsCount: item.feedsCount
