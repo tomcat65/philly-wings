@@ -1127,8 +1127,24 @@ async function generateMenuLink() {
         // Save to publishedMenus collection (immutable) with deep sanitize
         // Important: don't sanitize away FieldValue serverTimestamp; set it after sanitize
         const { publishedAt, ...restPublished } = publishedMenu;
-        const publishedMenuClean = sanitizeForFirestore(restPublished);
-        await setDoc(doc(db, 'publishedMenus', menuId), { ...publishedMenuClean, publishedAt: serverTimestamp() });
+        const publishedMenuClean = sanitizeForFirestore(restPublished, 'publishedMenu');
+
+        console.log('📊 Menu data structure before saving:', {
+            size: JSON.stringify(publishedMenuClean).length,
+            keys: Object.keys(publishedMenuClean),
+            frozenDataKeys: publishedMenuClean.frozenData ? Object.keys(publishedMenuClean.frozenData) : 'missing'
+        });
+
+        try {
+            await setDoc(doc(db, 'publishedMenus', menuId), { ...publishedMenuClean, publishedAt: serverTimestamp() });
+        } catch (error) {
+            console.error('🚨 Firestore setDoc error details:', {
+                error: error.message,
+                code: error.code,
+                data: publishedMenuClean
+            });
+            throw error;
+        }
 
         // Also save simplified version to publicMenus for backward compatibility
         const publicMenu = {
@@ -1532,7 +1548,10 @@ async function buildCompleteMenuSnapshot(platform) {
         console.warn('Failed to build flexible combos for platform export:', e);
     }
 
-    return snapshot;
+    // Sanitize the entire snapshot before returning
+    const sanitizedSnapshot = sanitizeForFirestore(snapshot, 'menuSnapshot');
+    console.log('🧹 Sanitized menu snapshot size:', JSON.stringify(sanitizedSnapshot).length);
+    return sanitizedSnapshot;
 }
 
 // Build Menu Categories for Export
