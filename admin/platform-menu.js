@@ -71,27 +71,68 @@ function getModifierPricingMeta() {
 }
 
 // Remove undefined/NaN/Infinity recursively to satisfy Firestore constraints
-function sanitizeForFirestore(value) {
-    if (value === undefined) return undefined;
+function sanitizeForFirestore(value, path = '') {
+    // Handle null and undefined
+    if (value === undefined) return null;
     if (value === null) return null;
-    if (Array.isArray(value)) {
-        const arr = value
-            .map((v) => sanitizeForFirestore(v))
-            .filter((v) => v !== undefined);
-        return arr;
-    }
+
+    // Handle numbers - reject NaN, Infinity, and invalid numbers
     if (typeof value === 'number') {
-        if (!Number.isFinite(value)) return 0;
+        if (!Number.isFinite(value) || isNaN(value)) {
+            console.warn(`Invalid number at ${path}:`, value);
+            return 0;
+        }
         return value;
     }
+
+    // Handle strings - trim and reject empty strings
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        return trimmed || null;
+    }
+
+    // Handle booleans
+    if (typeof value === 'boolean') {
+        return value;
+    }
+
+    // Handle arrays
+    if (Array.isArray(value)) {
+        const arr = value
+            .map((v, i) => sanitizeForFirestore(v, `${path}[${i}]`))
+            .filter((v) => v !== null && v !== undefined);
+        return arr.length > 0 ? arr : null;
+    }
+
+    // Handle objects
     if (typeof value === 'object') {
+        // Reject functions, dates that aren't serializable, etc.
+        if (value instanceof Date) {
+            return value; // Firestore handles Date objects
+        }
+        if (typeof value.toJSON === 'function') {
+            return sanitizeForFirestore(value.toJSON(), path);
+        }
+
         const out = {};
         for (const [k, v] of Object.entries(value)) {
-            const sv = sanitizeForFirestore(v);
-            if (sv !== undefined) out[k] = sv;
+            const sanitizedKey = String(k).trim();
+            if (sanitizedKey) {
+                const sv = sanitizeForFirestore(v, `${path}.${sanitizedKey}`);
+                if (sv !== null && sv !== undefined) {
+                    out[sanitizedKey] = sv;
+                }
+            }
         }
-        return out;
+        return Object.keys(out).length > 0 ? out : null;
     }
+
+    // Reject functions and other non-serializable types
+    if (typeof value === 'function') {
+        console.warn(`Function detected at ${path}, removing`);
+        return null;
+    }
+
     return value;
 }
 
