@@ -154,8 +154,14 @@ export class SauceMenu {
       ` <span class="allergen-mark" title="Contains: ${sauce.allergens.join(', ')}">ⓘ</span>` : '';
 
     card.innerHTML = `
-      <h4>${sauce.name}${allergenMark}</h4>
-      <p>${sauce.description}</p>
+      <img src="${sauce.imageUrl}"
+           alt="${sauce.altText || sauce.name}"
+           class="dip-image"
+           loading="lazy">
+      <div class="dip-content">
+        <h4>${sauce.name}${allergenMark}</h4>
+        <p>${sauce.description}</p>
+      </div>
     `;
 
     return card;

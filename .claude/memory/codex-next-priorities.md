@@ -97,3 +97,126 @@ Next tasks
 2) CI audits on PR (Storage manifest diff, link 404 check, WebP coverage report).
 3) Backups: export core collections (`menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`).
 4) Optional: Admin import/export tools for menus; content seeding automation.
+
+## 2025‑09‑20 — Platform Menus, Modifiers, Dips, and Publish Pipeline (Completed)
+
+Scope
+- Clean up MVP Meal duplicate; enforce combo pricing & order.
+- Split Dips from Sauces in Admin; encode per‑6 wing allowances (sauces, dips, sauce‑on‑side, cuts, boneless/classic).
+- Consolidate Sides for partner export (single item + Portion Size modifier).
+- Add Admin buttons for Preview JSON, Download JSON, and publish via Cloud Function to Storage (Versioned + Latest URL).
+
+Files touched
+- `admin/platform-menu.js`
+  - Added allowance helpers: `getWingsCountFromItem`, `getWingsCountFromComboItems`, `computeWingAllowancesByCount`, `getModifierPricingMeta`.
+  - Default wing variant `modifierGroups`: `['wing_type','wing_cut','sauce_choice','extra_sauces','extra_dips']`.
+  - Inline Allowances panel in editor (wings/combos): shows sets‑of‑6, allowed sauces, included sauce cups, included dips, extra cup prices, wing cut surcharge, and floor rule text.
+  - Split Sauces vs Dips in Admin UI rendering (`menuData.dips`, `#dips-items`).
+  - Ensured modifier groups loaded/created (and upserted to Firestore):
+    - `sauce_choice`: per‑6 rules, includes “Original (No Sauce)”, on‑side doesn’t count against dips.
+    - `extra_sauces`: price per cup ($1.00), included per 6 = 0.
+    - `extra_dips`: included per 6 = 2; price per extra = $1.25; options sourced from dips.
+    - `wing_type`: classic | boneless (required).
+    - `wing_cut`: mix | all_drums | all_flats; surchargePer6 = $1.50; appliesTo classic only.
+  - Platform export snapshot (`buildCompleteMenuSnapshot`):
+    - Adds `platformExport.consolidated` with:
+      - `sides`: consolidated item per side with required `portion_size` modifier (4/8/12/16) using price deltas.
+      - `wingsSplitRules`: per‑6 allowances & pricing for sauces, dips, wing cuts, classic/boneless.
+      - `combos`: includes `flexibleComponents` enabling fries substitutions (regular/large/loaded) and add/remove sides/drinks, and `wingsCount`.
+    - Includes `allowances` per wings/combos item in `snapshot.items[...]` for downstream clients.
+  - Publishing flow hardening:
+    - Deep sanitize snapshot before writes, re‑apply `serverTimestamp()` after sanitize.
+    - Added `previewPlatformJSON`, `downloadPlatformJSON`, `publishToStorage` (callable) actions; exposed on `window.*`.
+  - Sorting: combos sorted by `sortOrder` for stable presentation.
+
+- `admin/platform-menu.html`
+  - Added Quick Action buttons: `🧪 Preview Platform JSON`, `⬇️ Download JSON`, `☁️ Publish to Storage`.
+  - Added Dips section (`🫙 Dips`) with item count.
+
+- `src/firebase-config.js`
+  - Exported `functions = getFunctions(app)` for callable.
+
+- `functions/index.js` (NEW)
+  - Callable `publishPlatformMenu` (admin‑only) writes versioned and latest JSON under `platform-menus/{platform}/` in Storage and records metadata in `publishedMenus/{platform‑timestamp}`. Returns Versioned + Latest URLs (firebasestorage endpoints).
+
+- `functions/package.json` (NEW)
+  - Node 18 engines, dependencies: `firebase-admin`, `firebase-functions`.
+
+- `storage.rules`
+  - Added public read for `platform-menus/**`; admin write.
+
+- `firebase.json`
+  - Added `"functions": { "source": "functions" }` to enable function deployment.
+
+- Documentation/backups updated earlier in this session when deduping MVP:
+  - `docs/firebase/STATUS.md`: combos reduced to 5; duplicated MVP removed.
+  - `backups/firebase-snapshot.json`: combos count adjusted; legacy MVP removed.
+
+Firestore changes
+- Combos (dedupe + pricing + order):
+  - Deleted legacy docs: `combos/D1F7cvfjgfMyEfPrdvBE` (mvp_meal), `3yhbryADluFsEx8O2xdU` (sampler_platter), `m8XgnkYctZlA44j4wJbo` (game_day_30), `TkYtV7xlPbM06W71Ex8D` (party_pack_50), `fEAlRAD4aWoWGlf6PCiy` (the_tailgater).
+  - Kept canonical web docs and set:
+    - `LHVOJwNbXNuXOZbpHtGO` (combo‑mvp): basePrice 17.99, sortOrder 1.
+    - `Qzhmx3q9twaSR62M0R7l` (combo‑sampler): basePrice 18.99, sortOrder 0.
+    - `VQBQJsNsTPSdM3jUSuFm` (combo‑tailgater): basePrice 47.99, sortOrder 2.
+    - `Mwp2hJceFkGrFKgmIQKX` (combo‑game‑day‑30): basePrice 35.99, sortOrder 3.
+    - `iKGdzL0l3zjB3JZ6VegH` (combo‑party‑pack): basePrice 104.99, sortOrder 4.
+  - Platform pricing set: GH lower for certain combos (Tailgater, Party Pack, Sampler, Game Day).
+
+- Mozzarella Sticks variants (sides): removed 6‑count; confirmed 4/8/12/16 only (with per‑platform pricing). Admin still lists variants; platform export consolidates via size modifier.
+
+- Modifiers (created/upserted): `sauce_choice`, `extra_sauces`, `extra_dips`, `wing_type`, `wing_cut` with per‑6 metadata and prices.
+
+Admin UX changes
+- Allowances panel in item editor for wings & combos (computed per sets of 6; floor rule for 50 wings).
+- Modifier Editor modal renders and persists the 5 groups; supports tuning per‑6 counts and per‑cup/per‑extra pricing.
+- Dips appear as their own Admin category and are available as paid add‑ons.
+
+Publish & links
+- Short‑term Firestore writes were hardened (sanitize + re‑apply timestamps) but switched to Cloud Function publish to Storage for a robust partner‑facing link.
+- Callable function deployed (`us‑central1`). Admin button returns:
+  - Versioned JSON URL: `.../platform-menus/{platform}/{timestamp}.json?alt=media`
+  - Latest JSON URL: `.../platform-menus/{platform}/latest.json?alt=media` (stable link to share with partners).
+
+Decisions & policies
+- Public site is a marketing showcase; partner menus and logic live in the platform export.
+- Categories for partners: Wings (6/12/24/30/50), Sauces (modifiers only), Dips (own category and add‑on), Sides (consolidated), Drinks, Combos.
+- Wings remain separate SKUs to keep per‑6 allowances straightforward for partner ingestion.
+- Combos support substitutions and add/remove with price deltas.
+
+Open items / Next actions
+1) Deploy path already in place. Validate Admin “☁️ Publish to Storage” now returns Versioned + Latest URLs and share Latest with partners.
+2) Optional: Add a small “Copy URL” button in publish modal.
+3) Optional: CI to auto‑publish `latest.json` on main‑branch merges (GitHub Actions calling the callable).
+4) Upgrade Cloud Functions runtime to Node 20 and `firebase-functions` to v5+ (breaking changes likely) before 2025‑10‑30.
+5) Consider pinning client Functions region (e.g., `getFunctions(app, 'us-central1')`) to match deployed region.
+6) Optional: Add `extra_dips` modifier to relevant sides as paid add‑on if partners want dips exposed alongside sides.
+7) Keep backups: run Firestore export for `menuItems`, `combos`, `sauces`, `modifierGroups`, `nutritionData`.
+
+Owner: Codex
+Last updated: 2025‑09‑20 — Platform menus export + publish pipeline live
+
+## 2025‑09‑20 — Cloud Function Live + Admin Publish Verified
+
+Status
+- Function `publishPlatformMenu (us‑central1)` deployed (callable; admin‑only). Artifact cleanup policy set (30 days).
+- Storage rules allow public read for `platform-menus/**`; functions bypass rules for writes.
+- Admin Platform Menu shows new Quick Actions: `☁️ Publish to Storage`, `⬇️ Download JSON`, `🧪 Preview Platform JSON`.
+
+How to Publish / Share
+- In Admin → Platform Menu Manager:
+  1) Click `☁️ Publish to Storage`.
+  2) Modal shows two URLs:
+     - Versioned: `https://firebasestorage.googleapis.com/v0/b/{bucket}/o/platform-menus/{platform}/{timestamp}.json?alt=media`
+     - Latest: `https://firebasestorage.googleapis.com/v0/b/{bucket}/o/platform-menus/{platform}/latest.json?alt=media`
+  3) Share the Latest URL with partner platforms (stable pointer).
+- Use `🧪 Preview Platform JSON` to inspect payload before publish; use `⬇️ Download JSON` for manual handoff if needed.
+
+Admin View (Verified)
+- Categories present and correct: Wings (6/12/24/30/50), Sides (7), Drinks (1), Combos (5), Sauces & Rubs (10), Dips (4).
+- Modifiers ensured/loaded: `sauce_choice`, `extra_sauces`, `extra_dips`, `wing_type`, `wing_cut`.
+
+Notes / Follow‑ups
+- If function region matters for client, pin via `getFunctions(app, 'us-central1')` in `src/firebase-config.js`.
+- Optional: add Copy URL button in publish modal for faster partner handoff.
+- Optional: CI job to auto‑publish Latest on main merges (calls the callable).

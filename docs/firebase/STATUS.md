@@ -4,7 +4,7 @@ Generated: 2025-09-20
 Project: philly-wings
 
 ## Summary
-- Firestore root collections: 12
+- Firestore root collections: 13 (legacy `nutrition` collection removed 2025-09-20)
 - Notable: `menuItems` now seeded (4 docs)
 - Storage bucket: `philly-wings.firebasestorage.app`
 - Storage listing: blocked by bucket listing error; included inferred paths from references
@@ -46,23 +46,9 @@ Project: philly-wings
 - modifierGroups/MuminHzf2D3FqKNT7gxy — sauce_choice_party
 - modifierGroups/apvZlly9nA0mTz1mVCvt — sauce_choice
 
-### nutrition (16 docs)
-- nutrition/7xQtgthiqwGQwmR6acII — the-tailgater (combo)
-- nutrition/AVfgJPNvZgQFgE0fdzMB — blue-cheese (dip)
-- nutrition/E2wO6wYdUlDHhd3s9001 — mild-buffalo (sauce)
-- nutrition/HsJVodv6qITIlUcIdYtj — loaded-fries (side)
-- nutrition/IafhgOLIraI6qwZczj5L — mvp-meal (combo)
-- nutrition/JCkQtSwUSsBIZNddKZQc — 6-wings
-- nutrition/KZC057UpleAXUaT0yRDg — 24-wings
-- nutrition/Oot40DL3AFrm8raDewp7 — french-fries
-- nutrition/UoewjNpdqfEl61fbjcHV — 50-wings
-- nutrition/YNv9hWVwdXPu6M2AJ3ue — mozzarella-sticks
-- nutrition/b1Q4RJ5pc5QK1v2rk3yP — single-serving (4 wings)
-- nutrition/c7sILCkL00SDOueyf1NI — 12-wings
-- nutrition/cBgO3mUkRrmiQ5VZaSY8 — 30-wings
-- nutrition/eXkLB3VL5CuslwfnaKP7 — northeast-hot-lemon (dry rub)
-- nutrition/inY4fURMOjnkoH1VPW3B — classic-lemon-pepper (dry rub)
-- nutrition/jI7Km7HN2u7ig1wDLFp3 — sweet-teriyaki
+### ~~nutrition~~ (REMOVED)
+**Legacy collection removed 2025-09-20** - replaced by `nutritionData` with FDA 2020 compliance.
+All functionality migrated to `nutritionData` collection.
 
 ### nutritionData (11 docs)
 - nutritionData/4XK2ObzGtoNeWoDHmVm0 — 6-wings
