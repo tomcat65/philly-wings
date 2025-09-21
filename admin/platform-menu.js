@@ -331,6 +331,7 @@ async function loadMenuData() {
                         // Use variant's own ID if available, otherwise generate one
                         const variantId = variant.id || `${item.id}_variant_${index}`;
 
+                        const processedBasePrice = variant.basePrice || variant.price || item.basePrice || 0;
                         const expandedItem = {
                             ...variant,
                             id: variantId,
@@ -340,12 +341,18 @@ async function loadMenuData() {
                             category: item.category,
                             modifierGroups: item.modifierGroups || (item.category === 'wings' ? ['wing_type', 'wing_cut', 'sauce_choice', 'extra_sauces', 'extra_dips'] : []),
                             images: item.images || {},
-                            basePrice: variant.basePrice || item.basePrice || 0,
+                            basePrice: processedBasePrice,
                             platformPricing: variant.platformPricing || {},
                             // Preserve original item properties
                             allergens: variant.allergens || item.allergens || [],
                             active: variant.active !== undefined ? variant.active : item.active
                         };
+
+                        // Final safety check for undefined values
+                        if (expandedItem.basePrice === undefined || expandedItem.basePrice === null) {
+                            console.warn(`⚠️ Warning: basePrice was still undefined for ${expandedItem.name}, forcing to 0`);
+                            expandedItem.basePrice = 0;
+                        }
 
                         // Categorize by parent category
                         if (item.category === 'wings') {
@@ -356,7 +363,7 @@ async function loadMenuData() {
                             menuData.drinks.push(expandedItem);
                         }
 
-                        console.log(`     ✓ Added variant: ${variant.name} ($${variant.basePrice})`);
+                        console.log(`     ✓ Added variant: ${variant.name} ($${processedBasePrice})`);
                     });
                 } else {
                     // Single item (no variants) or legacy format
@@ -365,9 +372,16 @@ async function loadMenuData() {
                     const singleItem = {
                         ...item,
                         baseItem: true,
+                        basePrice: item.basePrice || 0,
                         platformPricing: item.platformPricing || {},
                         active: item.active !== undefined ? item.active : true
                     };
+
+                    // Final safety check for undefined values
+                    if (singleItem.basePrice === undefined || singleItem.basePrice === null) {
+                        console.warn(`⚠️ Warning: basePrice was still undefined for ${singleItem.name}, forcing to 0`);
+                        singleItem.basePrice = 0;
+                    }
 
                     if (item.category === 'wings') {
                         menuData.wings.push(singleItem);
@@ -1633,7 +1647,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice || 0,
+            price: item.platformPricing[platform]?.price || item.basePrice || item.price || 0,
             image: item.images?.original || '',
             modifiers: buildItemModifiers(item),
             portionDetails: item.portionDetails
@@ -1672,7 +1686,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice || 0,
+            price: item.platformPricing[platform]?.price || item.basePrice || item.price || 0,
             image: item.images?.original || '',
             portionDetails: item.portionDetails
         }))
@@ -1685,7 +1699,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice || 0,
+            price: item.platformPricing[platform]?.price || item.basePrice || item.price || 0,
             image: item.images?.original || ''
         }))
     });
@@ -1697,7 +1711,7 @@ async function buildMenuCategories(platform) {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.platformPricing[platform]?.price || item.basePrice || 0,
+            price: item.platformPricing[platform]?.price || item.basePrice || item.price || 0,
             image: item.images?.original || '',
             components: item.components,
             feedsCount: item.feedsCount
