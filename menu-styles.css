@@ -131,6 +131,14 @@
     object-fit: cover;
 }
 
+/* Fix for tall images like water bottle - show complete image */
+.menu-card-img[alt*="Water"],
+.menu-card-img[alt*="water"] {
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
 .menu-card-content {
     padding: 1.5rem;
 }
