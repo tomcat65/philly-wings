@@ -1,0 +1,149 @@
+{
+  "backupDate": "2025-09-21",
+  "reason": "Backing up Richard's new menu items that broke margin calculation",
+  "note": "These items had complex data structure issues and negative margins. Need to be restructured before re-adding.",
+  "items": [
+    {
+      "firebaseId": "BdbjqIs4xtZO4ddwPRLv",
+      "id": "wings-6",
+      "name": "6 Wings",
+      "category": "wings",
+      "description": "Six fresh, never frozen wings double-fried to crispy perfection",
+      "baseItem": true,
+      "active": true,
+      "basePrice": 9.49,
+      "platformPricing": {
+        "doordash": 13.76,
+        "ubereats": 13.76,
+        "grubhub": 11.86
+      },
+      "modifierGroups": [
+        "sauce_choice",
+        "wing_style",
+        "extra_sauces"
+      ],
+      "images": {
+        "main": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2F6-wings.png?alt=media",
+        "gallery": []
+      },
+      "variants": [
+        {
+          "id": "6-wings-traditional",
+          "name": "6 Traditional Wings",
+          "price": 9.49,
+          "description": "Classic bone-in wings"
+        },
+        {
+          "id": "6-wings-boneless",
+          "name": "6 Boneless Wings",
+          "price": 9.49,
+          "description": "Tender boneless pieces"
+        }
+      ],
+      "sortOrder": 1,
+      "issues": [
+        "Variants have pricing that doesn't match platformPricing",
+        "Data structure conflicts with admin interface expectations",
+        "Margin calculation logic couldn't process correctly"
+      ]
+    },
+    {
+      "firebaseId": "E112LlISGmoeMJBS0sUh",
+      "id": "wings-10",
+      "name": "10 Wings",
+      "category": "wings",
+      "description": "Ten fresh, never frozen wings double-fried to crispy perfection",
+      "baseItem": true,
+      "active": true,
+      "basePrice": 13.99,
+      "platformPricing": {
+        "doordash": 20.29,
+        "ubereats": 20.29,
+        "grubhub": 17.49
+      },
+      "modifierGroups": [
+        "sauce_choice",
+        "wing_style",
+        "extra_sauces"
+      ],
+      "images": {
+        "main": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2F10-wings.png?alt=media",
+        "gallery": []
+      },
+      "variants": [
+        {
+          "id": "10-wings-traditional",
+          "name": "10 Traditional Wings",
+          "price": 13.99,
+          "description": "Classic bone-in wings"
+        },
+        {
+          "id": "10-wings-boneless",
+          "name": "10 Boneless Wings",
+          "price": 13.99,
+          "description": "Tender boneless pieces"
+        }
+      ],
+      "sortOrder": 2,
+      "issues": [
+        "Same structural issues as 6 Wings",
+        "Needs proper integration with existing wing variants system"
+      ]
+    },
+    {
+      "firebaseId": "CWwizDijTKJXXhh0PEBV",
+      "id": "wings-20",
+      "name": "20 Wings",
+      "category": "wings",
+      "description": "Twenty fresh, never frozen wings double-fried to crispy perfection",
+      "baseItem": true,
+      "active": true,
+      "basePrice": 26.99,
+      "platformPricing": {
+        "doordash": 39.14,
+        "ubereats": 39.14,
+        "grubhub": 33.74
+      },
+      "modifierGroups": [
+        "sauce_choice",
+        "wing_style",
+        "extra_sauces"
+      ],
+      "images": {
+        "main": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2F20-wings.png?alt=media",
+        "gallery": []
+      },
+      "variants": [
+        {
+          "id": "20-wings-traditional",
+          "name": "20 Traditional Wings",
+          "price": 26.99,
+          "description": "Classic bone-in wings"
+        },
+        {
+          "id": "20-wings-boneless",
+          "name": "20 Boneless Wings",
+          "price": 26.99,
+          "description": "Tender boneless pieces"
+        }
+      ],
+      "sortOrder": 4,
+      "issues": [
+        "Same structural issues as other new items",
+        "Should be integrated into existing Wings variants instead of separate document"
+      ]
+    }
+  ],
+  "originalWorkingSchema": {
+    "note": "Our original working schema had Wings as a single document with variants",
+    "wingCounts": [6, 12, 24, 30, 50],
+    "structure": "Single 'Wings' document with variants array containing all counts",
+    "decision": "10 and 20 wings were NOT part of original offering - backing them up but not restoring"
+  },
+  "nextSteps": [
+    "✅ Remove these three documents from menuItems collection",
+    "❌ Do NOT add 10 and 20 wing variants - they were not in original schema",
+    "✅ Keep original working schema: 6, 12, 24, 30, 50 wings only",
+    "✅ Test margin calculation with clean original data"
+  ]
+}

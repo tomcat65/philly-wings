@@ -1,7 +1,8 @@
 # Philly Wings Express - Complete System Architecture
 
 ## System Overview
-Last Updated: 2025-01-18
+Last Updated: 2025-09-21
+**Major Update**: Resolved margin calculation issue and data structure conflicts
 
 ### Three Distinct Components:
 1. **Frontend (Marketing Site)** - Drive traffic to delivery platforms
@@ -314,3 +315,97 @@ Admin manages menu → Publishes to platforms → Customers order on platforms �
 - Lower commission but slower updates
 - Less sophisticated modifier system
 - May require manual entry for complex items
+
+---
+
+## Critical System Issues & Resolutions
+
+### Issue: Margin Calculation Breaking (Sept 21, 2025)
+
+**Problem**: Average margin calculation showed 45.2% then dropped to 0.0%
+
+**Root Cause**: New menu items added with incompatible data structures
+- Original working schema: Single `Wings` document with variants array
+- New problematic items: Separate documents with conflicting pricing structures
+- Admin interface couldn't process mixed data formats
+
+**Items Causing Issues**:
+```javascript
+// Problematic structure (separate documents)
+menuItems/BdbjqIs4xtZO4ddwPRLv: {
+  id: "wings-6",
+  platformPricing: { doordash: 13.76 },  // Direct number
+  variants: [{ price: 9.49 }]              // Conflicting pricing
+}
+
+// Working structure (variants in single doc)
+menuItems/RLhhyuaE4rxKj47Puu3W: {
+  id: "wings",
+  variants: [{
+    id: "wings_6",
+    platformPricing: { doordash: 8.99 }   // Clean structure
+  }]
+}
+```
+
+**Solution Applied**:
+1. **Enhanced `calculateAverageMargin()` function** to handle multiple data structures
+2. **Backed up problematic items** to `richard-menu-items-backup.json`
+3. **Removed conflicting documents** from live database
+4. **Restored original working schema**: 6, 12, 24, 30, 50 wings only
+
+**Code Fix Location**: `admin/platform-menu.js:948-1006`
+
+**Result**: ✅ Average margin calculation restored to 45.2% (stable)
+
+### Data Structure Standards
+
+**✅ Approved Structure** (Use This):
+```javascript
+// Single document with variants
+Wings: {
+  variants: [
+    {
+      id: "wings_6",
+      name: "6 Wings",
+      basePrice: 5.99,
+      platformPricing: {
+        doordash: 8.99,
+        ubereats: 8.99,
+        grubhub: 7.99
+      }
+    }
+  ]
+}
+```
+
+**❌ Problematic Structure** (Avoid):
+```javascript
+// Separate documents with mixed pricing
+wings-6: {
+  basePrice: 9.49,
+  platformPricing: { doordash: 13.76 },  // Direct number
+  variants: [{ price: 9.49 }]            // Conflicting data
+}
+```
+
+### Prevention Guidelines
+
+1. **Always use variants** within single category documents
+2. **Maintain consistent pricing structure** across all items
+3. **Test margin calculation** after adding new items
+4. **Back up experimental items** before going live
+5. **Stick to approved wing counts**: 6, 12, 24, 30, 50 only
+
+### Troubleshooting Margin Issues
+
+**Symptoms**: Average margin shows 0.0% or unexpected values
+
+**Debug Steps**:
+1. Check console logs for data structure warnings
+2. Verify all items have proper `platformPricing` format
+3. Look for items with `variants` arrays vs direct pricing
+4. Test with single platform first
+5. Use browser dev tools to inspect `menuData` object
+
+**Emergency Fix**: Remove problematic items, restore from backup

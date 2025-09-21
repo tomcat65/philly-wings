@@ -1,6 +1,7 @@
 # Admin Menu System - Platform Management
 
 ## Created: 2025-01-17
+## Last Updated: 2025-09-21 - **CRITICAL**: Margin calculation fix and data cleanup
 
 ### System Overview
 Complete admin menu management system for delivery platform integration (DoorDash, UberEats, Grubhub). Located at `/admin/platform-menu.html` with tablet-optimized interface for managing platform-specific pricing and generating shareable menu links.
@@ -170,3 +171,102 @@ https://phillywingsexpress.com/menu/doordash/menu_1737664000000_abc123xyz
 - Created platform menu generator
 - Implemented margin calculator
 - Added tablet optimizations
+
+## CRITICAL System Issue Resolution (2025-09-21)
+
+### ❌ **Problem Encountered**
+- Average margin calculation broke: 45.2% → 0.0%
+- Admin interface became unstable
+- Menu link generation failing
+
+### 🔍 **Root Cause Analysis**
+**Incompatible menu items were added** that broke our proven working schema:
+
+**❌ Problematic Items Added** (Now backed up):
+- `wings-6` (6 Wings) - Document ID: `BdbjqIs4xtZO4ddwPRLv`
+- `wings-10` (10 Wings) - Document ID: `E112LlISGmoeMJBS0sUh`
+- `wings-20` (20 Wings) - Document ID: `CWwizDijTKJXXhh0PEBV`
+
+**Issues with new items**:
+1. **Separate documents** instead of variants within Wings document
+2. **Mixed pricing structures**: `platformPricing.doordash: 13.76` vs `platformPricing.doordash.price: 13.76`
+3. **Conflicting base prices**: `basePrice: 9.49` vs `variants[].price: 9.49`
+4. **Non-standard wing counts**: 10, 20 were never in original offering
+
+### ✅ **Solution Applied**
+
+**1. Enhanced Margin Calculation Logic**
+- Updated `calculateAverageMargin()` function in `admin/platform-menu.js:948-1006`
+- Now handles multiple data structure formats safely
+- Added proper error checking and NaN/Infinity protection
+
+**2. Data Cleanup & Backup**
+- **Backed up problematic items** → `.claude/memory/richard-menu-items-backup.json`
+- **Removed conflicting documents** from live menuItems collection
+- **Preserved original working schema**: 6, 12, 24, 30, 50 wings only
+
+**3. Restored System Stability**
+- Average margin calculation: ✅ **45.2%** (stable)
+- Wings count: ✅ **5 items** (correct)
+- Admin interface: ✅ **Fully functional**
+
+### 📊 **Data Structure Standards (ENFORCED)**
+
+**✅ CORRECT Way** (What we use):
+```javascript
+// Single Wings document with variants
+Wings: {
+  id: "wings",
+  variants: [
+    {
+      id: "wings_6",
+      name: "6 Wings",
+      basePrice: 5.99,
+      platformPricing: {
+        doordash: 8.99,
+        ubereats: 8.99,
+        grubhub: 7.99
+      }
+    }
+  ]
+}
+```
+
+**❌ AVOID** (What caused problems):
+```javascript
+// Separate documents with mixed structures
+wings-6: {
+  id: "wings-6",
+  basePrice: 9.49,
+  platformPricing: { doordash: 13.76 },  // Direct number
+  variants: [{ price: 9.49 }]            // Conflicting pricing
+}
+```
+
+### 🚨 **Prevention Rules**
+
+1. **NEVER add wing counts** other than: 6, 12, 24, 30, 50
+2. **ALWAYS use variants** within existing Wings document
+3. **ALWAYS test margin calculation** after database changes
+4. **ALWAYS backup experimental items** before going live
+5. **STICK to approved data structures** - don't mix formats
+
+### 🛠️ **Troubleshooting Guide**
+
+**If Average Margin Shows 0.0%:**
+1. Check browser console for data structure warnings
+2. Look for items with mixed `platformPricing` formats
+3. Verify no duplicate wing count documents exist
+4. Test `calculateAverageMargin()` function in dev tools
+5. Emergency fix: Remove problematic items, restore from backup
+
+**Backup File Location**: `.claude/memory/richard-menu-items-backup.json`
+
+### ✅ **System Health Check (Current)**
+- ✅ Average Margin: **45.2%**
+- ✅ Wings: **5 items** (6, 12, 24, 30, 50)
+- ✅ Data Structure: **Consistent**
+- ✅ Admin Interface: **Stable**
+- ✅ Menu Generation: **Working**
+
+**Last Verified**: 2025-09-21 20:03 GMT
