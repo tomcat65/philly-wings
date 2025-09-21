@@ -72,8 +72,11 @@ function getModifierPricingMeta() {
 
 // Remove undefined/NaN/Infinity recursively to satisfy Firestore constraints
 function sanitizeForFirestore(value, path = '') {
-    // Handle null and undefined
-    if (value === undefined) return null;
+    // Handle null and undefined - completely remove undefined values
+    if (value === undefined) {
+        console.warn(`⚠️ Undefined value found at path: ${path}`);
+        return null;
+    }
     if (value === null) return null;
 
     // Handle numbers - reject NaN, Infinity, and invalid numbers
@@ -1147,15 +1150,40 @@ async function generateMenuLink() {
         }
 
         // Also save simplified version to publicMenus for backward compatibility
+        const categoriesData = await buildMenuCategories(platform);
         const publicMenu = {
             platform: platform,
-            restaurant: publishedMenu.restaurant,
-            categories: await buildMenuCategories(platform),
-            generated: serverTimestamp()
+            restaurant: sanitizeForFirestore(publishedMenu.restaurant, 'restaurant'),
+            categories: sanitizeForFirestore(categoriesData, 'categories')
         };
-        const { generated, ...restPublic } = publicMenu;
-        const publicMenuClean = sanitizeForFirestore(restPublic);
-        await setDoc(doc(db, 'publicMenus', menuId), { ...publicMenuClean, generated: serverTimestamp() });
+
+        console.log('📊 Public menu data before saving:', {
+            size: JSON.stringify(publicMenu).length,
+            keys: Object.keys(publicMenu),
+            categoriesCount: publicMenu.categories ? publicMenu.categories.length : 'null'
+        });
+
+        const publicMenuClean = sanitizeForFirestore(publicMenu, 'publicMenu');
+
+        // Final cleanup: remove any null/undefined properties completely
+        const finalPublicMenu = {};
+        for (const [key, val] of Object.entries(publicMenuClean)) {
+            if (val !== null && val !== undefined) {
+                finalPublicMenu[key] = val;
+            }
+        }
+        finalPublicMenu.generated = serverTimestamp();
+
+        try {
+            await setDoc(doc(db, 'publicMenus', menuId), finalPublicMenu);
+        } catch (error) {
+            console.error('🚨 PublicMenus setDoc error details:', {
+                error: error.message,
+                code: error.code,
+                data: finalPublicMenu
+            });
+            throw error;
+        }
 
         // Generate link
         const menuLink = `${window.location.origin}/menu/${platform}/${menuId}`;
