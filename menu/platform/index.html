@@ -478,6 +478,23 @@
         .error h2 {
             margin-bottom: 1rem;
         }
+
+        .demo-notice {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin: 2rem auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 600px;
+        }
+
+        .demo-notice p {
+            margin: 0;
+            font-size: 1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
@@ -494,23 +511,82 @@
         import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = window.__PHILLY_WINGS_FIREBASE_CONFIG__;
+        let db = null; // Global db reference
 
-        if (!firebaseConfig) {
-            const appContainer = document.getElementById('app');
-            if (appContainer) {
-                appContainer.innerHTML = `
-                    <div class="error">
-                        <h2>Configuration Missing</h2>
-                        <p>Firebase configuration was not loaded. Please add <code>menu/platform/firebase-config.js</code> based on the provided example.</p>
-                    </div>
-                `;
+        // Initialize the menu system
+        function initializeMenu() {
+            if (!firebaseConfig) {
+                console.log('🎭 Demo Mode: Firebase config not found, using static demo data');
+                // Demo mode with static data to showcase enhanced template
+                const demoMenuData = {
+                    restaurant: {
+                        name: 'Philly Wings Express',
+                        tagline: 'Fresh Wings, Philly Flavor',
+                        logoUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/logos%2Fphilly-wings-logo.png?alt=media'
+                    },
+                    platformConfig: {
+                        name: 'DoorDash',
+                        platform: 'doordash',
+                        themeColor: '#eb1700'
+                    },
+                    categories: [
+                        {
+                            id: 'wings',
+                            name: 'Wings',
+                            emoji: '🍗',
+                            items: [
+                                {
+                                    id: 'wings_6_bonein',
+                                    name: '6 Wings (Bone-In)',
+                                    description: '6 fresh bone-in wings with 1 included sauce',
+                                    price: 12.14,
+                                    category: 'wings',
+                                    portionDetails: { count: 6 },
+                                    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/menu-items%2Fwings-bone-in.jpg?alt=media',
+                                    includedSauces: 1
+                                },
+                                {
+                                    id: 'wings_12_bonein',
+                                    name: '12 Wings (Bone-In)',
+                                    description: '12 fresh bone-in wings with 2 included sauces',
+                                    price: 20.24,
+                                    category: 'wings',
+                                    portionDetails: { count: 12 },
+                                    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/menu-items%2Fwings-bone-in.jpg?alt=media',
+                                    includedSauces: 2
+                                }
+                            ]
+                        },
+                        {
+                            id: 'sides',
+                            name: 'Sides',
+                            emoji: '🍟',
+                            items: [
+                                {
+                                    id: 'fries_regular',
+                                    name: 'French Fries',
+                                    description: 'Golden crispy fries',
+                                    price: 5.39,
+                                    category: 'sides',
+                                    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/menu-items%2Ffries.jpg?alt=media'
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                // Render demo menu
+                renderDemoMenu(demoMenuData);
+                return;
             }
-            throw new Error('Firebase configuration not found. Create menu/platform/firebase-config.js that sets window.__PHILLY_WINGS_FIREBASE_CONFIG__.');
-        }
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+
+            // Start normal menu loading
+            renderMenu();
+        }
 
         // Extract menu ID from URL
         function getMenuIdFromUrl() {
@@ -657,6 +733,81 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Render demo menu with static data
+        function renderDemoMenu(menuData) {
+            const appDiv = document.getElementById('app');
+
+            // Set page title
+            document.title = `${menuData.restaurant.name} - ${menuData.platformConfig.name} Menu (Demo)`;
+
+            // Render the enhanced template with demo data
+            appDiv.innerHTML = `
+                <div class="platform-header">
+                    <div class="header-content">
+                        <div class="logo-container">
+                            <img src="${menuData.restaurant.logoUrl}" alt="${menuData.restaurant.name}" class="logo">
+                            <div>
+                                <h1>${menuData.restaurant.name}</h1>
+                                <div class="tagline">${menuData.restaurant.tagline}</div>
+                            </div>
+                        </div>
+                        <div class="platform-badge ${menuData.platformConfig.platform}">
+                            ${menuData.platformConfig.name} Menu
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-container">
+                    <div class="category-navigation">
+                        <div class="category-nav-container">
+                            ${menuData.categories.map((category, index) => `
+                                <button type="button"
+                                       class="category-nav-item ${index === 0 ? 'active' : ''}"
+                                       data-category="${category.id}">
+                                    <span class="category-emoji">${category.emoji}</span>
+                                    <span class="category-name">${category.name}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="categories-container">
+                        ${menuData.categories.map(category => `
+                            <div class="category-section" data-category="${category.id}">
+                                <h2 class="category-title">
+                                    <span class="category-emoji">${category.emoji}</span>
+                                    ${category.name}
+                                </h2>
+                                <div class="menu-items">
+                                    ${category.items.map(item => renderMenuItem(item, {}, true)).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="demo-notice">
+                    <p><strong>🎭 Demo Mode:</strong> This is a demonstration of the enhanced platform menu template with static data.</p>
+                </div>
+            `;
+
+            // Add category navigation functionality
+            document.querySelectorAll('.category-nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    // Update active nav item
+                    document.querySelectorAll('.category-nav-item').forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+
+                    // Scroll to category section
+                    const categoryId = item.dataset.category;
+                    const categorySection = document.querySelector(`[data-category="${categoryId}"]`);
+                    if (categorySection) {
+                        categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
         }
 
         // Render menu
@@ -835,7 +986,7 @@
         window.scrollToCategory = scrollToCategory;
 
         // Initialize
-        renderMenu();
+        initializeMenu();
     </script>
 </body>
 </html>
