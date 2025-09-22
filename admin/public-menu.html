@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philly Wings Express - Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .menu-header {
+            background: linear-gradient(135deg, #004c54 0%, #00703c 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .menu-header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+            opacity: 0.95;
+            font-style: italic;
+        }
+
+        .platform-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #eb1700, #ff4444);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .menu-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .category-section {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: #00703c;
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .category-header h2 {
+            font-size: 1.8rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-items {
+            padding: 1.5rem;
+        }
+
+        .menu-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            border-color: #00703c;
+        }
+
+        .item-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 3rem;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #004c54;
+        }
+
+        .item-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00703c;
+        }
+
+        .item-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .portion-info {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        .sauce-inclusion {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border: 1px solid #00703c;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sauce-inclusion-icon {
+            color: #00703c;
+            font-weight: bold;
+        }
+
+        .sauce-inclusion-text {
+            font-size: 0.9rem;
+            color: #00703c;
+            font-weight: 600;
+        }
+
+        .dips-section {
+            background: #fff8e1;
+            border: 1px solid #ff8000;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .dips-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ff8000;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dip-option {
+            display: inline-block;
+            background: white;
+            border: 1px solid #ff8000;
+            padding: 0.35rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .platform-pricing-note {
+            background: #f0f8ff;
+            border: 1px solid #0066cc;
+            border-radius: 6px;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            color: #0066cc;
+            text-align: center;
+        }
+
+        .order-button {
+            background: #00703c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .order-button:hover {
+            background: #004c54;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .menu-item {
+                flex-direction: column;
+            }
+            .item-image {
+                width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/logos%2Fphilly-wings-logo.png?alt=media" alt="Philly Wings Express" class="logo">
+                <div>
+                    <h1>Philly Wings Express</h1>
+                    <div class="tagline">Fresh Wings, Philly Flavor</div>
+                </div>
+            </div>
+            <div class="platform-badge">DoorDash Menu</div>
+        </div>
+    </div>
+
+    <div class="menu-container" id="menuContainer">
+        <div class="loading" style="text-align: center; padding: 4rem; font-size: 1.2rem; color: #666;">
+            Loading delicious menu...
+        </div>
+    </div>
+
+    <script src="../src/firebase-config.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        const app = initializeApp(window.firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Initialize the app
+        async function initializePublicMenu() {
+            // Anonymous auth for public access
+            await signInAnonymously(auth);
+            loadMenu();
+        }
+
+        async function loadMenu() {
+            try {
+                const menuContainer = document.getElementById('menuContainer');
+
+                // Load menu items
+                const menuItemsRef = collection(db, 'menuItems');
+                const menuSnapshot = await getDocs(menuItemsRef);
+
+                const menuData = {};
+                menuSnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    if (!menuData[item.category]) {
+                        menuData[item.category] = [];
+                    }
+                    menuData[item.category].push({...item, id: doc.id});
+                });
+
+                // Load combos
+                const combosRef = collection(db, 'combos');
+                const combosSnapshot = await getDocs(combosRef);
+                const combos = [];
+                combosSnapshot.forEach((doc) => {
+                    combos.push({...doc.data(), id: doc.id});
+                });
+
+                // Load sauces
+                const saucesRef = collection(db, 'sauces');
+                const saucesSnapshot = await getDocs(saucesRef);
+                const sauces = [];
+                saucesSnapshot.forEach((doc) => {
+                    const sauce = doc.data();
+                    sauces.push({...sauce, id: doc.id});
+                });
+
+                let html = '';
+
+                // Wings
+                if (menuData.wings) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-header">
+                                <h2>🍗 Wings</h2>
+                            </div>
+                            <div class="menu-items">
+                                ${menuData.wings.map(item => renderMenuItem(item, true)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Sides
+                if (menuData.sides) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-header">
+                                <h2>🍟 Sides</h2>
+                            </div>
+                            <div class="menu-items">
+                                ${menuData.sides.map(item => renderMenuItem(item, false)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Drinks
+                if (menuData.drinks) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-header">
+                                <h2>🥤 Drinks</h2>
+                            </div>
+                            <div class="menu-items">
+                                ${menuData.drinks.map(item => renderMenuItem(item, false)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Combos
+                if (combos.length) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-header">
+                                <h2>🎉 Combos</h2>
+                            </div>
+                            <div class="menu-items">
+                                ${combos.map(combo => renderComboItem(combo)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Sauces
+                const mainSauces = sauces.filter(s => s.type === 'sauce');
+                const dips = sauces.filter(s => s.type === 'dip');
+
+                if (mainSauces.length) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-header">
+                                <h2>🌶️ Sauces & Rubs</h2>
+                            </div>
+                            <div class="menu-items">
+                                ${mainSauces.map(sauce => renderSauceItem(sauce)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (dips.length) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-header">
+                                <h2>🫙 Dips</h2>
+                            </div>
+                            <div class="menu-items">
+                                ${dips.map(dip => renderSauceItem(dip)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                menuContainer.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                document.getElementById('menuContainer').innerHTML = `
+                    <div style="text-align: center; padding: 4rem; color: #dc3545;">
+                        <h2>Unable to load menu</h2>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        function formatPrice(price) {
+            return '$' + (price || 0).toFixed(2);
+        }
+
+        function renderMenuItem(item, isWings) {
+            const variants = item.variants || [];
+            if (variants.length > 0) {
+                return variants.map(variant => {
+                    const wingCount = variant.name.match(/(\d+)/)?.[1] || '';
+                    const includedSauces = Math.ceil(parseInt(wingCount) / 6) || 1;
+
+                    return `
+                        <div class="menu-item">
+                            <div class="item-image">${isWings ? '🍗' : '🍟'}</div>
+                            <div class="item-details">
+                                <div class="item-header">
+                                    <div class="item-name">${variant.name}</div>
+                                    <div class="item-price">${formatPrice(variant.price)}</div>
+                                </div>
+                                <div class="item-description">${variant.description || item.description}</div>
+                                ${variant.portionDetails?.count ? `<div class="portion-info">${variant.portionDetails.count} pieces</div>` : ''}
+                                ${isWings ? `
+                                    <div class="sauce-inclusion">
+                                        <span class="sauce-inclusion-icon">🌶️</span>
+                                        <span class="sauce-inclusion-text">Includes ${includedSauces} sauce${includedSauces > 1 ? 's' : ''}</span>
+                                    </div>
+                                    <div class="dips-section">
+                                        <div class="dips-title">
+                                            <span>🫙</span>
+                                            <span>Additional Dipping Sauces (+$0.75 each)</span>
+                                        </div>
+                                        <div class="dip-option">Ranch</div>
+                                        <div class="dip-option">Blue Cheese</div>
+                                        <div class="dip-option">Honey Mustard</div>
+                                        <div class="dip-option">BBQ Sauce</div>
+                                    </div>
+                                ` : ''}
+                                <div class="platform-pricing-note">
+                                    Available on DoorDash • Tap to order
+                                </div>
+                                <button class="order-button" onclick="orderItem('${variant.name}', ${variant.price})">
+                                    Add to DoorDash Cart - ${formatPrice(variant.price)}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                return `
+                    <div class="menu-item">
+                        <div class="item-image">${isWings ? '🍗' : '🍟'}</div>
+                        <div class="item-details">
+                            <div class="item-header">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-price">${formatPrice(item.basePrice)}</div>
+                            </div>
+                            <div class="item-description">${item.description}</div>
+                            <div class="platform-pricing-note">
+                                Available on DoorDash • Tap to order
+                            </div>
+                            <button class="order-button" onclick="orderItem('${item.name}', ${item.basePrice})">
+                                Add to DoorDash Cart - ${formatPrice(item.basePrice)}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderComboItem(combo) {
+            return `
+                <div class="menu-item">
+                    <div class="item-image">🎉</div>
+                    <div class="item-details">
+                        <div class="item-header">
+                            <div class="item-name">${combo.name}</div>
+                            <div class="item-price">${formatPrice(combo.price)}</div>
+                        </div>
+                        <div class="item-description">${combo.description}</div>
+                        <div class="platform-pricing-note">
+                            Available on DoorDash • Tap to order
+                        </div>
+                        <button class="order-button" onclick="orderItem('${combo.name}', ${combo.price})">
+                            Add to DoorDash Cart - ${formatPrice(combo.price)}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSauceItem(sauce) {
+            return `
+                <div class="menu-item">
+                    <div class="item-image">${sauce.type === 'dip' ? '🫙' : '🌶️'}</div>
+                    <div class="item-details">
+                        <div class="item-header">
+                            <div class="item-name">${sauce.name}</div>
+                            <div class="item-price">${formatPrice(sauce.price || 0)}</div>
+                        </div>
+                        <div class="item-description">${sauce.description}</div>
+                        ${sauce.price > 0 ? `
+                            <div class="platform-pricing-note">
+                                Available on DoorDash • Tap to order
+                            </div>
+                            <button class="order-button" onclick="orderItem('${sauce.name}', ${sauce.price})">
+                                Add to DoorDash Cart - ${formatPrice(sauce.price)}
+                            </button>
+                        ` : '<div style="color: #666; font-style: italic;">Complimentary with wings</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function orderItem(name, price) {
+            alert(`${name} (${formatPrice(price)}) would be added to your DoorDash cart!\\n\\nThis is a demonstration - connect to actual DoorDash ordering system.`);
+        }
+
+        // Initialize and load the menu
+        initializePublicMenu();
+    </script>
+</body>
+</html>

@@ -30,6 +30,7 @@ export default defineConfig({
         main: 'index.html',
         admin: 'admin/index.html',
         platformMenu: 'admin/platform-menu.html',
+        publicMenu: 'admin/public-menu.html',
         menuPlatform: 'menu/platform/index.html'
       }
     }
