@@ -23,26 +23,86 @@
         }
 
         .platform-header {
-            background: #004c54;
+            background: linear-gradient(135deg, #004c54 0%, #00703c 100%);
             color: white;
             padding: 2rem;
             text-align: center;
             border-bottom: 4px solid #00703c;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .platform-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .platform-header h1 {
             font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+            opacity: 0.95;
+            font-style: italic;
         }
 
         .platform-badge {
             display: inline-block;
-            background: white;
-            color: #004c54;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
             font-weight: bold;
             margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .platform-badge.doordash {
+            background: linear-gradient(45deg, #eb1700, #ff4444);
+        }
+
+        .platform-badge.ubereats {
+            background: linear-gradient(45deg, #06c167, #00d4aa);
+        }
+
+        .platform-badge.grubhub {
+            background: linear-gradient(45deg, #ff8000, #ffaa44);
         }
 
         .restaurant-info {
@@ -63,6 +123,51 @@
             max-width: 800px;
             margin: 1rem auto 0;
             text-align: left;
+        }
+
+        .category-navigation {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .category-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 0 2rem;
+        }
+
+        .category-nav-item {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 25px;
+            padding: 0.75rem 1.5rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #495057;
+            text-decoration: none;
+        }
+
+        .category-nav-item:hover {
+            background: #e9ecef;
+            border-color: #00703c;
+            color: #00703c;
+        }
+
+        .category-nav-item.active {
+            background: #00703c;
+            border-color: #00703c;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,112,60,0.3);
         }
 
         .menu-container {
@@ -96,19 +201,52 @@
         .menu-item {
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             display: flex;
             gap: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            border-color: #00703c;
         }
 
         .item-image {
             width: 150px;
             height: 150px;
-            border-radius: 8px;
+            border-radius: 12px;
             object-fit: cover;
             flex-shrink: 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .wing-type-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(45deg, #00703c, #004c54);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .wing-type-badge.boneless {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
         }
 
         .item-details {
@@ -216,6 +354,68 @@
             font-size: 0.9rem;
             color: #555;
             font-style: italic;
+        }
+
+        .sauce-inclusion {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border: 1px solid #00703c;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sauce-inclusion-icon {
+            color: #00703c;
+            font-weight: bold;
+        }
+
+        .sauce-inclusion-text {
+            font-size: 0.9rem;
+            color: #00703c;
+            font-weight: 600;
+        }
+
+        .dips-section {
+            background: #fff8e1;
+            border: 1px solid #ff8000;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .dips-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ff8000;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dip-option {
+            display: inline-block;
+            background: white;
+            border: 1px solid #ff8000;
+            padding: 0.35rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .platform-pricing-note {
+            background: #f0f8ff;
+            border: 1px solid #0066cc;
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #0066cc;
+            text-align: center;
         }
 
         .menu-footer {
@@ -384,12 +584,21 @@
         function renderMenuItem(item, modifiers, includeImages) {
             const allergens = item.allergens || [];
             const hasModifiers = item.modifierGroups && item.modifierGroups.length > 0;
+            const isWings = item.category === 'Wings' || item.name.toLowerCase().includes('wing');
+            const includedSauces = item.includedSauces || 0;
 
             return `
-                <div class="menu-item">
-                    ${includeImages && item.image ? `
-                        <img src="${item.image}" alt="${item.name}" class="item-image">
-                    ` : ''}
+                <div class="menu-item" id="item-${item.id}">
+                    <div class="item-image-container" style="position: relative;">
+                        ${includeImages && item.image ? `
+                            <img src="${item.image}" alt="${item.name}" class="item-image">
+                        ` : `
+                            <div class="item-image">🍗</div>
+                        `}
+                        ${item.type && isWings ? `
+                            <div class="wing-type-badge ${item.type === 'boneless' ? 'boneless' : ''}">${item.type}</div>
+                        ` : ''}
+                    </div>
                     <div class="item-details">
                         <div class="item-header">
                             <div class="item-name">${item.name}</div>
@@ -403,6 +612,26 @@
                             <div class="portion-info">
                                 ${item.portionDetails.count ? `${item.portionDetails.count} pieces` : ''}
                                 ${item.portionDetails.weight ? ` • ${item.portionDetails.weight}` : ''}
+                            </div>
+                        ` : ''}
+
+                        ${isWings && includedSauces > 0 ? `
+                            <div class="sauce-inclusion">
+                                <span class="sauce-inclusion-icon">🌶️</span>
+                                <span class="sauce-inclusion-text">Includes ${includedSauces} sauce${includedSauces > 1 ? 's' : ''} (Buffalo, BBQ, Teriyaki, Hot, Mild, Lemon Pepper, Garlic Parmesan, Sweet Chili, Cajun, Honey Mustard)</span>
+                            </div>
+                        ` : ''}
+
+                        ${isWings ? `
+                            <div class="dips-section">
+                                <div class="dips-title">
+                                    <span>🫙</span>
+                                    <span>Additional Dipping Sauces (+$0.75 each)</span>
+                                </div>
+                                <div class="dip-option">Ranch</div>
+                                <div class="dip-option">Blue Cheese</div>
+                                <div class="dip-option">Honey Mustard</div>
+                                <div class="dip-option">BBQ Sauce</div>
                             </div>
                         ` : ''}
 
@@ -421,6 +650,10 @@
                                 ).join('')}
                             </div>
                         ` : ''}
+
+                        <div class="platform-pricing-note">
+                            Platform pricing includes delivery service fees
+                        </div>
                     </div>
                 </div>
             `;
@@ -469,9 +702,17 @@
                 // Render the menu
                 const html = `
                     <div class="platform-header">
-                        <h1>${menuData.restaurant.name}</h1>
-                        <p>${menuData.restaurant.description}</p>
-                        <div class="platform-badge">${menuData.platformConfig.name} Menu</div>
+                        <div class="header-content">
+                            <div class="logo-container">
+                                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fphilly-wings-express-logo.png?alt=media" alt="Philly Wings Express Logo" class="logo">
+                                <div>
+                                    <h1>${menuData.restaurant.name}</h1>
+                                    <div class="tagline">Wings Made in Philly</div>
+                                </div>
+                            </div>
+                            <p>${menuData.restaurant.description}</p>
+                            <div class="platform-badge ${menuData.platformConfig.name.toLowerCase().replace(/\s+/g, '')}">${menuData.platformConfig.name} Menu</div>
+                        </div>
                     </div>
 
                     <div class="restaurant-info">
@@ -487,9 +728,21 @@
                         ` : ''}
                     </div>
 
+                    <div class="category-navigation">
+                        <div class="category-nav-container">
+                            ${menuData.frozenData.categories.map((category, index) => `
+                                <a href="#category-${category.name.toLowerCase().replace(/\s+/g, '-')}"
+                                   class="category-nav-item ${index === 0 ? 'active' : ''}"
+                                   onclick="scrollToCategory('${category.name.toLowerCase().replace(/\s+/g, '-')}')">
+                                    ${category.name}
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+
                     <div class="menu-container">
                         ${menuData.frozenData.categories.map(category => `
-                            <div class="menu-category">
+                            <div class="menu-category" id="category-${category.name.toLowerCase().replace(/\s+/g, '-')}">
                                 <div class="category-header">
                                     <h2>${category.name}</h2>
                                     ${category.description ? `
@@ -559,6 +812,27 @@
                 </div>
             `;
         }
+
+        // Category navigation function
+        function scrollToCategory(categoryId) {
+            const element = document.getElementById(`category-${categoryId}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // Update active nav item
+                document.querySelectorAll('.category-nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                const activeNav = document.querySelector(`[onclick="scrollToCategory('${categoryId}')"]`);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                }
+            }
+        }
+
+        // Make function globally available
+        window.scrollToCategory = scrollToCategory;
 
         // Initialize
         renderMenu();
