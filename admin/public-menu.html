@@ -302,19 +302,45 @@
         import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-        const app = initializeApp(window.firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        let app, db, auth;
 
         // Initialize the app
         async function initializePublicMenu() {
-            // Anonymous auth for public access
-            await signInAnonymously(auth);
-            loadMenu();
+            try {
+                console.log('🔧 Initializing public menu...');
+
+                // Check if Firebase config is available
+                if (!window.firebaseConfig) {
+                    throw new Error('Firebase configuration not found');
+                }
+
+                console.log('🔐 Firebase config loaded, initializing Firebase...');
+                app = initializeApp(window.firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                console.log('🔑 Attempting anonymous authentication...');
+
+                // Anonymous auth for public access
+                await signInAnonymously(auth);
+                console.log('✅ Anonymous authentication successful');
+
+                loadMenu();
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                document.getElementById('menuContainer').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                        <h2>Menu Temporarily Unavailable</h2>
+                        <p>We're experiencing technical difficulties. Please try again in a few moments.</p>
+                        <p style="font-size: 0.9em; margin-top: 1rem; opacity: 0.7;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
         }
 
         async function loadMenu() {
             try {
+                console.log('📋 Loading menu data...');
                 const menuContainer = document.getElementById('menuContainer');
 
                 // Load menu items
@@ -435,6 +461,7 @@
                     `;
                 }
 
+                console.log('✅ Menu loaded successfully with', Object.keys(menuData).length, 'categories');
                 menuContainer.innerHTML = html;
 
             } catch (error) {
