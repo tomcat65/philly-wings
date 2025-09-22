@@ -1,0 +1,14 @@
+Category,Item Name,Variant,Base Price,DoorDash Price,UberEats Price,Grubhub Price,Has Platform Pricing
+Wings,Wings,6 Wings,5.99,8.99,8.99,7.99,Yes
+Wings,Wings,12 Wings,10.99,16.99,16.99,14.99,Yes
+Wings,Wings,24 Wings,19.99,28.99,28.99,24.99,Yes
+Wings,Wings,30 Wings,24.99,35.99,35.99,31.99,Yes
+Wings,Wings,50 Wings,39.99,59.99,59.99,51.99,Yes
+Sides,Mozzarella Sticks,4 Mozzarella Sticks,5.99,8.99,8.99,7.49,Yes
+Sides,Mozzarella Sticks,8 Mozzarella Sticks,9.99,14.99,14.99,12.49,Yes
+Sides,Mozzarella Sticks,12 Mozzarella Sticks,13.99,20.99,20.99,17.49,Yes
+Sides,Mozzarella Sticks,16 Mozzarella Sticks,17.99,26.99,26.99,22.49,Yes
+Sides,Fries,Regular Fries,2.99,2.99,2.99,2.99,NO - MISSING
+Sides,Fries,Large Fries,4.99,4.99,4.99,4.99,NO - MISSING
+Sides,Fries,Loaded Fries,8.99,8.99,8.99,8.99,NO - MISSING
+Drinks,Drinks,Bottled Water,1.49,2.99,2.99,2.49,Yes

@@ -1,0 +1,53 @@
+Category,Item Name,Variant,Base Price,DoorDash Price,UberEats Price,Grubhub Price,Has Platform Pricing
+Wings,Classic-6,6 Wings,8.99,12.14,12.14,10.92,Yes
+Wings,Classic-12,12 Wings,15.99,21.59,21.59,19.43,Yes
+Wings,Classic-24,24 Wings,25.99,35.09,35.09,31.58,Yes
+Wings,Classic-30,30 Wings,39.99,53.99,53.99,48.59,Yes
+Wings,Classic-50,50 Wings,67.99,91.79,91.79,82.61,Yes
+Wings,Boneless-6,6 Wings,6.99,9.44,9.44,8.49,
+Wings,Boneless-12,12 Wings,9.99,13.49,13.49,12.14,
+Wings,Boneless-24,24 Wings,15.99,21.59,21.59,19.43,
+Wings,Boneless-30,30 Wings,24.99,33.74,33.74,30.36,
+Wings,Boneless-50,50 Wings,35.99,48.59,48.59,43.73,
+Sides,Mozzarella Sticks,4 Mozzarella Sticks,4.99,6.74,6.74,6.06,Yes
+Sides,Mozzarella Sticks,8 Mozzarella Sticks,9.99,13.49,13.49,12.14,Yes
+Sides,Mozzarella Sticks,12 Mozzarella Sticks,13.99,18.89,18.89,17.00,Yes
+Sides,Mozzarella Sticks,16 Mozzarella Sticks,17.99,24.29,24.29,21.86,Yes
+Sides,Fries,Regular Fries,2.99,4.04,4.04,3.63,NO - MISSING
+Sides,Fries,Large Fries,4.99,6.74,6.74,6.06,NO - MISSING
+Sides,Fries,Loaded Fries,8.99,12.14,12.14,10.92,NO - MISSING
+Drinks,Drinks,Bottled Water,2.2,2.97,2.97,2.67,Yes
+Drinks,Drinks-20oz,Coke,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Coke Zero,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Diet Coke,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Dr Pepper,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Sprite,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Fanta Orange,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Barq's Root Beer,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,HiC,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Unsweetened Tea,2.2,2.97,2.97,2.67,
+Drinks,Drinks-20oz,Sweetened Tea,2.2,2.97,2.97,2.67,
+Drinks,Drinks-32oz,Coke,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Coke Zero,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Diet Coke,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Dr Pepper,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Sprite,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Fanta Orange,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Barq's Root Beer,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,HiC,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Unsweetened Tea,3.15,4.25,4.25,3.83,
+Drinks,Drinks-32oz,Sweetened Tea,3.15,4.25,4.25,3.83,
+Dips,Dips-1.5oz,Cheese-Sauce,0.6,0.81,0.81,0.73,
+Dips,Dips-1.5oz,Ranch,0.6,0.81,0.81,0.73,
+Dips,Dips-1.5oz,Honey Mustard,0.6,0.81,0.81,0.73,
+Dips,Dips-1.5oz,Blue Cheese,0.6,0.81,0.81,0.73,
+Sauce,Dry-Rrub,Classic Lemmon Pepper,,,,,
+Sauce,Dry-Rrub,NorthEast Hot Lemmon,,,,,
+Sauce,Dry-Rrub,Frankford Cajun,,,,,
+Sauce,Dry-Rrub,Garlic Parmesan,,,,,
+Sauce,Original,Sweet Teriyaki,,,,,
+Sauce,Original,Tailgate BBQ,,,,,
+Sauce,Original,Mild Buffalo,,,,,
+Sauce,Original,Philly Classic Hot,,,,,
+Sauce,Original,Broad & Patterson Burn,,,,,
+Sauce,Original,Gritty's Revenge,,,,,
