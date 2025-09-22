@@ -13,23 +13,23 @@ After analyzing 4 local competitors, pricing has been adjusted to:
 ## Wing Pricing Structure
 
 ### Cost Basis (Including 15% Supplies)
-- **Boneless Wings**: $0.383 per wing ($0.333 base + 15% supplies)
-- **Bone-in Wings**: $0.497 per wing ($0.433 base + 15% supplies)
+- **Boneless Wings**: $0.324 per wing ($0.282 base + 15% supplies) - 390+ wings per box
+- **Bone-in Wings**: $0.497 per wing ($0.433 base + 15% supplies) - 200 wings per box
 
 ### Market-Adjusted Pricing
 
 | Size | Type     | Total Cost | Base Price | Markup % | Margin % |
 |------|----------|------------|------------|----------|----------|
 | 6    | Bone-in  | $2.98      | $8.99      | 202%     | 66.8%    |
-| 6    | Boneless | $2.30      | $6.99      | 204%     | 67.1%    |
+| 6    | Boneless | $1.95      | $6.99      | 258%     | 72.2%    |
 | 12   | Bone-in  | $5.97      | $14.99     | 151%     | 60.2%    |
-| 12   | Boneless | $4.60      | $11.99     | 161%     | 61.6%    |
+| 12   | Boneless | $3.89      | $11.99     | 208%     | 67.5%    |
 | 24   | Bone-in  | $11.94     | $25.99     | 118%     | 54.1%    |
-| 24   | Boneless | $9.20      | $20.99     | 128%     | 56.2%    |
+| 24   | Boneless | $7.78      | $20.99     | 170%     | 62.9%    |
 | 30   | Bone-in  | $14.92     | $32.99     | 121%     | 54.8%    |
-| 30   | Boneless | $11.50     | $25.99     | 126%     | 55.7%    |
+| 30   | Boneless | $9.73      | $25.99     | 167%     | 62.6%    |
 | 50   | Bone-in  | $24.87     | $49.99     | 101%     | 50.3%    |
-| 50   | Boneless | $19.16     | $39.99     | 109%     | 52.1%    |
+| 50   | Boneless | $16.22     | $39.99     | 147%     | 59.4%    |
 
 **Sauce Inclusion Policy**: 1 sauce per 6 wings (6=1, 12=2, 24=4, 30=5, 50=8)
 
@@ -106,10 +106,11 @@ Combos offer 15-17% savings to drive higher average order value
 - **50 wings**: $34.99-48.88 (Ours: $49.99) ✓
 
 ### Competitive Advantages
-1. Boneless wings priced 20-25% below bone-in
+1. Boneless wings priced 20-25% below bone-in (cost is 35% less)
 2. Free sauces included (competitors charge)
 3. Unique combo offerings
 4. Party sizes competitors don't offer
+5. Higher profit margins on boneless (59-72%) vs bone-in (50-67%)
 
 ## Implementation Guidelines
 
@@ -170,7 +171,8 @@ Combos offer 15-17% savings to drive higher average order value
 - **Net after fees**: Platform price × 0.70
 
 ### Margin Targets
-- Wings: 50-67%
+- Wings (Bone-in): 50-67%
+- Wings (Boneless): 59-72%
 - Sides: 80-91%
 - Beverages: 84-91%
 - Combos: 61-72%
