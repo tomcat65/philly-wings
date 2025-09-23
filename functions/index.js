@@ -119,19 +119,27 @@ async function fetchCompleteMenu() {
 
   try {
     // Parallel fetch for optimal performance
-    const [wingsDoc, friesDoc, drinksDoc, combosSnapshot, saucesSnapshot, settingsDoc] = await Promise.all([
-      db.collection('menuItems').doc('Wings').get(),
-      db.collection('menuItems').doc('Fries').get(),
-      db.collection('menuItems').doc('Drinks').get(),
+    const [menuItemsSnapshot, combosSnapshot, saucesSnapshot, settingsDoc] = await Promise.all([
+      db.collection('menuItems').get(),
       db.collection('combos').get(),
       db.collection('sauces').get(),
       db.collection('settings').doc('main').get()
     ]);
 
+    // Parse menuItems by their id field
+    const menuItems = {};
+    menuItemsSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.id) {
+        menuItems[data.id] = data;
+      }
+    });
+
     return {
-      wings: wingsDoc.exists ? wingsDoc.data() : { variants: [] },
-      fries: friesDoc.exists ? friesDoc.data() : { variants: [] },
-      drinks: drinksDoc.exists ? drinksDoc.data() : { variants: [] },
+      wings: menuItems.wings || { variants: [] },
+      fries: menuItems.fries || { variants: [] },
+      mozzarella: menuItems.mozzarella_sticks || { variants: [] },
+      drinks: menuItems.drinks || { variants: [] },
       combos: combosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
       sauces: saucesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
       settings: settingsDoc.exists ? settingsDoc.data() : {}
@@ -157,7 +165,7 @@ function processPlatformMenu(menuData, platform) {
     markup,
     markupPercentage: ((markup - 1) * 100).toFixed(1),
     wings: processWingVariants(menuData.wings, markup),
-    sides: processSides(menuData.fries, markup),
+    sides: processSides(menuData.fries, menuData.mozzarella, markup),
     beverages: processBeverages(menuData.drinks, markup),
     combos: processCombos(menuData.combos, markup),
     sauces: menuData.sauces,
@@ -191,15 +199,38 @@ function processCombos(combosData, markup) {
   }));
 }
 
-function processSides(sidesData, markup) {
-  if (!sidesData?.variants) return [];
+function processSides(friesData, mozzarellaData, markup) {
+  const sides = [];
 
-  return sidesData.variants.map(side => ({
-    ...side,
-    basePrice: side.basePrice,
-    platformPrice: (side.basePrice * markup).toFixed(2),
-    markupAmount: ((side.basePrice * markup) - side.basePrice).toFixed(2)
-  }));
+  // Process fries variants
+  if (friesData?.variants) {
+    friesData.variants.forEach(side => {
+      sides.push({
+        ...side,
+        basePrice: side.basePrice,
+        platformPrice: (side.basePrice * markup).toFixed(2),
+        markupAmount: ((side.basePrice * markup) - side.basePrice).toFixed(2),
+        image: friesData.images?.hero || 'fries',
+        category: 'fries'
+      });
+    });
+  }
+
+  // Process mozzarella variants
+  if (mozzarellaData?.variants) {
+    mozzarellaData.variants.forEach(side => {
+      sides.push({
+        ...side,
+        basePrice: side.basePrice,
+        platformPrice: (side.basePrice * markup).toFixed(2),
+        markupAmount: ((side.basePrice * markup) - side.basePrice).toFixed(2),
+        image: mozzarellaData.images?.hero || 'mozzarella-sticks',
+        category: 'mozzarella'
+      });
+    });
+  }
+
+  return sides;
 }
 
 function processBeverages(drinksData, markup) {
@@ -275,6 +306,17 @@ function getHeatLevelText(heatLevel) {
   if (level === 3) return 'Hot';
   if (level >= 4) return 'Extra Hot';
   return 'Mild';
+}
+
+function getHeatEmojis(heatLevel) {
+  const level = parseInt(heatLevel) || 0;
+  if (level === 0) return '○○○○○';
+  if (level === 1) return '🔥○○○○';
+  if (level === 2) return '🔥🔥○○○';
+  if (level === 3) return '🔥🔥🔥○○';
+  if (level === 4) return '🔥🔥🔥🔥○';
+  if (level >= 5) return '🔥🔥🔥🔥🔥';
+  return '🔥○○○○';
 }
 
 // Generate Featured Items Carousel - UberEats Style
@@ -2604,137 +2646,78 @@ function createStrategicMenuData(wings, combos, sides, beverages, sauces, multip
         isPromo: true
       }
     ],
-    combos: [
-      {
-        id: 'sampler',
-        name: 'Sampler Platter',
-        description: '6 wings, 4 mozzarella sticks, fries',
-        individualPrice: 16.47,
-        price: 13.99 * multiplier,
-        savings: 2.48,
-        badge: 'BEST VALUE',
-        image: 'sampler-platter'
-      },
-      {
-        id: 'mvp',
-        name: 'MVP Meal',
-        description: '12 wings, fries, 4 mozzarella sticks, 4 dips',
-        individualPrice: 22.47,
-        price: 18.99 * multiplier,
-        savings: 3.48,
-        badge: 'MOST POPULAR',
-        image: 'mvp-meal-combo'
-      },
-      {
-        id: 'tailgater',
-        name: 'The Tailgater',
-        description: '24 wings, 8 mozzarella sticks, large fries, 8 dips',
-        individualPrice: 38.97,
-        price: 32.99 * multiplier,
-        savings: 5.98,
-        badge: 'FAMILY SIZE',
-        image: 'party-pack-50-wings'
-      },
-      {
-        id: 'gameday',
-        name: 'Game Day 30',
-        description: '30 wings, 2 large fries, 8 mozzarella sticks, 10 dips',
-        individualPrice: 51.96,
-        price: 42.99 * multiplier,
-        savings: 8.97,
-        badge: 'PARTY SIZE',
-        image: 'game-day-30-wings'
-      },
-      {
-        id: 'party-pack',
-        name: '50 Party Pack',
-        description: '50 wings, 3 large fries, 16 mozzarella sticks, 18 dips',
-        individualPrice: 81.94,
-        price: 69.99 * multiplier,
-        savings: 11.95,
-        badge: 'ULTIMATE DEAL',
-        image: 'party-pack-50-wings'
-      }
-    ],
-    wings: [
-      {
-        id: 'boneless-6',
-        name: '6 Boneless Wings',
-        description: 'Tender boneless wings with 1 sauce',
-        price: 6.99 * multiplier,
-        image: 'boneless-wings',
-        badge: 'CUSTOMER FAVORITE'
-      },
-      {
-        id: 'boneless-12',
-        name: '12 Boneless Wings',
-        description: 'Perfect for sharing with 2 sauces',
-        price: 11.99 * multiplier,
-        image: 'boneless-wings',
-        badge: 'GREAT VALUE'
-      },
-      {
-        id: 'bone-in-6',
-        name: '6 Bone-In Wings',
-        description: 'Classic bone-in wings with 1 sauce',
-        price: 8.99 * multiplier,
-        image: 'original-flats'
-      },
-      {
-        id: 'bone-in-12',
-        name: '12 Bone-In Wings',
-        description: 'Traditional wings with 2 sauces',
-        price: 14.99 * multiplier,
-        image: 'original-drums'
-      }
-    ],
-    sides: [
-      {
-        id: 'loaded-fries',
-        name: 'Loaded Fries',
-        description: 'Fries topped with cheese, bacon & sour cream',
-        price: 8.99 * multiplier,
-        image: 'loaded-fries',
-        badge: 'SIGNATURE'
-      },
-      {
-        id: 'mozzarella-sticks',
-        name: 'Mozzarella Sticks',
-        description: '6 crispy mozzarella sticks with marinara',
-        price: 6.99 * multiplier,
-        image: 'mozzarella-sticks'
-      },
-      {
-        id: 'cheese-fries',
-        name: 'Cheese Fries',
-        description: 'Golden fries smothered in melted cheese',
-        price: 5.99 * multiplier,
-        image: 'loaded-fries'
-      },
-      {
-        id: 'fries',
-        name: 'French Fries',
-        description: 'Crispy golden french fries',
-        price: 3.99 * multiplier,
-        image: 'fries'
-      }
-    ],
-    beverages: [
-      {
-        id: 'fountain-32',
-        name: '32oz Fountain Drink',
-        description: 'Large fountain drink - multiple flavors',
-        price: 3.49 * multiplier,
-        image: 'fountain-drinks'
-      },
-      {
-        id: 'fountain-20',
-        name: '20oz Fountain Drink',
-        description: 'Regular fountain drink',
-        price: 2.49 * multiplier,
-        image: 'fountain-drinks'
-      }
-    ]
+    combos: combos && combos.length > 0 ? combos.map(combo => ({
+      id: combo.id,
+      name: combo.name,
+      description: combo.description,
+      price: combo.basePrice * multiplier,
+      platformPrice: combo.basePrice * multiplier,
+      imageUrl: combo.imageUrl,
+      badge: combo.badges ? (typeof combo.badges === 'string' ? combo.badges.replace(/[\[\]"]/g, '').split(',')[0] : Array.isArray(combo.badges) ? combo.badges[0] : 'COMBO DEAL') : 'COMBO DEAL',
+      savings: combo.originalPrice ? combo.originalPrice - combo.basePrice : 0,
+      featured: combo.featured || false,
+      active: combo.active !== false
+    })).filter(combo => combo.active) : [],
+    wings: wings && Array.isArray(wings) && wings.length > 0 ? wings.map(variant => {
+      // Generate badge based on wing count and type
+      let badge = 'CLASSIC';
+      if (variant.count >= 30) badge = 'PARTY SIZE';
+      else if (variant.count >= 24) badge = 'FEEDS CROWD';
+      else if (variant.count >= 12) badge = 'GREAT VALUE';
+      else if (variant.type === 'boneless') badge = 'CUSTOMER FAVORITE';
+      else if (variant.count === 6) badge = 'PERFECT START';
+
+      return {
+        id: variant.id,
+        name: variant.name,
+        description: variant.description,
+        price: variant.platformPrice || variant.basePrice * multiplier,
+        platformPrice: variant.platformPrice,
+        image: variant.image || 'wings-hero',
+        badge: badge,
+        count: variant.count,
+        type: variant.type,
+        includedSauces: variant.includedSauces || Math.floor(variant.count / 6)
+      };
+    }).filter(wing => wing.count <= 30) : [],
+    sides: sides && Array.isArray(sides) && sides.length > 0 ? sides.map(side => {
+      // Generate badge based on side type and characteristics
+      let badge = '';
+      if (side.name.toLowerCase().includes('loaded')) badge = 'SIGNATURE';
+      else if (side.category === 'mozzarella') badge = 'CRISPY';
+      else if (side.name.toLowerCase().includes('cheese')) badge = 'CLASSIC';
+      else if (side.category === 'fries') badge = 'ESSENTIAL';
+
+      return {
+        id: side.id,
+        name: side.name,
+        description: side.description,
+        price: side.platformPrice || side.basePrice * multiplier,
+        platformPrice: side.platformPrice,
+        image: side.image,
+        badge: badge,
+        category: side.category
+      };
+    }) : [],
+    beverages: beverages && Array.isArray(beverages) && beverages.length > 0 ? beverages.map(beverage => {
+      // Generate badge based on beverage characteristics
+      let badge = '';
+      if (beverage.name.toLowerCase().includes('32oz')) badge = 'LARGE';
+      else if (beverage.name.toLowerCase().includes('water')) badge = 'REFRESHING';
+      else if (beverage.name.toLowerCase().includes('fountain')) badge = 'CLASSIC';
+
+      return {
+        id: beverage.id,
+        name: beverage.name,
+        description: beverage.description,
+        basePrice: beverage.basePrice,
+        platformPrice: beverage.platformPrice,
+        markupAmount: beverage.markupAmount,
+        imageUrl: beverage.imageUrl || beverage.image,
+        badge: badge
+      };
+    }) : [],
+    sauces: sauces || []
   };
 }
 
@@ -3302,7 +3285,7 @@ function generateCombosSection(combos, branding) {
         ${combos.map(combo => `
             <div class="combo-card featured">
                 <div class="combo-image-wrapper">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcombo-platter_800x800.webp?alt=media"
+                    <img src="${combo.imageUrl || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcombo-platter_800x800.webp?alt=media'}"
                          alt="${combo.name}"
                          class="combo-image"
                          loading="lazy">
@@ -3375,37 +3358,89 @@ function generateSidesSection(sides, branding) {
 function generateBeveragesSection(beverages, branding) {
   if (!beverages?.length) return '<section id="beverages"><h2>Beverages section temporarily unavailable</h2></section>';
 
+  // Separate fountain drinks, tea, and other beverages
+  const fountainDrinks = beverages.filter(b => b.name.toLowerCase().includes('fountain'));
+  const teaDrinks = beverages.filter(b => b.name.toLowerCase().includes('tea'));
+  const otherBeverages = beverages.filter(b => !b.name.toLowerCase().includes('fountain') && !b.name.toLowerCase().includes('tea'));
+
   return `
 <section id="beverages" class="menu-section">
     <div class="section-header">
         <h2 class="section-title">🥤 Beverages</h2>
-        <p class="section-description">Refresh your meal • Fountain drinks, water, and sports drinks</p>
+        <p class="section-description">Cool down the heat • Fountain drinks, tea, and water</p>
     </div>
 
-    <div class="items-grid">
-        ${beverages.map(beverage => `
-            <div class="menu-item">
-                <div class="item-image">
-                    <img src="${beverage.image || 'https://storage.googleapis.com/philly-wings.appspot.com/beverages/default-drink.jpg'}"
-                         alt="${beverage.name}" loading="lazy">
+    ${fountainDrinks.length > 0 ? `
+    <div class="fountain-drinks-section">
+        <div class="fountain-hero">
+            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ffountain-drinks.png?alt=media"
+                 alt="Fountain Drinks"
+                 class="fountain-hero-image">
+            <div class="fountain-info">
+                <h3 class="fountain-title">🥤 Fountain Drinks</h3>
+                <p class="fountain-flavors">Available Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq's Root Beer, Hi-C Fruit Punch</p>
+                <div class="fountain-sizes">
+                    ${fountainDrinks.map(fountain => `
+                        <div class="size-option">
+                            <span class="size-name">${fountain.name}</span>
+                            <span class="size-price">$${fountain.platformPrice || fountain.basePrice}</span>
+                        </div>
+                    `).join('')}
                 </div>
-                <div class="item-info">
-                    <h3 class="item-name">${beverage.name}</h3>
-                    <p class="item-description">${beverage.description || 'Refreshing beverage'}</p>
-                    <div class="price-display">
-                        <div class="price-main">
-                            <span class="platform-price">$${beverage.platformPrice}</span>
-                            <span class="price-label">${branding.name} Price</span>
+                <button class="fountain-cta">ADD FOUNTAIN DRINK →</button>
+            </div>
+        </div>
+    </div>
+    ` : ''}
+
+    ${teaDrinks.length > 0 ? `
+    <div class="tea-drinks-section">
+        <div class="tea-hero">
+            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ficed-tea.png?alt=media"
+                 alt="Fresh Brewed Tea"
+                 class="tea-hero-image">
+            <div class="tea-info">
+                <h3 class="tea-title">🧊 Fresh Brewed Tea</h3>
+                <p class="tea-description">Freshly brewed daily • Sweet or unsweetened • Perfect refreshment</p>
+                <div class="tea-sizes">
+                    ${teaDrinks.map(tea => `
+                        <div class="size-option">
+                            <span class="size-name">${tea.name}</span>
+                            <span class="size-price">$${tea.platformPrice || tea.basePrice}</span>
                         </div>
-                        <div class="price-breakdown">
-                            <span class="base-price">Base: $${beverage.basePrice}</span>
-                            <span class="markup-amount">+$${beverage.markupAmount}</span>
+                    `).join('')}
+                </div>
+                <button class="tea-cta">ADD TEA →</button>
+            </div>
+        </div>
+    </div>
+    ` : ''}
+
+    ${otherBeverages.length > 0 ? `
+    <div class="other-beverages">
+        <h3 class="beverages-subtitle">Other Beverages</h3>
+        <div class="beverages-cards-grid">
+            ${otherBeverages.map(beverage => `
+                <div class="beverage-card">
+                    <div class="beverage-image-wrapper">
+                        <img src="${beverage.imageUrl || beverage.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fwater-bottle.png?alt=media'}"
+                             alt="${beverage.name}"
+                             class="beverage-image"
+                             loading="lazy">
+                    </div>
+                    <div class="beverage-content">
+                        <h3 class="beverage-name">${beverage.name}</h3>
+                        <p class="beverage-description">${beverage.description || 'Refreshing beverage to cool down the heat'}</p>
+                        <div class="beverage-pricing">
+                            <span class="beverage-price">$${beverage.platformPrice || beverage.basePrice}</span>
                         </div>
+                        <button class="beverage-cta">ADD DRINK →</button>
                     </div>
                 </div>
-            </div>
-        `).join('')}
+            `).join('')}
+        </div>
     </div>
+    ` : ''}
 </section>`;
 }
 
@@ -3415,19 +3450,28 @@ function generateSaucesSection(sauces, branding) {
   return `
 <section id="sauces" class="menu-section">
     <div class="section-header">
-        <h2 class="section-title">🌶️ Signature Sauces</h2>
-        <p class="section-description">Included with wings • Extra sauces $0.75 each</p>
+        <h2 class="section-title">🌶️ Signature Sauces & Rubs</h2>
+        <p class="section-description">From sweet to scorching - all made in-house</p>
     </div>
 
-    <div class="sauces-grid">
+    <div class="sauces-cards-grid">
         ${sauces.map(sauce => `
-            <div class="sauce-option">
-                <img src="${sauce.imageUrl || sauce.image || 'https://storage.googleapis.com/philly-wings.appspot.com/sauces/default-sauce.jpg'}"
-                     alt="${sauce.name}" class="sauce-image">
-                <div class="sauce-info">
-                    <span class="sauce-name">${sauce.name}</span>
-                    <span class="heat-level ${getHeatLevelClass(sauce.heatLevel || 0)}">${getHeatLevelText(sauce.heatLevel || 0)}</span>
-                    <p class="sauce-description">${sauce.description || ''}</p>
+            <div class="sauce-card">
+                <div class="sauce-image-wrapper">
+                    <img src="${sauce.imageUrl || sauce.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbuffalo-sauced.png?alt=media'}"
+                         alt="${sauce.name}"
+                         class="sauce-image"
+                         loading="lazy">
+                </div>
+                <div class="sauce-content">
+                    <h3 class="sauce-name">${sauce.name}</h3>
+                    <p class="sauce-description">${sauce.description || 'House-made sauce with bold flavor'}</p>
+                    ${sauce.heatLevel !== undefined ? `
+                        <div class="heat-level-indicator">
+                            <span class="heat-label">${getHeatLevelText(sauce.heatLevel)}</span>
+                            <span class="heat-visual">${getHeatEmojis(sauce.heatLevel)}</span>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
         `).join('')}
