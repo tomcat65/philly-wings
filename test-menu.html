@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Philly Wings Express complete menu for DoorDash - Wings, Combos, Sides & Beverages">
+    <meta name="robots" content="index, follow">
+    <title>Philly Wings Express - DoorDash Menu</title>
+    <link rel="icon" href="https://storage.googleapis.com/philly-wings.appspot.com/favicon.ico">
+    <style>
+    /* Reset and Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f8f9fa;
+    }
+
+    .menu-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        min-height: 100vh;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    /* Header Styles */
+    .menu-header {
+        background: linear-gradient(135deg, #EB1700 0%, #EB1700dd 100%);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .restaurant-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .restaurant-logo {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+    }
+
+    .restaurant-details h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .restaurant-tagline {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+
+    .platform-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+    }
+
+    .platform-logo-small {
+        width: 24px;
+        height: 24px;
+    }
+
+    .pricing-info {
+        text-align: right;
+        background: rgba(255,255,255,0.1);
+        padding: 1.5rem;
+        border-radius: 10px;
+    }
+
+    .pricing-info h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .contact-info {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-top: 0.5rem;
+    }
+
+    /* Navigation Styles */
+    .menu-nav {
+        background: #fff;
+        padding: 0;
+        border-bottom: 2px solid #EB1700;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .nav-container {
+        display: flex;
+        overflow-x: auto;
+        padding: 1rem 2rem;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        margin-right: 0.5rem;
+        text-decoration: none;
+        color: #666;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        font-weight: 600;
+        border: 2px solid transparent;
+    }
+
+    .nav-item:hover {
+        background: #EB1700;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Section Styles */
+    .menu-section {
+        padding: 3rem 2rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #EB1700;
+        font-weight: 700;
+    }
+
+    .section-description {
+        font-size: 1.1rem;
+        color: #666;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Items Grid */
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .menu-item {
+        border: 1px solid #eee;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .menu-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        border-color: #EB1700;
+    }
+
+    .item-image {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .item-image img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover .item-image img {
+        transform: scale(1.05);
+    }
+
+    .value-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #EB1700;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .item-info {
+        padding: 1.5rem;
+    }
+
+    .item-name {
+        font-size: 1.4rem;
+        margin-bottom: 0.75rem;
+        color: #333;
+        font-weight: 700;
+    }
+
+    .item-description {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .price-display {
+        margin-bottom: 1rem;
+    }
+
+    .price-main {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .platform-price {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #EB1700;
+    }
+
+    .price-label {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .price-breakdown {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .base-price {
+        text-decoration: line-through;
+    }
+
+    .markup-amount {
+        color: #EB1700;
+        font-weight: 600;
+    }
+
+    .included-items {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+        font-size: 0.9rem;
+    }
+
+    .sauce-count {
+        background: #FFF1F0;
+        color: #EB1700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-weight: 600;
+    }
+
+    .wing-types {
+        color: #666;
+        font-style: italic;
+    }
+
+    .combo-contents {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+        font-size: 0.9rem;
+    }
+
+    .content-item {
+        background: #FFF1F0;
+        color: #EB1700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-weight: 600;
+    }
+
+    /* Sauces Grid */
+    .sauces-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .sauce-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+    .sauce-option:hover {
+        border-color: #EB1700;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .sauce-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #eee;
+    }
+
+    .sauce-info {
+        flex: 1;
+    }
+
+    .sauce-name {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .heat-level {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .heat-level.mild { background: #d4edda; color: #155724; }
+    .heat-level.medium { background: #fff3cd; color: #856404; }
+    .heat-level.hot { background: #f8d7da; color: #721c24; }
+    .heat-level.extra-hot { background: #d1ecf1; color: #0c5460; }
+
+    .sauce-description {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    /* Footer Styles */
+    .menu-footer {
+        background: #2c3e50;
+        color: white;
+        padding: 3rem 2rem 2rem;
+    }
+
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .footer-section h4 {
+        color: #EB1700;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .footer-section p {
+        margin-bottom: 0.5rem;
+        opacity: 0.9;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .menu-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .restaurant-info {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .pricing-info {
+            text-align: center;
+        }
+
+        .items-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .nav-container {
+            padding: 1rem;
+        }
+
+        .footer-content {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+
+        .restaurant-details h1 {
+            font-size: 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .menu-section {
+            padding: 2rem 1rem;
+        }
+
+        .sauces-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sauce-option {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+  </style>
+</head>
+<body>
+    <div class="menu-container">
+        <!-- Professional Header -->
+        <header class="menu-header">
+            <div class="restaurant-info">
+                <img src="https://storage.googleapis.com/philly-wings.appspot.com/logo.png"
+                     alt="Philly Wings Express Logo" class="restaurant-logo">
+                <div class="restaurant-details">
+                    <h1>Philly Wings Express</h1>
+                    <p class="restaurant-tagline">Authentic Philly Wings • Made Fresh Daily</p>
+                    <div class="platform-badge">
+                        <img src="https://storage.googleapis.com/philly-wings.appspot.com/platform-logos/doordash-logo.png" alt="DoorDash" class="platform-logo-small">
+                        <span>Menu for DoorDash</span>
+                    </div>
+                </div>
+            </div>
+            <div class="platform-info">
+                <div class="pricing-info">
+                    <h3>Pricing Information</h3>
+                    <p>Base prices + 35.0% DoorDash markup</p>
+                    <p class="contact-info">Questions? Contact: merchant-support@doordash.com</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sticky Navigation -->
+        <nav class="menu-nav">
+            <div class="nav-container">
+                <a href="#wings" class="nav-item">🔥 Wings</a>
+                <a href="#combos" class="nav-item">🍽️ Combos</a>
+                <a href="#sides" class="nav-item">🍟 Sides</a>
+                <a href="#beverages" class="nav-item">🥤 Beverages</a>
+                <a href="#sauces" class="nav-item">🌶️ Sauces</a>
+            </div>
+        </nav>
+
+        <!-- Menu Content -->
+        <main class="menu-content">
+            <section id="wings"><h2>Wings section temporarily unavailable</h2></section>
+            
+<section id="combos" class="menu-section">
+    <div class="section-header">
+        <h2 class="section-title">🍽️ Combo Meals</h2>
+        <p class="section-description">Complete meals with wings, sides, and sauces • Save up to 17% vs individual items</p>
+    </div>
+
+    <div class="items-grid">
+        
+            <div class="menu-item combo-item">
+                <div class="item-image">
+                    <img src="https://storage.googleapis.com/philly-wings.appspot.com/combos/default-combo.jpg"
+                         alt="MVP Meal" loading="lazy">
+                    <div class="value-badge">Save 15%</div>
+                </div>
+                <div class="item-info">
+                    <h3 class="item-name">MVP Meal</h3>
+                    <p class="item-description">12 wings (2 sauces), regular fries, 4 mozzarella sticks (1 marinara), 4 dips</p>
+                    <div class="price-display">
+                        <div class="price-main">
+                            <span class="platform-price">$NaN</span>
+                            <span class="price-label">DoorDash Price</span>
+                        </div>
+                        <div class="price-breakdown">
+                            <span class="base-price">Base: $undefined</span>
+                            <span class="markup-amount">+$NaN</span>
+                        </div>
+                    </div>
+                    <div class="combo-contents">
+                        <span class="content-item">🍗 Wings</span>
+                        <span class="content-item">🍟 Fries</span>
+                        <span class="content-item">🧀 Mozz Sticks</span>
+                        <span class="content-item">🌶️ Sauces</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="menu-item combo-item">
+                <div class="item-image">
+                    <img src="https://storage.googleapis.com/philly-wings.appspot.com/combos/default-combo.jpg"
+                         alt="Game Day 30" loading="lazy">
+                    <div class="value-badge">Save 15%</div>
+                </div>
+                <div class="item-info">
+                    <h3 class="item-name">Game Day 30</h3>
+                    <p class="item-description">30 wings (5 sauces), 2 large fries, 8 mozzarella sticks (2 marinara), 10 dips</p>
+                    <div class="price-display">
+                        <div class="price-main">
+                            <span class="platform-price">$NaN</span>
+                            <span class="price-label">DoorDash Price</span>
+                        </div>
+                        <div class="price-breakdown">
+                            <span class="base-price">Base: $undefined</span>
+                            <span class="markup-amount">+$NaN</span>
+                        </div>
+                    </div>
+                    <div class="combo-contents">
+                        <span class="content-item">🍗 Wings</span>
+                        <span class="content-item">🍟 Fries</span>
+                        <span class="content-item">🧀 Mozz Sticks</span>
+                        <span class="content-item">🌶️ Sauces</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="menu-item combo-item">
+                <div class="item-image">
+                    <img src="https://storage.googleapis.com/philly-wings.appspot.com/combos/default-combo.jpg"
+                         alt="Sampler Platter" loading="lazy">
+                    <div class="value-badge">Save 15%</div>
+                </div>
+                <div class="item-info">
+                    <h3 class="item-name">Sampler Platter</h3>
+                    <p class="item-description">6 wings (1 sauce), 4 mozzarella sticks (1 marinara), regular fries</p>
+                    <div class="price-display">
+                        <div class="price-main">
+                            <span class="platform-price">$NaN</span>
+                            <span class="price-label">DoorDash Price</span>
+                        </div>
+                        <div class="price-breakdown">
+                            <span class="base-price">Base: $undefined</span>
+                            <span class="markup-amount">+$NaN</span>
+                        </div>
+                    </div>
+                    <div class="combo-contents">
+                        <span class="content-item">🍗 Wings</span>
+                        <span class="content-item">🍟 Fries</span>
+                        <span class="content-item">🧀 Mozz Sticks</span>
+                        <span class="content-item">🌶️ Sauces</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="menu-item combo-item">
+                <div class="item-image">
+                    <img src="https://storage.googleapis.com/philly-wings.appspot.com/combos/default-combo.jpg"
+                         alt="The Tailgater" loading="lazy">
+                    <div class="value-badge">Save 15%</div>
+                </div>
+                <div class="item-info">
+                    <h3 class="item-name">The Tailgater</h3>
+                    <p class="item-description">24 wings (4 sauces), 8 mozzarella sticks (2 marinara), 1 large fries, 8 dips</p>
+                    <div class="price-display">
+                        <div class="price-main">
+                            <span class="platform-price">$60.74</span>
+                            <span class="price-label">DoorDash Price</span>
+                        </div>
+                        <div class="price-breakdown">
+                            <span class="base-price">Base: $44.99</span>
+                            <span class="markup-amount">+$15.75</span>
+                        </div>
+                    </div>
+                    <div class="combo-contents">
+                        <span class="content-item">🍗 Wings</span>
+                        <span class="content-item">🍟 Fries</span>
+                        <span class="content-item">🧀 Mozz Sticks</span>
+                        <span class="content-item">🌶️ Sauces</span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="menu-item combo-item">
+                <div class="item-image">
+                    <img src="https://storage.googleapis.com/philly-wings.appspot.com/combos/default-combo.jpg"
+                         alt="Party Pack 50" loading="lazy">
+                    <div class="value-badge">Save 15%</div>
+                </div>
+                <div class="item-info">
+                    <h3 class="item-name">Party Pack 50</h3>
+                    <p class="item-description">50 wings (8 sauces), 3 large fries, 16 mozzarella sticks (4 marinara), 18 dips</p>
+                    <div class="price-display">
+                        <div class="price-main">
+                            <span class="platform-price">$NaN</span>
+                            <span class="price-label">DoorDash Price</span>
+                        </div>
+                        <div class="price-breakdown">
+                            <span class="base-price">Base: $undefined</span>
+                            <span class="markup-amount">+$NaN</span>
+                        </div>
+                    </div>
+                    <div class="combo-contents">
+                        <span class="content-item">🍗 Wings</span>
+                        <span class="content-item">🍟 Fries</span>
+                        <span class="content-item">🧀 Mozz Sticks</span>
+                        <span class="content-item">🌶️ Sauces</span>
+                    </div>
+                </div>
+            </div>
+        
+    </div>
+</section>
+            <section id="sides"><h2>Sides section temporarily unavailable</h2></section>
+            <section id="beverages"><h2>Beverages section temporarily unavailable</h2></section>
+            
+<section id="sauces" class="menu-section">
+    <div class="section-header">
+        <h2 class="section-title">🌶️ Signature Sauces</h2>
+        <p class="section-description">Included with wings • Extra sauces $0.75 each</p>
+    </div>
+
+    <div class="sauces-grid">
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbuffalo-sauced.png?alt=media"
+                     alt="Mild Buffalo" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Mild Buffalo</span>
+                    <span class="heat-level mild">Mild</span>
+                    <p class="sauce-description">Mild buffalo - all flavor, easy heat</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Flemon-pepper-dry-rub.png?alt=media"
+                     alt="Classic Lemon Pepper" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Classic Lemon Pepper</span>
+                    <span class="heat-level mild">Mild</span>
+                    <p class="sauce-description">Classic lemon pepper - zesty citrus, cracked black pepper</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmenu%2Fphilly-classic-hot.jpg?alt=media"
+                     alt="Philly Classic Hot" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Philly Classic Hot</span>
+                    <span class="heat-level hot">Hot</span>
+                    <p class="sauce-description">Traditional hot buffalo - the perfect heat</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fteriyaki-sauced.png?alt=media"
+                     alt="Sweet Teriyaki" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Sweet Teriyaki</span>
+                    <span class="heat-level mild">No Heat</span>
+                    <p class="sauce-description">Teriyaki glaze - soy, ginger, sesame</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbbq-sauced.png?alt=media"
+                     alt="Tailgate BBQ" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Tailgate BBQ</span>
+                    <span class="heat-level mild">No Heat</span>
+                    <p class="sauce-description">Classic BBQ - sweet, tangy, smoky</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fnortheast-hot-lemon.png?alt=media"
+                     alt="Northeast Hot Lemon" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Northeast Hot Lemon</span>
+                    <span class="heat-level medium">Medium</span>
+                    <p class="sauce-description">Spicy lemon pepper with cayenne kick</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fhoney-mustard.png?alt=media"
+                     alt="Honey Mustard" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Honey Mustard</span>
+                    <span class="heat-level mild">No Heat</span>
+                    <p class="sauce-description">Sweet & tangy</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fnashville-hot.png?alt=media"
+                     alt="Broad & Pattison Burn" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Broad & Pattison Burn</span>
+                    <span class="heat-level extra-hot">Extra Hot</span>
+                    <p class="sauce-description">Nashville-style hot - cayenne, brown sugar</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fblue-cheese.png?alt=media"
+                     alt="Blue Cheese" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Blue Cheese</span>
+                    <span class="heat-level mild">No Heat</span>
+                    <p class="sauce-description">Classic chunky</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcheese-sauce.png?alt=media"
+                     alt="Cheese Sauce" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Cheese Sauce</span>
+                    <span class="heat-level mild">No Heat</span>
+                    <p class="sauce-description">Warm & melty</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgrittys-revenge.png?alt=media"
+                     alt="Gritty's Revenge" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Gritty's Revenge</span>
+                    <span class="heat-level extra-hot">Extra Hot</span>
+                    <p class="sauce-description">Scorpion pepper sauce - NOT for rookies!</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcajun-dry-rub.png?alt=media"
+                     alt="Frankford Cajun" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Frankford Cajun</span>
+                    <span class="heat-level medium">Medium</span>
+                    <p class="sauce-description">Bold Cajun blend - paprika, garlic, herbs</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Franch-dip.png?alt=media"
+                     alt="Ranch" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Ranch</span>
+                    <span class="heat-level mild">No Heat</span>
+                    <p class="sauce-description">Cool & creamy</p>
+                </div>
+            </div>
+        
+            <div class="sauce-option">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgarlic-parmesan-dry-rub.png?alt=media"
+                     alt="Garlic Parmesan" class="sauce-image">
+                <div class="sauce-info">
+                    <span class="sauce-name">Garlic Parmesan</span>
+                    <span class="heat-level mild">No Heat</span>
+                    <p class="sauce-description">Creamy garlic butter with aged parmesan</p>
+                </div>
+            </div>
+        
+    </div>
+</section>
+        </main>
+
+        <!-- Professional Footer -->
+        <footer class="menu-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Restaurant Information</h4>
+                    <p>Philly Wings Express</p>
+                    <p>Virtual Kitchen • Delivery Only</p>
+                    <p>Philadelphia, PA</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Menu Information</h4>
+                    <p>Generated for: DoorDash</p>
+                    <p>Last Updated: 9/22/2025</p>
+                    <p>Pricing: Base + 35.0% markup</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: hello@phillywingsexpress.com</p>
+                    <p>Website: phillywingsexpress.com</p>
+                    <p>Platform Contact: merchant-support@doordash.com</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    // Smooth scrolling for navigation
+    document.querySelectorAll('.nav-item').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Update active nav item on scroll
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.menu-section');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        let currentSection = '';
+        sections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= 100 && rect.bottom >= 100) {
+                currentSection = section.id;
+            }
+        });
+
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === '#' + currentSection) {
+                item.classList.add('active');
+            }
+        });
+    });
+  </script>
+</body>
+</html>
