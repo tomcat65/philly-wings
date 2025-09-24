@@ -4,18 +4,53 @@
 - DEPLOYMENT: We deploy through GitHub Actions, not directly. User might have a PR that allows preview of changes. User is in charge of deploying when changes are made. DO NOT run firebase deploy commands.
 - GIT COMMITS: User (human) is in charge of committing. ONLY commit when user gives explicit permission. Never commit without permission.
 
-Philly Wings is a sophisticated Firebase-powered application (not a simple static site)
-All media assets are served from Firebase Storage (that's why I couldn't find local images)
-Dynamic content comes from Firestore (menu items, reviews, live orders)
-Full admin panel at /admin manages all content
-Purpose: Marketing showcase that drives traffic to delivery platforms
+## Philly Wings Express - Platform Menu System
 
-What This Means,
-Instead of building complex order systems or worrying about "missing" files, focus on:
+Philly Wings is a sophisticated Firebase-powered platform menu generation system (not a simple static site).
 
-Clarifying the user journey - Make it crystal clear that ordering happens on delivery apps
-Performance monitoring - How fast do Firebase assets load?
-Conversion tracking - Platform click-through rates
+### Core Architecture
+- **Server-Side Rendered Menus**: Firebase Functions generate dynamic HTML menus for delivery platforms
+- **Real-time Data**: All content from Firestore (combos, beverages, sauces, pricing)
+- **Media Assets**: Served from Firebase Storage with automatic WebP conversion
+- **Platform-Specific**: Each platform (DoorDash, UberEats, GrubHub) gets customized pricing and formatting
 
+### Critical Working URLs (Firebase Functions)
+**Local Development (Emulator - CURRENTLY ACTIVE on port 5002)**:
+- DoorDash: http://localhost:5002/philly-wings/us-central1/platformMenu?platform=doordash
+- UberEats: http://localhost:5002/philly-wings/us-central1/platformMenu?platform=ubereats
+- GrubHub: http://localhost:5002/philly-wings/us-central1/platformMenu?platform=grubhub
 
-- preview url: {Preview}
+**Note**: Emulators are currently active on port 5002 - no need to restart them!
+
+**Production URLs** (what gets passed to platforms):
+- DoorDash: https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=doordash
+- UberEats: https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=ubereats
+- GrubHub: https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=grubhub
+
+### Menu Generation Process
+1. Firebase Function in `/functions/index.js` receives platform parameter
+2. Fetches data from Firestore collections (combos, menuItems, sauces, beverages)
+3. Applies platform pricing (DoorDash/UberEats: 35% markup, GrubHub: 21.5%)
+4. Generates complete responsive HTML with CSS styling
+5. Returns server-rendered menu to platform/browser
+6. Updates automatically when Firestore data changes
+
+### Key Implementation Areas
+- **Beverage Section**: Card-based layout with modals, responsive WebP images
+- **Combo Section**: Sorted by wing count, platform-specific pricing
+- **Wings Section**: Two cards (Boneless first, then Bone-In)
+- **Sides Section**: Three categories (Fries, Loaded Fries, Mozzarella Sticks)
+- **Dips Section**: Separated from sauces, 4 individual cards with 1.5oz specification
+- **Sauce Section**: Full-width images showing cup contents from top
+
+### Focus Areas
+- Server-side menu generation for delivery platforms
+- Platform-specific pricing and markup calculations
+- Responsive design across desktop/tablet/mobile
+- Firebase Storage image optimization (WebP conversion)
+- Real-time Firestore data integration
+
+### Start Emulators
+```bash
+firebase emulators:start --only hosting,functions
+```

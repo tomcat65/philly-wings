@@ -2608,6 +2608,7 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
         <a href="#combos">Combos</a>
         <a href="#wings">Wings</a>
         <a href="#sides">Sides</a>
+        <a href="#dips">Dips</a>
         <a href="#beverages">Drinks</a>
         <a href="#sauces">Sauces</a>
     </nav>
@@ -2615,11 +2616,140 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
         ${generateCombosSection(strategicMenu.combos, { name: getPlatformName(platform) })}
         ${generateWingsSection(strategicMenu.wings, { name: getPlatformName(platform) })}
         ${generateSidesSection(strategicMenu.sides, { name: getPlatformName(platform) })}
+        ${generateDipsSection(strategicMenu.dips || [], { name: getPlatformName(platform) })}
         ${generateBeveragesSection(strategicMenu.beverages, { name: getPlatformName(platform) })}
         ${generateSaucesSection(strategicMenu.sauces || [], { name: getPlatformName(platform) })}
     </div>
     <div class="order-modal-placeholder"></div>
-    <script>// Strategic menu JS placeholder</script>
+    <script>
+        // Beverage modal functionality
+        function openBeverageModal(beverageData) {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('beverage-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'beverage-modal';
+                modal.className = 'modal-overlay';
+                modal.innerHTML = \`
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="beverage-modal-title" class="modal-title"></h2>
+                            <button class="close-modal" onclick="closeBeverageModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="beverage-modal-image" class="modal-image-wrapper"></div>
+                            <p id="beverage-modal-description" class="modal-description"></p>
+                            <div id="beverage-options" class="beverage-options"></div>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="decreaseBeverageQuantity()">−</button>
+                                <input type="number" id="beverage-quantity" class="quantity-input" value="1" min="1">
+                                <button class="quantity-btn" onclick="increaseBeverageQuantity()">+</button>
+                            </div>
+                            <button id="add-beverage-btn" class="add-to-bag" onclick="addBeverageToCart()">Add to bag</button>
+                        </div>
+                    </div>
+                \`;
+                document.body.appendChild(modal);
+            }
+
+            // Populate modal with beverage data
+            document.getElementById('beverage-modal-title').textContent = beverageData.name;
+            document.getElementById('beverage-modal-description').textContent = beverageData.description;
+
+            // Add image
+            const imageWrapper = document.getElementById('beverage-modal-image');
+            imageWrapper.innerHTML = \`<img src="\${beverageData.imageUrl}" alt="\${beverageData.name}" style="width: 100%; max-width: 200px; height: auto; border-radius: 12px;">\`;
+
+            // Handle options (fountain drinks, tea sizes, etc.)
+            const optionsDiv = document.getElementById('beverage-options');
+            if (beverageData.details && beverageData.details.length > 0) {
+                optionsDiv.innerHTML = '<h4>Available Options:</h4>' +
+                    beverageData.details.map(option => \`
+                        <div class="option-item" onclick="selectBeverageOption('\${option.name}', \${option.price})">
+                            <span class="option-name">\${option.name}</span>
+                            <span class="option-price">$\${option.price.toFixed(2)}</span>
+                        </div>
+                    \`).join('');
+
+                // Select first option by default
+                selectBeverageOption(beverageData.details[0].name, beverageData.details[0].price);
+            } else {
+                optionsDiv.innerHTML = '';
+                window.currentBeverageSelection = {
+                    name: beverageData.name,
+                    price: beverageData.platformPrice,
+                    baseData: beverageData
+                };
+            }
+
+            updateBeverageModalPrice();
+            modal.style.display = 'block';
+        }
+
+        function closeBeverageModal() {
+            const modal = document.getElementById('beverage-modal');
+            if (modal) modal.style.display = 'none';
+            window.currentBeverageSelection = null;
+        }
+
+        function selectBeverageOption(name, price) {
+            // Update selection
+            window.currentBeverageSelection = { name, price };
+
+            // Update UI to show selected option
+            document.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
+            event.target.closest('.option-item').classList.add('selected');
+
+            updateBeverageModalPrice();
+        }
+
+        function increaseBeverageQuantity() {
+            const input = document.getElementById('beverage-quantity');
+            input.value = parseInt(input.value) + 1;
+            updateBeverageModalPrice();
+        }
+
+        function decreaseBeverageQuantity() {
+            const input = document.getElementById('beverage-quantity');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateBeverageModalPrice();
+            }
+        }
+
+        function updateBeverageModalPrice() {
+            if (!window.currentBeverageSelection) return;
+            const quantity = parseInt(document.getElementById('beverage-quantity').value);
+            const total = (window.currentBeverageSelection.price * quantity).toFixed(2);
+            document.getElementById('add-beverage-btn').textContent = \`Add to bag: $\${total}\`;
+        }
+
+        function addBeverageToCart() {
+            if (!window.currentBeverageSelection) return;
+            const quantity = parseInt(document.getElementById('beverage-quantity').value);
+
+            // Add to cart (you can integrate with existing cart system)
+            console.log('Added to cart:', {
+                item: window.currentBeverageSelection.name,
+                quantity: quantity,
+                unitPrice: window.currentBeverageSelection.price,
+                total: window.currentBeverageSelection.price * quantity
+            });
+
+            // Show success message
+            alert(\`Added \${quantity}x \${window.currentBeverageSelection.name} to your order!\`);
+
+            closeBeverageModal();
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('beverage-modal');
+            if (event.target === modal) {
+                closeBeverageModal();
+            }
+        });
+    </script>
 </body>
 </html>`;
 }
@@ -2646,7 +2776,7 @@ function createStrategicMenuData(wings, combos, sides, beverages, sauces, multip
         isPromo: true
       }
     ],
-    combos: combos && combos.length > 0 ? combos.map(combo => ({
+    combos: combos && combos.length > 0 ? combos.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(combo => ({
       id: combo.id,
       name: combo.name,
       description: combo.description,
@@ -2717,7 +2847,14 @@ function createStrategicMenuData(wings, combos, sides, beverages, sauces, multip
         badge: badge
       };
     }) : [],
-    sauces: sauces || []
+    dips: sauces ? sauces.filter(sauce => sauce.category === 'dipping-sauce').map(dip => ({
+      id: dip.id,
+      name: dip.name,
+      description: dip.description,
+      imageUrl: dip.imageUrl,
+      price: '$0.75'
+    })) : [],
+    sauces: sauces ? sauces.filter(sauce => sauce.category !== 'dipping-sauce') : []
   };
 }
 
@@ -3323,34 +3460,138 @@ function generateSidesSection(sides, branding) {
         <p class="section-description">Perfect complements to your wings • Fresh cut fries and mozzarella sticks</p>
     </div>
 
-    <div class="sides-grid">
-        ${sides.map((side, index) => {
-          const sideImages = [
-            'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Floaded-fries_800x800.webp?alt=media',
-            'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmozzarella-sticks_800x800.webp?alt=media',
-            'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffries_800x800.webp?alt=media'
-          ];
-          return `
-            <div class="side-card">
-                <div class="side-image-wrapper">
-                    <img src="${sideImages[index % sideImages.length]}"
-                         alt="${side.name}"
-                         class="side-image"
-                         loading="lazy">
-                    ${side.name.toLowerCase().includes('loaded') ? '<div class="loaded-badge">🔥 LOADED</div>' : ''}
+    <div class="sides-categories-grid">
+        <div class="side-category-card">
+            <div class="side-category-image-wrapper">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffries_800x800.webp?alt=media"
+                     alt="Fries"
+                     class="side-category-image"
+                     loading="lazy">
+                <div class="side-category-badge">FRESH CUT</div>
+            </div>
+            <div class="side-category-details">
+                <h3 class="side-category-name">Fries</h3>
+                <p class="side-category-description">Fresh cut fries • Available in Regular and Large sizes</p>
+                <div class="side-sizes-info">
+                    <span class="sizes-label">Sizes: Regular & Large</span>
                 </div>
-                <div class="side-details">
-                    <h3 class="side-name">${side.name}</h3>
-                    <p class="side-description">${side.description || 'Fresh and delicious side item'}</p>
-                    <div class="side-pricing">
-                        <div class="price-main">$${side.platformPrice}</div>
+                <div class="side-category-pricing">
+                    <div class="price-main">Starting at $4.99</div>
+                    <div class="price-label">Choose Size</div>
+                </div>
+                <button class="order-side-category-btn">VIEW OPTIONS →</button>
+            </div>
+        </div>
+        <div class="side-category-card">
+            <div class="side-category-image-wrapper">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Floaded-fries_800x800.webp?alt=media"
+                     alt="Loaded Fries"
+                     class="side-category-image"
+                     loading="lazy">
+                <div class="side-category-badge">🔥 LOADED</div>
+            </div>
+            <div class="side-category-details">
+                <h3 class="side-category-name">Loaded Fries</h3>
+                <p class="side-category-description">Large fries topped with cheese sauce and bacon • Only available in Large size</p>
+                <div class="side-sizes-info">
+                    <span class="sizes-label">Size: Large Only</span>
+                </div>
+                <div class="side-category-pricing">
+                    <div class="price-main">Starting at $8.99</div>
+                    <div class="price-label">Large Size</div>
+                </div>
+                <button class="order-side-category-btn">VIEW OPTIONS →</button>
+            </div>
+        </div>
+        <div class="side-category-card">
+            <div class="side-category-image-wrapper">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmozzarella-sticks_800x800.webp?alt=media"
+                     alt="Mozzarella Sticks"
+                     class="side-category-image"
+                     loading="lazy">
+                <div class="side-category-badge">GOLDEN FRIED</div>
+            </div>
+            <div class="side-category-details">
+                <h3 class="side-category-name">Mozzarella Sticks</h3>
+                <p class="side-category-description">Golden fried mozzarella sticks • Available in 4, 8, 12, and 16 pieces</p>
+                <div class="side-sizes-info">
+                    <span class="sizes-label">Quantities: 4, 8, 12, 16 pieces</span>
+                </div>
+                <div class="side-category-pricing">
+                    <div class="price-main">Starting at $6.99</div>
+                    <div class="price-label">Choose Quantity</div>
+                </div>
+                <button class="order-side-category-btn">VIEW OPTIONS →</button>
+            </div>
+        </div>
+    </div>
+</section>`;
+}
+
+function generateDipsSection(dips, branding) {
+  // Define the 4 dip cards
+  const dipCategories = [
+    {
+      id: 'ranch',
+      name: 'Ranch',
+      description: 'Cool & creamy ranch dip • Perfect with wings and vegetables',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Franch-dip.png?alt=media',
+      badge: 'CLASSIC',
+      price: '$0.75'
+    },
+    {
+      id: 'honey-mustard',
+      name: 'Honey Mustard',
+      description: 'Sweet & tangy honey mustard • Great for dipping wings and sides',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fhoney-mustard.png?alt=media',
+      badge: 'SWEET & TANGY',
+      price: '$0.75'
+    },
+    {
+      id: 'blue-cheese',
+      name: 'Blue Cheese',
+      description: 'Classic chunky blue cheese • Traditional wing dip',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fblue-cheese.png?alt=media',
+      badge: 'CHUNKY',
+      price: '$0.75'
+    },
+    {
+      id: 'cheese-sauce',
+      name: 'Cheese Sauce',
+      description: 'Warm & melty cheese sauce • Perfect for loaded fries and sides',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcheese-sauce.png?alt=media',
+      badge: 'WARM & MELTY',
+      price: '$1.25'
+    }
+  ];
+
+  return `
+<section id="dips" class="menu-section">
+    <div class="section-header">
+        <h2 class="section-title">🥄 Dips</h2>
+        <p class="section-description">Extra flavor for your wings and sides • 1.5 oz cups</p>
+    </div>
+    <div class="dips-categories-grid">
+        ${dipCategories.map(dip => `
+            <div class="dip-category-card">
+                <div class="dip-category-image-wrapper">
+                    <img src="${dip.imageUrl}"
+                         alt="${dip.name}"
+                         class="dip-category-image"
+                         loading="lazy">
+                    <div class="dip-category-badge">${dip.badge}</div>
+                </div>
+                <div class="dip-category-details">
+                    <h3 class="dip-category-name">${dip.name}</h3>
+                    <p class="dip-category-description">${dip.description}</p>
+                    <div class="dip-category-pricing">
+                        <div class="price-main">${dip.price}</div>
                         <div class="price-label">Add to Order</div>
                     </div>
-                    <button class="add-side-btn">ADD SIDE</button>
+                    <button class="order-dip-category-btn">ADD DIP</button>
                 </div>
             </div>
-          `;
-        }).join('')}
+        `).join('')}
     </div>
 </section>`;
 }
@@ -3363,6 +3604,50 @@ function generateBeveragesSection(beverages, branding) {
   const teaDrinks = beverages.filter(b => b.name.toLowerCase().includes('tea'));
   const otherBeverages = beverages.filter(b => !b.name.toLowerCase().includes('fountain') && !b.name.toLowerCase().includes('tea'));
 
+  // Combine all beverages into card format
+  const allBeverages = [];
+
+  // Add fountain drinks as a single card
+  if (fountainDrinks.length > 0) {
+    allBeverages.push({
+      id: 'fountain-drinks',
+      name: 'Fountain Drinks',
+      description: '8 Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq\'s Root Beer, Hi-C Fruit Punch',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_200x200.webp?alt=media',
+      platformPrice: fountainDrinks[0]?.platformPrice || fountainDrinks[0]?.basePrice || 2.99,
+      badge: 'CHOOSE SIZE',
+      details: fountainDrinks.map(f => ({ name: f.name, price: f.platformPrice || f.basePrice })),
+      type: 'fountain'
+    });
+  }
+
+  // Add tea as a single card
+  if (teaDrinks.length > 0) {
+    allBeverages.push({
+      id: 'iced-tea',
+      name: 'Fresh Brewed Tea',
+      description: 'Freshly brewed daily • Sweet or unsweetened • Perfect refreshment',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_200x200.webp?alt=media',
+      platformPrice: teaDrinks[0]?.platformPrice || teaDrinks[0]?.basePrice || 2.99,
+      badge: 'CHOOSE SIZE',
+      details: teaDrinks.map(t => ({ name: t.name, price: t.platformPrice || t.basePrice })),
+      type: 'tea'
+    });
+  }
+
+  // Add other beverages
+  otherBeverages.forEach(beverage => {
+    allBeverages.push({
+      id: beverage.id || beverage.name?.toLowerCase().replace(/\s+/g, '-'),
+      name: beverage.name,
+      description: beverage.description || 'Refreshing beverage to cool down the heat',
+      imageUrl: beverage.imageUrl || beverage.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_200x200.webp?alt=media',
+      platformPrice: beverage.platformPrice || beverage.basePrice,
+      badge: 'COLD & FRESH',
+      type: 'single'
+    });
+  });
+
   return `
 <section id="beverages" class="menu-section">
     <div class="section-header">
@@ -3370,77 +3655,30 @@ function generateBeveragesSection(beverages, branding) {
         <p class="section-description">Cool down the heat • Fountain drinks, tea, and water</p>
     </div>
 
-    ${fountainDrinks.length > 0 ? `
-    <div class="fountain-drinks-section">
-        <div class="fountain-hero">
-            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ffountain-drinks.png?alt=media"
-                 alt="Fountain Drinks"
-                 class="fountain-hero-image">
-            <div class="fountain-info">
-                <h3 class="fountain-title">🥤 Fountain Drinks</h3>
-                <p class="fountain-flavors">Available Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq's Root Beer, Hi-C Fruit Punch</p>
-                <div class="fountain-sizes">
-                    ${fountainDrinks.map(fountain => `
-                        <div class="size-option">
-                            <span class="size-name">${fountain.name}</span>
-                            <span class="size-price">$${fountain.platformPrice || fountain.basePrice}</span>
-                        </div>
-                    `).join('')}
+    <div class="beverages-cards-grid">
+        ${allBeverages.map(beverage => `
+            <div class="beverage-card ${beverage.type === 'fountain' ? 'featured' : ''}" onclick="openBeverageModal(${JSON.stringify(beverage).replace(/"/g, '&quot;')})">
+                <div class="beverage-image-wrapper">
+                    <img src="${beverage.imageUrl}"
+                         alt="${beverage.name}"
+                         class="beverage-image"
+                         loading="lazy">
+                    ${beverage.badge ? `<div class="beverage-badge">${beverage.badge}</div>` : ''}
                 </div>
-                <button class="fountain-cta">ADD FOUNTAIN DRINK →</button>
-            </div>
-        </div>
-    </div>
-    ` : ''}
-
-    ${teaDrinks.length > 0 ? `
-    <div class="tea-drinks-section">
-        <div class="tea-hero">
-            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ficed-tea.png?alt=media"
-                 alt="Fresh Brewed Tea"
-                 class="tea-hero-image">
-            <div class="tea-info">
-                <h3 class="tea-title">🧊 Fresh Brewed Tea</h3>
-                <p class="tea-description">Freshly brewed daily • Sweet or unsweetened • Perfect refreshment</p>
-                <div class="tea-sizes">
-                    ${teaDrinks.map(tea => `
-                        <div class="size-option">
-                            <span class="size-name">${tea.name}</span>
-                            <span class="size-price">$${tea.platformPrice || tea.basePrice}</span>
-                        </div>
-                    `).join('')}
-                </div>
-                <button class="tea-cta">ADD TEA →</button>
-            </div>
-        </div>
-    </div>
-    ` : ''}
-
-    ${otherBeverages.length > 0 ? `
-    <div class="other-beverages">
-        <h3 class="beverages-subtitle">Other Beverages</h3>
-        <div class="beverages-cards-grid">
-            ${otherBeverages.map(beverage => `
-                <div class="beverage-card">
-                    <div class="beverage-image-wrapper">
-                        <img src="${beverage.imageUrl || beverage.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fwater-bottle.png?alt=media'}"
-                             alt="${beverage.name}"
-                             class="beverage-image"
-                             loading="lazy">
+                <div class="beverage-details">
+                    <h3 class="beverage-name">${beverage.name}</h3>
+                    <p class="beverage-description">${beverage.description}</p>
+                    <div class="beverage-pricing">
+                        <div class="price-main">$${beverage.platformPrice ? (typeof beverage.platformPrice === 'number' ? beverage.platformPrice.toFixed(2) : beverage.platformPrice) : 'N/A'}</div>
+                        <div class="price-label">${beverage.details ? 'Starting at' : 'Add to Order'}</div>
                     </div>
-                    <div class="beverage-content">
-                        <h3 class="beverage-name">${beverage.name}</h3>
-                        <p class="beverage-description">${beverage.description || 'Refreshing beverage to cool down the heat'}</p>
-                        <div class="beverage-pricing">
-                            <span class="beverage-price">$${beverage.platformPrice || beverage.basePrice}</span>
-                        </div>
-                        <button class="beverage-cta">ADD DRINK →</button>
-                    </div>
+                    <button class="beverage-btn">
+                        ${beverage.details ? 'VIEW OPTIONS →' : 'ADD TO ORDER'}
+                    </button>
                 </div>
-            `).join('')}
-        </div>
+            </div>
+        `).join('')}
     </div>
-    ` : ''}
 </section>`;
 }
 
@@ -3499,39 +3737,43 @@ function generateWingsSection(wings, branding) {
         </div>
     </div>
 
-    <div class="wings-grid">
-        ${wings.map((wing, index) => {
-          const wingImages = [
-            'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fclassic-buffalo-wings_800x800.webp?alt=media',
-            'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboneless-wings_200x200.webp?alt=media',
-            'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Foriginal-drums_200x200.webp?alt=media',
-            'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Foriginal-flats_200x200.webp?alt=media'
-          ];
-          return `
-            <div class="wing-card">
-                <div class="wing-image-wrapper">
-                    <img src="${wingImages[index % wingImages.length]}"
-                         alt="${wing.name}"
-                         class="wing-image"
-                         loading="lazy">
-                    ${wing.popular ? '<div class="popular-badge">🔥 POPULAR</div>' : ''}
-                    <div class="wing-count-badge">${wing.count || '6'} Wings</div>
-                </div>
-                <div class="wing-details">
-                    <h3 class="wing-name">${wing.name}</h3>
-                    <p class="wing-description">${wing.description}</p>
-                    <div class="wing-includes">
-                        <span class="include-sauce">+${wing.sauces || 1} Free Sauce${(wing.sauces || 1) > 1 ? 's' : ''}</span>
-                    </div>
-                    <div class="wing-pricing">
-                        <div class="price-main">$${wing.platformPrice}</div>
-                        <div class="price-label">On ${branding.name}</div>
-                    </div>
-                    <button class="order-wing-btn">ADD TO ORDER</button>
-                </div>
+    <div class="wings-categories-grid">
+        <div class="wing-category-card">
+            <div class="wing-category-image-wrapper">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmenu%2Fphilly-classic-hot.jpg?alt=media"
+                     alt="Boneless Wings"
+                     class="wing-category-image"
+                     loading="lazy">
+                <div class="wing-category-badge">ALL WHITE MEAT</div>
             </div>
-          `;
-        }).join('')}
+            <div class="wing-category-details">
+                <h3 class="wing-category-name">Boneless</h3>
+                <p class="wing-category-description">All White Chicken, Juicy and Lightly Breaded</p>
+                <div class="wing-category-pricing">
+                    <div class="price-main">Starting at $12.99</div>
+                    <div class="price-label">Choose Size & Sauce</div>
+                </div>
+                <button class="order-wing-category-btn">VIEW OPTIONS →</button>
+            </div>
+        </div>
+        <div class="wing-category-card">
+            <div class="wing-category-image-wrapper">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbroad-pattison-burn_800x800.webp?alt=media"
+                     alt="Classic Bone-In Wings"
+                     class="wing-category-image"
+                     loading="lazy">
+                <div class="wing-category-badge">AUTHENTIC</div>
+            </div>
+            <div class="wing-category-details">
+                <h3 class="wing-category-name">Classic (Bone-In)</h3>
+                <p class="wing-category-description">The Real Buffalo Wings, Real Food (not from Buffalo!)</p>
+                <div class="wing-category-pricing">
+                    <div class="price-main">Starting at $12.99</div>
+                    <div class="price-label">Choose Size & Sauce</div>
+                </div>
+                <button class="order-wing-category-btn">VIEW OPTIONS →</button>
+            </div>
+        </div>
     </div>
 </section>`;
 }
@@ -3676,6 +3918,312 @@ function generateDoorDashCSS(branding) {
         background: #e55a2b;
     }
 
+    /* Beverages Section Styles */
+    .beverages-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin: 24px 0;
+    }
+
+    .beverage-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .beverage-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .beverage-card.featured {
+        border: 2px solid #ff6b35;
+    }
+
+    .beverage-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 160px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        padding: 16px;
+    }
+
+    .beverage-image {
+        max-width: 140px;
+        max-height: 140px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+    /* Responsive beverage image sizing */
+    @media (max-width: 768px) {
+        .beverage-image {
+            max-width: 100px;
+            max-height: 100px;
+        }
+
+        .beverage-image-wrapper {
+            height: 140px;
+            padding: 12px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .beverage-image {
+            max-width: 80px;
+            max-height: 80px;
+        }
+
+        .beverage-image-wrapper {
+            height: 120px;
+            padding: 10px;
+        }
+    }
+
+    .beverage-card:hover .beverage-image {
+        transform: scale(1.05);
+    }
+
+    .beverage-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: #00b887;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    /* Special styling for fountain drinks card */
+    .beverage-card.featured .beverage-image-wrapper {
+        padding: 0;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    }
+    .beverage-card.featured .beverage-image {
+        max-width: 100%;
+        max-height: 100%;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .beverage-card.featured .beverage-badge {
+        background: rgba(255,255,255,0.9);
+        color: #ff6b35;
+    }
+
+    .beverage-details {
+        padding: 16px;
+    }
+
+    .beverage-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+
+    .beverage-description {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .beverage-pricing {
+        margin-bottom: 12px;
+    }
+
+    .beverage-pricing .price-main {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1a1a1a;
+    }
+
+    .beverage-pricing .price-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+    }
+
+    .beverage-btn {
+        width: 100%;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .beverage-btn:hover {
+        background: #1557b0;
+    }
+
+    /* Modal Styles for Beverages */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1a1a1a;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .modal-image-wrapper {
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .modal-description {
+        color: #666;
+        margin-bottom: 16px;
+        line-height: 1.4;
+    }
+
+    .beverage-options h4 {
+        margin-bottom: 12px;
+        color: #1a1a1a;
+    }
+
+    .option-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+
+    .option-item:hover {
+        border-color: #1976d2;
+    }
+
+    .option-item.selected {
+        border-color: #1976d2;
+        background: #f3f8ff;
+    }
+
+    .option-name {
+        font-weight: 500;
+        color: #1a1a1a;
+    }
+
+    .option-price {
+        font-weight: bold;
+        color: #1976d2;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin: 20px 0;
+    }
+
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #1976d2;
+        background: white;
+        color: #1976d2;
+        border-radius: 50%;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-btn:hover {
+        background: #1976d2;
+        color: white;
+    }
+
+    .quantity-input {
+        width: 60px;
+        height: 40px;
+        text-align: center;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .add-to-bag {
+        width: 100%;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .add-to-bag:hover {
+        background: #1557b0;
+    }
+
     /* Wings Section Styles */
     .wings-hero-banner {
         position: relative;
@@ -3724,6 +4272,94 @@ function generateDoorDashCSS(branding) {
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 20px;
         margin: 24px 0;
+    }
+    .wings-categories-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin: 24px 0;
+    }
+    @media (max-width: 768px) {
+        .wings-categories-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+    .wing-category-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    .wing-category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .wing-category-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+    }
+    .wing-category-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .wing-category-card:hover .wing-category-image {
+        transform: scale(1.05);
+    }
+    .wing-category-badge {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: #ff6b35;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .wing-category-details {
+        padding: 20px;
+    }
+    .wing-category-name {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+    .wing-category-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 16px;
+        line-height: 1.4;
+    }
+    .wing-category-pricing {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .order-wing-category-btn {
+        width: 100%;
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .order-wing-category-btn:hover {
+        background: #e55a2b;
     }
 
     .wing-card {
@@ -3837,6 +4473,211 @@ function generateDoorDashCSS(branding) {
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
         gap: 18px;
         margin: 24px 0;
+    }
+    .sides-categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin: 24px 0;
+    }
+    @media (max-width: 768px) {
+        .sides-categories-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+    .side-category-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    .side-category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .side-category-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+    }
+    .side-category-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .side-category-card:hover .side-category-image {
+        transform: scale(1.05);
+    }
+    .side-category-badge {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: #ff6b35;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .side-category-details {
+        padding: 20px;
+    }
+    .side-category-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+    .side-category-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+    .side-sizes-info {
+        margin-bottom: 16px;
+    }
+    .sizes-label {
+        font-size: 13px;
+        color: #888;
+        font-style: italic;
+    }
+    .side-category-pricing {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .order-side-category-btn {
+        width: 100%;
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .order-side-category-btn:hover {
+        background: #e55a2b;
+    }
+
+    /* Dips Section Styles */
+    .dips-categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin: 24px 0;
+    }
+    @media (max-width: 768px) {
+        .dips-categories-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+    }
+    @media (max-width: 480px) {
+        .dips-categories-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+    }
+    .dip-category-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    .dip-category-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.12);
+    }
+    .dip-category-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 160px;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+        background: #f8f9fa;
+    }
+    .dip-category-image {
+        width: 100%;
+        height: 120%;
+        object-fit: cover;
+        object-position: center 40%;
+        transition: transform 0.3s ease;
+        transform: scale(1.1);
+    }
+    .dip-category-card:hover .dip-category-image {
+        transform: scale(1.2);
+    }
+    .dip-category-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #00b887;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .dip-category-details {
+        padding: 16px;
+    }
+    .dip-category-name {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 6px;
+        color: #1a1a1a;
+    }
+    .dip-category-description {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 12px;
+        line-height: 1.3;
+    }
+    .dip-category-pricing {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .dip-category-pricing .price-main {
+        font-size: 16px;
+        font-weight: bold;
+        color: #ff6b35;
+    }
+    .dip-category-pricing .price-label {
+        font-size: 12px;
+        color: #888;
+    }
+    .order-dip-category-btn {
+        width: 100%;
+        background: #00b887;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .order-dip-category-btn:hover {
+        background: #009670;
     }
 
     .side-card {
@@ -4298,6 +5139,286 @@ function generateDoorDashCSS(branding) {
 
         .item-details {
             margin-right: 0;
+        }
+    }
+
+    /* Beverages Section Styling */
+    .fountain-drinks-section, .tea-drinks-section {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .fountain-hero, .tea-hero {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .fountain-hero-image, .tea-hero-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+
+    .fountain-info, .tea-info {
+        flex: 1;
+    }
+
+    .fountain-title, .tea-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+
+    .fountain-flavors, .tea-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 16px;
+        line-height: 1.4;
+    }
+
+    .fountain-sizes, .tea-sizes {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .size-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .size-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .size-price {
+        font-size: 16px;
+        font-weight: bold;
+        color: #ff6b35;
+    }
+
+    .fountain-cta, .tea-cta {
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .fountain-cta:hover, .tea-cta:hover {
+        background: #e55a2b;
+    }
+
+    /* Beverages Cards Grid */
+    .beverages-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .beverage-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .beverage-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .beverage-image-wrapper {
+        width: 100%;
+        height: 160px;
+        overflow: hidden;
+    }
+
+    .beverage-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .beverage-card:hover .beverage-image {
+        transform: scale(1.05);
+    }
+
+    .beverage-content {
+        padding: 16px;
+    }
+
+    .beverage-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+
+    .beverage-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .beverage-pricing {
+        margin-bottom: 12px;
+    }
+
+    .beverage-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: #ff6b35;
+    }
+
+    .beverage-cta {
+        width: 100%;
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .beverage-cta:hover {
+        background: #e55a2b;
+    }
+
+    /* Sauces Cards Grid */
+    .sauces-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .sauce-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        padding: 16px;
+    }
+
+    .sauce-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .sauce-image-wrapper {
+        width: 100%;
+        height: 160px;
+        overflow: hidden;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 0;
+    }
+
+    .sauce-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        transition: transform 0.3s ease;
+    }
+
+    .sauce-card:hover .sauce-image {
+        transform: scale(1.05);
+    }
+
+    .sauce-content {
+        text-align: center;
+    }
+
+    .sauce-name {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+
+    .sauce-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .heat-level-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .heat-label {
+        font-size: 12px;
+        font-weight: bold;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .heat-visual {
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .beverages-subtitle {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 16px;
+        color: #1a1a1a;
+    }
+
+    /* Responsive adjustments for beverages and sauces */
+    @media (max-width: 768px) {
+        .fountain-hero, .tea-hero {
+            flex-direction: column;
+            text-align: center;
+            padding: 16px;
+        }
+
+        .fountain-hero-image, .tea-hero-image {
+            width: 100px;
+            height: 100px;
+        }
+
+        .beverages-cards-grid, .sauces-cards-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .beverage-image-wrapper, .sauce-image-wrapper {
+            height: 140px;
         }
     }
   `;
