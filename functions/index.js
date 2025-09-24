@@ -191,9 +191,9 @@ function processWingVariants(wingsData, markup) {
 function processCombos(combosData, markup) {
   return combosData.map(combo => ({
     ...combo,
-    basePrice: combo.price,
-    platformPrice: (combo.price * markup).toFixed(2),
-    markupAmount: ((combo.price * markup) - combo.price).toFixed(2),
+    basePrice: combo.basePrice,
+    platformPrice: (combo.basePrice * markup).toFixed(2),
+    markupAmount: ((combo.basePrice * markup) - combo.basePrice).toFixed(2),
     savings: combo.savings || '15%',
     description: combo.description || generateComboDescription(combo)
   }));
@@ -913,7 +913,7 @@ function generateUberEatsCombosSection(combos) {
                      alt="${combo.name}" loading="lazy">
               </div>
             </div>
-            <div class="item-price">$${combo.platformPrice}</div>
+            <div class="item-price">$${combo.platformPrice ? (typeof combo.platformPrice === 'number' ? combo.platformPrice.toFixed(2) : combo.platformPrice) : 'N/A'}</div>
           </div>
         `).join('')}
       </div>
@@ -2781,7 +2781,7 @@ function createStrategicMenuData(wings, combos, sides, beverages, sauces, multip
       name: combo.name,
       description: combo.description,
       price: combo.basePrice * multiplier,
-      platformPrice: combo.basePrice * multiplier,
+      platformPrice: (combo.basePrice * multiplier).toFixed(2),
       imageUrl: combo.imageUrl,
       badge: combo.badges ? (typeof combo.badges === 'string' ? combo.badges.replace(/[\[\]"]/g, '').split(',')[0] : Array.isArray(combo.badges) ? combo.badges[0] : 'COMBO DEAL') : 'COMBO DEAL',
       savings: combo.originalPrice ? combo.originalPrice - combo.basePrice : 0,
@@ -3317,7 +3317,7 @@ function generateDoorDashCombosSection(combos) {
                              alt="${combo.name}" loading="lazy">
                     </div>
                 </div>
-                <div class="item-price">$${combo.platformPrice}</div>
+                <div class="item-price">$${combo.platformPrice ? (typeof combo.platformPrice === 'number' ? combo.platformPrice.toFixed(2) : combo.platformPrice) : 'N/A'}</div>
             </div>
         `).join('')}
     </div>
@@ -3439,7 +3439,7 @@ function generateCombosSection(combos, branding) {
                         <span class="include-item">🌶️ Sauces</span>
                     </div>
                     <div class="combo-pricing">
-                        <div class="price-main">$${combo.platformPrice}</div>
+                        <div class="price-main">$${combo.platformPrice ? (typeof combo.platformPrice === 'number' ? combo.platformPrice.toFixed(2) : combo.platformPrice) : 'N/A'}</div>
                         <div class="price-label">Order on ${branding.name}</div>
                     </div>
                     <button class="order-now-btn">ORDER NOW →</button>
@@ -3685,6 +3685,10 @@ function generateBeveragesSection(beverages, branding) {
 function generateSaucesSection(sauces, branding) {
   if (!sauces?.length) return '<section id="sauces"><h2>Sauces section temporarily unavailable</h2></section>';
 
+  // Separate dry rubs from sauces
+  const dryRubs = sauces.filter(sauce => sauce.isDryRub === true || sauce.category === 'dry-rub').sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  const classicSauces = sauces.filter(sauce => sauce.isDryRub !== true && sauce.category !== 'dry-rub' && sauce.category !== 'dipping-sauce').sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+
   return `
 <section id="sauces" class="menu-section">
     <div class="section-header">
@@ -3692,33 +3696,80 @@ function generateSaucesSection(sauces, branding) {
         <p class="section-description">From sweet to scorching - all made in-house</p>
     </div>
 
-    <div class="sauces-cards-grid">
-        ${sauces.map(sauce => `
-            <div class="sauce-card">
-                <div class="sauce-image-wrapper">
-                    <img src="${sauce.imageUrl || sauce.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbuffalo-sauced.png?alt=media'}"
-                         alt="${sauce.name}"
-                         class="sauce-image"
-                         loading="lazy">
+    ${dryRubs.length > 0 ? `
+    <div class="sauce-category-section">
+        <h3 class="sauce-category-title">🥄 Dry Rubs</h3>
+        <p class="sauce-category-description">Crispy wings tossed in our signature spice blends</p>
+        <div class="sauces-cards-grid">
+            ${dryRubs.map(sauce => `
+                <div class="sauce-card">
+                    <div class="sauce-image-wrapper">
+                        <img src="${sauce.imageUrl || sauce.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbuffalo-sauced.png?alt=media'}"
+                             alt="${sauce.name}"
+                             class="sauce-image"
+                             loading="lazy">
+                    </div>
+                    <div class="sauce-content">
+                        <h3 class="sauce-name">${sauce.name}</h3>
+                        <p class="sauce-description">${sauce.description || 'House-made spice blend with bold flavor'}</p>
+                        ${sauce.heatLevel !== undefined ? `
+                            <div class="heat-level-indicator">
+                                <span class="heat-label">${getHeatLevelText(sauce.heatLevel)}</span>
+                                <span class="heat-visual">${getHeatEmojis(sauce.heatLevel)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
-                <div class="sauce-content">
-                    <h3 class="sauce-name">${sauce.name}</h3>
-                    <p class="sauce-description">${sauce.description || 'House-made sauce with bold flavor'}</p>
-                    ${sauce.heatLevel !== undefined ? `
-                        <div class="heat-level-indicator">
-                            <span class="heat-label">${getHeatLevelText(sauce.heatLevel)}</span>
-                            <span class="heat-visual">${getHeatEmojis(sauce.heatLevel)}</span>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `).join('')}
+            `).join('')}
+        </div>
     </div>
+    ` : ''}
+
+    ${classicSauces.length > 0 ? `
+    <div class="sauce-category-section">
+        <h3 class="sauce-category-title">🍯 Classic Sauces</h3>
+        <p class="sauce-category-description">Wings smothered in our signature wet sauces</p>
+        <div class="sauces-cards-grid">
+            ${classicSauces.map(sauce => `
+                <div class="sauce-card">
+                    <div class="sauce-image-wrapper">
+                        <img src="${sauce.imageUrl || sauce.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbuffalo-sauced.png?alt=media'}"
+                             alt="${sauce.name}"
+                             class="sauce-image"
+                             loading="lazy">
+                    </div>
+                    <div class="sauce-content">
+                        <h3 class="sauce-name">${sauce.name}</h3>
+                        <p class="sauce-description">${sauce.description || 'House-made sauce with bold flavor'}</p>
+                        ${sauce.heatLevel !== undefined ? `
+                            <div class="heat-level-indicator">
+                                <span class="heat-label">${getHeatLevelText(sauce.heatLevel)}</span>
+                                <span class="heat-visual">${getHeatEmojis(sauce.heatLevel)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    </div>
+    ` : ''}
 </section>`;
 }
 
 function generateWingsSection(wings, branding) {
   if (!wings?.length) return '<section id="wings"><h2>Wings section temporarily unavailable</h2></section>';
+
+  // Extract boneless and bone-in pricing from wings data
+  const bonelessWings = wings.filter(w => w.type === 'boneless');
+  const boneInWings = wings.filter(w => w.type === 'bone-in');
+
+  const minBonelessPrice = bonelessWings.length > 0
+    ? Math.min(...bonelessWings.map(w => w.platformPrice)).toFixed(2)
+    : '6.99';
+
+  const minBoneInPrice = boneInWings.length > 0
+    ? Math.min(...boneInWings.map(w => w.platformPrice)).toFixed(2)
+    : '8.99';
 
   return `
 <section id="wings" class="menu-section">
@@ -3750,7 +3801,7 @@ function generateWingsSection(wings, branding) {
                 <h3 class="wing-category-name">Boneless</h3>
                 <p class="wing-category-description">All White Chicken, Juicy and Lightly Breaded</p>
                 <div class="wing-category-pricing">
-                    <div class="price-main">Starting at $12.99</div>
+                    <div class="price-main">Starting at $${minBonelessPrice}</div>
                     <div class="price-label">Choose Size & Sauce</div>
                 </div>
                 <button class="order-wing-category-btn">VIEW OPTIONS →</button>
@@ -3768,7 +3819,7 @@ function generateWingsSection(wings, branding) {
                 <h3 class="wing-category-name">Classic (Bone-In)</h3>
                 <p class="wing-category-description">The Real Buffalo Wings, Real Food (not from Buffalo!)</p>
                 <div class="wing-category-pricing">
-                    <div class="price-main">Starting at $12.99</div>
+                    <div class="price-main">Starting at $${minBoneInPrice}</div>
                     <div class="price-label">Choose Size & Sauce</div>
                 </div>
                 <button class="order-wing-category-btn">VIEW OPTIONS →</button>
@@ -5309,6 +5360,26 @@ function generateDoorDashCSS(branding) {
 
     .beverage-cta:hover {
         background: #e55a2b;
+    }
+
+    /* Sauce Category Sections */
+    .sauce-category-section {
+        margin-bottom: 40px;
+    }
+
+    .sauce-category-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+        margin-top: 0;
+    }
+
+    .sauce-category-description {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 24px;
+        margin-top: 0;
     }
 
     /* Sauces Cards Grid */
