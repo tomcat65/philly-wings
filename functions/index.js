@@ -2008,7 +2008,7 @@ function generateDoorDashJS() {
       });
 
       const totalPrice = basePrice + additionalCost;
-      document.getElementById('add-to-cart-btn').textContent = \`Add to cart - $\${totalPrice.toFixed(2)}\`;
+      document.getElementById('add-to-cart-btn').textContent = 'Add to cart - $' + totalPrice.toFixed(2);
     }
 
     function addToCart(item) {
@@ -2561,6 +2561,298 @@ function generateGrubHubCSS(branding) {
         margin-bottom: 16px;
       }
     }
+
+    // Wing Modal System Variables
+    let currentModalStep = 1;
+    let selectedWingVariant = null;
+    let selectedSauces = [];
+    let selectedWingStyle = 'regular';
+    let selectedExtraDips = [];
+    let modalWingsData = [];
+    let currentWingType = '';
+
+    // Wing Modal Functions
+    window.openWingModal = function(wingType, wingsData) {
+        currentWingType = wingType;
+        modalWingsData = wingsData;
+        currentModalStep = 1;
+        selectedWingVariant = null;
+        selectedSauces = [];
+        selectedWingStyle = 'regular';
+        selectedExtraDips = [];
+
+        const modal = document.getElementById('wingModal');
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+
+        // Reset progress indicators
+        document.querySelectorAll('.progress-step').forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+            if (index === 0) step.classList.add('active');
+        });
+
+        // Reset modal steps
+        document.querySelectorAll('.modal-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        document.getElementById('modalStep1').classList.add('active');
+
+        // Initialize step 1 - Wing variants
+        populateWingVariants();
+        updateModalButtons();
+
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeWingModal = function() {
+        const modal = document.getElementById('wingModal');
+        modal.classList.remove('active');
+
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+    };
+
+    window.navigateModalStep = function(direction) {
+        if (direction === 1) {
+            // Moving forward
+            if (currentModalStep === 1 && !selectedWingVariant) {
+                alert('Please select a wing size first');
+                return;
+            }
+            if (currentModalStep === 2 && selectedSauces.length === 0) {
+                alert('Please select at least one sauce');
+                return;
+            }
+        }
+
+        // Update step
+        currentModalStep += direction;
+
+        if (currentModalStep < 1) currentModalStep = 1;
+        if (currentModalStep > 5) currentModalStep = 5;
+
+        // Update progress indicators
+        document.querySelectorAll('.progress-step').forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+            if (index < currentModalStep - 1) {
+                step.classList.add('completed');
+            } else if (index === currentModalStep - 1) {
+                step.classList.add('active');
+            }
+        });
+
+        // Show current step
+        document.querySelectorAll('.modal-step').forEach((step, index) => {
+            step.classList.remove('active');
+            if (index === currentModalStep - 1) {
+                step.classList.add('active');
+            }
+        });
+
+        // Initialize step content
+        if (currentModalStep === 2) populateSauceSelection();
+        if (currentModalStep === 3) populateWingStyleOptions();
+        if (currentModalStep === 4) populateExtraDips();
+        if (currentModalStep === 5) populateOrderSummary();
+
+        updateModalButtons();
+    };
+
+    function populateWingVariants() {
+        const container = document.getElementById('wingVariants');
+        container.innerHTML = modalWingsData.map(variant => {
+            return '<div class="wing-variant-option" onclick="selectWingVariant(\\'' + variant.id + '\\')\">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>' + variant.count + ' ' + currentWingType + ' Wings</h4>' +
+                        '<p>' + (variant.includedSauces || Math.floor(variant.count / 6)) + ' sauce' + ((variant.includedSauces || Math.floor(variant.count / 6)) > 1 ? 's' : '') + ' included</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">$' + variant.platformPrice.toFixed(2) + '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    window.selectWingVariant = function(variantId) {
+        selectedWingVariant = modalWingsData.find(v => v.id === variantId);
+
+        // Update UI
+        document.querySelectorAll('.wing-variant-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        event.target.closest('.wing-variant-option').classList.add('selected');
+    };
+
+    function populateSauceSelection() {
+        // For now, create sample sauce data - in production this would come from Firestore
+        const sampleSauces = [
+            { id: 'buffalo', name: 'Classic Buffalo', category: 'signature', heatLevel: 2 },
+            { id: 'bbq', name: 'Sweet BBQ', category: 'signature', heatLevel: 1 },
+            { id: 'honey_mustard', name: 'Honey Mustard', category: 'signature', heatLevel: 1 },
+            { id: 'ranch', name: 'Ranch', category: 'dipping', heatLevel: 0 },
+            { id: 'blue_cheese', name: 'Blue Cheese', category: 'dipping', heatLevel: 0 },
+            { id: 'cajun_dry', name: 'Cajun Dry Rub', category: 'dry-rub', heatLevel: 3 }
+        ];
+
+        const maxSauces = selectedWingVariant ? (selectedWingVariant.includedSauces || Math.floor(selectedWingVariant.count / 6)) : 1;
+
+        const container = document.getElementById('sauceSelection');
+        container.innerHTML =
+            '<div class="sauce-limit-info">Select up to ' + maxSauces + ' sauce' + (maxSauces > 1 ? 's' : '') + ' (included with your wings)</div>' +
+            sampleSauces.map(sauce => {
+                return '<div class="sauce-option" onclick="toggleSauce(\\'' + sauce.id + '\\')\">' +
+                    '<h5>' + sauce.name + '</h5>' +
+                    '<p>Heat: ' + '🔥'.repeat(sauce.heatLevel || 1) + '</p>' +
+                '</div>';
+            }).join('');
+    }
+
+    window.toggleSauce = function(sauceId) {
+        const maxSauces = selectedWingVariant ? (selectedWingVariant.includedSauces || Math.floor(selectedWingVariant.count / 6)) : 1;
+
+        const index = selectedSauces.indexOf(sauceId);
+        if (index > -1) {
+            // Remove sauce
+            selectedSauces.splice(index, 1);
+            event.target.closest('.sauce-option').classList.remove('selected');
+        } else {
+            // Add sauce if under limit
+            if (selectedSauces.length < maxSauces) {
+                selectedSauces.push(sauceId);
+                event.target.closest('.sauce-option').classList.add('selected');
+            } else {
+                alert('You can only select up to ' + maxSauces + ' sauce' + (maxSauces > 1 ? 's' : ''));
+            }
+        }
+    };
+
+    function populateWingStyleOptions() {
+        const container = document.getElementById('wingStyleOptions');
+        container.innerHTML =
+            '<div class="wing-variant-option ' + (selectedWingStyle === 'regular' ? 'selected' : '') + '" onclick="selectWingStyle(\\'regular\\')">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>Regular Mix</h4>' +
+                        '<p>Mix of drums and flats (no extra charge)</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">$0.00</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="wing-variant-option ' + (selectedWingStyle === 'all-drums' ? 'selected' : '') + '" onclick="selectWingStyle(\\'all-drums\\')">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>All Drums</h4>' +
+                        '<p>All drumstick pieces</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">+$1.50</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="wing-variant-option ' + (selectedWingStyle === 'all-flats' ? 'selected' : '') + '" onclick="selectWingStyle(\\'all-flats\\')">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>All Flats</h4>' +
+                        '<p>All wing flat pieces</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">+$1.50</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    window.selectWingStyle = function(style) {
+        selectedWingStyle = style;
+
+        // Update UI
+        document.querySelectorAll('#wingStyleOptions .wing-variant-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        event.target.closest('.wing-variant-option').classList.add('selected');
+    };
+
+    function populateExtraDips() {
+        const extraDips = [
+            { id: 'extra_ranch', name: 'Extra Ranch', price: 0.75 },
+            { id: 'extra_blue_cheese', name: 'Extra Blue Cheese', price: 0.75 },
+            { id: 'extra_buffalo', name: 'Extra Buffalo Sauce', price: 0.75 },
+            { id: 'extra_bbq', name: 'Extra BBQ Sauce', price: 0.75 }
+        ];
+
+        const container = document.getElementById('extraDips');
+        container.innerHTML = extraDips.map(dip => {
+            return '<div class="sauce-option ' + (selectedExtraDips.includes(dip.id) ? 'selected' : '') + '" onclick="toggleExtraDip(\\'' + dip.id + '\\')\">' +
+                '<h5>' + dip.name + '</h5>' +
+                '<p>+$' + dip.price.toFixed(2) + '</p>' +
+            '</div>';
+        }).join('');
+    }
+
+    window.toggleExtraDip = function(dipId) {
+        const index = selectedExtraDips.indexOf(dipId);
+        if (index > -1) {
+            selectedExtraDips.splice(index, 1);
+            event.target.classList.remove('selected');
+        } else {
+            selectedExtraDips.push(dipId);
+            event.target.classList.add('selected');
+        }
+    };
+
+    function populateOrderSummary() {
+        if (!selectedWingVariant) return;
+
+        const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
+        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
+
+        const container = document.getElementById('orderSummary');
+        container.innerHTML =
+            '<div style="text-align: left; font-size: 16px; line-height: 1.6;">' +
+                '<h4 style="margin-bottom: 16px; color: #1a1a1a;">' + selectedWingVariant.count + ' ' + currentWingType + ' Wings</h4>' +
+                '<p style="margin-bottom: 8px; color: #666;">Base Price: $' + selectedWingVariant.platformPrice.toFixed(2) + '</p>' +
+                '<p style="margin-bottom: 8px; color: #666;">Sauces: ' + selectedSauces.length + ' included</p>' +
+                '<p style="margin-bottom: 8px; color: #666;">Style: ' + selectedWingStyle.replace('-', ' ') + (wingStyleUpcharge > 0 ? ' (+$' + wingStyleUpcharge.toFixed(2) + ')' : '') + '</p>' +
+                (selectedExtraDips.length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + selectedExtraDips.length + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
+                '<hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">' +
+                '<p style="font-size: 18px; font-weight: bold; color: #ff6b35;">Total: $' + totalPrice.toFixed(2) + '</p>' +
+            '</div>';
+    }
+
+    function updateModalButtons() {
+        const backBtn = document.getElementById('modalBackBtn');
+        const nextBtn = document.getElementById('modalNextBtn');
+        const addToCartBtn = document.getElementById('modalAddToCartBtn');
+
+        // Show/hide back button
+        backBtn.style.display = currentModalStep > 1 ? 'block' : 'none';
+
+        // Show/hide next vs add to cart button
+        if (currentModalStep === 5) {
+            nextBtn.style.display = 'none';
+            addToCartBtn.style.display = 'block';
+        } else {
+            nextBtn.style.display = 'block';
+            addToCartBtn.style.display = 'none';
+        }
+    }
+
+    window.addWingOrderToCart = function() {
+        if (!selectedWingVariant) {
+            alert('Please complete your wing selection');
+            return;
+        }
+
+        // Calculate final price
+        const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
+        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
+
+        // For now, just show success message - in production this would integrate with platform cart
+        alert('Added ' + selectedWingVariant.count + ' ' + currentWingType + ' wings to your cart! Total: $' + totalPrice.toFixed(2));
+
+        closeWingModal();
+    };
   `;
 }
 
@@ -2630,25 +2922,24 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
                 modal = document.createElement('div');
                 modal.id = 'beverage-modal';
                 modal.className = 'modal-overlay';
-                modal.innerHTML = \`
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2 id="beverage-modal-title" class="modal-title"></h2>
-                            <button class="close-modal" onclick="closeBeverageModal()">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <div id="beverage-modal-image" class="modal-image-wrapper"></div>
-                            <p id="beverage-modal-description" class="modal-description"></p>
-                            <div id="beverage-options" class="beverage-options"></div>
-                            <div class="quantity-controls">
-                                <button class="quantity-btn" onclick="decreaseBeverageQuantity()">−</button>
-                                <input type="number" id="beverage-quantity" class="quantity-input" value="1" min="1">
-                                <button class="quantity-btn" onclick="increaseBeverageQuantity()">+</button>
-                            </div>
-                            <button id="add-beverage-btn" class="add-to-bag" onclick="addBeverageToCart()">Add to bag</button>
-                        </div>
-                    </div>
-                \`;
+                modal.innerHTML =
+                    '<div class="modal-content">' +
+                        '<div class="modal-header">' +
+                            '<h2 id="beverage-modal-title" class="modal-title"></h2>' +
+                            '<button class="close-modal" onclick="closeBeverageModal()">&times;</button>' +
+                        '</div>' +
+                        '<div class="modal-body">' +
+                            '<div id="beverage-modal-image" class="modal-image-wrapper"></div>' +
+                            '<p id="beverage-modal-description" class="modal-description"></p>' +
+                            '<div id="beverage-options" class="beverage-options"></div>' +
+                            '<div class="quantity-controls">' +
+                                '<button class="quantity-btn" onclick="decreaseBeverageQuantity()">−</button>' +
+                                '<input type="number" id="beverage-quantity" class="quantity-input" value="1" min="1">' +
+                                '<button class="quantity-btn" onclick="increaseBeverageQuantity()">+</button>' +
+                            '</div>' +
+                            '<button id="add-beverage-btn" class="add-to-bag" onclick="addBeverageToCart()">Add to bag</button>' +
+                        '</div>' +
+                    '</div>';
                 document.body.appendChild(modal);
             }
 
@@ -2658,18 +2949,18 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
 
             // Add image
             const imageWrapper = document.getElementById('beverage-modal-image');
-            imageWrapper.innerHTML = \`<img src="\${beverageData.imageUrl}" alt="\${beverageData.name}" style="width: 100%; max-width: 200px; height: auto; border-radius: 12px;">\`;
+            imageWrapper.innerHTML = '<img src="' + beverageData.imageUrl + '" alt="' + beverageData.name + '" style="width: 100%; max-width: 200px; height: auto; border-radius: 12px;">';
 
             // Handle options (fountain drinks, tea sizes, etc.)
             const optionsDiv = document.getElementById('beverage-options');
             if (beverageData.details && beverageData.details.length > 0) {
                 optionsDiv.innerHTML = '<h4>Available Options:</h4>' +
-                    beverageData.details.map(option => \`
-                        <div class="option-item" onclick="selectBeverageOption('\${option.name}', \${option.price})">
-                            <span class="option-name">\${option.name}</span>
-                            <span class="option-price">$\${option.price.toFixed(2)}</span>
-                        </div>
-                    \`).join('');
+                    beverageData.details.map(option =>
+                        '<div class="option-item" onclick="selectBeverageOption(\\'' + option.name + '\\', ' + option.price + ')">' +
+                            '<span class="option-name">' + option.name + '</span>' +
+                            '<span class="option-price">$' + option.price.toFixed(2) + '</span>' +
+                        '</div>'
+                    ).join('');
 
                 // Select first option by default
                 selectBeverageOption(beverageData.details[0].name, beverageData.details[0].price);
@@ -2721,7 +3012,7 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
             if (!window.currentBeverageSelection) return;
             const quantity = parseInt(document.getElementById('beverage-quantity').value);
             const total = (window.currentBeverageSelection.price * quantity).toFixed(2);
-            document.getElementById('add-beverage-btn').textContent = \`Add to bag: $\${total}\`;
+            document.getElementById('add-beverage-btn').textContent = 'Add to bag: $' + total;
         }
 
         function addBeverageToCart() {
@@ -2737,7 +3028,7 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
             });
 
             // Show success message
-            alert(\`Added \${quantity}x \${window.currentBeverageSelection.name} to your order!\`);
+            alert('Added ' + quantity + 'x ' + window.currentBeverageSelection.name + ' to your order!');
 
             closeBeverageModal();
         }
@@ -2749,6 +3040,331 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
                 closeBeverageModal();
             }
         });
+
+        // Wing Modal System Variables
+        let currentModalStep = 1;
+        let selectedWingVariant = null;
+        let selectedSauces = [];
+        let selectedWingStyle = 'regular';
+        let selectedExtraDips = [];
+        let modalWingsData = [];
+        let currentWingType = '';
+
+        // Wing Modal Functions
+        window.openWingModal = function(wingType) {
+            console.log('Opening wing modal:', wingType); // Debug log
+            currentWingType = wingType;
+
+            // Create sample wing data for the selected type
+            if (wingType === 'boneless') {
+                modalWingsData = [
+                    { id: 'wings_6_boneless', name: '6 Wings (Boneless)', count: 6, platformPrice: 9.44, includedSauces: 1 },
+                    { id: 'wings_12_boneless', name: '12 Wings (Boneless)', count: 12, platformPrice: 16.19, includedSauces: 2 },
+                    { id: 'wings_24_boneless', name: '24 Wings (Boneless)', count: 24, platformPrice: 28.34, includedSauces: 4 },
+                    { id: 'wings_30_boneless', name: '30 Wings (Boneless)', count: 30, platformPrice: 35.09, includedSauces: 5 }
+                ];
+            } else {
+                modalWingsData = [
+                    { id: 'wings_6_bonein', name: '6 Wings (Bone-In)', count: 6, platformPrice: 12.14, includedSauces: 1 },
+                    { id: 'wings_12_bonein', name: '12 Wings (Bone-In)', count: 12, platformPrice: 20.24, includedSauces: 2 },
+                    { id: 'wings_24_bonein', name: '24 Wings (Bone-In)', count: 24, platformPrice: 35.09, includedSauces: 4 },
+                    { id: 'wings_30_bonein', name: '30 Wings (Bone-In)', count: 30, platformPrice: 44.54, includedSauces: 5 }
+                ];
+            }
+
+            console.log('Using wing data:', modalWingsData); // Debug log
+            currentModalStep = 1;
+            selectedWingVariant = null;
+            selectedSauces = [];
+            selectedWingStyle = 'regular';
+            selectedExtraDips = [];
+
+            const modal = document.getElementById('wingModal');
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+
+            // Reset progress indicators
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index === 0) step.classList.add('active');
+            });
+
+            // Reset modal steps
+            document.querySelectorAll('.modal-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById('modalStep1').classList.add('active');
+
+            // Initialize step 1 - Wing variants
+            populateWingVariants();
+            updateModalButtons();
+
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeWingModal = function() {
+            const modal = document.getElementById('wingModal');
+            modal.classList.remove('active');
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 300);
+        };
+
+        window.navigateModalStep = function(direction) {
+            if (direction === 1) {
+                // Moving forward
+                if (currentModalStep === 1 && !selectedWingVariant) {
+                    alert('Please select a wing size first');
+                    return;
+                }
+                if (currentModalStep === 2 && selectedSauces.length === 0) {
+                    alert('Please select at least one sauce');
+                    return;
+                }
+            }
+
+            // Update step
+            currentModalStep += direction;
+
+            if (currentModalStep < 1) currentModalStep = 1;
+            if (currentModalStep > 5) currentModalStep = 5;
+
+            // Update progress indicators
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < currentModalStep - 1) {
+                    step.classList.add('completed');
+                } else if (index === currentModalStep - 1) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Show current step
+            document.querySelectorAll('.modal-step').forEach((step, index) => {
+                step.classList.remove('active');
+                if (index === currentModalStep - 1) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Initialize step content
+            if (currentModalStep === 2) populateSauceSelection();
+            if (currentModalStep === 3) populateWingStyleOptions();
+            if (currentModalStep === 4) populateExtraDips();
+            if (currentModalStep === 5) populateOrderSummary();
+
+            updateModalButtons();
+        };
+
+        function populateWingVariants() {
+            console.log('Populating wing variants with data:', modalWingsData); // Debug log
+            const container = document.getElementById('wingVariants');
+            if (!container) {
+                console.error('wingVariants container not found!');
+                return;
+            }
+
+            if (!modalWingsData || !Array.isArray(modalWingsData)) {
+                console.error('Invalid modalWingsData:', modalWingsData);
+                container.innerHTML = '<p>Error loading wing options. Please refresh and try again.</p>';
+                return;
+            }
+
+            container.innerHTML = modalWingsData.map(variant =>
+                '<div class="wing-variant-option" onclick="selectWingVariant(\\'' + variant.id + '\\')\">' +
+                    '<div class="wing-variant-info">' +
+                        '<div class="wing-variant-details">' +
+                            '<h4>' + variant.count + ' ' + currentWingType + ' Wings</h4>' +
+                            '<p>' + (variant.includedSauces || Math.floor(variant.count / 6)) + ' sauce' + ((variant.includedSauces || Math.floor(variant.count / 6)) > 1 ? 's' : '') + ' included</p>' +
+                        '</div>' +
+                        '<div class="wing-variant-price">$' + variant.platformPrice.toFixed(2) + '</div>' +
+                    '</div>' +
+                '</div>'
+            ).join('');
+            console.log('Wing variants populated, HTML length:', container.innerHTML.length); // Debug log
+        }
+
+        window.selectWingVariant = function(variantId) {
+            selectedWingVariant = modalWingsData.find(v => v.id === variantId);
+
+            // Update UI
+            document.querySelectorAll('.wing-variant-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.closest('.wing-variant-option').classList.add('selected');
+        };
+
+        function populateSauceSelection() {
+            // For now, create sample sauce data - in production this would come from Firestore
+            const sampleSauces = [
+                { id: 'buffalo', name: 'Classic Buffalo', category: 'signature', heatLevel: 2 },
+                { id: 'bbq', name: 'Sweet BBQ', category: 'signature', heatLevel: 1 },
+                { id: 'honey_mustard', name: 'Honey Mustard', category: 'signature', heatLevel: 1 },
+                { id: 'ranch', name: 'Ranch', category: 'dipping', heatLevel: 0 },
+                { id: 'blue_cheese', name: 'Blue Cheese', category: 'dipping', heatLevel: 0 },
+                { id: 'cajun_dry', name: 'Cajun Dry Rub', category: 'dry-rub', heatLevel: 3 }
+            ];
+
+            const maxSauces = selectedWingVariant ? (selectedWingVariant.includedSauces || Math.floor(selectedWingVariant.count / 6)) : 1;
+
+            const container = document.getElementById('sauceSelection');
+            container.innerHTML =
+                '<div class="sauce-limit-info">Select up to ' + maxSauces + ' sauce' + (maxSauces > 1 ? 's' : '') + ' (included with your wings)</div>' +
+                sampleSauces.map(sauce =>
+                    '<div class="sauce-option" onclick="toggleSauce(\\'' + sauce.id + '\\')\">' +
+                        '<h5>' + sauce.name + '</h5>' +
+                        '<p>Heat: ' + '🔥'.repeat(sauce.heatLevel || 1) + '</p>' +
+                    '</div>'
+                ).join('');
+        }
+
+        window.toggleSauce = function(sauceId) {
+            const maxSauces = selectedWingVariant ? (selectedWingVariant.includedSauces || Math.floor(selectedWingVariant.count / 6)) : 1;
+
+            const index = selectedSauces.indexOf(sauceId);
+            if (index > -1) {
+                // Remove sauce
+                selectedSauces.splice(index, 1);
+                event.target.closest('.sauce-option').classList.remove('selected');
+            } else {
+                // Add sauce if under limit
+                if (selectedSauces.length < maxSauces) {
+                    selectedSauces.push(sauceId);
+                    event.target.closest('.sauce-option').classList.add('selected');
+                } else {
+                    alert('You can only select up to ' + maxSauces + ' sauce' + (maxSauces > 1 ? 's' : ''));
+                }
+            }
+        };
+
+        function populateWingStyleOptions() {
+            const container = document.getElementById('wingStyleOptions');
+            container.innerHTML = \`
+                <div class="wing-variant-option \${selectedWingStyle === 'regular' ? 'selected' : ''}" onclick="selectWingStyle('regular')">
+                    <div class="wing-variant-info">
+                        <div class="wing-variant-details">
+                            <h4>Regular Mix</h4>
+                            <p>Mix of drums and flats (no extra charge)</p>
+                        </div>
+                        <div class="wing-variant-price">$0.00</div>
+                    </div>
+                </div>
+                <div class="wing-variant-option \${selectedWingStyle === 'all-drums' ? 'selected' : ''}" onclick="selectWingStyle('all-drums')">
+                    <div class="wing-variant-info">
+                        <div class="wing-variant-details">
+                            <h4>All Drums</h4>
+                            <p>All drumstick pieces</p>
+                        </div>
+                        <div class="wing-variant-price">+$1.50</div>
+                    </div>
+                </div>
+                <div class="wing-variant-option \${selectedWingStyle === 'all-flats' ? 'selected' : ''}" onclick="selectWingStyle('all-flats')">
+                    <div class="wing-variant-info">
+                        <div class="wing-variant-details">
+                            <h4>All Flats</h4>
+                            <p>All wing flat pieces</p>
+                        </div>
+                        <div class="wing-variant-price">+$1.50</div>
+                    </div>
+                </div>
+            \`;
+        }
+
+        window.selectWingStyle = function(style) {
+            selectedWingStyle = style;
+
+            // Update UI
+            document.querySelectorAll('#wingStyleOptions .wing-variant-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.closest('.wing-variant-option').classList.add('selected');
+        };
+
+        function populateExtraDips() {
+            const extraDips = [
+                { id: 'extra_ranch', name: 'Extra Ranch', price: 0.75 },
+                { id: 'extra_blue_cheese', name: 'Extra Blue Cheese', price: 0.75 },
+                { id: 'extra_buffalo', name: 'Extra Buffalo Sauce', price: 0.75 },
+                { id: 'extra_bbq', name: 'Extra BBQ Sauce', price: 0.75 }
+            ];
+
+            const container = document.getElementById('extraDips');
+            container.innerHTML = extraDips.map(dip => \`
+                <div class="sauce-option \${selectedExtraDips.includes(dip.id) ? 'selected' : ''}" onclick="toggleExtraDip('\${dip.id}')">
+                    <h5>\${dip.name}</h5>
+                    <p>+$\${dip.price.toFixed(2)}</p>
+                </div>
+            \`).join('');
+        }
+
+        window.toggleExtraDip = function(dipId) {
+            const index = selectedExtraDips.indexOf(dipId);
+            if (index > -1) {
+                selectedExtraDips.splice(index, 1);
+                event.target.classList.remove('selected');
+            } else {
+                selectedExtraDips.push(dipId);
+                event.target.classList.add('selected');
+            }
+        };
+
+        function populateOrderSummary() {
+            if (!selectedWingVariant) return;
+
+            const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
+            const extraDipsTotal = selectedExtraDips.length * 0.75;
+            const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
+
+            const container = document.getElementById('orderSummary');
+            container.innerHTML =
+                '<div style="text-align: left; font-size: 16px; line-height: 1.6;">' +
+                    '<h4 style="margin-bottom: 16px; color: #1a1a1a;">' + selectedWingVariant.count + ' ' + currentWingType + ' Wings</h4>' +
+                    '<p style="margin-bottom: 8px; color: #666;">Base Price: $' + selectedWingVariant.platformPrice.toFixed(2) + '</p>' +
+                    '<p style="margin-bottom: 8px; color: #666;">Sauces: ' + selectedSauces.length + ' included</p>' +
+                    '<p style="margin-bottom: 8px; color: #666;">Style: ' + selectedWingStyle.replace('-', ' ') + (wingStyleUpcharge > 0 ? ' (+$' + wingStyleUpcharge.toFixed(2) + ')' : '') + '</p>' +
+                    (selectedExtraDips.length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + selectedExtraDips.length + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
+                    '<hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">' +
+                    '<p style="font-size: 18px; font-weight: bold; color: #ff6b35;">Total: $' + totalPrice.toFixed(2) + '</p>' +
+                '</div>';
+        }
+
+        function updateModalButtons() {
+            const backBtn = document.getElementById('modalBackBtn');
+            const nextBtn = document.getElementById('modalNextBtn');
+            const addToCartBtn = document.getElementById('modalAddToCartBtn');
+
+            // Show/hide back button
+            backBtn.style.display = currentModalStep > 1 ? 'block' : 'none';
+
+            // Show/hide next vs add to cart button
+            if (currentModalStep === 5) {
+                nextBtn.style.display = 'none';
+                addToCartBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                addToCartBtn.style.display = 'none';
+            }
+        }
+
+        window.addWingOrderToCart = function() {
+            if (!selectedWingVariant) {
+                alert('Please complete your wing selection');
+                return;
+            }
+
+            // Calculate final price
+            const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
+            const extraDipsTotal = selectedExtraDips.length * 0.75;
+            const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
+
+            // For now, just show success message - in production this would integrate with platform cart
+            alert('Added ' + selectedWingVariant.count + ' ' + currentWingType + ' wings to your cart! Total: $' + totalPrice.toFixed(2));
+
+            closeWingModal();
+        };
     </script>
 </body>
 </html>`;
@@ -2996,7 +3612,7 @@ function generateGrubHubHTML(menuData, settings) {
             if (!currentItem) return;
             const quantity = parseInt(document.getElementById('modal-quantity').value);
             const total = (currentItem.platformPrice * quantity).toFixed(2);
-            document.getElementById('add-to-bag-btn').textContent = \`Add to bag : $\${total}\`;
+            document.getElementById('add-to-bag-btn').textContent = 'Add to bag : $' + total;
         }
 
         function addToCart() {
@@ -3015,7 +3631,7 @@ function generateGrubHubHTML(menuData, settings) {
             const count = cart.reduce((sum, item) => sum + item.quantity, 0);
             const cartBtn = document.querySelector('.cart-btn');
             if (cartBtn) {
-                cartBtn.textContent = \`Your Bag (\${count})\`;
+                cartBtn.textContent = 'Your Bag (' + count + ')';
             }
         }
 
@@ -3789,40 +4405,90 @@ function generateWingsSection(wings, branding) {
     </div>
 
     <div class="wings-categories-grid">
-        <div class="wing-category-card">
+        <div class="wing-category-card enhanced" data-wing-type="boneless">
             <div class="wing-category-image-wrapper">
                 <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmenu%2Fphilly-classic-hot.jpg?alt=media"
                      alt="Boneless Wings"
                      class="wing-category-image"
                      loading="lazy">
                 <div class="wing-category-badge">ALL WHITE MEAT</div>
+                <div class="value-badge">💰 22% CHEAPER</div>
             </div>
             <div class="wing-category-details">
-                <h3 class="wing-category-name">Boneless</h3>
+                <h3 class="wing-category-name">Boneless Wings</h3>
                 <p class="wing-category-description">All White Chicken, Juicy and Lightly Breaded</p>
                 <div class="wing-category-pricing">
                     <div class="price-main">Starting at $${minBonelessPrice}</div>
-                    <div class="price-label">Choose Size & Sauce</div>
+                    <div class="price-comparison">22% cheaper than bone-in</div>
                 </div>
-                <button class="order-wing-category-btn">VIEW OPTIONS →</button>
+                <button class="order-wing-category-btn interactive" onclick="openWingModal('boneless')">
+                    VIEW OPTIONS →
+                </button>
             </div>
         </div>
-        <div class="wing-category-card">
+        <div class="wing-category-card enhanced" data-wing-type="bone-in">
             <div class="wing-category-image-wrapper">
                 <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbroad-pattison-burn_800x800.webp?alt=media"
                      alt="Classic Bone-In Wings"
                      class="wing-category-image"
                      loading="lazy">
                 <div class="wing-category-badge">AUTHENTIC</div>
+                <div class="tradition-badge">🔥 ORIGINAL</div>
             </div>
             <div class="wing-category-details">
                 <h3 class="wing-category-name">Classic (Bone-In)</h3>
                 <p class="wing-category-description">The Real Buffalo Wings, Real Food (not from Buffalo!)</p>
                 <div class="wing-category-pricing">
                     <div class="price-main">Starting at $${minBoneInPrice}</div>
-                    <div class="price-label">Choose Size & Sauce</div>
+                    <div class="price-comparison">Traditional Buffalo experience</div>
                 </div>
-                <button class="order-wing-category-btn">VIEW OPTIONS →</button>
+                <button class="order-wing-category-btn interactive" onclick="openWingModal('bone-in')">
+                    VIEW OPTIONS →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wing Ordering Modal -->
+    <div id="wingModal" class="wing-modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeWingModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeWingModal()">&times;</button>
+                <div class="modal-progress">
+                    <div class="progress-step active" data-step="1">1</div>
+                    <div class="progress-step" data-step="2">2</div>
+                    <div class="progress-step" data-step="3">3</div>
+                    <div class="progress-step" data-step="4">4</div>
+                    <div class="progress-step" data-step="5">5</div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="modalStep1" class="modal-step active">
+                    <h3>Choose Your Wing Size</h3>
+                    <div id="wingVariants" class="wing-variants-grid"></div>
+                </div>
+                <div id="modalStep2" class="modal-step">
+                    <h3>Select Your Sauces</h3>
+                    <div id="sauceSelection" class="sauce-selection-grid"></div>
+                </div>
+                <div id="modalStep3" class="modal-step">
+                    <h3>Wing Style Preference</h3>
+                    <div id="wingStyleOptions" class="wing-style-options"></div>
+                </div>
+                <div id="modalStep4" class="modal-step">
+                    <h3>Extra Dips (Optional)</h3>
+                    <div id="extraDips" class="extra-dips-grid"></div>
+                </div>
+                <div id="modalStep5" class="modal-step">
+                    <h3>Order Summary</h3>
+                    <div id="orderSummary" class="order-summary"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modalBackBtn" onclick="navigateModalStep(-1)" style="display: none;">← Back</button>
+                <button id="modalNextBtn" onclick="navigateModalStep(1)">Next →</button>
+                <button id="modalAddToCartBtn" onclick="addWingOrderToCart()" style="display: none;">Add to Cart</button>
             </div>
         </div>
     </div>
@@ -4411,6 +5077,391 @@ function generateDoorDashCSS(branding) {
     }
     .order-wing-category-btn:hover {
         background: #e55a2b;
+    }
+
+    /* Enhanced Wing Card Styles */
+    .wing-category-card.enhanced .wing-category-image-wrapper {
+        position: relative;
+    }
+
+    .value-badge, .tradition-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: #28a745;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        z-index: 2;
+    }
+
+    .tradition-badge {
+        background: #dc3545;
+    }
+
+    .price-comparison {
+        font-size: 12px;
+        color: #28a745;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .order-wing-category-btn.interactive {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        transform: translateY(0);
+        transition: all 0.3s ease;
+    }
+
+    .order-wing-category-btn.interactive:hover {
+        background: linear-gradient(135deg, #e55a2b 0%, #e8851d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    }
+
+    /* Wing Modal Styles */
+    .wing-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .wing-modal.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        position: relative;
+        background: white;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+
+    .wing-modal.active .modal-content {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .modal-close:hover {
+        background: #f5f5f5;
+        color: #333;
+    }
+
+    .modal-progress {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .progress-step {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .progress-step.active {
+        background: #ff6b35;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .progress-step.completed {
+        background: #28a745;
+        color: white;
+    }
+
+    .modal-body {
+        padding: 24px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .modal-step {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-step.active {
+        display: block;
+    }
+
+    .modal-step h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .wing-variants-grid {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .wing-variant-option {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .wing-variant-option:hover {
+        border-color: #ff6b35;
+        background: #fff5f2;
+    }
+
+    .wing-variant-option.selected {
+        border-color: #ff6b35;
+        background: #fff5f2;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    .wing-variant-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .wing-variant-details h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+    }
+
+    .wing-variant-details p {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .wing-variant-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ff6b35;
+    }
+
+    .sauce-selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .sauce-option {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .sauce-option:hover {
+        border-color: #ff6b35;
+        background: #fff5f2;
+    }
+
+    .sauce-option.selected {
+        border-color: #ff6b35;
+        background: #fff5f2;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    .sauce-option.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f8f9fa;
+    }
+
+    .sauce-option img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .sauce-option h5 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+    }
+
+    .sauce-option p {
+        font-size: 12px;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .sauce-limit-info {
+        background: #e7f3ff;
+        border: 1px solid #b8daff;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        color: #0056b3;
+        text-align: center;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        background: #fafafa;
+    }
+
+    .modal-footer button {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    #modalBackBtn {
+        background: #6c757d;
+        color: white;
+    }
+
+    #modalBackBtn:hover {
+        background: #545b62;
+    }
+
+    #modalNextBtn {
+        background: #ff6b35;
+        color: white;
+    }
+
+    #modalNextBtn:hover {
+        background: #e55a2b;
+    }
+
+    #modalAddToCartBtn {
+        background: #28a745;
+        color: white;
+        flex: 1;
+        font-size: 16px;
+        padding: 14px 24px;
+    }
+
+    #modalAddToCartBtn:hover {
+        background: #218838;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile Responsive Modal */
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 95%;
+            max-height: 95vh;
+            margin: 0 8px;
+        }
+
+        .modal-header {
+            padding: 16px 20px 12px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .wing-variants-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sauce-selection-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+        }
+
+        .modal-progress {
+            gap: 8px;
+        }
+
+        .progress-step {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+        }
     }
 
     .wing-card {
@@ -5545,5 +6596,297 @@ function generateDoorDashJS() {
             }, 150);
         });
     });
+
+    // Wing Modal System Variables
+    let currentModalStep = 1;
+    let selectedWingVariant = null;
+    let selectedSauces = [];
+    let selectedWingStyle = 'regular';
+    let selectedExtraDips = [];
+    let modalWingsData = [];
+    let currentWingType = '';
+
+    // Wing Modal Functions
+    window.openWingModal = function(wingType, wingsData) {
+        currentWingType = wingType;
+        modalWingsData = wingsData;
+        currentModalStep = 1;
+        selectedWingVariant = null;
+        selectedSauces = [];
+        selectedWingStyle = 'regular';
+        selectedExtraDips = [];
+
+        const modal = document.getElementById('wingModal');
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+
+        // Reset progress indicators
+        document.querySelectorAll('.progress-step').forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+            if (index === 0) step.classList.add('active');
+        });
+
+        // Reset modal steps
+        document.querySelectorAll('.modal-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        document.getElementById('modalStep1').classList.add('active');
+
+        // Initialize step 1 - Wing variants
+        populateWingVariants();
+        updateModalButtons();
+
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeWingModal = function() {
+        const modal = document.getElementById('wingModal');
+        modal.classList.remove('active');
+
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+    };
+
+    window.navigateModalStep = function(direction) {
+        if (direction === 1) {
+            // Moving forward
+            if (currentModalStep === 1 && !selectedWingVariant) {
+                alert('Please select a wing size first');
+                return;
+            }
+            if (currentModalStep === 2 && selectedSauces.length === 0) {
+                alert('Please select at least one sauce');
+                return;
+            }
+        }
+
+        // Update step
+        currentModalStep += direction;
+
+        if (currentModalStep < 1) currentModalStep = 1;
+        if (currentModalStep > 5) currentModalStep = 5;
+
+        // Update progress indicators
+        document.querySelectorAll('.progress-step').forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+            if (index < currentModalStep - 1) {
+                step.classList.add('completed');
+            } else if (index === currentModalStep - 1) {
+                step.classList.add('active');
+            }
+        });
+
+        // Show current step
+        document.querySelectorAll('.modal-step').forEach((step, index) => {
+            step.classList.remove('active');
+            if (index === currentModalStep - 1) {
+                step.classList.add('active');
+            }
+        });
+
+        // Initialize step content
+        if (currentModalStep === 2) populateSauceSelection();
+        if (currentModalStep === 3) populateWingStyleOptions();
+        if (currentModalStep === 4) populateExtraDips();
+        if (currentModalStep === 5) populateOrderSummary();
+
+        updateModalButtons();
+    };
+
+    function populateWingVariants() {
+        const container = document.getElementById('wingVariants');
+        container.innerHTML = modalWingsData.map(variant => {
+            return '<div class="wing-variant-option" onclick="selectWingVariant(\\'' + variant.id + '\\')\">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>' + variant.count + ' ' + currentWingType + ' Wings</h4>' +
+                        '<p>' + (variant.includedSauces || Math.floor(variant.count / 6)) + ' sauce' + ((variant.includedSauces || Math.floor(variant.count / 6)) > 1 ? 's' : '') + ' included</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">$' + variant.platformPrice.toFixed(2) + '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    window.selectWingVariant = function(variantId) {
+        selectedWingVariant = modalWingsData.find(v => v.id === variantId);
+
+        // Update UI
+        document.querySelectorAll('.wing-variant-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        event.target.closest('.wing-variant-option').classList.add('selected');
+    };
+
+    function populateSauceSelection() {
+        // For now, create sample sauce data - in production this would come from Firestore
+        const sampleSauces = [
+            { id: 'buffalo', name: 'Classic Buffalo', category: 'signature', heatLevel: 2 },
+            { id: 'bbq', name: 'Sweet BBQ', category: 'signature', heatLevel: 1 },
+            { id: 'honey_mustard', name: 'Honey Mustard', category: 'signature', heatLevel: 1 },
+            { id: 'ranch', name: 'Ranch', category: 'dipping', heatLevel: 0 },
+            { id: 'blue_cheese', name: 'Blue Cheese', category: 'dipping', heatLevel: 0 },
+            { id: 'cajun_dry', name: 'Cajun Dry Rub', category: 'dry-rub', heatLevel: 3 }
+        ];
+
+        const maxSauces = selectedWingVariant ? (selectedWingVariant.includedSauces || Math.floor(selectedWingVariant.count / 6)) : 1;
+
+        const container = document.getElementById('sauceSelection');
+        container.innerHTML =
+            '<div class="sauce-limit-info">Select up to ' + maxSauces + ' sauce' + (maxSauces > 1 ? 's' : '') + ' (included with your wings)</div>' +
+            sampleSauces.map(sauce => {
+                return '<div class="sauce-option" onclick="toggleSauce(\\'' + sauce.id + '\\')\">' +
+                    '<h5>' + sauce.name + '</h5>' +
+                    '<p>Heat: ' + '🔥'.repeat(sauce.heatLevel || 1) + '</p>' +
+                '</div>';
+            }).join('');
+    }
+
+    window.toggleSauce = function(sauceId) {
+        const maxSauces = selectedWingVariant ? (selectedWingVariant.includedSauces || Math.floor(selectedWingVariant.count / 6)) : 1;
+
+        const index = selectedSauces.indexOf(sauceId);
+        if (index > -1) {
+            // Remove sauce
+            selectedSauces.splice(index, 1);
+            event.target.closest('.sauce-option').classList.remove('selected');
+        } else {
+            // Add sauce if under limit
+            if (selectedSauces.length < maxSauces) {
+                selectedSauces.push(sauceId);
+                event.target.closest('.sauce-option').classList.add('selected');
+            } else {
+                alert('You can only select up to ' + maxSauces + ' sauce' + (maxSauces > 1 ? 's' : ''));
+            }
+        }
+    };
+
+    function populateWingStyleOptions() {
+        const container = document.getElementById('wingStyleOptions');
+        container.innerHTML =
+            '<div class="wing-variant-option ' + (selectedWingStyle === 'regular' ? 'selected' : '') + '" onclick="selectWingStyle(\\'regular\\')">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>Regular Mix</h4>' +
+                        '<p>Mix of drums and flats (no extra charge)</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">$0.00</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="wing-variant-option ' + (selectedWingStyle === 'all-drums' ? 'selected' : '') + '" onclick="selectWingStyle(\\'all-drums\\')">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>All Drums</h4>' +
+                        '<p>All drumstick pieces</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">+$1.50</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="wing-variant-option ' + (selectedWingStyle === 'all-flats' ? 'selected' : '') + '" onclick="selectWingStyle(\\'all-flats\\')">' +
+                '<div class="wing-variant-info">' +
+                    '<div class="wing-variant-details">' +
+                        '<h4>All Flats</h4>' +
+                        '<p>All wing flat pieces</p>' +
+                    '</div>' +
+                    '<div class="wing-variant-price">+$1.50</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    window.selectWingStyle = function(style) {
+        selectedWingStyle = style;
+
+        // Update UI
+        document.querySelectorAll('#wingStyleOptions .wing-variant-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        event.target.closest('.wing-variant-option').classList.add('selected');
+    };
+
+    function populateExtraDips() {
+        const extraDips = [
+            { id: 'extra_ranch', name: 'Extra Ranch', price: 0.75 },
+            { id: 'extra_blue_cheese', name: 'Extra Blue Cheese', price: 0.75 },
+            { id: 'extra_buffalo', name: 'Extra Buffalo Sauce', price: 0.75 },
+            { id: 'extra_bbq', name: 'Extra BBQ Sauce', price: 0.75 }
+        ];
+
+        const container = document.getElementById('extraDips');
+        container.innerHTML = extraDips.map(dip => {
+            return '<div class="sauce-option ' + (selectedExtraDips.includes(dip.id) ? 'selected' : '') + '" onclick="toggleExtraDip(\\'' + dip.id + '\\')\">' +
+                '<h5>' + dip.name + '</h5>' +
+                '<p>+$' + dip.price.toFixed(2) + '</p>' +
+            '</div>';
+        }).join('');
+    }
+
+    window.toggleExtraDip = function(dipId) {
+        const index = selectedExtraDips.indexOf(dipId);
+        if (index > -1) {
+            selectedExtraDips.splice(index, 1);
+            event.target.classList.remove('selected');
+        } else {
+            selectedExtraDips.push(dipId);
+            event.target.classList.add('selected');
+        }
+    };
+
+    function populateOrderSummary() {
+        if (!selectedWingVariant) return;
+
+        const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
+        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
+
+        const container = document.getElementById('orderSummary');
+        container.innerHTML =
+            '<div style="text-align: left; font-size: 16px; line-height: 1.6;">' +
+                '<h4 style="margin-bottom: 16px; color: #1a1a1a;">' + selectedWingVariant.count + ' ' + currentWingType + ' Wings</h4>' +
+                '<p style="margin-bottom: 8px; color: #666;">Base Price: $' + selectedWingVariant.platformPrice.toFixed(2) + '</p>' +
+                '<p style="margin-bottom: 8px; color: #666;">Sauces: ' + selectedSauces.length + ' included</p>' +
+                '<p style="margin-bottom: 8px; color: #666;">Style: ' + selectedWingStyle.replace('-', ' ') + (wingStyleUpcharge > 0 ? ' (+$' + wingStyleUpcharge.toFixed(2) + ')' : '') + '</p>' +
+                (selectedExtraDips.length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + selectedExtraDips.length + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
+                '<hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">' +
+                '<p style="font-size: 18px; font-weight: bold; color: #ff6b35;">Total: $' + totalPrice.toFixed(2) + '</p>' +
+            '</div>';
+    }
+
+    function updateModalButtons() {
+        const backBtn = document.getElementById('modalBackBtn');
+        const nextBtn = document.getElementById('modalNextBtn');
+        const addToCartBtn = document.getElementById('modalAddToCartBtn');
+
+        // Show/hide back button
+        backBtn.style.display = currentModalStep > 1 ? 'block' : 'none';
+
+        // Show/hide next vs add to cart button
+        if (currentModalStep === 5) {
+            nextBtn.style.display = 'none';
+            addToCartBtn.style.display = 'block';
+        } else {
+            nextBtn.style.display = 'block';
+            addToCartBtn.style.display = 'none';
+        }
+    }
+
+    window.addWingOrderToCart = function() {
+        if (!selectedWingVariant) {
+            alert('Please complete your wing selection');
+            return;
+        }
+
+        // Calculate final price
+        const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
+        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
+
+        // For now, just show success message - in production this would integrate with platform cart
+        alert('Added ' + selectedWingVariant.count + ' ' + currentWingType + ' wings to your cart! Total: $' + totalPrice.toFixed(2));
+
+        closeWingModal();
+    };
   `;
 }
