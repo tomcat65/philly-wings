@@ -2632,7 +2632,9 @@ function generateGrubHubCSS(branding) {
         currentModalStep += direction;
 
         if (currentModalStep < 1) currentModalStep = 1;
-        if (currentModalStep > 5) currentModalStep = 5;
+        // Max steps: boneless = 5 steps, bone-in = 6 steps
+        const maxSteps = currentWingType === 'bone-in' ? 6 : 5;
+        if (currentModalStep > maxSteps) currentModalStep = maxSteps;
 
         // Update progress indicators
         document.querySelectorAll('.progress-step').forEach((step, index) => {
@@ -2652,11 +2654,35 @@ function generateGrubHubCSS(branding) {
             }
         });
 
-        // Initialize step content
-        if (currentModalStep === 2) populateSauceSelection();
-        if (currentModalStep === 3) populateWingStyleOptions();
-        if (currentModalStep === 4) populateExtraDips();
-        if (currentModalStep === 5) populateOrderSummary();
+        // Update step titles and visibility based on wing type
+        updateModalStepLayout();
+
+        // Initialize step content based on wing type and step
+        if (currentModalStep === 2) {
+            populateSauceSelection();
+        } else if (currentModalStep === 3) {
+            // Step 3: Included dips (for all wings)
+            populateIncludedDipSelection();
+        } else if (currentModalStep === 4) {
+            if (currentWingType === 'bone-in') {
+                // Step 4: Wing style (only for bone-in wings)
+                populateWingStyleOptions();
+            } else {
+                // Step 4: Extra dips for boneless wings
+                populateExtraDips();
+            }
+        } else if (currentModalStep === 5) {
+            if (currentWingType === 'bone-in') {
+                // Step 5: Extra dips for bone-in wings
+                populateExtraDips();
+            } else {
+                // Step 5: Order summary for boneless wings
+                populateOrderSummary();
+            }
+        } else if (currentModalStep === 6 && currentWingType === 'bone-in') {
+            // Step 6: Order summary for bone-in wings
+            populateOrderSummary();
+        }
 
         updateModalButtons();
     };
@@ -2674,6 +2700,32 @@ function generateGrubHubCSS(branding) {
                 '</div>' +
             '</div>';
         }).join('');
+    }
+
+    function updateModalStepLayout() {
+        // Update step titles and visibility based on wing type and current step
+        if (currentWingType === 'boneless') {
+            // Boneless wings: 5 steps total (no wing style)
+            // Step 3: Included Dips, Step 4: Extra Dips, Step 5: Order Summary
+            document.getElementById('step3Title').textContent = 'Choose Included Dips';
+            document.getElementById('step4Title').textContent = 'Extra Dips (Optional)';
+            document.getElementById('step5Title').textContent = 'Order Summary';
+
+            // Hide step 6 and its progress indicator for boneless
+            document.querySelector('[data-step="6"]').style.display = 'none';
+            document.getElementById('modalStep6').style.display = 'none';
+        } else {
+            // Bone-in wings: 6 steps total (includes wing style)
+            // Step 3: Included Dips, Step 4: Wing Style, Step 5: Extra Dips, Step 6: Order Summary
+            document.getElementById('step3Title').textContent = 'Choose Included Dips';
+            document.getElementById('step4Title').textContent = 'Wing Style Preference';
+            document.getElementById('step5Title').textContent = 'Extra Dips (Optional)';
+            document.getElementById('step6Title').textContent = 'Order Summary';
+
+            // Show step 6 and its progress indicator for bone-in
+            document.querySelector('[data-step="6"]').style.display = 'flex';
+            document.getElementById('modalStep6').style.display = 'block';
+        }
     }
 
     window.selectWingVariant = function(variantId) {
@@ -2730,7 +2782,7 @@ function generateGrubHubCSS(branding) {
     };
 
     function populateWingStyleOptions() {
-        const container = document.getElementById('wingStyleOptions');
+        const container = document.getElementById('step4Content');
         container.innerHTML =
             '<div class="wing-variant-option ' + (selectedWingStyle === 'regular' ? 'selected' : '') + '" onclick="selectWingStyle(\\'regular\\')">' +
                 '<div class="wing-variant-info">' +
@@ -2775,45 +2827,73 @@ function generateGrubHubCSS(branding) {
         const extraDips = [
             { id: 'extra_ranch', name: 'Extra Ranch', price: 0.75 },
             { id: 'extra_blue_cheese', name: 'Extra Blue Cheese', price: 0.75 },
-            { id: 'extra_buffalo', name: 'Extra Buffalo Sauce', price: 0.75 },
-            { id: 'extra_bbq', name: 'Extra BBQ Sauce', price: 0.75 }
+            { id: 'extra_honey_mustard', name: 'Extra Honey Mustard', price: 0.75 },
+            { id: 'extra_cheese_sauce', name: 'Extra Cheese Sauce', price: 0.75 }
         ];
 
-        const container = document.getElementById('extraDips');
-        container.innerHTML = extraDips.map(dip => {
-            return '<div class="sauce-option ' + (selectedExtraDips.includes(dip.id) ? 'selected' : '') + '" onclick="toggleExtraDip(\\'' + dip.id + '\\')\">' +
-                '<h5>' + dip.name + '</h5>' +
-                '<p>+$' + dip.price.toFixed(2) + '</p>' +
-            '</div>';
-        }).join('');
+        // Use the appropriate container based on wing type and step
+        const containerId = currentWingType === 'boneless' ? 'step4Content' : 'step5Content';
+        console.log('populateExtraDips called - containerId:', containerId, 'currentWingType:', currentWingType);
+        const container = document.getElementById(containerId);
+        console.log('Container found:', container);
+        if (!container) {
+            console.error('Container not found for containerId:', containerId);
+            return;
+        }
+        container.innerHTML =
+            '<div style="margin-bottom: 20px; font-size: 14px; color: #666; text-align: center;">' +
+                'Select as many dips as you would like - $0.75 each' +
+            '</div>' +
+            extraDips.map(dip => {
+                const quantity = selectedExtraDips[dip.id] || 0;
+                return '<div class="sauce-option" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 2px solid ' + (quantity > 0 ? '#ff6b35' : '#e0e0e0') + '; border-radius: 12px; margin-bottom: 12px; background: ' + (quantity > 0 ? '#fff5f2' : 'white') + ';">' +
+                    '<div style="flex: 1;">' +
+                        '<h5 style="margin: 0 0 4px 0; color: #1a1a1a; font-size: 16px;">' + dip.name + '</h5>' +
+                        '<p style="margin: 0; color: #666; font-size: 14px;">+$' + dip.price.toFixed(2) + ' each</p>' +
+                    '</div>' +
+                    '<div style="display: flex; align-items: center; gap: 12px;">' +
+                        '<button onclick="adjustExtraDipQuantity(\\'' + dip.id + '\\', -1)" style="width: 36px; height: 36px; border: 2px solid ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; background: white; color: ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: ' + (quantity === 0 ? 'not-allowed' : 'pointer') + '; opacity: ' + (quantity === 0 ? '0.3' : '1') + ';" ' + (quantity === 0 ? 'disabled' : '') + '>\\u2212</button>' +
+                        '<span style="min-width: 24px; text-align: center; font-size: 18px; font-weight: bold; color: #1a1a1a;">' + quantity + '</span>' +
+                        '<button onclick="adjustExtraDipQuantity(\\'' + dip.id + '\\', 1)" style="width: 36px; height: 36px; border: 2px solid #ff6b35; background: #ff6b35; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer;">+</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
     }
 
-    window.toggleExtraDip = function(dipId) {
-        const index = selectedExtraDips.indexOf(dipId);
-        if (index > -1) {
-            selectedExtraDips.splice(index, 1);
-            event.target.classList.remove('selected');
+    window.adjustExtraDipQuantity = function(dipId, change) {
+        const currentQuantity = selectedExtraDips[dipId] || 0;
+        const newQuantity = Math.max(0, currentQuantity + change);
+
+        if (newQuantity === 0) {
+            delete selectedExtraDips[dipId];
         } else {
-            selectedExtraDips.push(dipId);
-            event.target.classList.add('selected');
+            selectedExtraDips[dipId] = newQuantity;
         }
+
+        // Refresh the extra dips display
+        populateExtraDips();
     };
 
     function populateOrderSummary() {
         if (!selectedWingVariant) return;
 
         const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
-        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const extraDipsTotal = Object.values(selectedExtraDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
         const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
 
-        const container = document.getElementById('orderSummary');
+        // Get dipping sauces data for displaying included dips names
+        const dippingSauces = ${JSON.stringify(strategicMenu.dips || [])};
+
+        // Use the appropriate container based on wing type
+        const containerId = currentWingType === 'boneless' ? 'step5Content' : 'step6Content';
+        const container = document.getElementById(containerId);
         container.innerHTML =
             '<div style="text-align: left; font-size: 16px; line-height: 1.6;">' +
                 '<h4 style="margin-bottom: 16px; color: #1a1a1a;">' + selectedWingVariant.count + ' ' + currentWingType + ' Wings</h4>' +
                 '<p style="margin-bottom: 8px; color: #666;">Base Price: $' + selectedWingVariant.platformPrice.toFixed(2) + '</p>' +
                 '<p style="margin-bottom: 8px; color: #666;">Sauces: ' + selectedSauces.length + ' included</p>' +
                 '<p style="margin-bottom: 8px; color: #666;">Style: ' + selectedWingStyle.replace('-', ' ') + (wingStyleUpcharge > 0 ? ' (+$' + wingStyleUpcharge.toFixed(2) + ')' : '') + '</p>' +
-                (selectedExtraDips.length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + selectedExtraDips.length + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
+                (Object.keys(selectedExtraDips).length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + Object.values(selectedExtraDips).reduce((sum, qty) => sum + qty, 0) + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
                 '<hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">' +
                 '<p style="font-size: 18px; font-weight: bold; color: #ff6b35;">Total: $' + totalPrice.toFixed(2) + '</p>' +
             '</div>';
@@ -2845,7 +2925,7 @@ function generateGrubHubCSS(branding) {
 
         // Calculate final price
         const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
-        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const extraDipsTotal = Object.values(selectedExtraDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
         const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
 
         // For now, just show success message - in production this would integrate with platform cart
@@ -2958,7 +3038,7 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
                     beverageData.details.map(option =>
                         '<div class="option-item" onclick="selectBeverageOption(\\'' + option.name + '\\', ' + option.price + ')">' +
                             '<span class="option-name">' + option.name + '</span>' +
-                            '<span class="option-price">$' + option.price.toFixed(2) + '</span>' +
+                            '<span class="option-price">$' + parseFloat(option.price).toFixed(2) + '</span>' +
                         '</div>'
                     ).join('');
 
@@ -2968,7 +3048,7 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
                 optionsDiv.innerHTML = '';
                 window.currentBeverageSelection = {
                     name: beverageData.name,
-                    price: beverageData.platformPrice,
+                    price: parseFloat(beverageData.platformPrice),
                     baseData: beverageData
                 };
             }
@@ -2985,11 +3065,18 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
 
         function selectBeverageOption(name, price) {
             // Update selection
-            window.currentBeverageSelection = { name, price };
+            window.currentBeverageSelection = { name, price: parseFloat(price) };
 
             // Update UI to show selected option
             document.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
-            event.target.closest('.option-item').classList.add('selected');
+
+            // Find and select the matching option item
+            const targetOption = Array.from(document.querySelectorAll('.option-item')).find(item =>
+                item.querySelector('.option-name').textContent === name
+            );
+            if (targetOption) {
+                targetOption.classList.add('selected');
+            }
 
             updateBeverageModalPrice();
         }
@@ -3050,6 +3137,9 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
         let modalWingsData = [];
         let currentWingType = '';
 
+        // All available sauces from Firestore (filtered to exclude dips)
+        const allSauces = ${JSON.stringify(strategicMenu.sauces || [])};
+
         // Wing Modal Functions
         window.openWingModal = function(wingType) {
             console.log('Opening wing modal:', wingType); // Debug log
@@ -3061,14 +3151,16 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
                     { id: 'wings_6_boneless', name: '6 Wings (Boneless)', count: 6, platformPrice: 9.44, includedSauces: 1 },
                     { id: 'wings_12_boneless', name: '12 Wings (Boneless)', count: 12, platformPrice: 16.19, includedSauces: 2 },
                     { id: 'wings_24_boneless', name: '24 Wings (Boneless)', count: 24, platformPrice: 28.34, includedSauces: 4 },
-                    { id: 'wings_30_boneless', name: '30 Wings (Boneless)', count: 30, platformPrice: 35.09, includedSauces: 5 }
+                    { id: 'wings_30_boneless', name: '30 Wings (Boneless)', count: 30, platformPrice: 35.09, includedSauces: 5 },
+                    { id: 'wings_50_boneless', name: '50 Wings (Boneless)', count: 50, platformPrice: 53.99, includedSauces: 8 }
                 ];
             } else {
                 modalWingsData = [
                     { id: 'wings_6_bonein', name: '6 Wings (Bone-In)', count: 6, platformPrice: 12.14, includedSauces: 1 },
                     { id: 'wings_12_bonein', name: '12 Wings (Bone-In)', count: 12, platformPrice: 20.24, includedSauces: 2 },
                     { id: 'wings_24_bonein', name: '24 Wings (Bone-In)', count: 24, platformPrice: 35.09, includedSauces: 4 },
-                    { id: 'wings_30_bonein', name: '30 Wings (Bone-In)', count: 30, platformPrice: 44.54, includedSauces: 5 }
+                    { id: 'wings_30_bonein', name: '30 Wings (Bone-In)', count: 30, platformPrice: 44.54, includedSauces: 5 },
+                    { id: 'wings_50_bonein', name: '50 Wings (Bone-In)', count: 50, platformPrice: 69.74, includedSauces: 8 }
                 ];
             }
 
@@ -3077,7 +3169,8 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
             selectedWingVariant = null;
             selectedSauces = [];
             selectedWingStyle = 'regular';
-            selectedExtraDips = [];
+            selectedExtraDips = {};
+            selectedIncludedDips = {};
 
             const modal = document.getElementById('wingModal');
             modal.classList.add('active');
@@ -3130,7 +3223,9 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
             currentModalStep += direction;
 
             if (currentModalStep < 1) currentModalStep = 1;
-            if (currentModalStep > 5) currentModalStep = 5;
+            // Max steps: boneless = 5 steps, bone-in = 6 steps
+            const maxSteps = currentWingType === 'bone-in' ? 6 : 5;
+            if (currentModalStep > maxSteps) currentModalStep = maxSteps;
 
             // Update progress indicators
             document.querySelectorAll('.progress-step').forEach((step, index) => {
@@ -3150,11 +3245,32 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
                 }
             });
 
-            // Initialize step content
-            if (currentModalStep === 2) populateSauceSelection();
-            if (currentModalStep === 3) populateWingStyleOptions();
-            if (currentModalStep === 4) populateExtraDips();
-            if (currentModalStep === 5) populateOrderSummary();
+            // Initialize step content based on wing type and step
+            if (currentModalStep === 2) {
+                populateSauceSelection();
+            } else if (currentModalStep === 3) {
+                // Step 3: Included dips (for all wings)
+                populateIncludedDipSelection();
+            } else if (currentModalStep === 4) {
+                if (currentWingType === 'bone-in') {
+                    // Step 4: Wing style (only for bone-in wings)
+                    populateWingStyleOptions();
+                } else {
+                    // Step 4: Extra dips for boneless wings
+                    populateExtraDips();
+                }
+            } else if (currentModalStep === 5) {
+                if (currentWingType === 'bone-in') {
+                    // Step 5: Extra dips for bone-in wings
+                    populateExtraDips();
+                } else {
+                    // Step 5: Order summary for boneless wings
+                    populateOrderSummary();
+                }
+            } else if (currentModalStep === 6 && currentWingType === 'bone-in') {
+                // Step 6: Order summary for bone-in wings
+                populateOrderSummary();
+            }
 
             updateModalButtons();
         };
@@ -3198,27 +3314,45 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
         };
 
         function populateSauceSelection() {
-            // For now, create sample sauce data - in production this would come from Firestore
-            const sampleSauces = [
-                { id: 'buffalo', name: 'Classic Buffalo', category: 'signature', heatLevel: 2 },
-                { id: 'bbq', name: 'Sweet BBQ', category: 'signature', heatLevel: 1 },
-                { id: 'honey_mustard', name: 'Honey Mustard', category: 'signature', heatLevel: 1 },
-                { id: 'ranch', name: 'Ranch', category: 'dipping', heatLevel: 0 },
-                { id: 'blue_cheese', name: 'Blue Cheese', category: 'dipping', heatLevel: 0 },
-                { id: 'cajun_dry', name: 'Cajun Dry Rub', category: 'dry-rub', heatLevel: 3 }
-            ];
+            // Organize sauces by category
+            const dryRubs = allSauces.filter(sauce => sauce.isDryRub === true);
+            const classicSauces = allSauces.filter(sauce => sauce.category === 'signature-sauce' && !sauce.isDryRub);
 
             const maxSauces = selectedWingVariant ? (selectedWingVariant.includedSauces || Math.floor(selectedWingVariant.count / 6)) : 1;
 
             const container = document.getElementById('sauceSelection');
             container.innerHTML =
-                '<div class="sauce-limit-info">Select up to ' + maxSauces + ' sauce' + (maxSauces > 1 ? 's' : '') + ' (included with your wings)</div>' +
-                sampleSauces.map(sauce =>
-                    '<div class="sauce-option" onclick="toggleSauce(\\'' + sauce.id + '\\')\">' +
-                        '<h5>' + sauce.name + '</h5>' +
-                        '<p>Heat: ' + '🔥'.repeat(sauce.heatLevel || 1) + '</p>' +
+                '<div class="sauce-limit-info">Select up to ' + maxSauces + ' wing sauce' + (maxSauces > 1 ? 's' : '') + ' (included with your wings)</div>' +
+
+                // Dry Rubs Section
+                (dryRubs.length > 0 ?
+                    '<div class="sauce-category">' +
+                        '<h4 class="sauce-category-title">🌶️ Dry Rubs</h4>' +
+                        dryRubs.map(sauce =>
+                            '<div class="sauce-option" onclick="toggleSauce(\\'' + sauce.id + '\\')\">' +
+                                '<div class="sauce-info">' +
+                                    '<h5>' + sauce.name + '</h5>' +
+                                    '<p class="sauce-description">' + (sauce.description || 'Dry seasoning blend') + '</p>' +
+                                '</div>' +
+                            '</div>'
+                        ).join('') +
                     '</div>'
-                ).join('');
+                    : '') +
+
+                // Classic Sauces Section
+                (classicSauces.length > 0 ?
+                    '<div class="sauce-category">' +
+                        '<h4 class="sauce-category-title">🍯 Classic Sauces</h4>' +
+                        classicSauces.map(sauce =>
+                            '<div class="sauce-option" onclick="toggleSauce(\\'' + sauce.id + '\\')\">' +
+                                '<div class="sauce-info">' +
+                                    '<h5>' + sauce.name + '</h5>' +
+                                    '<p class="sauce-description">' + (sauce.description || 'Classic wing sauce') + '</p>' +
+                                '</div>' +
+                            '</div>'
+                        ).join('') +
+                    '</div>'
+                    : '');
         }
 
         window.toggleSauce = function(sauceId) {
@@ -3240,8 +3374,135 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
             }
         };
 
+        // New variables for dip selection
+        let selectedDips = [];
+        let selectedIncludedDips = {}; // Object to track quantities: {dipId: quantity}
+
+        function populateDipSelection() {
+            // Get dipping sauces from strategicMenu.dips (these are the filtered dipping-sauce category items)
+            const dippingSauces = ${JSON.stringify(strategicMenu.dips || [])};
+
+            const container = document.getElementById('sauceSelection');
+            container.innerHTML =
+                '<div class="sauce-limit-info">Select your preferred dip' + (dippingSauces.length > 1 ? 's' : '') + ' (optional)</div>' +
+                dippingSauces.map(dip =>
+                    '<div class="sauce-option" onclick="toggleDip(\\'' + dip.id + '\\')\">' +
+                        '<div class="sauce-info">' +
+                            '<h5>' + dip.name + '</h5>' +
+                            '<p class="sauce-description">' + (dip.description || 'Creamy dipping sauce') + '</p>' +
+                            '<p class="dip-price">' + dip.price + '</p>' +
+                        '</div>' +
+                    '</div>'
+                ).join('');
+        }
+
+        window.toggleDip = function(dipId) {
+            const index = selectedDips.indexOf(dipId);
+            if (index > -1) {
+                // Remove dip
+                selectedDips.splice(index, 1);
+                event.target.closest('.sauce-option').classList.remove('selected');
+            } else {
+                // Add dip - no limit for regular dips, they're optional
+                selectedDips.push(dipId);
+                event.target.closest('.sauce-option').classList.add('selected');
+            }
+        };
+
+        function populateIncludedDipSelection() {
+            // Calculate how many dips are included based on wing count
+            const includedDips = selectedWingVariant ? Math.floor(selectedWingVariant.count / 6) : 1;
+
+            // Get dipping sauces from strategicMenu.dips
+            const dippingSauces = ${JSON.stringify(strategicMenu.dips || [])};
+
+            const container = document.getElementById('step3Content');
+            container.innerHTML =
+                '<div class="sauce-limit-info">Select up to ' + includedDips + ' dip' + (includedDips > 1 ? 's' : '') + ' total (included with your ' + selectedWingVariant.count + ' wings)</div>' +
+                '<div class="dips-selection-info" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #666;">' +
+                    'Selected: <span id="selectedDipCount">0</span> / ' + includedDips + ' dips' +
+                '</div>' +
+                '<div class="dips-grid">' +
+                dippingSauces.map(dip => {
+                    const quantity = selectedIncludedDips[dip.id] || 0;
+                    return '<div class="dip-option-with-quantity" style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white;">' +
+                        '<div class="dip-info" style="display: flex; justify-content: space-between; align-items: center;">' +
+                            '<div>' +
+                                '<h5 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600;">' + dip.name + '</h5>' +
+                                '<p style="margin: 0; font-size: 14px; color: #666;">' + (dip.description || 'Creamy dipping sauce') + '</p>' +
+                            '</div>' +
+                            '<div class="quantity-controls" style="display: flex; align-items: center; gap: 12px;">' +
+                                '<button class="quantity-btn" onclick="adjustIncludedDipQuantity(\\'' + dip.id + '\\', -1)" style="width: 32px; height: 32px; border: 1px solid #ddd; background: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; font-weight: bold; color: #666;">−</button>' +
+                                '<span class="quantity-display" id="quantity-' + dip.id + '" style="min-width: 20px; text-align: center; font-size: 16px; font-weight: 600;">' + quantity + '</span>' +
+                                '<button class="quantity-btn" onclick="adjustIncludedDipQuantity(\\'' + dip.id + '\\', 1)" style="width: 32px; height: 32px; border: 1px solid #ddd; background: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; font-weight: bold; color: #666;">+</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                }).join('') +
+                '</div>';
+
+            updateIncludedDipCount();
+        }
+
+        function updateIncludedDipCount() {
+            const totalSelected = Object.values(selectedIncludedDips).reduce((sum, quantity) => sum + quantity, 0);
+            const countDisplay = document.getElementById('selectedDipCount');
+            if (countDisplay) {
+                countDisplay.textContent = totalSelected;
+                countDisplay.style.color = totalSelected > 0 ? '#28a745' : '#666';
+            }
+        }
+
+        window.adjustIncludedDipQuantity = function(dipId, change) {
+            const includedDips = selectedWingVariant ? Math.floor(selectedWingVariant.count / 6) : 1;
+            const currentQuantity = selectedIncludedDips[dipId] || 0;
+            const newQuantity = currentQuantity + change;
+            const totalSelected = Object.values(selectedIncludedDips).reduce((sum, qty) => sum + qty, 0);
+
+            // Prevent going below 0
+            if (newQuantity < 0) return;
+
+            // Prevent exceeding total allowed dips
+            if (change > 0 && totalSelected >= includedDips) {
+                alert('You have reached the maximum number of included dips (' + includedDips + ')');
+                return;
+            }
+
+            // Update quantity
+            if (newQuantity === 0) {
+                delete selectedIncludedDips[dipId];
+            } else {
+                selectedIncludedDips[dipId] = newQuantity;
+            }
+
+            // Update display
+            const quantityDisplay = document.getElementById('quantity-' + dipId);
+            if (quantityDisplay) {
+                quantityDisplay.textContent = newQuantity;
+            }
+
+            // Update total count
+            updateIncludedDipCount();
+
+            // Update button states
+            const decreaseBtn = event.target.closest('.dip-option-with-quantity').querySelector('button[onclick*="' + dipId + '\\', -1"]');
+            const increaseBtn = event.target.closest('.dip-option-with-quantity').querySelector('button[onclick*="' + dipId + '\\', 1"]');
+
+            if (decreaseBtn) {
+                decreaseBtn.style.opacity = newQuantity === 0 ? '0.5' : '1';
+                decreaseBtn.style.cursor = newQuantity === 0 ? 'not-allowed' : 'pointer';
+            }
+
+            const newTotalSelected = Object.values(selectedIncludedDips).reduce((sum, qty) => sum + qty, 0);
+            if (increaseBtn) {
+                increaseBtn.style.opacity = newTotalSelected >= includedDips ? '0.5' : '1';
+                increaseBtn.style.cursor = newTotalSelected >= includedDips ? 'not-allowed' : 'pointer';
+            }
+        };
+
+
         function populateWingStyleOptions() {
-            const container = document.getElementById('wingStyleOptions');
+            const container = document.getElementById('step4Content');
             container.innerHTML = \`
                 <div class="wing-variant-option \${selectedWingStyle === 'regular' ? 'selected' : ''}" onclick="selectWingStyle('regular')">
                     <div class="wing-variant-info">
@@ -3287,45 +3548,76 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
             const extraDips = [
                 { id: 'extra_ranch', name: 'Extra Ranch', price: 0.75 },
                 { id: 'extra_blue_cheese', name: 'Extra Blue Cheese', price: 0.75 },
-                { id: 'extra_buffalo', name: 'Extra Buffalo Sauce', price: 0.75 },
-                { id: 'extra_bbq', name: 'Extra BBQ Sauce', price: 0.75 }
+                { id: 'extra_honey_mustard', name: 'Extra Honey Mustard', price: 0.75 },
+                { id: 'extra_cheese_sauce', name: 'Extra Cheese Sauce', price: 0.75 }
             ];
 
-            const container = document.getElementById('extraDips');
-            container.innerHTML = extraDips.map(dip => \`
-                <div class="sauce-option \${selectedExtraDips.includes(dip.id) ? 'selected' : ''}" onclick="toggleExtraDip('\${dip.id}')">
-                    <h5>\${dip.name}</h5>
-                    <p>+$\${dip.price.toFixed(2)}</p>
-                </div>
-            \`).join('');
+            // Use the appropriate container based on wing type and step
+            const containerId = currentWingType === 'boneless' ? 'step4Content' : 'step5Content';
+            const container = document.getElementById(containerId);
+            container.innerHTML =
+                '<div style="margin-bottom: 20px; font-size: 14px; color: #666; text-align: center;">' +
+                    'Select as many dips as you would like - $0.75 each' +
+                '</div>' +
+                extraDips.map(dip => {
+                    const quantity = selectedExtraDips[dip.id] || 0;
+                    return '<div class="sauce-option" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 2px solid ' + (quantity > 0 ? '#ff6b35' : '#e0e0e0') + '; border-radius: 12px; margin-bottom: 12px; background: ' + (quantity > 0 ? '#fff5f2' : 'white') + ';">' +
+                        '<div style="flex: 1;">' +
+                            '<h5 style="margin: 0 0 4px 0; color: #1a1a1a; font-size: 16px;">' + dip.name + '</h5>' +
+                            '<p style="margin: 0; color: #666; font-size: 14px;">+$' + dip.price.toFixed(2) + ' each</p>' +
+                        '</div>' +
+                        '<div style="display: flex; align-items: center; gap: 12px;">' +
+                            '<button onclick="adjustExtraDipQuantity(\\'' + dip.id + '\\', -1)" style="width: 36px; height: 36px; border: 2px solid ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; background: white; color: ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: ' + (quantity === 0 ? 'not-allowed' : 'pointer') + '; opacity: ' + (quantity === 0 ? '0.3' : '1') + ';" ' + (quantity === 0 ? 'disabled' : '') + '>\\u2212</button>' +
+                            '<span style="min-width: 24px; text-align: center; font-size: 18px; font-weight: bold; color: #1a1a1a;">' + quantity + '</span>' +
+                            '<button onclick="adjustExtraDipQuantity(\\'' + dip.id + '\\', 1)" style="width: 36px; height: 36px; border: 2px solid #ff6b35; background: #ff6b35; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer;">+</button>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
         }
 
-        window.toggleExtraDip = function(dipId) {
-            const index = selectedExtraDips.indexOf(dipId);
-            if (index > -1) {
-                selectedExtraDips.splice(index, 1);
-                event.target.classList.remove('selected');
+        window.adjustExtraDipQuantity = function(dipId, change) {
+            const currentQuantity = selectedExtraDips[dipId] || 0;
+            const newQuantity = Math.max(0, currentQuantity + change);
+
+            if (newQuantity === 0) {
+                delete selectedExtraDips[dipId];
             } else {
-                selectedExtraDips.push(dipId);
-                event.target.classList.add('selected');
+                selectedExtraDips[dipId] = newQuantity;
             }
+
+            // Refresh the extra dips display
+            populateExtraDips();
         };
 
         function populateOrderSummary() {
             if (!selectedWingVariant) return;
 
             const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
-            const extraDipsTotal = selectedExtraDips.length * 0.75;
+            const extraDipsTotal = Object.values(selectedExtraDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
             const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
 
-            const container = document.getElementById('orderSummary');
+            // Get dipping sauces data for displaying included dips names
+            const dippingSauces = ${JSON.stringify(strategicMenu.dips || [])};
+
+            // Use the appropriate container based on wing type
+        const containerId = currentWingType === 'boneless' ? 'step5Content' : 'step6Content';
+        const container = document.getElementById(containerId);
             container.innerHTML =
                 '<div style="text-align: left; font-size: 16px; line-height: 1.6;">' +
                     '<h4 style="margin-bottom: 16px; color: #1a1a1a;">' + selectedWingVariant.count + ' ' + currentWingType + ' Wings</h4>' +
                     '<p style="margin-bottom: 8px; color: #666;">Base Price: $' + selectedWingVariant.platformPrice.toFixed(2) + '</p>' +
-                    '<p style="margin-bottom: 8px; color: #666;">Sauces: ' + selectedSauces.length + ' included</p>' +
-                    '<p style="margin-bottom: 8px; color: #666;">Style: ' + selectedWingStyle.replace('-', ' ') + (wingStyleUpcharge > 0 ? ' (+$' + wingStyleUpcharge.toFixed(2) + ')' : '') + '</p>' +
-                    (selectedExtraDips.length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + selectedExtraDips.length + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
+                    '<p style="margin-bottom: 8px; color: #666;">Wing Sauces: ' + selectedSauces.length + ' selected</p>' +
+                    '<p style="margin-bottom: 8px; color: #666;">Included Dips: ' + Object.values(selectedIncludedDips).reduce((sum, qty) => sum + qty, 0) + ' selected</p>' +
+                    (Object.keys(selectedIncludedDips).length > 0 ?
+                        '<div style="margin-left: 16px; margin-bottom: 8px; color: #666;">' +
+                            Object.entries(selectedIncludedDips).map(([dipId, qty]) => {
+                                const dip = dippingSauces.find(d => d.id === dipId);
+                                return '• ' + (dip ? dip.name : dipId) + ' (' + qty + ')';
+                            }).join('<br>') +
+                        '</div>'
+                        : '') +
+                    (currentWingType === 'bone-in' ? '<p style="margin-bottom: 8px; color: #666;">Style: ' + selectedWingStyle.replace('-', ' ') + (wingStyleUpcharge > 0 ? ' (+$' + wingStyleUpcharge.toFixed(2) + ')' : '') + '</p>' : '') +
+                    (Object.keys(selectedExtraDips).length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + Object.values(selectedExtraDips).reduce((sum, qty) => sum + qty, 0) + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
                     '<hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">' +
                     '<p style="font-size: 18px; font-weight: bold; color: #ff6b35;">Total: $' + totalPrice.toFixed(2) + '</p>' +
                 '</div>';
@@ -3339,8 +3631,11 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
             // Show/hide back button
             backBtn.style.display = currentModalStep > 1 ? 'block' : 'none';
 
-            // Show/hide next vs add to cart button
-            if (currentModalStep === 5) {
+            // Show/hide next vs add to cart button based on wing type and step
+            const isLastStep = (currentWingType === 'boneless' && currentModalStep === 5) ||
+                               (currentWingType === 'bone-in' && currentModalStep === 6);
+
+            if (isLastStep) {
                 nextBtn.style.display = 'none';
                 addToCartBtn.style.display = 'block';
             } else {
@@ -3357,13 +3652,259 @@ function generateStrategicMenuHTML(menuData, platform, settings, multiplier) {
 
             // Calculate final price
             const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
-            const extraDipsTotal = selectedExtraDips.length * 0.75;
+            const extraDipsTotal = Object.values(selectedExtraDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
             const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
 
             // For now, just show success message - in production this would integrate with platform cart
             alert('Added ' + selectedWingVariant.count + ' ' + currentWingType + ' wings to your cart! Total: $' + totalPrice.toFixed(2));
 
             closeWingModal();
+        };
+
+        // Sides Modal Functions
+        let currentSideModalStep = 1;
+        let selectedSideVariant = null;
+        let selectedSideDips = {};
+        let selectedSideQuantities = {}; // New: Track quantities of each side option
+        let currentSideType = '';
+        let sideModalData = [];
+
+        window.openSideModal = function(sideType) {
+            console.log('Opening side modal:', sideType);
+            currentSideType = sideType;
+            currentSideModalStep = 1;
+            selectedSideVariant = null;
+            selectedSideDips = {};
+            selectedSideQuantities = {};
+
+            // Create side data based on type
+            if (sideType === 'fries') {
+                sideModalData = [
+                    { id: 'fries_regular', name: 'Regular Fries', size: 'Regular', platformPrice: 4.99 },
+                    { id: 'fries_large', name: 'Large Fries', size: 'Large', platformPrice: 6.99 }
+                ];
+                document.getElementById('sideModalTitle').textContent = 'Choose Fries Size';
+            } else if (sideType === 'loaded-fries') {
+                sideModalData = [
+                    { id: 'loaded_fries_large', name: 'Loaded Fries', size: 'Large', platformPrice: 8.99, description: 'Topped with cheese sauce and bacon' }
+                ];
+                document.getElementById('sideModalTitle').textContent = 'Loaded Fries';
+            } else if (sideType === 'mozzarella-sticks') {
+                sideModalData = [
+                    { id: 'mozz_4', name: '4 Mozzarella Sticks', count: 4, platformPrice: 6.99, description: 'Includes 1 marinara sauce' },
+                    { id: 'mozz_8', name: '8 Mozzarella Sticks', count: 8, platformPrice: 12.99, description: 'Includes 1 marinara sauce' },
+                    { id: 'mozz_12', name: '12 Mozzarella Sticks', count: 12, platformPrice: 18.99, description: 'Includes 2 marinara sauces' },
+                    { id: 'mozz_16', name: '16 Mozzarella Sticks', count: 16, platformPrice: 24.99, description: 'Includes 2 marinara sauces' }
+                ];
+                document.getElementById('sideModalTitle').textContent = 'Choose Your Mozzarella Sticks';
+            }
+
+            populateSideOptions();
+            document.getElementById('sidesModal').style.display = 'flex';
+            updateSideModalButtons();
+        };
+
+        window.closeSidesModal = function() {
+            document.getElementById('sidesModal').style.display = 'none';
+        };
+
+        function populateSideOptions() {
+            const container = document.getElementById('sideOptions');
+            container.innerHTML = sideModalData.map(option => {
+                const description = option.description || '';
+                const sizeInfo = option.size ? 'Size: ' + option.size : '';
+                const countInfo = option.count ? option.count + ' pieces' : '';
+                const subtitle = sizeInfo || countInfo;
+                const quantity = selectedSideQuantities[option.id] || 0;
+
+                return '<div class="side-option-with-quantity">' +
+                    '<div class="side-option-info">' +
+                        '<div class="side-option-details">' +
+                            '<h4>' + option.name + '</h4>' +
+                            (subtitle ? '<p>' + subtitle + '</p>' : '') +
+                            (description ? '<p class="option-description">' + description + '</p>' : '') +
+                        '</div>' +
+                        '<div class="side-option-price">$' + option.platformPrice.toFixed(2) + ' each</div>' +
+                    '</div>' +
+                    '<div class="quantity-controls">' +
+                        '<button onclick="adjustSideOptionQuantity(\\'' + option.id + '\\', -1)" ' + (quantity === 0 ? 'disabled' : '') + '>-</button>' +
+                        '<span class="quantity">' + quantity + '</span>' +
+                        '<button onclick="adjustSideOptionQuantity(\\'' + option.id + '\\', 1)">+</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        // New function to handle side option quantity changes
+        window.adjustSideOptionQuantity = function(optionId, change) {
+            const currentQuantity = selectedSideQuantities[optionId] || 0;
+            const newQuantity = Math.max(0, currentQuantity + change);
+
+            if (newQuantity === 0) {
+                delete selectedSideQuantities[optionId];
+            } else {
+                selectedSideQuantities[optionId] = newQuantity;
+            }
+
+            // Refresh the options display
+            populateSideOptions();
+            updateSideModalButtons();
+        };
+
+        // Keep selectSideVariant for backwards compatibility but update logic
+        window.selectSideVariant = function(variantId) {
+            selectedSideVariant = sideModalData.find(option => option.id === variantId);
+            updateSideModalButtons();
+        };
+
+        window.navigateSideModalStep = function(direction) {
+            if (direction === 1) {
+                if (currentSideModalStep === 1) {
+                    const totalQuantity = Object.values(selectedSideQuantities).reduce((sum, qty) => sum + qty, 0);
+                    if (totalQuantity === 0) {
+                        alert('Please select at least one item');
+                        return;
+                    }
+                }
+            }
+
+            currentSideModalStep += direction;
+            if (currentSideModalStep < 1) currentSideModalStep = 1;
+            if (currentSideModalStep > 3) currentSideModalStep = 3;
+
+            // Update progress indicators
+            document.querySelectorAll('#sidesModal .progress-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < currentSideModalStep - 1) {
+                    step.classList.add('completed');
+                } else if (index === currentSideModalStep - 1) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Show current step
+            document.querySelectorAll('#sidesModal .modal-step').forEach((step, index) => {
+                step.classList.remove('active');
+                if (index === currentSideModalStep - 1) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Initialize step content
+            if (currentSideModalStep === 2) {
+                populateSideExtraDips();
+            } else if (currentSideModalStep === 3) {
+                populateSideOrderSummary();
+            }
+
+            updateSideModalButtons();
+        };
+
+        function populateSideExtraDips() {
+            const extraDips = [
+                { id: 'extra_ranch', name: 'Extra Ranch', price: 0.75 },
+                { id: 'extra_blue_cheese', name: 'Extra Blue Cheese', price: 0.75 },
+                { id: 'extra_honey_mustard', name: 'Extra Honey Mustard', price: 0.75 },
+                { id: 'extra_cheese_sauce', name: 'Extra Cheese Sauce', price: 0.75 }
+            ];
+
+            const container = document.getElementById('sideExtraDips');
+            container.innerHTML = extraDips.map(dip => {
+                const quantity = selectedSideDips[dip.id] || 0;
+                return '<div class="dip-option">' +
+                    '<div class="dip-info">' +
+                        '<h4>' + dip.name + '</h4>' +
+                        '<p>$' + dip.price.toFixed(2) + ' each</p>' +
+                    '</div>' +
+                    '<div class="quantity-controls">' +
+                        '<button onclick="adjustSideDipQuantity(\\'' + dip.id + '\\', -1)" ' + (quantity === 0 ? 'disabled' : '') + '>-</button>' +
+                        '<span class="quantity">' + quantity + '</span>' +
+                        '<button onclick="adjustSideDipQuantity(\\'' + dip.id + '\\', 1)">+</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        window.adjustSideDipQuantity = function(dipId, change) {
+            const currentQuantity = selectedSideDips[dipId] || 0;
+            const newQuantity = Math.max(0, currentQuantity + change);
+
+            if (newQuantity === 0) {
+                delete selectedSideDips[dipId];
+            } else {
+                selectedSideDips[dipId] = newQuantity;
+            }
+
+            populateSideExtraDips();
+        };
+
+        function populateSideOrderSummary() {
+            const extraDipsTotal = Object.values(selectedSideDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
+
+            // Calculate total for all selected side options
+            let sidesTotal = 0;
+            let summaryHTML = '<div class="order-summary">';
+
+            // Add all selected side options
+            Object.keys(selectedSideQuantities).forEach(optionId => {
+                const quantity = selectedSideQuantities[optionId];
+                const option = sideModalData.find(opt => opt.id === optionId);
+                if (option && quantity > 0) {
+                    const itemTotal = quantity * option.platformPrice;
+                    sidesTotal += itemTotal;
+                    summaryHTML += '<div class="summary-item main-item">' +
+                        '<span>' + quantity + 'x ' + option.name + '</span>' +
+                        '<span>$' + itemTotal.toFixed(2) + '</span>' +
+                    '</div>';
+                }
+            });
+
+            // Add selected dips
+            Object.keys(selectedSideDips).forEach(dipId => {
+                const quantity = selectedSideDips[dipId];
+                const dipName = dipId.replace('extra_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                summaryHTML += '<div class="summary-item">' +
+                    '<span>' + quantity + 'x ' + dipName + '</span>' +
+                    '<span>$' + (quantity * 0.75).toFixed(2) + '</span>' +
+                '</div>';
+            });
+
+            const totalPrice = sidesTotal + extraDipsTotal;
+            summaryHTML += '<div class="summary-total">' +
+                '<span><strong>Total</strong></span>' +
+                '<span><strong>$' + totalPrice.toFixed(2) + '</strong></span>' +
+            '</div></div>';
+
+            document.getElementById('sideOrderSummary').innerHTML = summaryHTML;
+        }
+
+        function updateSideModalButtons() {
+            const backBtn = document.getElementById('sideModalBackBtn');
+            const nextBtn = document.getElementById('sideModalNextBtn');
+            const addBtn = document.getElementById('sideModalAddToCartBtn');
+
+            backBtn.style.display = currentSideModalStep > 1 ? 'block' : 'none';
+
+            if (currentSideModalStep === 3) {
+                nextBtn.style.display = 'none';
+                addBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                addBtn.style.display = 'none';
+            }
+
+            // Update validation logic for new quantity-based system
+            if (currentSideModalStep === 1) {
+                const totalQuantity = Object.values(selectedSideQuantities).reduce((sum, qty) => sum + qty, 0);
+                nextBtn.disabled = totalQuantity === 0;
+            } else {
+                nextBtn.disabled = false;
+            }
+        }
+
+        window.addSideOrderToCart = function() {
+            alert('Added to cart! (Integration with platform cart coming soon)');
+            closeSidesModal();
         };
     </script>
 </body>
@@ -4095,7 +4636,7 @@ function generateSidesSection(sides, branding) {
                     <div class="price-main">Starting at $4.99</div>
                     <div class="price-label">Choose Size</div>
                 </div>
-                <button class="order-side-category-btn">VIEW OPTIONS →</button>
+                <button class="order-side-category-btn" onclick="openSideModal('fries')">VIEW OPTIONS →</button>
             </div>
         </div>
         <div class="side-category-card">
@@ -4116,7 +4657,7 @@ function generateSidesSection(sides, branding) {
                     <div class="price-main">Starting at $8.99</div>
                     <div class="price-label">Large Size</div>
                 </div>
-                <button class="order-side-category-btn">VIEW OPTIONS →</button>
+                <button class="order-side-category-btn" onclick="openSideModal('loaded-fries')">VIEW OPTIONS →</button>
             </div>
         </div>
         <div class="side-category-card">
@@ -4137,7 +4678,41 @@ function generateSidesSection(sides, branding) {
                     <div class="price-main">Starting at $6.99</div>
                     <div class="price-label">Choose Quantity</div>
                 </div>
-                <button class="order-side-category-btn">VIEW OPTIONS →</button>
+                <button class="order-side-category-btn" onclick="openSideModal('mozzarella-sticks')">VIEW OPTIONS →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sides Ordering Modal -->
+    <div id="sidesModal" class="sides-modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeSidesModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeSidesModal()">&times;</button>
+                <div class="modal-progress">
+                    <div class="progress-step active" data-step="1">1</div>
+                    <div class="progress-step" data-step="2">2</div>
+                    <div class="progress-step" data-step="3" style="display: none;">3</div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="sideModalStep1" class="modal-step active">
+                    <h3 id="sideModalTitle">Choose Your Option</h3>
+                    <div id="sideOptions" class="side-options-grid"></div>
+                </div>
+                <div id="sideModalStep2" class="modal-step">
+                    <h3>Add Dips (Optional)</h3>
+                    <div id="sideExtraDips" class="side-dips-grid"></div>
+                </div>
+                <div id="sideModalStep3" class="modal-step">
+                    <h3>Order Summary</h3>
+                    <div id="sideOrderSummary" class="order-summary-content"></div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="sideModalBackBtn" onclick="navigateSideModalStep(-1)" style="display: none;">← Back</button>
+                <button id="sideModalNextBtn" onclick="navigateSideModalStep(1)">Next →</button>
+                <button id="sideModalAddToCartBtn" onclick="addSideOrderToCart()" style="display: none;">Add to Cart</button>
             </div>
         </div>
     </div>
@@ -4461,6 +5036,7 @@ function generateWingsSection(wings, branding) {
                     <div class="progress-step" data-step="3">3</div>
                     <div class="progress-step" data-step="4">4</div>
                     <div class="progress-step" data-step="5">5</div>
+                    <div class="progress-step" data-step="6" style="display: none;">6</div>
                 </div>
             </div>
             <div class="modal-body">
@@ -4473,16 +5049,20 @@ function generateWingsSection(wings, branding) {
                     <div id="sauceSelection" class="sauce-selection-grid"></div>
                 </div>
                 <div id="modalStep3" class="modal-step">
-                    <h3>Wing Style Preference</h3>
-                    <div id="wingStyleOptions" class="wing-style-options"></div>
+                    <h3 id="step3Title">Included Dips</h3>
+                    <div id="step3Content" class="step-content"></div>
                 </div>
                 <div id="modalStep4" class="modal-step">
-                    <h3>Extra Dips (Optional)</h3>
-                    <div id="extraDips" class="extra-dips-grid"></div>
+                    <h3 id="step4Title">Extra Dips (Optional)</h3>
+                    <div id="step4Content" class="step-content"></div>
                 </div>
                 <div id="modalStep5" class="modal-step">
-                    <h3>Order Summary</h3>
-                    <div id="orderSummary" class="order-summary"></div>
+                    <h3 id="step5Title">Order Summary</h3>
+                    <div id="step5Content" class="step-content"></div>
+                </div>
+                <div id="modalStep6" class="modal-step">
+                    <h3 id="step6Title">Order Summary</h3>
+                    <div id="step6Content" class="step-content"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -5461,6 +6041,219 @@ function generateDoorDashCSS(branding) {
             width: 28px;
             height: 28px;
             font-size: 12px;
+        }
+    }
+
+    /* Sides Modal Styling */
+    .sides-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .side-options-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .side-option {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .side-option:hover {
+        border-color: #ff6b35;
+        background: #fff5f2;
+    }
+
+    .side-option.selected {
+        border-color: #ff6b35;
+        background: #fff5f2;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    .side-option-with-quantity {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 16px;
+        background: white;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .side-option-with-quantity:hover {
+        border-color: #ff6b35;
+        background: #fff5f2;
+    }
+
+    .side-option-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .side-option-with-quantity .side-option-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .side-option-with-quantity .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-self: flex-end;
+    }
+
+    .side-option-details h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+    }
+
+    .side-option-details p {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .side-option-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ff6b35;
+    }
+
+    .side-dips-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .dip-option {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+    }
+
+    .dip-info h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+    }
+
+    .dip-info p {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .quantity-controls button {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #ff6b35;
+        background: white;
+        color: #ff6b35;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .quantity-controls button:hover:not(:disabled) {
+        background: #ff6b35;
+        color: white;
+    }
+
+    .quantity-controls button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .quantity-controls .quantity {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    .order-summary {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-item.main-item {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0 0;
+        margin-top: 12px;
+        border-top: 2px solid #dee2e6;
+        font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+        .side-dips-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dip-option {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .quantity-controls {
+            align-self: flex-end;
         }
     }
 
@@ -6667,7 +7460,9 @@ function generateDoorDashJS() {
         currentModalStep += direction;
 
         if (currentModalStep < 1) currentModalStep = 1;
-        if (currentModalStep > 5) currentModalStep = 5;
+        // Max steps: boneless = 5 steps, bone-in = 6 steps
+        const maxSteps = currentWingType === 'bone-in' ? 6 : 5;
+        if (currentModalStep > maxSteps) currentModalStep = maxSteps;
 
         // Update progress indicators
         document.querySelectorAll('.progress-step').forEach((step, index) => {
@@ -6687,11 +7482,35 @@ function generateDoorDashJS() {
             }
         });
 
-        // Initialize step content
-        if (currentModalStep === 2) populateSauceSelection();
-        if (currentModalStep === 3) populateWingStyleOptions();
-        if (currentModalStep === 4) populateExtraDips();
-        if (currentModalStep === 5) populateOrderSummary();
+        // Update step titles and visibility based on wing type
+        updateModalStepLayout();
+
+        // Initialize step content based on wing type and step
+        if (currentModalStep === 2) {
+            populateSauceSelection();
+        } else if (currentModalStep === 3) {
+            // Step 3: Included dips (for all wings)
+            populateIncludedDipSelection();
+        } else if (currentModalStep === 4) {
+            if (currentWingType === 'bone-in') {
+                // Step 4: Wing style (only for bone-in wings)
+                populateWingStyleOptions();
+            } else {
+                // Step 4: Extra dips for boneless wings
+                populateExtraDips();
+            }
+        } else if (currentModalStep === 5) {
+            if (currentWingType === 'bone-in') {
+                // Step 5: Extra dips for bone-in wings
+                populateExtraDips();
+            } else {
+                // Step 5: Order summary for boneless wings
+                populateOrderSummary();
+            }
+        } else if (currentModalStep === 6 && currentWingType === 'bone-in') {
+            // Step 6: Order summary for bone-in wings
+            populateOrderSummary();
+        }
 
         updateModalButtons();
     };
@@ -6709,6 +7528,32 @@ function generateDoorDashJS() {
                 '</div>' +
             '</div>';
         }).join('');
+    }
+
+    function updateModalStepLayout() {
+        // Update step titles and visibility based on wing type and current step
+        if (currentWingType === 'boneless') {
+            // Boneless wings: 5 steps total (no wing style)
+            // Step 3: Included Dips, Step 4: Extra Dips, Step 5: Order Summary
+            document.getElementById('step3Title').textContent = 'Choose Included Dips';
+            document.getElementById('step4Title').textContent = 'Extra Dips (Optional)';
+            document.getElementById('step5Title').textContent = 'Order Summary';
+
+            // Hide step 6 and its progress indicator for boneless
+            document.querySelector('[data-step="6"]').style.display = 'none';
+            document.getElementById('modalStep6').style.display = 'none';
+        } else {
+            // Bone-in wings: 6 steps total (includes wing style)
+            // Step 3: Included Dips, Step 4: Wing Style, Step 5: Extra Dips, Step 6: Order Summary
+            document.getElementById('step3Title').textContent = 'Choose Included Dips';
+            document.getElementById('step4Title').textContent = 'Wing Style Preference';
+            document.getElementById('step5Title').textContent = 'Extra Dips (Optional)';
+            document.getElementById('step6Title').textContent = 'Order Summary';
+
+            // Show step 6 and its progress indicator for bone-in
+            document.querySelector('[data-step="6"]').style.display = 'flex';
+            document.getElementById('modalStep6').style.display = 'block';
+        }
     }
 
     window.selectWingVariant = function(variantId) {
@@ -6765,7 +7610,7 @@ function generateDoorDashJS() {
     };
 
     function populateWingStyleOptions() {
-        const container = document.getElementById('wingStyleOptions');
+        const container = document.getElementById('step4Content');
         container.innerHTML =
             '<div class="wing-variant-option ' + (selectedWingStyle === 'regular' ? 'selected' : '') + '" onclick="selectWingStyle(\\'regular\\')">' +
                 '<div class="wing-variant-info">' +
@@ -6810,45 +7655,73 @@ function generateDoorDashJS() {
         const extraDips = [
             { id: 'extra_ranch', name: 'Extra Ranch', price: 0.75 },
             { id: 'extra_blue_cheese', name: 'Extra Blue Cheese', price: 0.75 },
-            { id: 'extra_buffalo', name: 'Extra Buffalo Sauce', price: 0.75 },
-            { id: 'extra_bbq', name: 'Extra BBQ Sauce', price: 0.75 }
+            { id: 'extra_honey_mustard', name: 'Extra Honey Mustard', price: 0.75 },
+            { id: 'extra_cheese_sauce', name: 'Extra Cheese Sauce', price: 0.75 }
         ];
 
-        const container = document.getElementById('extraDips');
-        container.innerHTML = extraDips.map(dip => {
-            return '<div class="sauce-option ' + (selectedExtraDips.includes(dip.id) ? 'selected' : '') + '" onclick="toggleExtraDip(\\'' + dip.id + '\\')\">' +
-                '<h5>' + dip.name + '</h5>' +
-                '<p>+$' + dip.price.toFixed(2) + '</p>' +
-            '</div>';
-        }).join('');
+        // Use the appropriate container based on wing type and step
+        const containerId = currentWingType === 'boneless' ? 'step4Content' : 'step5Content';
+        console.log('populateExtraDips called - containerId:', containerId, 'currentWingType:', currentWingType);
+        const container = document.getElementById(containerId);
+        console.log('Container found:', container);
+        if (!container) {
+            console.error('Container not found for containerId:', containerId);
+            return;
+        }
+        container.innerHTML =
+            '<div style="margin-bottom: 20px; font-size: 14px; color: #666; text-align: center;">' +
+                'Select as many dips as you would like - $0.75 each' +
+            '</div>' +
+            extraDips.map(dip => {
+                const quantity = selectedExtraDips[dip.id] || 0;
+                return '<div class="sauce-option" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 2px solid ' + (quantity > 0 ? '#ff6b35' : '#e0e0e0') + '; border-radius: 12px; margin-bottom: 12px; background: ' + (quantity > 0 ? '#fff5f2' : 'white') + ';">' +
+                    '<div style="flex: 1;">' +
+                        '<h5 style="margin: 0 0 4px 0; color: #1a1a1a; font-size: 16px;">' + dip.name + '</h5>' +
+                        '<p style="margin: 0; color: #666; font-size: 14px;">+$' + dip.price.toFixed(2) + ' each</p>' +
+                    '</div>' +
+                    '<div style="display: flex; align-items: center; gap: 12px;">' +
+                        '<button onclick="adjustExtraDipQuantity(\\'' + dip.id + '\\', -1)" style="width: 36px; height: 36px; border: 2px solid ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; background: white; color: ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: ' + (quantity === 0 ? 'not-allowed' : 'pointer') + '; opacity: ' + (quantity === 0 ? '0.3' : '1') + ';" ' + (quantity === 0 ? 'disabled' : '') + '>\\u2212</button>' +
+                        '<span style="min-width: 24px; text-align: center; font-size: 18px; font-weight: bold; color: #1a1a1a;">' + quantity + '</span>' +
+                        '<button onclick="adjustExtraDipQuantity(\\'' + dip.id + '\\', 1)" style="width: 36px; height: 36px; border: 2px solid #ff6b35; background: #ff6b35; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer;">+</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
     }
 
-    window.toggleExtraDip = function(dipId) {
-        const index = selectedExtraDips.indexOf(dipId);
-        if (index > -1) {
-            selectedExtraDips.splice(index, 1);
-            event.target.classList.remove('selected');
+    window.adjustExtraDipQuantity = function(dipId, change) {
+        const currentQuantity = selectedExtraDips[dipId] || 0;
+        const newQuantity = Math.max(0, currentQuantity + change);
+
+        if (newQuantity === 0) {
+            delete selectedExtraDips[dipId];
         } else {
-            selectedExtraDips.push(dipId);
-            event.target.classList.add('selected');
+            selectedExtraDips[dipId] = newQuantity;
         }
+
+        // Refresh the extra dips display
+        populateExtraDips();
     };
 
     function populateOrderSummary() {
         if (!selectedWingVariant) return;
 
         const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
-        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const extraDipsTotal = Object.values(selectedExtraDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
         const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
 
-        const container = document.getElementById('orderSummary');
+        // Get dipping sauces data for displaying included dips names
+        const dippingSauces = ${JSON.stringify(strategicMenu.dips || [])};
+
+        // Use the appropriate container based on wing type
+        const containerId = currentWingType === 'boneless' ? 'step5Content' : 'step6Content';
+        const container = document.getElementById(containerId);
         container.innerHTML =
             '<div style="text-align: left; font-size: 16px; line-height: 1.6;">' +
                 '<h4 style="margin-bottom: 16px; color: #1a1a1a;">' + selectedWingVariant.count + ' ' + currentWingType + ' Wings</h4>' +
                 '<p style="margin-bottom: 8px; color: #666;">Base Price: $' + selectedWingVariant.platformPrice.toFixed(2) + '</p>' +
                 '<p style="margin-bottom: 8px; color: #666;">Sauces: ' + selectedSauces.length + ' included</p>' +
                 '<p style="margin-bottom: 8px; color: #666;">Style: ' + selectedWingStyle.replace('-', ' ') + (wingStyleUpcharge > 0 ? ' (+$' + wingStyleUpcharge.toFixed(2) + ')' : '') + '</p>' +
-                (selectedExtraDips.length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + selectedExtraDips.length + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
+                (Object.keys(selectedExtraDips).length > 0 ? '<p style="margin-bottom: 8px; color: #666;">Extra Dips: ' + Object.values(selectedExtraDips).reduce((sum, qty) => sum + qty, 0) + ' (+$' + extraDipsTotal.toFixed(2) + ')</p>' : '') +
                 '<hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">' +
                 '<p style="font-size: 18px; font-weight: bold; color: #ff6b35;">Total: $' + totalPrice.toFixed(2) + '</p>' +
             '</div>';
@@ -6880,7 +7753,7 @@ function generateDoorDashJS() {
 
         // Calculate final price
         const wingStyleUpcharge = selectedWingStyle !== 'regular' ? 1.50 : 0;
-        const extraDipsTotal = selectedExtraDips.length * 0.75;
+        const extraDipsTotal = Object.values(selectedExtraDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
         const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
 
         // For now, just show success message - in production this would integrate with platform cart
