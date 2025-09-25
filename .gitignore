@@ -101,3 +101,7 @@ menu/platform/firebase-config.js
 # Playwright (local state)
 .playwright-profiles/
 /screenshots/
+
+# Backup files in functions directory
+functions/*backup.js
+functions/*.backup*
