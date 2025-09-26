@@ -54,3 +54,4 @@ Philly Wings is a sophisticated Firebase-powered platform menu generation system
 ```bash
 firebase emulators:start --only hosting,functions
 ```
+- remember to work on the refactored code
