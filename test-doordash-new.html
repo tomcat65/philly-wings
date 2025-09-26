@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Philly Wings Express - Wings, Combos, Sides & Beverages on DoorDash">
+    <meta name="robots" content="index, follow">
+    <title>Philly Wings Express | DoorDash</title>
+    <link rel="icon" href="https://storage.googleapis.com/philly-wings.appspot.com/favicon.ico">
+    <style>
+    /* Reset and Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        background: #ffffff;
+        color: #191919;
+    }
+
+    /* DoorDash Header */
+    .dd-header {
+        background: white;
+        border-bottom: 1px solid #e8e8e8;
+    }
+
+    .dd-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .dd-nav-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .menu-btn {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .platform-logo {
+        height: 32px;
+    }
+
+    .dd-nav-center .location-text {
+        font-size: 0.9rem;
+        color: #6B7280;
+    }
+
+    .dd-nav-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .login-btn, .app-btn {
+        background: none;
+        border: none;
+        color: #191919;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+    }
+
+    .app-btn {
+        background: #FF3008;
+        color: white;
+        border-radius: 20px;
+    }
+
+    .cart-btn {
+        background: #FF3008;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        padding: 0.5rem 1.5rem;
+        font-size: 0.85rem;
+        color: #6B7280;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .breadcrumb a {
+        color: #6B7280;
+        text-decoration: none;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+    }
+
+    .hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .restaurant-logo-overlay {
+        position: absolute;
+        bottom: -30px;
+        left: 2rem;
+    }
+
+    .restaurant-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+    }
+
+    /* Restaurant Info */
+    .restaurant-info {
+        padding: 2rem 1.5rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .restaurant-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #191919;
+    }
+
+    .restaurant-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #6B7280;
+        flex-wrap: wrap;
+    }
+
+    .rating {
+        color: #191919;
+        font-weight: 600;
+    }
+
+    .dashpass {
+        color: #00B14F;
+        font-weight: 600;
+    }
+
+    /* Promo Banner */
+    .promo-banner {
+        background: #FEF3F2;
+        border: 1px solid #FECDCA;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #B91C1C;
+        font-size: 0.9rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #e8e8e8;
+        background: white;
+        border-radius: 20px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .action-btn.active {
+        background: #191919;
+        color: white;
+        border-color: #191919;
+    }
+
+    /* Delivery Info */
+    .delivery-info {
+        font-size: 0.85rem;
+        color: #6B7280;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Menu Navigation */
+    .menu-navigation {
+        border-bottom: 1px solid #e8e8e8;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+    }
+
+    .menu-tabs {
+        display: flex;
+        overflow-x: auto;
+        padding: 0 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .menu-tab {
+        padding: 1rem 1.5rem;
+        text-decoration: none;
+        color: #6B7280;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+        transition: all 0.2s;
+    }
+
+    .menu-tab:hover,
+    .menu-tab.active {
+        color: #191919;
+        border-bottom-color: #FF3008;
+    }
+
+    /* Menu Content */
+    .menu-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    .menu-section {
+        padding: 2rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #191919;
+    }
+
+    .menu-items {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Menu Item Cards - DoorDash Style */
+    .menu-item-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid #f3f4f6;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .menu-item-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .item-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+
+    .item-details {
+        flex: 1;
+        margin-right: 1rem;
+    }
+
+    .item-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #191919;
+    }
+
+    .item-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .rating-badge {
+        background: #FEF3F2;
+        color: #B91C1C;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .rating-percent {
+        font-size: 0.85rem;
+        color: #6B7280;
+    }
+
+    .item-description {
+        font-size: 0.9rem;
+        color: #6B7280;
+        line-height: 1.4;
+    }
+
+    .item-image {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+    }
+
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .item-price {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #191919;
+        text-align: right;
+    }
+
+    /* Heat Level Indicators */
+    .heat-indicator {
+        margin-bottom: 0.5rem;
+    }
+
+    .heat-level {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .heat-level.mild { background: #ECFDF5; color: #065F46; }
+    .heat-level.medium { background: #FFFBEB; color: #92400E; }
+    .heat-level.hot { background: #FEF2F2; color: #991B1B; }
+    .heat-level.extra-hot { background: #EFF6FF; color: #1E40AF; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dd-nav-center {
+            display: none;
+        }
+
+        .restaurant-logo-overlay {
+            left: 1rem;
+        }
+
+        .restaurant-info {
+            padding: 1.5rem 1rem 1rem;
+        }
+
+        .menu-content {
+            padding: 0 1rem;
+        }
+
+        .item-content {
+            flex-direction: column-reverse;
+            align-items: flex-start;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 120px;
+            margin-bottom: 1rem;
+        }
+
+        .item-details {
+            margin-right: 0;
+        }
+    }
+  </style>
+</head>
+<body>
+    <!-- DoorDash-style Header -->
+    <header class="dd-header">
+        <div class="dd-nav">
+            <div class="dd-nav-left">
+                <button class="menu-btn">☰</button>
+                <img src="https://storage.googleapis.com/philly-wings.appspot.com/platform-logos/doordash-logo.png" alt="DoorDash" class="platform-logo">
+            </div>
+            <div class="dd-nav-center">
+                <span class="location-text">1455 Franklin Mills Cir</span>
+            </div>
+            <div class="dd-nav-right">
+                <button class="login-btn">Login</button>
+                <button class="app-btn">Open App</button>
+                <div class="cart-btn">🛒 0</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb">
+            <a href="#">Home</a> / <a href="#">Philadelphia</a> / <span>Philly Wings Express</span>
+        </nav>
+    </header>
+
+    <!-- Hero Image Section -->
+    <div class="hero-section">
+        <img src="https://storage.googleapis.com/philly-wings.appspot.com/hero-wings.jpg"
+             alt="Philly Wings Express" class="hero-image">
+        <div class="restaurant-logo-overlay">
+            <img src="https://storage.googleapis.com/philly-wings.appspot.com/logo.png"
+                 alt="Philly Wings Express Logo" class="restaurant-logo">
+        </div>
+    </div>
+
+    <!-- Restaurant Info Section -->
+    <div class="restaurant-info">
+        <h1 class="restaurant-name">Philly Wings Express</h1>
+        <div class="restaurant-meta">
+            <span class="rating">⭐ 4.8</span>
+            <span class="rating-count">(New Restaurant)</span>
+            <span class="dashpass">🟢 DashPass</span>
+            <span class="cuisine">American</span>
+            <span class="distance">Virtual Kitchen</span>
+            <span class="price-range">$$</span>
+        </div>
+
+        <!-- Promotional Banner -->
+        <div class="promo-banner">
+            <span class="promo-icon">🚚</span>
+            <span>Enjoy $0 delivery fee on your first order</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn active">Delivery</button>
+            <button class="action-btn">Pickup</button>
+            <button class="action-btn">Group Order</button>
+        </div>
+
+        <!-- Delivery Info -->
+        <div class="delivery-info">
+            <span class="delivery-time">⏱ 35 min left to order from this store on DoorDash</span>
+        </div>
+    </div>
+
+    <!-- Menu Navigation -->
+    <nav class="menu-navigation">
+        <div class="menu-tabs">
+            <a href="#wings" class="menu-tab">Wings</a>
+            <a href="#combos" class="menu-tab">Combos</a>
+            <a href="#sides" class="menu-tab">Sides</a>
+            <a href="#beverages" class="menu-tab">Beverages</a>
+            <a href="#sauces" class="menu-tab">Sauces</a>
+        </div>
+    </nav>
+
+    <!-- Menu Content -->
+    <main class="menu-content">
+        <div id="wings" class="menu-section"><h3>Wings</h3><p>Coming soon</p></div>
+        
+<div id="combos" class="menu-section">
+    <h3 class="section-title">Combos</h3>
+    <div class="menu-items">
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">MVP Meal</h4>
+                        <div class="item-rating">
+                            <span class="rating-percent">👍 92% (156)</span>
+                        </div>
+                        <p class="item-description">12 wings (2 sauces), regular fries, 4 mozzarella sticks (1 marinara), 4 dips</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmvp-meal-combo.png?alt=media"
+                             alt="MVP Meal" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$NaN</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Game Day 30</h4>
+                        <div class="item-rating">
+                            <span class="rating-percent">👍 92% (156)</span>
+                        </div>
+                        <p class="item-description">30 wings (5 sauces), 2 large fries, 8 mozzarella sticks (2 marinara), 10 dips</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media"
+                             alt="Game Day 30" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$NaN</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Sampler Platter</h4>
+                        <div class="item-rating">
+                            <span class="rating-percent">👍 92% (156)</span>
+                        </div>
+                        <p class="item-description">6 wings (1 sauce), 4 mozzarella sticks (1 marinara), regular fries</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fsampler-platter.png?alt=media"
+                             alt="Sampler Platter" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$NaN</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">The Tailgater</h4>
+                        <div class="item-rating">
+                            <span class="rating-percent">👍 92% (156)</span>
+                        </div>
+                        <p class="item-description">24 wings (4 sauces), 8 mozzarella sticks (2 marinara), 1 large fries, 8 dips</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgame-day-30-wings.png?alt=media"
+                             alt="The Tailgater" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$60.74</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Party Pack 50</h4>
+                        <div class="item-rating">
+                            <span class="rating-percent">👍 92% (156)</span>
+                        </div>
+                        <p class="item-description">50 wings (8 sauces), 3 large fries, 16 mozzarella sticks (4 marinara), 18 dips</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fparty-pack-50-wings.png?alt=media"
+                             alt="Party Pack 50" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$NaN</div>
+            </div>
+        
+    </div>
+</div>
+        <div id="sides" class="menu-section"><h3>Sides</h3><p>Coming soon</p></div>
+        <div id="beverages" class="menu-section"><h3>Beverages</h3><p>Coming soon</p></div>
+        
+<div id="sauces" class="menu-section">
+    <h3 class="section-title">Sauces & Add-Ons</h3>
+    <div class="menu-items">
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Mild Buffalo</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">Mild</span>
+                        </div>
+                        <p class="item-description">Mild buffalo - all flavor, easy heat</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbuffalo-sauced.png?alt=media"
+                             alt="Mild Buffalo" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Classic Lemon Pepper</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">Mild</span>
+                        </div>
+                        <p class="item-description">Classic lemon pepper - zesty citrus, cracked black pepper</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Flemon-pepper-dry-rub.png?alt=media"
+                             alt="Classic Lemon Pepper" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Philly Classic Hot</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level hot">Hot</span>
+                        </div>
+                        <p class="item-description">Traditional hot buffalo - the perfect heat</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmenu%2Fphilly-classic-hot.jpg?alt=media"
+                             alt="Philly Classic Hot" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Sweet Teriyaki</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">No Heat</span>
+                        </div>
+                        <p class="item-description">Teriyaki glaze - soy, ginger, sesame</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fteriyaki-sauced.png?alt=media"
+                             alt="Sweet Teriyaki" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Tailgate BBQ</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">No Heat</span>
+                        </div>
+                        <p class="item-description">Classic BBQ - sweet, tangy, smoky</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbbq-sauced.png?alt=media"
+                             alt="Tailgate BBQ" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Northeast Hot Lemon</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level medium">Medium</span>
+                        </div>
+                        <p class="item-description">Spicy lemon pepper with cayenne kick</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fnortheast-hot-lemon.png?alt=media"
+                             alt="Northeast Hot Lemon" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Honey Mustard</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">No Heat</span>
+                        </div>
+                        <p class="item-description">Sweet & tangy</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fhoney-mustard.png?alt=media"
+                             alt="Honey Mustard" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Broad & Pattison Burn</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level extra-hot">Extra Hot</span>
+                        </div>
+                        <p class="item-description">Nashville-style hot - cayenne, brown sugar</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fnashville-hot.png?alt=media"
+                             alt="Broad & Pattison Burn" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Blue Cheese</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">No Heat</span>
+                        </div>
+                        <p class="item-description">Classic chunky</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fblue-cheese.png?alt=media"
+                             alt="Blue Cheese" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Cheese Sauce</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">No Heat</span>
+                        </div>
+                        <p class="item-description">Warm & melty</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcheese-sauce.png?alt=media"
+                             alt="Cheese Sauce" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Gritty's Revenge</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level extra-hot">Extra Hot</span>
+                        </div>
+                        <p class="item-description">Scorpion pepper sauce - NOT for rookies!</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgrittys-revenge.png?alt=media"
+                             alt="Gritty's Revenge" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Frankford Cajun</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level medium">Medium</span>
+                        </div>
+                        <p class="item-description">Bold Cajun blend - paprika, garlic, herbs</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcajun-dry-rub.png?alt=media"
+                             alt="Frankford Cajun" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Ranch</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">No Heat</span>
+                        </div>
+                        <p class="item-description">Cool & creamy</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Franch-dip.png?alt=media"
+                             alt="Ranch" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+            <div class="menu-item-card">
+                <div class="item-content">
+                    <div class="item-details">
+                        <h4 class="item-name">Garlic Parmesan</h4>
+                        <div class="heat-indicator">
+                            <span class="heat-level mild">No Heat</span>
+                        </div>
+                        <p class="item-description">Creamy garlic butter with aged parmesan</p>
+                    </div>
+                    <div class="item-image">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgarlic-parmesan-dry-rub.png?alt=media"
+                             alt="Garlic Parmesan" loading="lazy">
+                    </div>
+                </div>
+                <div class="item-price">$0.75</div>
+            </div>
+        
+    </div>
+</div>
+    </main>
+
+    <script>
+    // Smooth scrolling for menu tabs
+    document.querySelectorAll('.menu-tab').forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }
+        });
+    });
+
+    // Update active menu tab on scroll
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.menu-section');
+        const tabs = document.querySelectorAll('.menu-tab');
+
+        let currentSection = '';
+        sections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= 150 && rect.bottom >= 150) {
+                currentSection = section.id;
+            }
+        });
+
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.getAttribute('href') === '#' + currentSection) {
+                tab.classList.add('active');
+            }
+        });
+    });
+
+    // Menu item click handler
+    document.querySelectorAll('.menu-item-card').forEach(card => {
+        card.addEventListener('click', function() {
+            // In real DoorDash, this would open item customization modal
+            // For now, just add a visual feedback
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+    });
+  </script>
+</body>
+</html>

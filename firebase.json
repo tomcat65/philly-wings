@@ -62,14 +62,18 @@
     "firestore": {
       "port": 8080
     },
+    "functions": {
+      "port": 5002
+    },
     "hosting": {
-      "port": 5000
+      "port": 5003
     },
     "storage": {
       "port": 9199
     },
     "ui": {
-      "enabled": true
+      "enabled": true,
+      "port": 4002
     }
   }
 }
