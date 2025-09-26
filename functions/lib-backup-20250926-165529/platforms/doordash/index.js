@@ -5,7 +5,7 @@
 
 const { generateDoorDashCSS } = require('./css');
 const { generateDoorDashHTMLBody } = require('./html');
-const { generateDoorDashJS } = require('./javascript-backup-complete');
+const { generateDoorDashJS } = require('./javascript');
 const { getPlatformBranding } = require('../../data/branding');
 
 /**
