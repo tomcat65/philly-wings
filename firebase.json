@@ -9,6 +9,10 @@
     ],
     "rewrites": [
       {
+        "source": "/platform/**",
+        "function": "platformMenu"
+      },
+      {
         "source": "/menu/**",
         "destination": "/menu/platform/index.html"
       }

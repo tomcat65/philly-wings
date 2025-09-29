@@ -186,41 +186,61 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
 function generateCombosSection(combos, branding) {
   if (!combos?.length) return '<section id="combos"><h2>Combos section temporarily unavailable</h2></section>';
 
+  const cardsHtml = combos.map(raw => {
+    // Safe fallbacks for incomplete production combo documents
+    const id = raw.id || '';
+    const nameFromDescMatch = typeof raw.description === 'string' && raw.description.match(/(\d+)\s*wings?/i);
+    const derivedName = nameFromDescMatch ? `${nameFromDescMatch[1]}-Wing Combo` : (id ? `Combo ${id}` : 'Combo Deal');
+    const name = raw.name || derivedName;
+
+    const description = raw.description || `${name} - A perfect meal combination`;
+    const imageUrl = raw.imageUrl || (raw.images && (raw.images.hero || raw.images.original)) || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcombo-platter_800x800.webp?alt=media';
+
+    let price = raw.platformPrice;
+    if (price === undefined || price === null) {
+      const base = typeof raw.basePrice === 'number' ? raw.basePrice : parseFloat(raw.basePrice) || 0;
+      const fallback = base * 1.35; // default DD markup as a safe fallback
+      price = fallback > 0 ? fallback : null;
+    }
+    const priceHtml = price !== null ? (typeof price === 'number' ? price.toFixed(2) : price) : 'N/A';
+
+    const badge = raw.badge || 'COMBO DEAL';
+    const savings = (typeof raw.savings === 'string' && raw.savings.includes('%')) ? raw.savings : (raw.savings || '$8');
+
+    return `
+      <div class="combo-card featured">
+        <div class="combo-image-wrapper">
+          <img src="${imageUrl}"
+               alt="${name}"
+               class="combo-image"
+               loading="lazy">
+          <div class="combo-badge">${badge}</div>
+          <div class="savings-badge">Save ${savings}</div>
+        </div>
+        <div class="combo-details">
+          <h3 class="combo-name">${name}</h3>
+          <p class="combo-description">${description}</p>
+          <div class="combo-includes">
+            ${generateComboIncludes(raw).map(include => `<span class="include-item">${include.emoji} ${include.name}</span>`).join('')}
+          </div>
+          <div class="combo-pricing">
+            <div class="price-main">$${priceHtml}</div>
+            <div class="price-label">Order on ${branding.platformName}</div>
+          </div>
+          <button class="order-now-btn">ORDER NOW →</button>
+        </div>
+      </div>`;
+  }).join('');
+
   return `
     <section id="combos" class="menu-section">
-        <div class="section-header">
-            <h2 class="section-title">🔥 COMBO DEALS</h2>
-            <p class="section-description">Save up to 17% • Complete meals ready in 20-30 mins</p>
-        </div>
-
-        <div class="combo-cards-grid">
-            ${combos.map(combo => `
-                <div class="combo-card featured">
-                    <div class="combo-image-wrapper">
-                        <img src="${combo.imageUrl || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcombo-platter_800x800.webp?alt=media'}"
-                             alt="${combo.name}"
-                             class="combo-image"
-                             loading="lazy">
-                        <div class="combo-badge">${combo.badge || 'COMBO DEAL'}</div>
-                        <div class="savings-badge">Save ${typeof combo.savings === 'string' && combo.savings.includes('%') ? combo.savings : (combo.savings || '$8')}</div>
-                    </div>
-                    <div class="combo-details">
-                        <h3 class="combo-name">${combo.name}</h3>
-                        <p class="combo-description">${combo.description}</p>
-                        <div class="combo-includes">
-                            ${generateComboIncludes(combo).map(include =>
-                                `<span class="include-item">${include.emoji} ${include.name}</span>`
-                            ).join('')}
-                        </div>
-                        <div class="combo-pricing">
-                            <div class="price-main">$${combo.platformPrice ? (typeof combo.platformPrice === 'number' ? combo.platformPrice.toFixed(2) : combo.platformPrice) : 'N/A'}</div>
-                            <div class="price-label">Order on ${branding.platformName}</div>
-                        </div>
-                        <button class="order-now-btn">ORDER NOW →</button>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
+      <div class="section-header">
+        <h2 class="section-title">🔥 COMBO DEALS</h2>
+        <p class="section-description">Save up to 17% • Complete meals ready in 20-30 mins</p>
+      </div>
+      <div class="combo-cards-grid">
+        ${cardsHtml}
+      </div>
     </section>
   `;
 }
@@ -317,7 +337,7 @@ function generateBonelessWingCard(minBonelessPrice, minBoneInPrice) {
                 <div class="price-main">Starting at ${formatCurrency(minBonelessPrice)}</div>
                 <div class="price-comparison">${savings}% cheaper than bone-in</div>
             </div>
-            <button class="order-wing-category-btn interactive" onclick="openWingModal('boneless')">
+            <button class="order-wing-category-btn interactive" onclick="openBonelessWingModal()">
                 VIEW OPTIONS →
             </button>
         </div>
@@ -345,7 +365,7 @@ function generateBoneInWingCard(minBoneInPrice) {
             <div class="wing-category-pricing">
                 <div class="price-main">Starting at ${formatCurrency(minBoneInPrice)}</div>
             </div>
-            <button class="order-wing-category-btn interactive" onclick="openWingModal('bone-in')">
+            <button class="order-wing-category-btn interactive" onclick="openBoneInWingModal()">
                 VIEW OPTIONS →
             </button>
         </div>

@@ -3,6 +3,9 @@
  * Handles all interactive functionality for DoorDash platform
  */
 
+// Import the modular wings modal
+const { generateWingsModalJS } = require('./modules/wings-modal-complete');
+
 /**
  * Generate complete DoorDash JavaScript
  * @param {Object} menuData Complete menu data from Firestore including sauces
@@ -13,7 +16,7 @@ function generateDoorDashJS(menuData = {}) {
     ${generateGlobalVariables(menuData)}
     ${generateMobileMenuFunctions()}
     ${generateSidesModalFunctions()}
-    ${generateModalFunctions(menuData)}
+    ${generateWingsModalJS(menuData, menuData.sauces)}
     ${generateNavigationFunctions()}
     ${generateUtilityFunctions()}
     ${generateInitialization()}
@@ -300,170 +303,18 @@ function generateSidesModalFunctions() {
         selectedSideQuantities[sideId] = newQuantity;
       }
 
-      // Refresh the entire display to update button states and selection highlighting
+      // Refresh the entire side options to update styling and disabled states
       populateSideOptions();
-      updateSideModalButtons();
     };
 
     function populateSideExtraDips() {
       console.log('Loading side extra dips...');
-
-      // Get available dipping sauces from Firestore data
-      const allSauces = strategicMenu.sauces || firestoreSauces || [];
-      const availableDips = [
-        // Standard dipping sauces at $0.75 each
-        { id: 'ranch', name: 'Ranch', price: 0.75, description: 'Cool & creamy ranch dip' },
-        { id: 'blue_cheese', name: 'Blue Cheese', price: 0.75, description: 'Tangy blue cheese dip' },
-        { id: 'honey_mustard', name: 'Honey Mustard', price: 0.75, description: 'Sweet honey mustard dip' },
-        { id: 'cheese_sauce', name: 'Cheese Sauce', price: 0.75, description: 'Warm & melty cheese sauce' }
-      ];
-
-      const container = document.getElementById('sideExtraDips');
-      if (!container) return;
-
-      container.innerHTML =
-        '<div style="margin-bottom: 20px; font-size: 14px; color: #666; text-align: center;">Select extra dipping sauces for your fries (optional) - $0.75 each</div>' +
-        '<div style="margin-bottom: 16px; text-align: center;">' +
-          '<button onclick="skipSideDips()" style="padding: 10px 20px; background: #f8f9fa; border: 2px solid #dee2e6; color: #6c757d; border-radius: 8px; cursor: pointer; font-size: 14px;">Skip Dips (None)</button>' +
-        '</div>' +
-        availableDips.map(dip => {
-          const quantity = selectedSideDips[dip.id] || 0;
-          return '<div class="side-dip-option" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 2px solid ' + (quantity > 0 ? '#ff6b35' : '#e0e0e0') + '; border-radius: 12px; margin-bottom: 12px; background: ' + (quantity > 0 ? '#fff5f2' : 'white') + ';">' +
-            '<div style="flex: 1;">' +
-              '<h5 style="margin: 0 0 4px 0; color: #1a1a1a; font-size: 16px;">' + dip.name + '</h5>' +
-              '<p style="margin: 0; color: #666; font-size: 14px;">' + dip.description + ' - $' + dip.price.toFixed(2) + ' each</p>' +
-            '</div>' +
-            '<div style="display: flex; align-items: center; gap: 12px;">' +
-              '<button onclick="adjustSideDipQuantity(\\'' + dip.id + '\\', -1)" style="width: 36px; height: 36px; border: 2px solid ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; background: white; color: ' + (quantity === 0 ? '#ccc' : '#ff6b35') + '; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: ' + (quantity === 0 ? 'not-allowed' : 'pointer') + '; opacity: ' + (quantity === 0 ? '0.3' : '1') + ';" ' + (quantity === 0 ? 'disabled' : '') + '>−</button>' +
-              '<span style="min-width: 24px; text-align: center; font-size: 18px; font-weight: bold; color: #1a1a1a;">' + quantity + '</span>' +
-              '<button onclick="adjustSideDipQuantity(\\'' + dip.id + '\\', 1)" style="width: 36px; height: 36px; border: 2px solid #ff6b35; background: #ff6b35; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer;">+</button>' +
-            '</div>' +
-          '</div>';
-        }).join('');
+      // TODO: Implement extra dips selection
     }
-
-    // Helper functions for side dip selection
-    window.adjustSideDipQuantity = function(dipId, change) {
-      const currentQuantity = selectedSideDips[dipId] || 0;
-      const newQuantity = Math.max(0, Math.min(10, currentQuantity + change)); // Max 10 of any dip
-
-      if (newQuantity === 0) {
-        delete selectedSideDips[dipId];
-      } else {
-        selectedSideDips[dipId] = newQuantity;
-      }
-
-      // Refresh the dips display
-      populateSideExtraDips();
-    };
-
-    window.skipSideDips = function() {
-      // Clear all selected dips and go to summary
-      selectedSideDips = {};
-      navigateSideModalStep(1); // Move to step 3 (summary)
-    };
 
     function populateSideOrderSummary() {
       console.log('Loading side order summary...');
-
-      const container = document.getElementById('sideOrderSummary');
-      if (!container) return;
-
-      // Calculate totals
-      let subtotal = 0;
-      let itemDetails = [];
-
-      // Add selected fries/sides
-      Object.keys(selectedSideQuantities).forEach(sideId => {
-        const quantity = selectedSideQuantities[sideId];
-        if (quantity > 0) {
-          const sideItem = sideModalData.find(s => s.id === sideId);
-          if (sideItem) {
-            const itemTotal = sideItem.platformPrice * quantity;
-            subtotal += itemTotal;
-            itemDetails.push({
-              name: sideItem.name,
-              quantity: quantity,
-              unitPrice: sideItem.platformPrice,
-              total: itemTotal
-            });
-          }
-        }
-      });
-
-      // Add selected dipping sauces
-      let dipTotal = 0;
-      const dipDetails = [];
-      Object.keys(selectedSideDips).forEach(dipId => {
-        const quantity = selectedSideDips[dipId];
-        if (quantity > 0) {
-          const dipPrice = 0.75; // Standard dip price
-          const itemTotal = dipPrice * quantity;
-          dipTotal += itemTotal;
-          subtotal += itemTotal;
-
-          const dipName = dipId.replace('_', ' ').split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-
-          dipDetails.push({
-            name: dipName,
-            quantity: quantity,
-            unitPrice: dipPrice,
-            total: itemTotal
-          });
-        }
-      });
-
-      container.innerHTML =
-        '<div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 20px;">' +
-          '<h4 style="margin: 0 0 16px 0; color: #1a1a1a; font-size: 18px;">Order Summary</h4>' +
-
-          // Fries/Sides section
-          '<div style="margin-bottom: 16px;">' +
-            '<div style="font-weight: bold; margin-bottom: 8px; color: #333; font-size: 16px;">' + currentSideType.charAt(0).toUpperCase() + currentSideType.slice(1).replace('-', ' ') + ':</div>' +
-            itemDetails.map(item =>
-              '<div style="display: flex; justify-content: space-between; margin-bottom: 4px; padding-left: 16px; font-size: 14px;">' +
-                '<span>' + item.name + ' × ' + item.quantity + '</span>' +
-                '<span>$' + item.total.toFixed(2) + '</span>' +
-              '</div>'
-            ).join('') +
-          '</div>' +
-
-          // Dipping sauces section (if any)
-          (dipDetails.length > 0 ?
-            '<div style="margin-bottom: 16px;">' +
-              '<div style="font-weight: bold; margin-bottom: 8px; color: #333; font-size: 16px;">Extra Dipping Sauces:</div>' +
-              dipDetails.map(dip =>
-                '<div style="display: flex; justify-content: space-between; margin-bottom: 4px; padding-left: 16px; font-size: 14px;">' +
-                  '<span>' + dip.name + ' × ' + dip.quantity + '</span>' +
-                  '<span>$' + dip.total.toFixed(2) + '</span>' +
-                '</div>'
-              ).join('') +
-              '<div style="border-top: 1px solid #dee2e6; margin-top: 8px; padding-top: 8px; padding-left: 16px; font-size: 14px;">' +
-                '<div style="display: flex; justify-content: space-between; font-weight: bold;">' +
-                  '<span>Dips Subtotal:</span>' +
-                  '<span>$' + dipTotal.toFixed(2) + '</span>' +
-                '</div>' +
-              '</div>' +
-            '</div>'
-            :
-            '<div style="margin-bottom: 16px; font-size: 14px; color: #666; font-style: italic;">No extra dipping sauces</div>'
-          ) +
-
-          // Total
-          '<div style="border-top: 2px solid #dee2e6; padding-top: 12px; margin-top: 16px;">' +
-            '<div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #1a1a1a;">' +
-              '<span>Total:</span>' +
-              '<span>$' + subtotal.toFixed(2) + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-
-        // Options to continue or finish
-        '<div style="display: flex; gap: 12px; margin-top: 20px;">' +
-          '<button onclick="continueShopping()" style="flex: 1; padding: 12px; background: #f8f9fa; border: 2px solid #dee2e6; color: #495057; border-radius: 8px; cursor: pointer; font-size: 14px;">Continue Shopping Sides</button>' +
-          '<button onclick="finishSideOrder()" style="flex: 1; padding: 12px; background: #28a745; border: 2px solid #28a745; color: white; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold;">Finish & Add to Cart</button>' +
-        '</div>';
+      // TODO: Implement order summary display
     }
 
     window.addSideOrderToCart = function() {
@@ -475,17 +326,6 @@ function generateSidesModalFunctions() {
 
       closeSidesModal();
       alert('Side added to cart! (This is a demo)');
-    };
-
-    // Helper functions for summary step actions
-    window.continueShopping = function() {
-      // Close current modal and allow user to select more sides
-      closeSidesModal();
-    };
-
-    window.finishSideOrder = function() {
-      // Add current order to cart and close modal
-      addSideOrderToCart();
     };
 
     // Beverage Modal System
@@ -1518,24 +1358,8 @@ function generateModalFunctions(menuData = {}) {
         { id: 'extra_cheese_sauce', name: 'Extra Cheese Sauce', price: 0.75 }
       ];
 
-      // Find the correct container based on current step and wing type
-      let container;
-      if (currentWingType === 'boneless' && currentModalStep === 4) {
-        // For boneless wings, extra dips are in step 4 but need to use the step 4 content area
-        container = document.querySelector('#modalStep4 .wing-style-options');
-        if (!container) {
-          // Create the container if it doesn't exist in the right place
-          const step4 = document.getElementById('modalStep4');
-          if (step4) {
-            step4.innerHTML = '<h3 id="step4Title">Extra Dips (Optional)</h3><div class="extra-dip-options"></div>';
-            container = step4.querySelector('.extra-dip-options');
-          }
-        }
-      } else {
-        // For bone-in wings, extra dips are in step 5
-        container = document.getElementById('extraDipOptions');
-      }
-
+      const containerId = currentWingType === 'boneless' ? 'extraDipOptions' : 'extraDipOptions';
+      const container = document.getElementById(containerId);
       if (!container) return;
 
       container.innerHTML =
@@ -1576,29 +1400,18 @@ function generateModalFunctions(menuData = {}) {
       const extraDipsTotal = Object.values(selectedExtraDips).reduce((sum, qty) => sum + (qty * 0.75), 0);
       const totalPrice = selectedWingVariant.platformPrice + wingStyleUpcharge + extraDipsTotal;
 
-      // Find the correct container based on current step and wing type
-      let container;
-      if (currentWingType === 'boneless' && currentModalStep === 5) {
-        // For boneless wings, order summary is in step 5 but needs to use the step 5 content area
-        container = document.querySelector('#modalStep5 .extra-dip-options');
-        if (!container) {
-          // Create the container if it doesn't exist in the right place
-          const step5 = document.getElementById('modalStep5');
-          if (step5) {
-            step5.innerHTML = '<h3 id="step5Title">Order Summary</h3><div class="order-summary"></div>';
-            container = step5.querySelector('.order-summary');
-          }
-        }
-      } else {
-        // For bone-in wings, order summary is in step 6
-        container = document.getElementById('orderSummary');
-      }
-
+      const container = document.getElementById('orderSummary');
       if (!container) return;
 
       container.innerHTML =
         '<div style="text-align: left; font-size: 16px; line-height: 1.6;">' +
-          '<h4 style="margin-bottom: 16px; color: #1a1a1a; font-size: 20px;">' + selectedWingVariant.count + ' ' + (currentWingType === 'boneless' ? 'Boneless' : 'Bone-In') + ' Wings</h4>' +
+          '<h4 style="margin-bottom: 16px; color: #1a1a1a; font-size: 20px;">' +
+            selectedWingVariant.count + ' ' +
+            (currentWingType === 'boneless' ? 'Boneless' : 'Bone-In') + ' Wings' +
+            (currentWingType === 'bone-in' && selectedWingStyle !== 'regular' ?
+              ' (' + (selectedWingStyle === 'all-drums' ? 'All Drums' : selectedWingStyle === 'all-flats' ? 'All Flats' : selectedWingStyle) + ')'
+              : '') +
+          '</h4>' +
           '<div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px;">' +
             '<p style="margin-bottom: 8px; color: #666; display: flex; justify-content: space-between;"><span>Base Price:</span><span>$' + selectedWingVariant.platformPrice.toFixed(2) + '</span></p>' +
             // Generate detailed sauce list with "on the side" notation
@@ -1661,33 +1474,8 @@ function generateModalFunctions(menuData = {}) {
                 :
                 '<p style="margin-bottom: 8px; color: #666; display: flex; justify-content: space-between;"><span>Included Dips:</span><span>None selected</span></p>'
             ) +
-            (selectedWingStyle !== 'regular' ?
-              '<p style="margin-bottom: 8px; color: #666; display: flex; justify-content: space-between;"><span>Wing Style: ' +
-              (selectedWingStyle === 'grilled' ? 'Grilled' : selectedWingStyle === 'crispy' ? 'Extra Crispy' : selectedWingStyle.charAt(0).toUpperCase() + selectedWingStyle.slice(1)) +
-              '</span><span>+$' + wingStyleUpcharge.toFixed(2) + '</span></p>'
-              : '') +
-            // Add extra dips section with detailed breakdown
-            (Object.keys(selectedExtraDips).length > 0 ?
-              '<div style="margin-bottom: 8px; color: #666;">' +
-                '<div style="font-weight: bold; margin-bottom: 4px;">Extra Dips (+$0.75 each):</div>' +
-                Object.keys(selectedExtraDips)
-                  .filter(dipId => selectedExtraDips[dipId] > 0)
-                  .map(dipId => {
-                    const quantity = selectedExtraDips[dipId];
-                    const dipName = dipId.replace('extra_', '').replace('_', ' ')
-                      .split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                    const dipTotal = (quantity * 0.75).toFixed(2);
-                    return '<div style="padding-left: 16px; font-size: 14px; line-height: 1.4; margin-bottom: 2px; display: flex; justify-content: space-between;">' +
-                      '<span>• ' + dipName + ' × ' + quantity + '</span>' +
-                      '<span>+$' + dipTotal + '</span>' +
-                    '</div>';
-                  }).join('') +
-                '<div style="border-top: 1px solid #eee; margin-top: 4px; padding-top: 4px; padding-left: 16px; font-size: 14px; font-weight: bold; display: flex; justify-content: space-between;">' +
-                  '<span>Extra Dips Total:</span>' +
-                  '<span>+$' + extraDipsTotal.toFixed(2) + '</span>' +
-                '</div>' +
-              '</div>'
-              : '') +
+            (selectedWingStyle !== 'regular' ? '<p style="margin-bottom: 8px; color: #666; display: flex; justify-content: space-between;"><span>' + (selectedWingStyle === 'all-drums' ? 'All Drums' : selectedWingStyle === 'all-flats' ? 'All Flats' : 'Wing Style') + ':</span><span>+$' + wingStyleUpcharge.toFixed(2) + '</span></p>' : '') +
+            (Object.keys(selectedExtraDips).length > 0 ? '<p style="margin-bottom: 8px; color: #666; display: flex; justify-content: space-between;"><span>Extra Dips (' + Object.values(selectedExtraDips).reduce((sum, qty) => sum + qty, 0) + '):</span><span>+$' + extraDipsTotal.toFixed(2) + '</span></p>' : '') +
           '</div>' +
           '<div style="border-top: 2px solid #ff6b35; padding-top: 16px;">' +
             '<p style="font-size: 24px; font-weight: bold; color: #ff6b35; text-align: center; margin: 0;">Total: $' + totalPrice.toFixed(2) + '</p>' +
@@ -1877,7 +1665,7 @@ module.exports = {
   generateGlobalVariables,
   generateMobileMenuFunctions,
   generateSidesModalFunctions,
-  generateModalFunctions,
+  // generateModalFunctions, // REPLACED BY: generateWingsModalJS from modules/wings-modal-complete.js
   generateNavigationFunctions,
   generateUtilityFunctions,
   generateInitialization
