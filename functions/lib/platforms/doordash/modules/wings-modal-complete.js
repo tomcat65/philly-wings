@@ -309,6 +309,7 @@ function generateWingsModalJS(menuData = {}, saucesData = []) {
                     (isOnSide ? ' (on the side)' : '') +
                   '</div>';
                 }).join('') +
+                '<div style="padding-left: 16px; font-size: 14px; color: #333; font-weight: bold; margin-top: 8px; border-top: 1px solid #ddd; padding-top: 8px;">Total Wings: ' + selectedWingVariant.count + '</div>' +
               '</div>'
             : '') +
             // Wing style label (informational)

@@ -105,3 +105,6 @@ menu/platform/firebase-config.js
 # Backup files in functions directory
 functions/*backup.js
 functions/*.backup*
+
+firebase-mcp-test/
+firebase-mcp*.*

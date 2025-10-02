@@ -1011,7 +1011,8 @@ function generateMenuSectionStyles(branding) {
 function generateWingModalStyles(branding) {
   return `
     /* Wing Modal Styles */
-    .wing-modal {
+    .wing-modal,
+    .sides-modal {
       position: fixed;
       top: 0;
       left: 0;
@@ -1277,6 +1278,154 @@ function generateWingModalStyles(branding) {
       padding: 1.5rem;
     }
 
+    /* Fountain Drinks Styles - Consistent with Wing Variants */
+    .fountain-drinks-container {
+      padding: 0.5rem 0;
+    }
+
+    .fountain-sizes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .fountain-size-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fountain-size-header {
+      margin: 0 0 1rem 0;
+      color: #1a1a1a;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      padding: 0.75rem;
+      background: ${branding.primaryColor}15;
+      border-radius: 12px;
+      border: 2px solid ${branding.primaryColor}30;
+    }
+
+    .fountain-flavors-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .fountain-flavor-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      margin: 0;
+    }
+
+    .fountain-flavor-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .fountain-flavor-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .fountain-quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .fountain-qty-btn {
+      width: 32px;
+      height: 32px;
+      border: 2px solid ${branding.primaryColor};
+      background: white;
+      color: ${branding.primaryColor};
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .fountain-qty-btn:hover {
+      background: ${branding.primaryColor};
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .fountain-qty-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .fountain-qty-display {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      min-width: 32px;
+      text-align: center;
+      padding: 0.25rem 0.5rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+    }
+
+    /* Responsive adjustments for fountain drinks */
+    @media (max-width: 768px) {
+      .fountain-sizes-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    /* Cart Summary Styles */
+    .cart-items {
+      margin-bottom: 1.5rem;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-desc {
+      font-size: 16px;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+
+    .item-price {
+      font-size: 16px;
+      font-weight: 600;
+      color: ${branding.primaryColor};
+    }
+
+    .cart-total {
+      padding: 1rem 0;
+      border-top: 2px solid ${branding.primaryColor};
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .cart-total strong {
+      font-size: 20px;
+      color: #1a1a1a;
+    }
+
     .summary-header h4 {
       margin: 0 0 1rem 0;
       color: #1a1a1a;
@@ -1335,6 +1484,269 @@ function generateWingModalStyles(branding) {
       font-size: 1.3rem;
       font-weight: 700;
       color: ${branding.primaryColor};
+    }
+  `;
+}
+
+/**
+ * Generate sides modal specific styles
+ */
+function generateSidesModalStyles() {
+  return `
+    /* Fries Modal Options */
+    .fries-options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .fries-size-option {
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .fries-size-option:hover {
+      border-color: #ff6b35;
+      transform: translateY(-2px);
+    }
+
+    .fries-size-option.selected {
+      border-color: #ff6b35;
+      background: #fff5f2;
+    }
+
+    .size-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .size-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .size-description {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .size-price {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ff6b35;
+    }
+
+    .size-selector {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #ff6b35;
+    }
+
+    .selected .size-selector {
+      border-color: #ff6b35;
+      background: #ff6b35;
+      color: white;
+    }
+
+    /* Loaded Fries Modal Options */
+    .loaded-fries-options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .loaded-fries-option {
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .loaded-fries-option:hover {
+      border-color: #ff6b35;
+      transform: translateY(-2px);
+    }
+
+    .loaded-fries-option.selected {
+      border-color: #ff6b35;
+      background: #fff5f2;
+    }
+
+    .loaded-fries-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .loaded-fries-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .loaded-fries-description {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .loaded-fries-includes {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .loaded-fries-price {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ff6b35;
+    }
+
+    .loaded-fries-selector {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #ff6b35;
+    }
+
+    .selected .loaded-fries-selector {
+      border-color: #ff6b35;
+      background: #ff6b35;
+      color: white;
+    }
+
+    /* Customizations Grid */
+    .customizations-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .customization-option {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Mozzarella Modal Options */
+    .mozzarella-options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .mozzarella-count-option {
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mozzarella-count-option:hover {
+      border-color: #ff6b35;
+      transform: translateY(-2px);
+    }
+
+    .mozzarella-count-option.selected {
+      border-color: #ff6b35;
+      background: #fff5f2;
+    }
+
+    .mozzarella-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .mozzarella-count-badge {
+      background: #ff6b35;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .mozzarella-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .mozzarella-description {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .mozzarella-price {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ff6b35;
+    }
+
+    .mozzarella-selector {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #ff6b35;
+    }
+
+    .selected .mozzarella-selector {
+      border-color: #ff6b35;
+      background: #ff6b35;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .mozzarella-options-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `;
 }

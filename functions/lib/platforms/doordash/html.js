@@ -56,7 +56,7 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
         ${generateWingsSection(menuData.wings, branding)}
         ${generateSidesSection(menuData.sides, branding)}
         ${generateDipsSection(menuData.sauces.filter(s => s.category === 'dipping-sauce'), branding)}
-        ${generateBeveragesSection(menuData.beverages, branding)}
+        ${generateBeveragesSection(menuData.drinks, branding)}
         ${generateSaucesSection(menuData.sauces, branding)}
     </main>
 
@@ -109,29 +109,30 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
         </div>
     </div>
 
-    <!-- Sides Ordering Modal -->
+    <!-- Sides Ordering Modal (Shared) -->
     <div id="sidesModal" class="sides-modal" style="display: none;">
         <div class="modal-backdrop" onclick="closeSidesModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <button class="modal-close" onclick="closeSidesModal()">&times;</button>
                 <h2 id="sideModalTitle" class="modal-title">Choose Your Side</h2>
-                <div class="modal-progress">
-                    <div class="progress-step active" data-step="1">Options</div>
-                    <div class="progress-step" data-step="2">Dips</div>
-                    <div class="progress-step" data-step="3">Summary</div>
-                </div>
+                <div class="modal-progress" id="sideModalProgress"></div>
             </div>
             <div class="modal-body">
-                <div id="sideModalStep1" class="modal-step active">
+                <div id="sideModalVariants" class="modal-step active">
+                    <h3 id="sideVariantsTitle" class="modal-step-title">Choose Your Side</h3>
                     <div id="sideOptions" class="side-options-grid"></div>
                 </div>
-                <div id="sideModalStep2" class="modal-step">
-                    <h3>Extra Dipping Sauces</h3>
+                <div id="sideModalCustomization" class="modal-step">
+                    <h3 id="sideCustomizationTitle" class="modal-step-title">Customize</h3>
+                    <div id="sideCustomizationContent"></div>
+                </div>
+                <div id="sideModalDips" class="modal-step">
+                    <h3 id="sideDipsTitle" class="modal-step-title">Extra Dipping Sauces</h3>
                     <div id="sideExtraDips" class="extra-dips-grid"></div>
                 </div>
-                <div id="sideModalStep3" class="modal-step">
-                    <h3>Order Summary</h3>
+                <div id="sideModalSummary" class="modal-step">
+                    <h3 id="sideSummaryTitle" class="modal-step-title">Order Summary</h3>
                     <div id="sideOrderSummary" class="order-summary"></div>
                 </div>
             </div>
@@ -159,11 +160,11 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
             <div class="modal-body">
                 <div id="beverageModalStep1" class="modal-step active">
                     <h3 id="beverageStep1Title">Choose Your Size</h3>
-                    <div id="beverageSizeOptions" class="beverage-size-options"></div>
+                    <div id="beverageSizeOptions" class="wing-variants-grid"></div>
                 </div>
                 <div id="beverageModalStep2" class="modal-step">
                     <h3 id="beverageStep2Title">Choose Your Flavor</h3>
-                    <div id="beverageFlavorOptions" class="beverage-flavor-options"></div>
+                    <div id="beverageFlavorOptions" class="wing-variants-grid"></div>
                 </div>
                 <div id="beverageModalStep3" class="modal-step">
                     <h3>Order Summary</h3>
@@ -411,7 +412,7 @@ function generateSidesSection(sides, branding) {
                         <div class="price-main">Starting at ${formatCurrency(minFriesPrice)}</div>
                         <div class="price-label">Choose Size</div>
                     </div>
-                    <button class="order-side-category-btn" onclick="openSideModal('fries')">VIEW OPTIONS →</button>
+                    <button class="order-side-category-btn" onclick="openFriesModal()">VIEW OPTIONS →</button>
                 </div>
             </div>
             <div class="side-category-card">
@@ -432,7 +433,7 @@ function generateSidesSection(sides, branding) {
                         <div class="price-main">Starting at ${formatCurrency(loadedFriesPrice)}</div>
                         <div class="price-label">Large Size</div>
                     </div>
-                    <button class="order-side-category-btn" onclick="openSideModal('loaded-fries')">VIEW OPTIONS →</button>
+                    <button class="order-side-category-btn" onclick="openLoadedFriesModal()">VIEW OPTIONS →</button>
                 </div>
             </div>
             <div class="side-category-card">
@@ -453,7 +454,7 @@ function generateSidesSection(sides, branding) {
                         <div class="price-main">Starting at ${formatCurrency(minMozzPrice)}</div>
                         <div class="price-label">Choose Quantity</div>
                     </div>
-                    <button class="order-side-category-btn" onclick="openSideModal('mozzarella-sticks')">VIEW OPTIONS →</button>
+                    <button class="order-side-category-btn" onclick="openMozzarellaModal()">VIEW OPTIONS →</button>
                 </div>
             </div>
         </div>
@@ -464,91 +465,166 @@ function generateSidesSection(sides, branding) {
 /**
  * Generate beverages section HTML
  */
-function generateBeveragesSection(beverages, branding) {
-  if (!beverages || beverages.length === 0) return '';
+function generateBeveragesSection(drinksDoc, branding) {
+  const variants = drinksDoc?.variants || [];
+  if (!variants.length) return '';
 
-  // Separate fountain drinks, tea, and other beverages (matching original logic)
-  const fountainDrinks = beverages.filter(b => b.name.toLowerCase().includes('fountain'));
-  const teaDrinks = beverages.filter(b => b.name.toLowerCase().includes('tea'));
-  const otherBeverages = beverages.filter(b => !b.name.toLowerCase().includes('fountain') && !b.name.toLowerCase().includes('tea'));
-
-  // Combine all beverages into rich card format
-  const allBeverages = [];
-
-  // Add fountain drinks as a single card
-  if (fountainDrinks.length > 0) {
-    allBeverages.push({
-      id: 'fountain-drinks',
-      name: 'Fountain Drinks',
-      description: '8 Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq\'s Root Beer, Hi-C Fruit Punch',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_200x200.webp?alt=media',
-      platformPrice: fountainDrinks[0]?.platformPrice || fountainDrinks[0]?.basePrice || 3.36,
-      badge: 'CHOOSE SIZE',
-      details: fountainDrinks.map(f => ({ name: f.name, price: f.platformPrice || f.basePrice })),
-      type: 'fountain'
-    });
-  }
-
-  // Add tea as a single card
-  if (teaDrinks.length > 0) {
-    allBeverages.push({
-      id: 'iced-tea',
-      name: 'Fresh Brewed Tea',
-      description: 'Freshly brewed daily • Sweet or unsweetened • Perfect refreshment',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_200x200.webp?alt=media',
-      platformPrice: teaDrinks[0]?.platformPrice || teaDrinks[0]?.basePrice || 2.99,
-      badge: 'FRESH DAILY',
-      details: teaDrinks.map(t => ({ name: t.name, price: t.platformPrice || t.basePrice })),
-      type: 'tea'
-    });
-  }
-
-  // Add other beverages (like bottled water)
-  otherBeverages.forEach(beverage => {
-    allBeverages.push({
-      id: beverage.id || 'bottled-water',
-      name: beverage.name || 'Bottled Water',
-      description: beverage.description || 'Pure refreshment • 16.9 fl oz bottle',
-      imageUrl: beverage.imageUrl || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_200x200.webp?alt=media',
-      platformPrice: beverage.platformPrice || beverage.basePrice || 3.09,
-      badge: 'PURE',
-      type: 'bottle'
-    });
-  });
+  // Group variants into logical beverage types for the modal
+  const beverageGroups = groupVariantsIntoBeverageTypes(variants);
 
   return `
     <section id="beverages" class="menu-section">
         <div class="section-header">
-            <h2 class="section-title">🥤 Beverages</h2>
-            <p class="section-description">Cool down the heat • Fountain drinks, tea, and water</p>
+            <h2 class="section-title">🥤 ${drinksDoc?.name || 'Beverages'}</h2>
+            <p class="section-description">${drinksDoc?.description || 'Cool down the heat with handcrafted refreshments'}</p>
         </div>
 
         <div class="beverages-cards-grid">
-            ${allBeverages.map(beverage => `
-                <div class="beverage-card ${beverage.type === 'fountain' ? 'featured' : ''}" onclick="openBeverageModal(${JSON.stringify(beverage).replace(/"/g, '&quot;')})">
+            ${beverageGroups.map((group, groupIndex) => {
+              const displayPrice = (() => {
+                const firstVariant = group.sizes[0];
+                const platformPrice = firstVariant?.platformPricing?.doordash ?? firstVariant?.platformPrice;
+                const base = typeof platformPrice === 'number' ? platformPrice : parseFloat(platformPrice);
+                const fallback = typeof firstVariant?.basePrice === 'number' ? firstVariant.basePrice : parseFloat(firstVariant?.basePrice);
+                const value = !Number.isNaN(base) && base > 0 ? base : (!Number.isNaN(fallback) && fallback > 0 ? fallback : 0);
+                return value.toFixed(2);
+              })();
+
+              const cardClasses = ['beverage-card'];
+              if (group.featured) cardClasses.push('featured');
+
+              const flavorCount = group.flavors?.length || 0;
+              const hasMultipleSizes = group.sizes?.length > 1;
+              const badgeText = group.badge || (flavorCount > 0 ? `${flavorCount} FLAVORS` : (hasMultipleSizes ? 'CHOOSE SIZE' : ''));
+
+              return `
+                <div class="${cardClasses.join(' ')}" onclick="openBeverageModal(window.beverageGroups[${groupIndex}])">
                     <div class="beverage-image-wrapper">
-                        <img src="${beverage.imageUrl}"
-                             alt="${beverage.name}"
+                        <img src="${group.imageUrl}"
+                             alt="${group.name}"
                              class="beverage-image"
                              loading="lazy">
-                        ${beverage.badge ? `<div class="beverage-badge">${beverage.badge}</div>` : ''}
+                        ${badgeText ? `<div class="beverage-badge">${badgeText}</div>` : ''}
                     </div>
                     <div class="beverage-details">
-                        <h3 class="beverage-name">${beverage.name}</h3>
-                        <p class="beverage-description">${beverage.description}</p>
+                        <h3 class="beverage-name">${group.name}</h3>
+                        <p class="beverage-description">${group.description}</p>
                         <div class="beverage-pricing">
-                            <div class="price-main">$${beverage.platformPrice ? (typeof beverage.platformPrice === 'number' ? beverage.platformPrice.toFixed(2) : parseFloat(beverage.platformPrice).toFixed(2)) : 'N/A'}</div>
-                            <div class="price-label">${beverage.details ? 'Starting at' : 'Add to Order'}</div>
+                            <div class="price-main">$${displayPrice}</div>
+                            <div class="price-label">${hasMultipleSizes ? 'Starting at' : (flavorCount > 0 ? 'Choose flavor' : 'Add to order')}</div>
                         </div>
                         <button class="beverage-btn">
-                            ${beverage.details ? 'VIEW OPTIONS →' : 'ADD TO ORDER'}
+                            ${hasMultipleSizes || flavorCount > 0 ? 'VIEW OPTIONS →' : 'ADD TO ORDER'}
                         </button>
                     </div>
                 </div>
-            `).join('')}
+              `;
+            }).join('')}
         </div>
     </section>
   `;
+}
+
+// Helper function to group individual variants into logical beverage types
+function groupVariantsIntoBeverageTypes(variants) {
+  const groups = [];
+
+  // Group fountain drinks
+  const fountainVariants = variants.filter(v => v.id.includes('fountain'));
+  if (fountainVariants.length > 0) {
+    groups.push({
+      id: 'fountain-drinks',
+      name: 'Fountain Drinks',
+      description: '8 Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq\'s Root Beer, Hi-C Fruit Punch',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_200x200.webp?alt=media',
+      badge: 'CHOOSE SIZE',
+      featured: true,
+      sizes: fountainVariants.map(v => ({
+        id: v.id,
+        name: v.size || v.name,
+        label: v.size || v.name,
+        description: `Fountain drink ${v.size}`,
+        platformPrice: v.platformPrice || v.basePrice,
+        basePrice: v.basePrice
+      })),
+      flavors: [
+        { id: 'coca_cola', name: 'Coca-Cola' },
+        { id: 'diet_coke', name: 'Diet Coke' },
+        { id: 'coke_zero', name: 'Coke Zero' },
+        { id: 'sprite', name: 'Sprite' },
+        { id: 'fanta_orange', name: 'Fanta Orange' },
+        { id: 'dr_pepper', name: 'Dr Pepper' },
+        { id: 'barqs_root_beer', name: 'Barq\'s Root Beer' },
+        { id: 'hic_fruit_punch', name: 'Hi-C Fruit Punch' }
+      ],
+      type: 'fountain'
+    });
+  }
+
+  // Group tea drinks
+  const teaVariants = variants.filter(v => v.id.includes('tea'));
+  if (teaVariants.length > 0) {
+    // Extract unique sizes from tea variants (20oz, 32oz)
+    const uniqueSizes = [];
+    const sizesSeen = new Set();
+
+    teaVariants.forEach(v => {
+      const sizeLabel = v.size || (v.name.includes('20oz') ? '20oz' : v.name.includes('32oz') ? '32oz' : 'Standard');
+      if (!sizesSeen.has(sizeLabel)) {
+        sizesSeen.add(sizeLabel);
+        // Use the first variant of this size for pricing (sweet tea)
+        const sampleVariant = teaVariants.find(tv => (tv.size || tv.name).includes(sizeLabel));
+        uniqueSizes.push({
+          id: sampleVariant.id,
+          name: sampleVariant.name,
+          label: sizeLabel,
+          description: `Fresh brewed tea ${sizeLabel}`,
+          platformPrice: sampleVariant.platformPrice || sampleVariant.basePrice,
+          basePrice: sampleVariant.basePrice
+        });
+      }
+    });
+
+    groups.push({
+      id: 'iced-tea',
+      name: 'Fresh Brewed Tea',
+      description: 'Freshly brewed daily • Sweet or unsweetened • Perfect refreshment',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_200x200.webp?alt=media',
+      badge: 'FRESH DAILY',
+      sizes: uniqueSizes,
+      flavors: [
+        { id: 'sweet', name: 'Sweet Tea' },
+        { id: 'unsweetened', name: 'Unsweetened Tea' }
+      ],
+      type: 'tea'
+    });
+  }
+
+  // Group bottled water
+  const waterVariants = variants.filter(v => v.id.includes('water'));
+  if (waterVariants.length > 0) {
+    waterVariants.forEach(variant => {
+      groups.push({
+        id: variant.id,
+        name: variant.name,
+        description: 'Pure refreshment • 16.9 fl oz bottle',
+        imageUrl: variant.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_200x200.webp?alt=media',
+        badge: 'PURE',
+        sizes: [{
+          id: variant.id,
+          name: variant.name,
+          label: 'Standard',
+          description: variant.description || 'Pure refreshment • 16.9 fl oz bottle',
+          platformPrice: variant.platformPrice || variant.basePrice,
+          basePrice: variant.basePrice
+        }],
+        flavors: [],
+        type: 'bottle'
+      });
+    });
+  }
+
+  return groups;
 }
 
 /**

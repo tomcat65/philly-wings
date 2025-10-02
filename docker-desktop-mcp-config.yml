@@ -1,0 +1,68 @@
+# Docker Desktop MCP Configuration for philly-wings
+# This configuration enables seamless integration between Docker Desktop and Firebase MCP containers
+
+version: '3.8'
+
+services:
+  # Firebase MCP Unified Container
+  firebase-mcp-unified:
+    image: firebase-mcp-unified:latest
+    container_name: philly-wings-firebase-mcp
+    environment:
+      - FIREBASE_PROJECT_ID=philly-wings
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account/service-account.json
+      - NODE_ENV=production
+    volumes:
+      # Mount philly-wings project for project-aware detection
+      - /home/tomcat65/projects/dev/philly-wings:/app/workspace:ro
+      # Mount service account
+      - /home/tomcat65/projects/docs/Phillywingsexpress/philly-wings-firebase-adminsdk-fbsvc-b9a46d307f.json:/app/service-account/service-account.json:ro
+      # Mount environment file
+      - /home/tomcat65/projects/dev/philly-wings/.env:/app/.env:ro
+    stdin_open: true
+    tty: true
+    networks:
+      - philly-wings-mcp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "echo", '{"jsonrpc":"2.0","method":"ping","id":1}']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Development MCP Container (for testing)
+  firebase-mcp-dev:
+    image: firebase-admin-sdk-mcp:latest
+    container_name: philly-wings-firebase-mcp-dev
+    environment:
+      - FIREBASE_PROJECT_ID=philly-wings
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account/service-account.json
+      - NODE_ENV=development
+    volumes:
+      - /home/tomcat65/projects/dev/philly-wings:/app/workspace:ro
+      - /home/tomcat65/projects/docs/Phillywingsexpress/philly-wings-firebase-adminsdk-fbsvc-b9a46d307f.json:/app/service-account/service-account.json:ro
+      - /home/tomcat65/projects/dev/philly-wings/.env:/app/.env:ro
+    stdin_open: true
+    tty: true
+    networks:
+      - philly-wings-mcp
+    profiles:
+      - dev
+
+networks:
+  philly-wings-mcp:
+    driver: bridge
+    name: philly-wings-mcp-network
+
+# Docker Desktop specific configurations
+x-docker-desktop:
+  mcp:
+    enabled: true
+    project: philly-wings
+    containers:
+      - firebase-mcp-unified
+    health_checks: true
+    auto_restart: true
+
+

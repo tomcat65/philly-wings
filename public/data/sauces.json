@@ -243,7 +243,7 @@
     {
       "id": "ranch",
       "name": "Ranch",
-      "category": "dipping-sauce",
+      "category": "dip",
       "description": "Cool & creamy",
       "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Franch-dip.png?alt=media",
       "altText": "Ranch dipping sauce",
@@ -267,7 +267,7 @@
     {
       "id": "honey-mustard",
       "name": "Honey Mustard",
-      "category": "dipping-sauce",
+      "category": "dip",
       "description": "Sweet & tangy",
       "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fhoney-mustard.png?alt=media",
       "altText": "Honey mustard dipping sauce",
@@ -291,7 +291,7 @@
     {
       "id": "blue-cheese",
       "name": "Blue Cheese",
-      "category": "dipping-sauce",
+      "category": "dip",
       "description": "Classic chunky",
       "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fblue-cheese.png?alt=media",
       "altText": "Blue cheese dipping sauce",
@@ -315,7 +315,7 @@
     {
       "id": "cheese-sauce",
       "name": "Cheese Sauce",
-      "category": "dipping-sauce",
+      "category": "dip",
       "description": "Warm & melty",
       "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcheese-sauce.png?alt=media",
       "altText": "Warm cheese dipping sauce",

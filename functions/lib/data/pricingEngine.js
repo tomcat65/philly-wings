@@ -68,11 +68,30 @@ function processSides(friesData, mozzarellaData, markup) {
  * @param {number} markup Markup multiplier
  * @returns {Array} Processed beverages with platform pricing
  */
-function processBeverages(drinksData, markup) {
-  return drinksData.map(drink => ({
-    ...drink,
-    platformPrice: parseFloat((drink.basePrice * markup).toFixed(2))
-  }));
+function processBeverages(drinksData, markup, platform) {
+  const platformKey = platform || 'doordash';
+  return drinksData.map(drink => {
+    const numericBase = typeof drink.basePrice === 'number'
+      ? drink.basePrice
+      : parseFloat(drink.basePrice || drink.price || 0);
+    const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+    const existingPricing = drink.platformPricing || {};
+    const platformValue = existingPricing[platformKey];
+    const parsedPlatform = typeof platformValue === 'number' ? platformValue : parseFloat(platformValue);
+    const platformPrice = !Number.isNaN(parsedPlatform) && parsedPlatform > 0
+      ? parseFloat(parsedPlatform.toFixed(2))
+      : parseFloat((safeBase * markup).toFixed(2));
+
+    return {
+      ...drink,
+      basePrice: safeBase,
+      platformPrice,
+      platformPricing: {
+        ...existingPricing,
+        [platformKey]: platformPrice
+      }
+    };
+  });
 }
 
 /**
@@ -87,7 +106,7 @@ function processPlatformMenu(menuData, platform) {
   const processedWings = processWingVariants(menuData.wings, markup);
   const processedCombos = processCombos(menuData.combos, markup);
   const processedSides = processSides(menuData.sides.fries, menuData.sides.mozzarella, markup);
-  const processedBeverages = processBeverages(menuData.beverages, markup);
+  const processedBeverages = processBeverages(menuData.beverages, markup, platform);
 
   // Sauces don't typically have pricing, so pass through as-is
   const sauces = menuData.sauces;

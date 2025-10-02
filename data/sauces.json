@@ -99,24 +99,28 @@
       "id": "ranch",
       "name": "Ranch",
       "description": "Cool & creamy",
+      "category": "dip",
       "allergens": ["dairy", "egg"]
     },
     {
       "id": "honey-mustard",
       "name": "Honey Mustard",
       "description": "Sweet & tangy",
+      "category": "dip",
       "allergens": []
     },
     {
       "id": "blue-cheese",
       "name": "Blue Cheese",
       "description": "Classic chunky",
+      "category": "dip",
       "allergens": ["dairy"]
     },
     {
       "id": "cheese-sauce",
       "name": "Cheese Sauce",
       "description": "Warm & melty",
+      "category": "dip",
       "allergens": ["dairy"]
     }
   ]

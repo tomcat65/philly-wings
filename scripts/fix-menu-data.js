@@ -145,6 +145,20 @@ const MENU_ITEMS = [
     baseItem: true,
     active: true,
     sortOrder: 2,
+    customization: {
+      toppingsPlacement: [
+        {
+          id: 'on_top',
+          label: 'On Top',
+          description: 'Cheese sauce and bacon served over the fries for maximum flavor.'
+        },
+        {
+          id: 'on_side',
+          label: 'On the Side',
+          description: 'Toppings served separately to keep fries crisp.'
+        }
+      ]
+    },
     variants: [
       {
         id: 'fries_regular',

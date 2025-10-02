@@ -329,10 +329,33 @@ function processPlatformMenu(menuData, platform) {
 
   // Apply pricing to beverages - handle variants structure
   if (processedMenu.drinks && processedMenu.drinks.variants) {
-    processedMenu.beverages = processedMenu.drinks.variants.map(beverage => ({
-      ...beverage,
-      basePrice: beverage.basePrice || beverage.price,
-      platformPrice: parseFloat(((beverage.basePrice || beverage.price) * multiplier).toFixed(2))
+    processedMenu.drinks.variants = processedMenu.drinks.variants.map(variant => {
+      const numericBase = typeof variant.basePrice === 'number'
+        ? variant.basePrice
+        : parseFloat(variant.basePrice || variant.price || 0);
+      const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+      const existingPricing = variant.platformPricing || {};
+      const existingPlatformPrice = existingPricing[platform];
+      const computedPrice = typeof existingPlatformPrice === 'number'
+        ? existingPlatformPrice
+        : parseFloat(existingPlatformPrice);
+      const platformPrice = !Number.isNaN(computedPrice) && computedPrice > 0
+        ? parseFloat(computedPrice.toFixed(2))
+        : parseFloat((safeBase * multiplier).toFixed(2));
+
+      return {
+        ...variant,
+        basePrice: safeBase,
+        platformPrice,
+        platformPricing: {
+          ...existingPricing,
+          [platform]: platformPrice
+        }
+      };
+    });
+
+    processedMenu.beverages = processedMenu.drinks.variants.map(variant => ({
+      ...variant
     }));
   }
 

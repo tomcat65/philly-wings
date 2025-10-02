@@ -205,6 +205,54 @@ const SAUCES = [
     vegetarian: true,
     platformAvailability: ['doordash', 'ubereats', 'grubhub'],
     imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgrittys-revenge.png?alt=media'
+  },
+  {
+    id: 'ranch',
+    name: 'Ranch',
+    category: 'dip',
+    description: 'Cool & creamy ranch dip',
+    basePrice: 0.75,
+    active: true,
+    sortOrder: 201,
+    allergens: ['dairy', 'egg'],
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fdips%2Franch.png?alt=media',
+    platformAvailability: ['doordash', 'ubereats', 'grubhub']
+  },
+  {
+    id: 'honey-mustard',
+    name: 'Honey Mustard',
+    category: 'dip',
+    description: 'Sweet & tangy honey mustard dip',
+    basePrice: 0.75,
+    active: true,
+    sortOrder: 202,
+    allergens: [],
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fdips%2Fhoney-mustard.png?alt=media',
+    platformAvailability: ['doordash', 'ubereats', 'grubhub']
+  },
+  {
+    id: 'blue-cheese',
+    name: 'Blue Cheese',
+    category: 'dip',
+    description: 'Chunky blue cheese dip',
+    basePrice: 0.75,
+    active: true,
+    sortOrder: 203,
+    allergens: ['dairy'],
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fdips%2Fblue-cheese.png?alt=media',
+    platformAvailability: ['doordash', 'ubereats', 'grubhub']
+  },
+  {
+    id: 'cheese-sauce',
+    name: 'Cheese Sauce',
+    category: 'dip',
+    description: 'Warm & melty cheese sauce',
+    basePrice: 0.75,
+    active: true,
+    sortOrder: 204,
+    allergens: ['dairy'],
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fdips%2Fcheese-sauce.png?alt=media',
+    platformAvailability: ['doordash', 'ubereats', 'grubhub']
   }
 ];
 
