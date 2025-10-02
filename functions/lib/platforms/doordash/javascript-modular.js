@@ -245,20 +245,32 @@ function generateBeverageGroups(drinksVariants, menuData = {}) {
 
   // 4. Boxed Iced Tea from separate document
   if (boxedIcedTeaDoc && boxedIcedTeaDoc.variants && boxedIcedTeaDoc.variants.length > 0) {
+    // Group variants by size, extracting unique sizes
+    const sizeGroups = {};
+    boxedIcedTeaDoc.variants.forEach(variant => {
+      // Extract size from variant name (e.g., "96oz" from "Sweet Tea 96oz Box")
+      const sizeMatch = variant.name.match(/(\d+\s*(oz|gallon))/i);
+      const sizeKey = sizeMatch ? sizeMatch[1].toLowerCase() : 'unknown';
+
+      if (!sizeGroups[sizeKey]) {
+        sizeGroups[sizeKey] = {
+          id: variant.id.replace(/(sweet|unsweetened)_/i, ''), // Remove tea type from ID
+          name: variant.name.replace(/(Sweet|Unsweetened)\s*/i, ''), // Remove tea type from name
+          label: variant.name.replace(/(Sweet|Unsweetened)\s*/i, ''),
+          description: variant.description,
+          platformPrice: variant.platformPricing?.doordash || variant.platformPrice || variant.basePrice,
+          basePrice: variant.basePrice
+        };
+      }
+    });
+
     groups.push({
       id: 'boxed-iced-tea',
       name: boxedIcedTeaDoc.name || 'Boxed Iced Tea',
       description: boxedIcedTeaDoc.description || 'Large volume iced tea in boxes • Includes ice',
       imageUrl: boxedIcedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboxed-iced-tea.png?alt=media',
       badge: 'LARGE VOLUME',
-      sizes: boxedIcedTeaDoc.variants.map(v => ({
-        id: v.id,
-        name: v.name,
-        label: v.name,
-        description: v.description,
-        platformPrice: v.platformPricing?.doordash || v.platformPrice || v.basePrice,
-        basePrice: v.basePrice
-      })),
+      sizes: Object.values(sizeGroups),
       flavors: [
         { id: 'sweet', name: 'Sweet Tea' },
         { id: 'unsweetened', name: 'Unsweetened Tea' }

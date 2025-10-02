@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philly Wings Express - Platform Menu</title>
+    <script>
+        // Extract platform from subdomain and redirect to function
+        const host = window.location.hostname.toLowerCase();
+        let platform = 'doordash'; // default
+
+        if (host.includes('doordash')) platform = 'doordash';
+        else if (host.includes('ubereats')) platform = 'ubereats';
+        else if (host.includes('grubhub')) platform = 'grubhub';
+
+        // Immediate redirect to function with platform parameter
+        const functionUrl = `https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=${platform}`;
+        window.location.replace(functionUrl);
+    </script>
+</head>
+<body>
+    <h1>Platform Menu Loading...</h1>
+    <p>Redirecting to platform menu...</p>
+    <noscript>
+        <meta http-equiv="refresh" content="0; url=https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=doordash">
+    </noscript>
+</body>
+</html>
