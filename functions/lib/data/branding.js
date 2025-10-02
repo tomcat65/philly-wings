@@ -25,19 +25,19 @@ function getPlatformBranding(platform) {
       favicon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iI0ZGMzMzMyIvPgo8L3N2Zz4K',
       backgroundLogo: {
         bonelessWings: {
-          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboneless-wings-package_800x800.webp?alt=media',
-          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboneless-wings-package.png?alt=media',
+          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchicken-box-boneless_800x800.webp?alt=media&token=bcfc95e6-d251-4043-8ddd-703cae1a7d63',
+          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fchicken-box-boneless.png?alt=media&token=d028ec0c-3815-47a9-8b9c-178a2467fe29',
           position: 'left center',
-          size: '180px'
+          size: '320px'
         },
         classicWings: {
-          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fclassic-wings-package_800x800.webp?alt=media',
-          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-wings-package.png?alt=media',
+          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchicken-box-classic_800x800.webp?alt=media&token=5f73fc8f-3466-4142-83a7-6ac140b709ab',
+          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fchicken-box-classic.png?alt=media&token=7446adb5-a179-4a33-9e0a-ad3e0b11fbc3',
           position: 'right center',
-          size: '180px'
+          size: '320px'
         },
-        opacity: 0.08,
-        blend: 'overlay'
+        opacity: 0.85,
+        blend: 'normal'
       }
     },
     ubereats: {
@@ -53,7 +53,23 @@ function getPlatformBranding(platform) {
       shadowColor: 'rgba(0, 0, 0, 0.08)',
       platformName: 'Uber Eats',
       logoUrl: 'https://d3i4yxtzktqr9n.cloudfront.net/web-eats-v2/97c43f8974e6c876.svg',
-      favicon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzA2QzE2NyIvPgo8L3N2Zz4K'
+      favicon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzA2QzE2NyIvPgo8L3N2Zz4K',
+      backgroundLogo: {
+        bonelessWings: {
+          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchicken-box-boneless_800x800.webp?alt=media&token=bcfc95e6-d251-4043-8ddd-703cae1a7d63',
+          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fchicken-box-boneless.png?alt=media&token=d028ec0c-3815-47a9-8b9c-178a2467fe29',
+          position: 'left center',
+          size: '320px'
+        },
+        classicWings: {
+          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchicken-box-classic_800x800.webp?alt=media&token=5f73fc8f-3466-4142-83a7-6ac140b709ab',
+          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fchicken-box-classic.png?alt=media&token=7446adb5-a179-4a33-9e0a-ad3e0b11fbc3',
+          position: 'right center',
+          size: '320px'
+        },
+        opacity: 0.85,
+        blend: 'normal'
+      }
     },
     grubhub: {
       primaryColor: '#F63440',
@@ -68,7 +84,23 @@ function getPlatformBranding(platform) {
       shadowColor: 'rgba(246, 52, 64, 0.1)',
       platformName: 'Grubhub',
       logoUrl: 'https://res.cloudinary.com/grubhub/image/upload/d_search:browse-images:default.jpg/w_150,q_auto:low,fl_lossy,dpr_2.0,c_fill,f_auto,h_64/TopBranding/gh-logo',
-      favicon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iI0Y2MzQ0MCIvPgo8L3N2Zz4K'
+      favicon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iI0Y2MzQ0MCIvPgo8L3N2Zz4K',
+      backgroundLogo: {
+        bonelessWings: {
+          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchicken-box-boneless_800x800.webp?alt=media&token=bcfc95e6-d251-4043-8ddd-703cae1a7d63',
+          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fchicken-box-boneless.png?alt=media&token=d028ec0c-3815-47a9-8b9c-178a2467fe29',
+          position: 'left center',
+          size: '320px'
+        },
+        classicWings: {
+          url: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchicken-box-classic_800x800.webp?alt=media&token=5f73fc8f-3466-4142-83a7-6ac140b709ab',
+          originalUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fchicken-box-classic.png?alt=media&token=7446adb5-a179-4a33-9e0a-ad3e0b11fbc3',
+          position: 'right center',
+          size: '320px'
+        },
+        opacity: 0.85,
+        blend: 'normal'
+      }
     }
   };
 

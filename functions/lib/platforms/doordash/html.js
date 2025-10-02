@@ -20,6 +20,11 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
     <!-- Header Section -->
     <header class="restaurant-header">
         <div class="header-content">
+            <div class="logo-section">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fphilly-wings-logo_200x200.webp?alt=media&token=2542f325-5fdc-4093-a641-1dfc1a2bb6e1"
+                     alt="Philly Wings Express Logo"
+                     class="restaurant-logo">
+            </div>
             <div class="restaurant-info">
                 <h1 class="restaurant-name">Philly Wings Express</h1>
                 <p class="restaurant-description">Authentic Philadelphia Wings & More</p>

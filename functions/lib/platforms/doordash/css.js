@@ -60,47 +60,55 @@ function generateBaseStyles() {
  */
 function generateHeaderStyles(branding) {
   return `
-    /* Header Styles */
+    /* Outstanding Header Styles */
     .restaurant-header {
-      background: linear-gradient(135deg, ${branding.primaryColor}, ${branding.secondaryColor});
+      background: linear-gradient(135deg, ${branding.primaryColor} 0%, ${branding.secondaryColor} 50%, ${branding.primaryColor} 100%);
       color: white;
-      padding: 2rem 1rem;
+      padding: 3rem 1rem;
       text-align: center;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 20px ${branding.shadowColor};
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
       position: relative;
       overflow: hidden;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
     }
 
-    /* Dual Background Logo System */
+    /* Enhanced Background System with Better Positioning */
     .restaurant-header::before,
     .restaurant-header::after {
       content: '';
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: ${branding.backgroundLogo?.bonelessWings?.size || '180px'};
-      height: ${branding.backgroundLogo?.bonelessWings?.size || '180px'};
+      width: ${branding.backgroundLogo?.bonelessWings?.size || '240px'};
+      height: ${branding.backgroundLogo?.bonelessWings?.size || '240px'};
       background-size: contain;
       background-repeat: no-repeat;
-      opacity: ${branding.backgroundLogo?.opacity || 0.08};
-      mix-blend-mode: ${branding.backgroundLogo?.blend || 'overlay'};
+      opacity: ${branding.backgroundLogo?.opacity || 0.4};
+      mix-blend-mode: ${branding.backgroundLogo?.blend || 'multiply'};
       z-index: 1;
       pointer-events: none;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
     }
 
     .restaurant-header::before {
-      left: 5%;
+      left: 20px;
       background-image: url('${branding.backgroundLogo?.bonelessWings?.url}');
       background-position: ${branding.backgroundLogo?.bonelessWings?.position || 'left center'};
+      transform: translateY(-50%) rotate(-12deg);
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
     }
 
     .restaurant-header::after {
-      right: 5%;
+      right: 20px;
       background-image: url('${branding.backgroundLogo?.classicWings?.url}');
       background-position: ${branding.backgroundLogo?.classicWings?.position || 'right center'};
+      transform: translateY(-50%) rotate(12deg);
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
     }
 
     .header-content {
@@ -108,34 +116,129 @@ function generateHeaderStyles(branding) {
       margin: 0 auto;
       position: relative;
       z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      width: 100%;
+    }
+
+    .logo-section {
+      flex-shrink: 0;
+    }
+
+    .restaurant-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .restaurant-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .restaurant-info {
+      text-align: left;
+      flex: 1;
+      max-width: 500px;
     }
 
     .restaurant-name {
-      font-size: 2.5rem;
-      font-weight: 700;
+      font-size: 3rem;
+      font-weight: 800;
       margin-bottom: 0.5rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      background: linear-gradient(45deg, #ffffff, #f0f0f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
     }
 
     .restaurant-description {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      opacity: 0.95;
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     .restaurant-meta {
       display: flex;
-      justify-content: center;
-      gap: 1rem;
+      justify-content: flex-start;
+      gap: 1.5rem;
       flex-wrap: wrap;
-      font-size: 0.9rem;
+      font-size: 1rem;
     }
 
     .hours, .delivery-info {
-      background: rgba(255,255,255,0.1);
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
+      background: rgba(255,255,255,0.15);
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
       backdrop-filter: blur(10px);
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* Mobile Responsive Header */
+    @media (max-width: 768px) {
+      .restaurant-header {
+        padding: 2rem 1rem;
+        min-height: 220px;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .restaurant-info {
+        text-align: center;
+        max-width: none;
+      }
+
+      .restaurant-logo {
+        width: 80px;
+        height: 80px;
+      }
+
+      .restaurant-name {
+        font-size: 2.2rem;
+      }
+
+      .restaurant-description {
+        font-size: 1.1rem;
+      }
+
+      .restaurant-meta {
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      .restaurant-header::before,
+      .restaurant-header::after {
+        width: 200px;
+        height: 200px;
+        opacity: 0.7;
+      }
+
+      .restaurant-header::before {
+        left: -10px;
+        transform: translateY(-50%) rotate(-15deg);
+      }
+
+      .restaurant-header::after {
+        right: -10px;
+        transform: translateY(-50%) rotate(15deg);
+      }
     }
   `;
 }
