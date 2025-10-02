@@ -1,23 +1,16 @@
 {
   "mcpServers": {
-    "firebase": {
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "-e",
-        "FIREBASE_PROJECT_ID=philly-wings",
-        "-e",
-        "FIREBASE_API_KEY=AIzaSyDapDV62B29OWOyQPvc4PrxxQzzkLU0hKc",
-        "-e",
-        "GOOGLE_APPLICATION_CREDENTIALS=/app/service-account/service-account.json",
-        "-v",
-        "/home/tomcat65/projects/docs/Phillywingsexpress/philly-wings-firebase-adminsdk-fbsvc-b9a46d307f.json:/app/service-account/service-account.json:ro",
-        "-v",
-        "/home/tomcat65/projects/dev/philly-wings:/workspace:ro",
-        "firebase-mcp-unified:latest"
-      ]
+    "firebase-official": {
+      "command": "npx",
+      "args": ["-y", "firebase-tools@latest", "experimental:mcp"]
+    },
+    "firebase-community": {
+      "command": "npx",
+      "args": ["-y", "@gannonh/firebase-mcp"],
+      "env": {
+        "SERVICE_ACCOUNT_KEY_PATH": "/home/tomcat65/projects/docs/Phillywingsexpress/philly-wings-firebase-adminsdk-fbsvc-b9a46d307f.json",
+        "FIREBASE_STORAGE_BUCKET": "philly-wings.firebasestorage.app"
+      }
     }
   }
 }

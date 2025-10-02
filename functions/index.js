@@ -120,6 +120,8 @@ async function fetchCompleteMenu() {
       fries: menuItems.fries || { variants: [] },
       mozzarella: menuItems.mozzarella_sticks || { variants: [] },
       drinks: menuItems.drinks || { variants: [] },
+      bagged_tea: menuItems.bagged_tea || { variants: [] },
+      boxed_iced_tea: menuItems.boxed_iced_tea || { variants: [] },
       combos: combosSnapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .sort((a, b) => {
@@ -156,6 +158,8 @@ async function fetchCompleteMenu() {
     const missingFries = !assembled.fries?.variants?.length;
     const missingMozz = !assembled.mozzarella?.variants?.length;
     const missingDrinks = !assembled.drinks?.variants?.length;
+    const missingBaggedTea = !assembled.bagged_tea?.variants?.length;
+    const missingBoxedTea = !assembled.boxed_iced_tea?.variants?.length;
     const missingCombos = !assembled.combos?.length;
 
     if ((missingWings && missingFries && missingMozz) || missingCombos) {
@@ -182,6 +186,8 @@ async function fetchCompleteMenu() {
       fries: assembled.fries?.variants?.length || 0,
       mozzarella: assembled.mozzarella?.variants?.length || 0,
       drinks: assembled.drinks?.variants?.length || 0,
+      bagged_tea: assembled.bagged_tea?.variants?.length || 0,
+      boxed_iced_tea: assembled.boxed_iced_tea?.variants?.length || 0,
       combos: assembled.combos?.length || 0,
       sauces: assembled.sauces?.length || 0
     });
@@ -357,6 +363,62 @@ function processPlatformMenu(menuData, platform) {
     processedMenu.beverages = processedMenu.drinks.variants.map(variant => ({
       ...variant
     }));
+  }
+
+  // Apply pricing to bagged tea variants
+  if (processedMenu.bagged_tea && processedMenu.bagged_tea.variants) {
+    processedMenu.bagged_tea.variants = processedMenu.bagged_tea.variants.map(variant => {
+      const numericBase = typeof variant.basePrice === 'number'
+        ? variant.basePrice
+        : parseFloat(variant.basePrice || variant.price || 0);
+      const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+      const existingPricing = variant.platformPricing || {};
+      const existingPlatformPrice = existingPricing[platform];
+      const computedPrice = typeof existingPlatformPrice === 'number'
+        ? existingPlatformPrice
+        : parseFloat(existingPlatformPrice);
+      const platformPrice = !Number.isNaN(computedPrice) && computedPrice > 0
+        ? parseFloat(computedPrice.toFixed(2))
+        : parseFloat((safeBase * multiplier).toFixed(2));
+
+      return {
+        ...variant,
+        basePrice: safeBase,
+        platformPrice,
+        platformPricing: {
+          ...existingPricing,
+          [platform]: platformPrice
+        }
+      };
+    });
+  }
+
+  // Apply pricing to boxed iced tea variants
+  if (processedMenu.boxed_iced_tea && processedMenu.boxed_iced_tea.variants) {
+    processedMenu.boxed_iced_tea.variants = processedMenu.boxed_iced_tea.variants.map(variant => {
+      const numericBase = typeof variant.basePrice === 'number'
+        ? variant.basePrice
+        : parseFloat(variant.basePrice || variant.price || 0);
+      const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+      const existingPricing = variant.platformPricing || {};
+      const existingPlatformPrice = existingPricing[platform];
+      const computedPrice = typeof existingPlatformPrice === 'number'
+        ? existingPlatformPrice
+        : parseFloat(existingPlatformPrice);
+      const platformPrice = !Number.isNaN(computedPrice) && computedPrice > 0
+        ? parseFloat(computedPrice.toFixed(2))
+        : parseFloat((safeBase * multiplier).toFixed(2));
+
+      return {
+        ...variant,
+        basePrice: safeBase,
+        platformPrice,
+        platformPricing: {
+          ...existingPricing,
+          [platform]: platformPrice
+        }
+      };
+    });
   }
 
   // Apply pricing to sides - process fries and mozzarella variants

@@ -113,12 +113,12 @@ function generateBeverageModalJS(menuData = {}) {
         modalTitle.textContent = beverageVariant.name + ' Selection';
       }
 
-      // Hide progress steps for fountain drinks (we'll use custom ones)
+      // Hide progress steps for fountain drinks (we'll use custom ones with sides modal approach)
       const progressContainer = modal.querySelector('.modal-progress');
       if (progressContainer) {
         progressContainer.innerHTML =
-          '<div class="progress-step active" data-step="1">Select Drinks</div>' +
-          '<div class="progress-step" data-step="2">Summary</div>';
+          '<div class="progress-step active" data-step="1" style="font-size: 12px; position: relative; z-index: 1;">Select</div>' +
+          '<div class="progress-step" data-step="2" style="font-size: 12px; position: relative; z-index: 1;">Cart</div>';
       }
 
       // Update step 1 for beverage selection grid

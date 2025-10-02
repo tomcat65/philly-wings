@@ -56,7 +56,7 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
         ${generateWingsSection(menuData.wings, branding)}
         ${generateSidesSection(menuData.sides, branding)}
         ${generateDipsSection(menuData.sauces.filter(s => s.category === 'dipping-sauce'), branding)}
-        ${generateBeveragesSection(menuData.drinks, branding)}
+        ${generateBeveragesSection(menuData, branding)}
         ${generateSaucesSection(menuData.sauces, branding)}
     </main>
 
@@ -152,9 +152,9 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
                 <button class="modal-close" onclick="closeBeverageModal()">&times;</button>
                 <h2 id="beverageModalTitle" class="modal-title">Choose Your Beverage</h2>
                 <div class="modal-progress">
-                    <div class="progress-step active" data-step="1">Size</div>
-                    <div class="progress-step" data-step="2">Flavor</div>
-                    <div class="progress-step" data-step="3">Summary</div>
+                    <div class="progress-step active" data-step="1" style="font-size: 12px; position: relative; z-index: 1;">Size</div>
+                    <div class="progress-step" data-step="2" style="font-size: 12px; position: relative; z-index: 1;">Flavor</div>
+                    <div class="progress-step" data-step="3" style="font-size: 12px; position: relative; z-index: 1;">Cart</div>
                 </div>
             </div>
             <div class="modal-body">
@@ -465,18 +465,23 @@ function generateSidesSection(sides, branding) {
 /**
  * Generate beverages section HTML
  */
-function generateBeveragesSection(drinksDoc, branding) {
-  const variants = drinksDoc?.variants || [];
-  if (!variants.length) return '';
+function generateBeveragesSection(menuData, branding) {
+  // Extract all beverage data from the menu
+  const drinksDoc = menuData.drinks;
+  const baggedTeaDoc = menuData.bagged_tea;
+  const boxedIcedTeaDoc = menuData.boxed_iced_tea;
 
-  // Group variants into logical beverage types for the modal
-  const beverageGroups = groupVariantsIntoBeverageTypes(variants);
+  // Get variants from drinks document
+  const variants = drinksDoc?.variants || [];
+
+  // Create beverage groups from all beverage sources
+  const beverageGroups = createAllBeverageGroups(variants, baggedTeaDoc, boxedIcedTeaDoc);
 
   return `
     <section id="beverages" class="menu-section">
         <div class="section-header">
-            <h2 class="section-title">🥤 ${drinksDoc?.name || 'Beverages'}</h2>
-            <p class="section-description">${drinksDoc?.description || 'Cool down the heat with handcrafted refreshments'}</p>
+            <h2 class="section-title">🥤 Beverages</h2>
+            <p class="section-description">Cool down the heat with handcrafted refreshments</p>
         </div>
 
         <div class="beverages-cards-grid">
@@ -525,12 +530,12 @@ function generateBeveragesSection(drinksDoc, branding) {
   `;
 }
 
-// Helper function to group individual variants into logical beverage types
-function groupVariantsIntoBeverageTypes(variants) {
+// Helper function to create all beverage groups from multiple sources
+function createAllBeverageGroups(drinksVariants, baggedTeaDoc, boxedIcedTeaDoc) {
   const groups = [];
 
-  // Group fountain drinks
-  const fountainVariants = variants.filter(v => v.id.includes('fountain'));
+  // 1. Fountain Drinks from drinks variants
+  const fountainVariants = drinksVariants.filter(v => v.id.includes('fountain'));
   if (fountainVariants.length > 0) {
     groups.push({
       id: 'fountain-drinks',
@@ -561,8 +566,8 @@ function groupVariantsIntoBeverageTypes(variants) {
     });
   }
 
-  // Group tea drinks
-  const teaVariants = variants.filter(v => v.id.includes('tea'));
+  // 2. Fresh Brewed Tea (individual sizes) from drinks variants
+  const teaVariants = drinksVariants.filter(v => v.id.includes('tea'));
   if (teaVariants.length > 0) {
     // Extract unique sizes from tea variants (20oz, 32oz)
     const uniqueSizes = [];
@@ -588,7 +593,7 @@ function groupVariantsIntoBeverageTypes(variants) {
     groups.push({
       id: 'iced-tea',
       name: 'Fresh Brewed Tea',
-      description: 'Freshly brewed daily • Sweet or unsweetened • Perfect refreshment',
+      description: 'Freshly brewed daily • Sweet or unsweetened • Individual sizes',
       imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_200x200.webp?alt=media',
       badge: 'FRESH DAILY',
       sizes: uniqueSizes,
@@ -600,8 +605,56 @@ function groupVariantsIntoBeverageTypes(variants) {
     });
   }
 
-  // Group bottled water
-  const waterVariants = variants.filter(v => v.id.includes('water'));
+  // 3. Bagged Tea from separate document
+  if (baggedTeaDoc && baggedTeaDoc.variants && baggedTeaDoc.variants.length > 0) {
+    groups.push({
+      id: 'bagged-tea',
+      name: baggedTeaDoc.name || 'Bagged Tea',
+      description: baggedTeaDoc.description || 'Bulk tea in convenient bags • Perfect for groups',
+      imageUrl: baggedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbagged-tea.png?alt=media',
+      badge: 'BULK SIZE',
+      sizes: baggedTeaDoc.variants.map(v => ({
+        id: v.id,
+        name: v.name,
+        label: v.name,
+        description: v.description,
+        platformPrice: v.platformPrice || v.basePrice,
+        basePrice: v.basePrice
+      })),
+      flavors: [
+        { id: 'sweet', name: 'Sweet Tea' },
+        { id: 'unsweetened', name: 'Unsweetened Tea' }
+      ],
+      type: 'bagged_tea'
+    });
+  }
+
+  // 4. Boxed Iced Tea from separate document
+  if (boxedIcedTeaDoc && boxedIcedTeaDoc.variants && boxedIcedTeaDoc.variants.length > 0) {
+    groups.push({
+      id: 'boxed-iced-tea',
+      name: boxedIcedTeaDoc.name || 'Boxed Iced Tea',
+      description: boxedIcedTeaDoc.description || 'Large volume iced tea in boxes • Includes ice',
+      imageUrl: boxedIcedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboxed-iced-tea.png?alt=media',
+      badge: 'LARGE VOLUME',
+      sizes: boxedIcedTeaDoc.variants.map(v => ({
+        id: v.id,
+        name: v.name,
+        label: v.name,
+        description: v.description,
+        platformPrice: v.platformPrice || v.basePrice,
+        basePrice: v.basePrice
+      })),
+      flavors: [
+        { id: 'sweet', name: 'Sweet Tea' },
+        { id: 'unsweetened', name: 'Unsweetened Tea' }
+      ],
+      type: 'boxed_tea'
+    });
+  }
+
+  // 5. Bottled Water from drinks variants
+  const waterVariants = drinksVariants.filter(v => v.id.includes('water'));
   if (waterVariants.length > 0) {
     waterVariants.forEach(variant => {
       groups.push({
@@ -625,6 +678,11 @@ function groupVariantsIntoBeverageTypes(variants) {
   }
 
   return groups;
+}
+
+// Legacy function kept for compatibility (not used anymore)
+function groupVariantsIntoBeverageTypes(variants) {
+  return createAllBeverageGroups(variants, null, null);
 }
 
 /**

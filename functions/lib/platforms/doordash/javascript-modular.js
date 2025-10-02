@@ -143,42 +143,30 @@ function generateGlobalVariables(menuData = {}) {
 }
 
 // Helper function to group individual variants into logical beverage types (same logic as HTML)
-function generateBeverageGroups(variants, menuData = {}) {
+function generateBeverageGroups(drinksVariants, menuData = {}) {
+  const baggedTeaDoc = menuData.bagged_tea;
+  const boxedIcedTeaDoc = menuData.boxed_iced_tea;
   const groups = [];
 
-  // Group fountain drinks - extract flavors from Firebase data
-  const fountainVariants = variants.filter(v => v.id.includes('fountain'));
+  // 1. Fountain Drinks from drinks variants
+  const fountainVariants = drinksVariants.filter(v => v.id.includes('fountain'));
   if (fountainVariants.length > 0) {
-    // Extract unique sizes from fountain variants
-    const uniqueFountainSizes = [];
-    const fountainSizesSeen = new Set();
-
-    fountainVariants.forEach(v => {
-      const sizeLabel = v.size || (v.name.includes('20oz') ? '20oz' : v.name.includes('32oz') ? '32oz' : 'Standard');
-      if (!fountainSizesSeen.has(sizeLabel)) {
-        fountainSizesSeen.add(sizeLabel);
-        uniqueFountainSizes.push({
-          id: v.id,
-          name: v.size || v.name,
-          label: sizeLabel,
-          description: `Fountain drink ${sizeLabel}`,
-          platformPrice: v.platformPrice || v.basePrice,
-          basePrice: v.basePrice
-        });
-      }
-    });
-
-    // Get fountain flavors from Firebase drinks collection if available
-    let fountainFlavors = [];
-    if (menuData.drinks?.flavors?.fountain) {
-      // Use flavors from Firebase if available
-      fountainFlavors = menuData.drinks.flavors.fountain.map(flavor => ({
-        id: flavor.id || flavor.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
-        name: flavor.name
-      }));
-    } else {
-      // Fallback: Extract flavors from variant names or use default set
-      const defaultFountainFlavors = [
+    groups.push({
+      id: 'fountain-drinks',
+      name: 'Fountain Drinks',
+      description: '8 Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq\'s Root Beer, Hi-C Fruit Punch',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_200x200.webp?alt=media',
+      badge: 'CHOOSE SIZE',
+      featured: true,
+      sizes: fountainVariants.map(v => ({
+        id: v.id,
+        name: v.size || v.name,
+        label: v.size || v.name,
+        description: `Fountain drink ${v.size}`,
+        platformPrice: v.platformPrice || v.basePrice,
+        basePrice: v.basePrice
+      })),
+      flavors: [
         { id: 'coca_cola', name: 'Coca-Cola' },
         { id: 'diet_coke', name: 'Diet Coke' },
         { id: 'coke_zero', name: 'Coke Zero' },
@@ -187,37 +175,25 @@ function generateBeverageGroups(variants, menuData = {}) {
         { id: 'dr_pepper', name: 'Dr Pepper' },
         { id: 'barqs_root_beer', name: 'Barq\'s Root Beer' },
         { id: 'hic_fruit_punch', name: 'Hi-C Fruit Punch' }
-      ];
-      fountainFlavors = defaultFountainFlavors;
-    }
-
-    groups.push({
-      id: 'fountain-drinks',
-      name: 'Fountain Drinks',
-      description: `${fountainFlavors.length} Flavors: ${fountainFlavors.map(f => f.name).join(', ')}`,
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_200x200.webp?alt=media',
-      badge: 'CHOOSE SIZE',
-      featured: true,
-      sizes: uniqueFountainSizes,
-      flavors: fountainFlavors,
+      ],
       type: 'fountain'
     });
   }
 
-  // Group tea drinks - extract flavors from Firebase data
-  const teaVariants = variants.filter(v => v.id.includes('tea'));
+  // 2. Fresh Brewed Tea (individual sizes) from drinks variants
+  const teaVariants = drinksVariants.filter(v => v.id.includes('tea'));
   if (teaVariants.length > 0) {
     // Extract unique sizes from tea variants (20oz, 32oz)
-    const uniqueTeaSizes = [];
-    const teaSizesSeen = new Set();
+    const uniqueSizes = [];
+    const sizesSeen = new Set();
 
     teaVariants.forEach(v => {
       const sizeLabel = v.size || (v.name.includes('20oz') ? '20oz' : v.name.includes('32oz') ? '32oz' : 'Standard');
-      if (!teaSizesSeen.has(sizeLabel)) {
-        teaSizesSeen.add(sizeLabel);
+      if (!sizesSeen.has(sizeLabel)) {
+        sizesSeen.add(sizeLabel);
         // Use the first variant of this size for pricing (sweet tea)
         const sampleVariant = teaVariants.find(tv => (tv.size || tv.name).includes(sizeLabel));
-        uniqueTeaSizes.push({
+        uniqueSizes.push({
           id: sampleVariant.id,
           name: sampleVariant.name,
           label: sizeLabel,
@@ -228,53 +204,71 @@ function generateBeverageGroups(variants, menuData = {}) {
       }
     });
 
-    // Extract tea flavors from Firebase data by analyzing variant names
-    const teaFlavors = [];
-    const teaFlavorsSeen = new Set();
-
-    teaVariants.forEach(v => {
-      let flavorName = '';
-      let flavorId = '';
-
-      if (v.id.includes('sweet_tea') || v.name.toLowerCase().includes('sweet tea')) {
-        flavorName = 'Sweet Tea';
-        flavorId = 'sweet';
-      } else if (v.id.includes('unsweetened_tea') || v.name.toLowerCase().includes('unsweetened tea')) {
-        flavorName = 'Unsweetened Tea';
-        flavorId = 'unsweetened';
-      }
-
-      if (flavorName && !teaFlavorsSeen.has(flavorId)) {
-        teaFlavorsSeen.add(flavorId);
-        teaFlavors.push({ id: flavorId, name: flavorName });
-      }
-    });
-
-    // Get tea flavors from Firebase drinks collection if available
-    if (menuData.drinks?.flavors?.tea && menuData.drinks.flavors.tea.length > 0) {
-      // Use flavors from Firebase if available
-      const firebaseTeaFlavors = menuData.drinks.flavors.tea.map(flavor => ({
-        id: flavor.id || flavor.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
-        name: flavor.name
-      }));
-      teaFlavors.length = 0; // Clear extracted flavors
-      teaFlavors.push(...firebaseTeaFlavors);
-    }
-
     groups.push({
       id: 'iced-tea',
       name: 'Fresh Brewed Tea',
-      description: `Freshly brewed daily • ${teaFlavors.map(f => f.name.replace(' Tea', '')).join(' or ').toLowerCase()} • Perfect refreshment`,
+      description: 'Freshly brewed daily • Sweet or unsweetened • Individual sizes',
       imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_200x200.webp?alt=media',
       badge: 'FRESH DAILY',
-      sizes: uniqueTeaSizes,
-      flavors: teaFlavors,
+      sizes: uniqueSizes,
+      flavors: [
+        { id: 'sweet', name: 'Sweet Tea' },
+        { id: 'unsweetened', name: 'Unsweetened Tea' }
+      ],
       type: 'tea'
     });
   }
 
-  // Group bottled water
-  const waterVariants = variants.filter(v => v.id.includes('water'));
+  // 3. Bagged Tea from separate document
+  if (baggedTeaDoc && baggedTeaDoc.variants && baggedTeaDoc.variants.length > 0) {
+    groups.push({
+      id: 'bagged-tea',
+      name: baggedTeaDoc.name || 'Bagged Tea',
+      description: baggedTeaDoc.description || 'Bulk tea in convenient bags • Perfect for groups',
+      imageUrl: baggedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbagged-tea.png?alt=media',
+      badge: 'BULK SIZE',
+      sizes: baggedTeaDoc.variants.map(v => ({
+        id: v.id,
+        name: v.name,
+        label: v.name,
+        description: v.description,
+        platformPrice: v.platformPricing?.doordash || v.platformPrice || v.basePrice,
+        basePrice: v.basePrice
+      })),
+      flavors: [
+        { id: 'sweet', name: 'Sweet Tea' },
+        { id: 'unsweetened', name: 'Unsweetened Tea' }
+      ],
+      type: 'bagged_tea'
+    });
+  }
+
+  // 4. Boxed Iced Tea from separate document
+  if (boxedIcedTeaDoc && boxedIcedTeaDoc.variants && boxedIcedTeaDoc.variants.length > 0) {
+    groups.push({
+      id: 'boxed-iced-tea',
+      name: boxedIcedTeaDoc.name || 'Boxed Iced Tea',
+      description: boxedIcedTeaDoc.description || 'Large volume iced tea in boxes • Includes ice',
+      imageUrl: boxedIcedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboxed-iced-tea.png?alt=media',
+      badge: 'LARGE VOLUME',
+      sizes: boxedIcedTeaDoc.variants.map(v => ({
+        id: v.id,
+        name: v.name,
+        label: v.name,
+        description: v.description,
+        platformPrice: v.platformPricing?.doordash || v.platformPrice || v.basePrice,
+        basePrice: v.basePrice
+      })),
+      flavors: [
+        { id: 'sweet', name: 'Sweet Tea' },
+        { id: 'unsweetened', name: 'Unsweetened Tea' }
+      ],
+      type: 'boxed_tea'
+    });
+  }
+
+  // 5. Bottled Water from drinks variants
+  const waterVariants = drinksVariants.filter(v => v.id.includes('water'));
   if (waterVariants.length > 0) {
     waterVariants.forEach(variant => {
       groups.push({
