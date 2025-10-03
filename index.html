@@ -68,7 +68,7 @@
         <div class="hero-media">
             <video autoplay muted loop playsinline class="hero-video" id="heroVideo">
                 <source src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/videos%2Fhero-wings-sauced.mp4?alt=media" type="video/mp4">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Crispy buffalo wings" class="hero-fallback">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fclassic-buffalo-wings_800x800.webp?alt=media" alt="Crispy buffalo wings" class="hero-fallback">
             </video>
             <div class="hero-overlay"></div>
         </div>
@@ -79,11 +79,11 @@
             <p class="hero-micro chalk-text">Made in Philly • No BS • Just Fire Wings</p>
             
             <div class="made-in-philly-badge">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media" alt="Made in Philadelphia" width="120">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fclassic-buffalo-wings_800x800.webp?alt=media" alt="Made in Philadelphia" width="120">
             </div>
             
             <div class="cta-container">
-                <button class="cta-primary pulse" onclick="scrollToOrder()">
+                <button class="cta-primary pulse" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); return false;">
                     <span class="cta-text">Order Now - I'm Hungry</span>
                     <span class="cta-icon">🔥</span>
                 </button>
@@ -120,7 +120,7 @@
 
             <div class="combo-cards">
                 <!-- Game Day 30 -->
-                <div class="combo-card popular" onclick="scrollToOrder(); window.trackQuickPickView && trackQuickPickView('Game Day 30', '34.99')">
+                <div class="combo-card popular" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); window.trackQuickPickView && trackQuickPickView('Game Day 30', '34.99')">
                     <span class="combo-badge">MOST POPULAR</span>
                     <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fgame-day-30-wings_800x800.webp?alt=media"
                          alt="Game Day Special - 30 Wings"
@@ -269,7 +269,7 @@
         <!-- Wings Section -->
         <div class="menu-category" id="category-wings">
             <div class="category-hero">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fclassic-buffalo-wings.png?alt=media"
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fclassic-buffalo-wings_800x800.webp?alt=media"
                      alt="Crispy Wings" class="hero-banner">
                 <div class="hero-overlay">
                     <h2 class="category-title">Wings</h2>
@@ -343,7 +343,7 @@
             <h3>Choose Your Style:</h3>
             <div class="wing-style-grid">
                 <div class="wing-style-card active" data-style="drums">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Foriginal-drums_200x200.webp?alt=media"
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Foriginal-drums_800x800.webp?alt=media"
                          alt="Drums"
                          class="wing-style-img zoomable"
                          title="Click to zoom">
@@ -351,7 +351,7 @@
                     <p class="wing-style-desc">Meaty drumsticks</p>
                 </div>
                 <div class="wing-style-card" data-style="flats">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Foriginal-flats_200x200.webp?alt=media"
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Foriginal-flats_800x800.webp?alt=media"
                          alt="Flats"
                          class="wing-style-img zoomable"
                          title="Click to zoom">
@@ -359,7 +359,7 @@
                     <p class="wing-style-desc">Double-bone perfection</p>
                 </div>
                 <div class="wing-style-card" data-style="boneless">
-                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboneless-wings_200x200.webp?alt=media"
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboneless-wings_800x800.webp?alt=media"
                          alt="Boneless Wings"
                          class="wing-style-img zoomable"
                          title="Click to zoom">
@@ -464,7 +464,7 @@
 
             <div class="menu-grid">
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ffountain-drinks.png?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_800x800.webp?alt=media"
                          alt="Fountain Drinks" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">Fountain Drinks</h3>
@@ -474,7 +474,7 @@
                 </div>
 
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Ficed-tea.png?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_800x800.webp?alt=media"
                          alt="Iced Tea" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">Iced Tea</h3>
@@ -484,7 +484,7 @@
                 </div>
 
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbagged-tea_200x200.webp?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbagged-tea_800x800.webp?alt=media"
                          alt="Bagged Tea" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">Bagged Tea</h3>
@@ -494,7 +494,7 @@
                 </div>
 
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboxed-iced-tea_200x200.webp?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboxed-iced-tea_800x800.webp?alt=media"
                          alt="Boxed Iced Tea" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">Boxed Iced Tea</h3>
@@ -504,7 +504,7 @@
                 </div>
 
                 <div class="menu-card">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fwater-bottle.png?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_800x800.webp?alt=media"
                          alt="Bottled Water" class="menu-card-img">
                     <div class="menu-card-content">
                         <h3 class="menu-card-title">Bottled Water</h3>

@@ -1666,6 +1666,7 @@ section {
         padding: 16px 24px;
         width: 100%;
         max-width: 300px;
+        justify-content: center;
     }
     
     .cta-helper {
