@@ -288,9 +288,10 @@ h1, h2, h3 {
     .rating-badge-container {
         position: absolute;
         bottom: 80px;
-        left: 40px;
+        left: 100px;
         margin-top: 0;
         animation: float 3s ease-in-out infinite;
+        z-index: 1;
     }
 }
 
