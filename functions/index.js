@@ -1,6 +1,7 @@
 // Cloud Functions for platform menu publishing
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const cors = require('cors')({origin: true});
 
 // Import refactored platform modules
 const { generateDoorDashHTML } = require('./lib/platforms/doordash');
@@ -522,4 +523,267 @@ exports.publishPlatformMenu = functions.https.onCall(async (data, context) => {
     console.error('Error publishing menu:', error);
     throw new functions.https.HttpsError('internal', 'Failed to publish menu');
   }
+});
+
+// Philadelphia Teams Configuration
+const PHILLY_TEAMS = {
+  nfl: {
+    name: 'Eagles',
+    abbr: 'PHI',
+    colors: { primary: '#004c54', secondary: '#a5acaf', accent: '#acc0c6' },
+    logo: '🦅',
+    venue: 'Lincoln Financial Field',
+    promos: {
+      gameDay: 'Eagles Game Day Special - Free delivery on $35+',
+      victory: 'Eagles Win! Celebrate with 20% off wings',
+      nextGame: 'Get ready for Eagles football with our Tailgate Combo'
+    }
+  },
+  nba: {
+    name: '76ers',
+    abbr: 'PHI',
+    colors: { primary: '#006bb6', secondary: '#ed174c', accent: '#002b5c' },
+    logo: '🏀',
+    venue: 'Wells Fargo Center',
+    promos: {
+      gameDay: 'Sixers Game Night - Order wings for tip-off',
+      victory: 'Trust the Process! Victory wings 15% off',
+      nextGame: 'Gear up for Sixers basketball with our Philly Special'
+    }
+  },
+  mlb: {
+    name: 'Phillies',
+    abbr: 'PHI',
+    colors: { primary: '#e81828', secondary: '#002d72', accent: '#ffffff' },
+    logo: '⚾',
+    venue: 'Citizens Bank Park',
+    promos: {
+      gameDay: 'Phillies Game Day - Perfect wings for the ballpark',
+      victory: 'Phillies Win! Home run deals on combos',
+      nextGame: 'Baseball season calls for classic Buffalo wings'
+    }
+  },
+  nhl: {
+    name: 'Flyers',
+    abbr: 'PHI',
+    colors: { primary: '#f74902', secondary: '#000000', accent: '#ffffff' },
+    logo: '🏒',
+    venue: 'Wells Fargo Center',
+    promos: {
+      gameDay: 'Flyers Hockey Night - Hot wings for cold rink action',
+      victory: 'Flyers Victory! Score big with wing deals',
+      nextGame: 'Hockey season heats up - order spicy wings'
+    }
+  }
+};
+
+// Helper functions
+function getCountdown(gameDate) {
+  const now = new Date();
+  const diff = gameDate - now;
+
+  if (diff <= 0) return null;
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+function getUrgencyLevel(gameDate, isLive, isUpcoming) {
+  if (isLive) return 10;
+  if (!isUpcoming) return 1;
+
+  const now = new Date();
+  const hoursUntil = (gameDate - now) / (1000 * 60 * 60);
+
+  if (hoursUntil <= 2) return 9;
+  if (hoursUntil <= 6) return 8;
+  if (hoursUntil <= 24) return 7;
+  if (hoursUntil <= 72) return 5;
+  return 3;
+}
+
+/**
+ * HTTP Function: getSportsData
+ * Fetches sports data from ESPN API for a specific sport/league
+ */
+exports.getSportsData = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    try {
+      const { sport, league } = req.query;
+      const today = new Date();
+      const endDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      const formatDate = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}${m}${day}`;
+      };
+
+      const dateRange = `${formatDate(today)}-${formatDate(endDate)}`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard?dates=${dateRange}&limit=300`;
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`ESPN API returned ${response.status}`);
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+});
+
+/**
+ * HTTP Function: phillyGames
+ * Aggregated Philadelphia sports games with enhanced data
+ */
+exports.phillyGames = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    try {
+      const sports = [
+        { sport: 'football', league: 'nfl', teamKey: 'nfl' },
+        { sport: 'basketball', league: 'nba', teamKey: 'nba' },
+        { sport: 'baseball', league: 'mlb', teamKey: 'mlb' },
+        { sport: 'hockey', league: 'nhl', teamKey: 'nhl' }
+      ];
+
+      const allGames = [];
+      const now = new Date();
+
+      for (const { sport, league, teamKey } of sports) {
+        try {
+          const today = new Date();
+          const endDate = new Date(today.getTime() + 45 * 24 * 60 * 60 * 1000); // 45 days
+
+          const formatDate = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}${m}${day}`;
+          };
+
+          const dateRange = `${formatDate(today)}-${formatDate(endDate)}`;
+          const url = `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard?dates=${dateRange}&limit=500`;
+
+          const response = await fetch(url);
+          if (!response.ok) continue;
+
+          const data = await response.json();
+          const teamData = PHILLY_TEAMS[teamKey];
+
+          // Filter and enhance Philadelphia team games
+          const phillyGames = data.events?.filter(event => {
+            const competitors = event.competitions?.[0]?.competitors || [];
+            return competitors.some(comp =>
+              comp.team?.abbreviation === 'PHI' ||
+              comp.team?.displayName?.includes('Philadelphia')
+            );
+          }).map(game => {
+            const competition = game.competitions[0];
+            const competitors = competition.competitors;
+            const homeTeam = competitors.find(c => c.homeAway === 'home');
+            const awayTeam = competitors.find(c => c.homeAway === 'away');
+            const isHome = homeTeam?.team?.abbreviation === 'PHI';
+            const gameDate = new Date(game.date);
+            const isLive = competition.status.type.name === 'STATUS_IN_PROGRESS';
+            const isComplete = competition.status.type.name === 'STATUS_FINAL';
+            const isUpcoming = gameDate > now && !isLive && !isComplete;
+
+            // Determine promotional message
+            let promoMessage = teamData.promos.nextGame;
+            if (isLive || (isUpcoming && gameDate - now < 24 * 60 * 60 * 1000)) {
+              promoMessage = teamData.promos.gameDay;
+            } else if (isComplete) {
+              // Check if Philly won (simplified logic)
+              const phillyCompetitor = competitors.find(c => c.team?.abbreviation === 'PHI');
+              const opponentCompetitor = competitors.find(c => c.team?.abbreviation !== 'PHI');
+              if (phillyCompetitor?.score > opponentCompetitor?.score) {
+                promoMessage = teamData.promos.victory;
+              }
+            }
+
+            return {
+              id: game.id,
+              sport: teamData.name,
+              league: league.toUpperCase(),
+              teamKey: teamKey,
+              icon: teamData.logo,
+              colors: teamData.colors,
+              date: game.date,
+              status: competition.status.type.name,
+              statusText: competition.status.type.description,
+              period: competition.status.period || 0,
+              clock: competition.status.displayClock,
+              homeTeam: {
+                name: homeTeam?.team?.displayName || homeTeam?.team?.name,
+                abbr: homeTeam?.team?.abbreviation,
+                score: homeTeam?.score || 0,
+                logo: homeTeam?.team?.logo
+              },
+              awayTeam: {
+                name: awayTeam?.team?.displayName || awayTeam?.team?.name,
+                abbr: awayTeam?.team?.abbreviation,
+                score: awayTeam?.score || 0,
+                logo: awayTeam?.team?.logo
+              },
+              venue: competition.venue?.fullName || teamData.venue,
+              isHome: isHome,
+              isLive: isLive,
+              isComplete: isComplete,
+              isUpcoming: isUpcoming,
+              gameTime: gameDate.toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZone: 'America/New_York'
+              }),
+              countdown: isUpcoming ? getCountdown(gameDate) : null,
+              promoMessage: promoMessage,
+              urgency: getUrgencyLevel(gameDate, isLive, isUpcoming)
+            };
+          }) || [];
+
+          allGames.push(...phillyGames);
+
+        } catch (error) {
+          console.error(`Error fetching ${teamKey} games:`, error);
+        }
+      }
+
+      // Sort by urgency, then by date
+      allGames.sort((a, b) => {
+        if (a.urgency !== b.urgency) return b.urgency - a.urgency;
+        return new Date(a.date) - new Date(b.date);
+      });
+
+      // Limit to next 10 games for performance
+      const limitedGames = allGames.slice(0, 10);
+
+      res.set('Cache-Control', 'public, max-age=300, s-maxage=600'); // 5min cache, 10min CDN
+      res.json({
+        games: limitedGames,
+        lastUpdated: new Date().toISOString(),
+        count: limitedGames.length,
+        hasLiveGames: limitedGames.some(g => g.isLive),
+        nextGame: limitedGames.find(g => g.isUpcoming) || null
+      });
+
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({
+        error: error.message,
+        games: [],
+        fallback: true
+      });
+    }
+  });
 });

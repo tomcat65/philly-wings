@@ -16,6 +16,14 @@
         {
           "source": "/menu/**",
           "destination": "/menu/platform/index.html"
+        },
+        {
+          "source": "/api/sports",
+          "function": "getSportsData"
+        },
+        {
+          "source": "/api/phillygames",
+          "function": "phillyGames"
         }
       ],
       "headers": [

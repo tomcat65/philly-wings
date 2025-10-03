@@ -1,33 +1,35 @@
-import { GameDayBannerService, SettingsService } from '../services/firebase-service';
-
+// Simple GameDayBanner without Firebase dependencies for now
 export class GameDayBanner {
   constructor() {
     this.container = document.getElementById('gameDayBanner');
     this.liveOrderCount = document.getElementById('liveOrderCount');
-    this.unsubscribeBanner = null;
-    this.unsubscribeSettings = null;
   }
 
-  init() {
+  async init() {
     if (!this.container) return;
 
-    // Subscribe to active game day banner
-    this.unsubscribeBanner = GameDayBannerService.subscribeToActive((banners) => {
-      if (banners && banners.length > 0) {
-        this.updateBanner(banners[0]);
+    try {
+      // For now, use a simple fetch approach or keep hardcoded fallback
+      // This will be replaced with proper Firebase integration later
+      const bannerData = {
+        active: true,
+        team1: "EAGLES",
+        team2: "COWBOYS",
+        gameDate: "2025-09-14T17:00:00.000Z",
+        message: "Order your Tailgate Special now",
+        specialOffer: "Free delivery on orders $30+"
+      };
+
+      if (bannerData.active) {
+        this.updateBanner(bannerData);
         this.container.style.display = 'block';
       } else {
         this.container.style.display = 'none';
       }
-    });
-
-    // Subscribe to live order count
-    if (this.liveOrderCount) {
-      this.unsubscribeSettings = SettingsService.subscribeToSettings((settings) => {
-        if (settings && settings.analytics) {
-          this.liveOrderCount.textContent = settings.analytics.lastHourOrders || 0;
-        }
-      });
+    } catch (error) {
+      console.error('Error loading banner:', error);
+      // Keep banner hidden on error
+      this.container.style.display = 'none';
     }
   }
 
@@ -36,36 +38,25 @@ export class GameDayBanner {
     if (!gameText) return;
 
     let message = '';
-    
-    if (banner.team1 && banner.team2) {
-      const gameDate = banner.gameDate ? new Date(banner.gameDate.seconds * 1000) : null;
-      const dayOfWeek = gameDate ? gameDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase() : 'GAMEDAY';
-      
-      message = `🏈 ${banner.team1} VS ${banner.team2} ${dayOfWeek}`;
-    }
 
-    if (banner.specialOffer) {
-      message += ` • ${banner.specialOffer}`;
+    if (banner.team1 && banner.team2) {
+      const gameDate = banner.gameDate ? new Date(banner.gameDate) : null;
+      const dayOfWeek = gameDate ? gameDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase() : 'GAMEDAY';
+
+      message = `🏈 ${banner.team1} VS ${banner.team2} ${dayOfWeek}`;
     }
 
     if (banner.message) {
       message += ` • ${banner.message}`;
     }
 
-    if (this.liveOrderCount) {
-      message += ` • <span id="liveOrderCount">${this.liveOrderCount.textContent}</span> orders this hour`;
+    if (banner.specialOffer) {
+      message += ` • 🔥 ${banner.specialOffer}`;
+    } else {
+      message += ' • 🔥 Limited time deals';
     }
 
-    gameText.innerHTML = message;
-  }
-
-  destroy() {
-    if (this.unsubscribeBanner) {
-      this.unsubscribeBanner();
-    }
-    if (this.unsubscribeSettings) {
-      this.unsubscribeSettings();
-    }
+    gameText.textContent = message;
   }
 }
 

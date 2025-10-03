@@ -58,9 +58,12 @@
     <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-    <!-- Game Day Banner -->
-    <div class="game-day-banner" id="gameDayBanner">
-        <p class="game-day-text">🏈 EAGLES VS COWBOYS SUNDAY • Order your Tailgate Special now • 🔥 Limited time deals</p>
+    <!-- Philadelphia Sports Banner -->
+    <div class="philly-sports-banner" id="phillySportsBanner" style="display: none;">
+        <div class="banner-loading">
+            <div class="loading-spinner"></div>
+            <span>Loading Philadelphia sports...</span>
+        </div>
     </div>
 
     <!-- Hero Section - The Appetite Awakener -->
@@ -691,6 +694,7 @@
     <script type="module" src="/scripts.js"></script>
     <script type="module" src="src/components/nutrition-modal-firebase.js"></script>
     <script type="module" src="src/components/story-loader.js"></script>
+    <script type="module" src="src/components/philly-sports-banner.js"></script>
     <script type="module">
         // Initialize the nutrition modal
         import { NutritionModalFirebase } from './src/components/nutrition-modal-firebase.js';
