@@ -155,7 +155,7 @@ function generateBeverageGroups(drinksVariants, menuData = {}) {
       id: 'fountain-drinks',
       name: 'Fountain Drinks',
       description: '8 Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq\'s Root Beer, Hi-C Fruit Punch',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_200x200.webp?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_1920x1080.webp?alt=media',
       badge: 'CHOOSE SIZE',
       featured: true,
       sizes: fountainVariants.map(v => ({
@@ -208,7 +208,7 @@ function generateBeverageGroups(drinksVariants, menuData = {}) {
       id: 'iced-tea',
       name: 'Fresh Brewed Tea',
       description: 'Freshly brewed daily • Sweet or unsweetened • Individual sizes',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_200x200.webp?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_1920x1080.webp?alt=media',
       badge: 'FRESH DAILY',
       sizes: uniqueSizes,
       flavors: [
@@ -223,10 +223,12 @@ function generateBeverageGroups(drinksVariants, menuData = {}) {
   if (baggedTeaDoc && baggedTeaDoc.variants && baggedTeaDoc.variants.length > 0) {
     // Group variants by size, extracting unique sizes
     const sizeGroups = {};
+    console.log('🔍 Bagged Tea Variants Debug:', baggedTeaDoc.variants.map(v => ({name: v.name, id: v.id})));
     baggedTeaDoc.variants.forEach(variant => {
       // Extract size from variant name (e.g., "1/2 gallon" from "Sweet Tea 1/2 Gallon Bag")
       const sizeMatch = variant.name.match(/(1\/2\s*gallon|1\s*gallon|\d+\s*(oz|gallon))/i);
       const sizeKey = sizeMatch ? sizeMatch[1].toLowerCase().replace(/\s+/g, ' ') : 'unknown';
+      console.log(`🔍 Variant: "${variant.name}" -> Size Match: ${sizeMatch ? sizeMatch[1] : 'NO MATCH'} -> Key: "${sizeKey}"`);
 
       if (!sizeGroups[sizeKey]) {
         sizeGroups[sizeKey] = {
@@ -244,7 +246,7 @@ function generateBeverageGroups(drinksVariants, menuData = {}) {
       id: 'bagged-tea',
       name: baggedTeaDoc.name || 'Bagged Tea',
       description: baggedTeaDoc.description || 'Bulk tea in convenient bags • Perfect for groups',
-      imageUrl: baggedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbagged-tea.png?alt=media',
+      imageUrl: baggedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbagged-tea_1920x1080.webp?alt=media',
       badge: 'BULK SIZE',
       sizes: Object.values(sizeGroups),
       flavors: [
@@ -280,7 +282,7 @@ function generateBeverageGroups(drinksVariants, menuData = {}) {
       id: 'boxed-iced-tea',
       name: boxedIcedTeaDoc.name || 'Boxed Iced Tea',
       description: boxedIcedTeaDoc.description || 'Large volume iced tea in boxes • Includes ice',
-      imageUrl: boxedIcedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboxed-iced-tea.png?alt=media',
+      imageUrl: boxedIcedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboxed-iced-tea_1920x1080.webp?alt=media',
       badge: 'LARGE VOLUME',
       sizes: Object.values(sizeGroups),
       flavors: [
@@ -299,7 +301,7 @@ function generateBeverageGroups(drinksVariants, menuData = {}) {
         id: variant.id,
         name: variant.name,
         description: 'Pure refreshment • 16.9 fl oz bottle',
-        imageUrl: variant.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_200x200.webp?alt=media',
+        imageUrl: variant.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_1920x1080.webp?alt=media',
         badge: 'PURE',
         sizes: [{
           id: variant.id,

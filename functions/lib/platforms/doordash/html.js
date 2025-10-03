@@ -200,7 +200,7 @@ function generateCombosSection(combos, branding) {
     const name = raw.name || derivedName;
 
     const description = raw.description || `${name} - A perfect meal combination`;
-    const imageUrl = raw.imageUrl || (raw.images && (raw.images.hero || raw.images.original)) || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcombo-platter_800x800.webp?alt=media';
+    const imageUrl = raw.imageUrl || (raw.images && (raw.images.hero || raw.images.original)) || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcombo-platter_1920x1080.webp?alt=media';
 
     let price = raw.platformPrice;
     if (price === undefined || price === null) {
@@ -329,7 +329,7 @@ function generateBonelessWingCard(minBonelessPrice, minBoneInPrice) {
   return `
     <div class="wing-category-card enhanced" data-wing-type="boneless">
         <div class="wing-category-image-wrapper">
-            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmenu%2Fphilly-classic-hot.jpg?alt=media"
+            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fphilly-classic-hot_1920x1080.webp?alt=media"
                  alt="Boneless Wings"
                  class="wing-category-image"
                  loading="lazy">
@@ -358,7 +358,7 @@ function generateBoneInWingCard(minBoneInPrice) {
   return `
     <div class="wing-category-card enhanced" data-wing-type="bone-in">
         <div class="wing-category-image-wrapper">
-            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbroad-pattison-burn_800x800.webp?alt=media"
+            <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbroad-pattison-burn_1920x1080.webp?alt=media"
                  alt="Classic Bone-In Wings"
                  class="wing-category-image"
                  loading="lazy">
@@ -401,7 +401,7 @@ function generateSidesSection(sides, branding) {
         <div class="sides-categories-grid">
             <div class="side-category-card">
                 <div class="side-category-image-wrapper">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffries_800x800.webp?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffries_1920x1080.webp?alt=media"
                          alt="Fries"
                          class="side-category-image"
                          loading="lazy">
@@ -422,7 +422,7 @@ function generateSidesSection(sides, branding) {
             </div>
             <div class="side-category-card">
                 <div class="side-category-image-wrapper">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Floaded-fries_800x800.webp?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Floaded-fries_1920x1080.webp?alt=media"
                          alt="Loaded Fries"
                          class="side-category-image"
                          loading="lazy">
@@ -443,7 +443,7 @@ function generateSidesSection(sides, branding) {
             </div>
             <div class="side-category-card">
                 <div class="side-category-image-wrapper">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmozzarella-sticks_800x800.webp?alt=media"
+                    <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmozzarella-sticks_1920x1080.webp?alt=media"
                          alt="Mozzarella Sticks"
                          class="side-category-image"
                          loading="lazy">
@@ -546,7 +546,7 @@ function createAllBeverageGroups(drinksVariants, baggedTeaDoc, boxedIcedTeaDoc) 
       id: 'fountain-drinks',
       name: 'Fountain Drinks',
       description: '8 Flavors: Coca-Cola, Diet Coke, Coke Zero, Sprite, Fanta Orange, Dr Pepper, Barq\'s Root Beer, Hi-C Fruit Punch',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_200x200.webp?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ffountain-drinks_1920x1080.webp?alt=media',
       badge: 'CHOOSE SIZE',
       featured: true,
       sizes: fountainVariants.map(v => ({
@@ -599,7 +599,7 @@ function createAllBeverageGroups(drinksVariants, baggedTeaDoc, boxedIcedTeaDoc) 
       id: 'iced-tea',
       name: 'Fresh Brewed Tea',
       description: 'Freshly brewed daily • Sweet or unsweetened • Individual sizes',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_200x200.webp?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea_1920x1080.webp?alt=media',
       badge: 'FRESH DAILY',
       sizes: uniqueSizes,
       flavors: [
@@ -616,7 +616,7 @@ function createAllBeverageGroups(drinksVariants, baggedTeaDoc, boxedIcedTeaDoc) 
       id: 'bagged-tea',
       name: baggedTeaDoc.name || 'Bagged Tea',
       description: baggedTeaDoc.description || 'Bulk tea in convenient bags • Perfect for groups',
-      imageUrl: baggedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbagged-tea.png?alt=media',
+      imageUrl: baggedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbagged-tea_1920x1080.webp?alt=media',
       badge: 'BULK SIZE',
       sizes: baggedTeaDoc.variants.map(v => ({
         id: v.id,
@@ -640,7 +640,7 @@ function createAllBeverageGroups(drinksVariants, baggedTeaDoc, boxedIcedTeaDoc) 
       id: 'boxed-iced-tea',
       name: boxedIcedTeaDoc.name || 'Boxed Iced Tea',
       description: boxedIcedTeaDoc.description || 'Large volume iced tea in boxes • Includes ice',
-      imageUrl: boxedIcedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboxed-iced-tea.png?alt=media',
+      imageUrl: boxedIcedTeaDoc.images?.hero || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fboxed-iced-tea_1920x1080.webp?alt=media',
       badge: 'LARGE VOLUME',
       sizes: boxedIcedTeaDoc.variants.map(v => ({
         id: v.id,
@@ -666,7 +666,7 @@ function createAllBeverageGroups(drinksVariants, baggedTeaDoc, boxedIcedTeaDoc) 
         id: variant.id,
         name: variant.name,
         description: 'Pure refreshment • 16.9 fl oz bottle',
-        imageUrl: variant.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_200x200.webp?alt=media',
+        imageUrl: variant.image || 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottle_1920x1080.webp?alt=media',
         badge: 'PURE',
         sizes: [{
           id: variant.id,
@@ -785,7 +785,7 @@ function generateDipsSection(dips, branding) {
       id: 'ranch',
       name: 'Ranch',
       description: 'Cool & creamy ranch dip • Perfect with wings and vegetables',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Franch-dip.png?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Franch-dip_1920x1080.webp?alt=media',
       badge: 'CLASSIC',
       price: '$0.75'
     },
@@ -793,7 +793,7 @@ function generateDipsSection(dips, branding) {
       id: 'honey-mustard',
       name: 'Honey Mustard',
       description: 'Sweet & tangy honey mustard • Great for dipping wings and sides',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fhoney-mustard.png?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fhoney-mustard_1920x1080.webp?alt=media',
       badge: 'SWEET & TANGY',
       price: '$0.75'
     },
@@ -801,7 +801,7 @@ function generateDipsSection(dips, branding) {
       id: 'blue-cheese',
       name: 'Blue Cheese',
       description: 'Classic chunky blue cheese • Traditional wing dip',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fblue-cheese.png?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fblue-cheese_1920x1080.webp?alt=media',
       badge: 'CHUNKY',
       price: '$0.75'
     },
@@ -809,7 +809,7 @@ function generateDipsSection(dips, branding) {
       id: 'cheese-sauce',
       name: 'Cheese Sauce',
       description: 'Warm & melty cheese sauce • Perfect for loaded fries and sides',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcheese-sauce.png?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcheese-sauce_1920x1080.webp?alt=media',
       badge: 'WARM & MELTY',
       price: '$0.75'
     }
