@@ -2368,6 +2368,29 @@ section {
     100% { transform: translateX(-400%); }
 }
 
+/* ===== ALLERGEN BADGE POSITIONING FIX ===== */
+.menu-card-content {
+    position: relative !important;
+}
+
+.allergen-info {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    left: auto !important;
+    z-index: 10 !important;
+}
+
+/* Hide allergen badges in sports banner and CTA areas completely */
+.philly-sports-banner .allergen-info,
+.philly-sports-banner *[class*="allergen"],
+.game-day-cta .allergen-info,
+.game-day-cta *[class*="allergen"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
 /* ===== GAME DAY CTA STYLES ===== */
 .game-day-cta {
     background: linear-gradient(135deg, #004c54 0%, #e81828 100%);
