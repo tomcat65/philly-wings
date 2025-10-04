@@ -2226,6 +2226,11 @@ section {
     height: 60px;
 }
 
+/* Ensure no allergen badges appear in sports banner */
+.philly-sports-banner .allergen-info {
+    display: none !important;
+}
+
 .sports-banner-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2263,10 +2268,9 @@ section {
     font-weight: 600;
     margin: 0 4px;
     font-size: 12px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 160px;
+    flex: 1;
+    min-width: 0;
 }
 
 .game-time {
@@ -2330,7 +2334,10 @@ section {
 
     .team-vs {
         font-size: 11px;
-        max-width: 200px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .game-time {
