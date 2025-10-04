@@ -56,15 +56,15 @@ export class PhillySportsBanner {
       return;
     }
 
-    // Take first 8 games for banner
-    const bannerGames = this.games.slice(0, 8);
+    // Take first 4 games for banner (2 rows, 2 games each)
+    const bannerGames = this.games.slice(0, 4);
 
-    const gamesHTML = bannerGames.map(game => {
+    const gamesHTML = bannerGames.map((game, index) => {
       const isLive = game.isLive;
       const teamDisplay = game.isHome ? `${game.awayTeam.name} vs ${game.homeTeam.name}` : `${game.homeTeam.name} vs ${game.awayTeam.name}`;
 
       return `
-        <div class="sports-game">
+        <div class="sports-game" data-row="${index < 2 ? 'top' : 'bottom'}">
           <div class="game-info">
             <span class="sport-icon">${game.icon}</span>
             <span class="team-vs">${teamDisplay}</span>
@@ -78,7 +78,6 @@ export class PhillySportsBanner {
     this.container.innerHTML = `
       <div class="sports-banner-content">
         ${gamesHTML}
-        ${gamesHTML} <!-- Duplicate for seamless scroll -->
       </div>
     `;
 

@@ -2218,33 +2218,41 @@ section {
 .philly-sports-banner {
     background: linear-gradient(90deg, #004c54 0%, #a50034 25%, #e81828 50%, #f74902 75%, #004c54 100%);
     color: white;
-    padding: 12px 0;
+    padding: 6px 0;
     margin: 0;
     position: relative;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: 60px;
 }
 
 .sports-banner-content {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 4px;
+    height: 100%;
+    padding: 0 20px;
     animation: scroll-banner 45s linear infinite;
 }
 
 .sports-game {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    margin-right: 60px;
-    min-width: 300px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
+    padding: 4px 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .game-info {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
 }
 
 .sport-icon {
@@ -2252,16 +2260,23 @@ section {
 }
 
 .team-vs {
-    font-weight: 700;
-    margin: 0 8px;
+    font-weight: 600;
+    margin: 0 4px;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 160px;
 }
 
 .game-time {
-    background: rgba(255,255,255,0.2);
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    margin-left: 12px;
+    background: rgba(255,255,255,0.25);
+    padding: 3px 6px;
+    border-radius: 8px;
+    font-size: 11px;
+    margin-left: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .live-indicator {
@@ -2294,13 +2309,42 @@ section {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .philly-sports-banner {
+        height: 50px;
+    }
+
+    .sports-banner-content {
+        display: flex;
+        gap: 8px;
+        padding: 0 15px;
+        animation: scroll-banner-mobile 35s linear infinite;
+    }
+
     .sports-game {
-        min-width: 250px;
-        font-size: 13px;
+        min-width: calc(100vw - 40px);
+        max-width: calc(100vw - 40px);
+        font-size: 11px;
+        padding: 3px 6px;
+        flex-shrink: 0;
+    }
+
+    .team-vs {
+        font-size: 11px;
+        max-width: 200px;
     }
 
     .game-time {
-        font-size: 11px;
+        font-size: 10px;
+        padding: 2px 4px;
     }
+
+    .sport-icon {
+        font-size: 14px;
+    }
+}
+
+@keyframes scroll-banner-mobile {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-400%); }
 }
 
