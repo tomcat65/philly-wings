@@ -348,7 +348,9 @@ class AcquisitionModal {
 
     this.hasShown = true;
     const modal = document.getElementById('acquisitionModal');
+    const modalContent = modal.querySelector('.acquisition-modal');
     modal.style.display = 'flex';
+    modalContent.classList.add('show');
 
     // Track modal show event
     this.trackEvent('acquisition_modal_shown', {
@@ -363,6 +365,8 @@ class AcquisitionModal {
 
   hide() {
     const modal = document.getElementById('acquisitionModal');
+    const modalContent = modal.querySelector('.acquisition-modal');
+    modalContent.classList.remove('show');
     modal.style.display = 'none';
   }
 
