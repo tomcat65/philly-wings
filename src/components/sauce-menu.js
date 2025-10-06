@@ -212,4 +212,4 @@ if (document.readyState === 'loading') {
 } else {
   window.sauceMenu = new SauceMenu();
   window.sauceMenu.init();
-}
+}// Firebase-first sauce loading deployed Sun Oct  5 20:03:16 CDT 2025
