@@ -238,6 +238,33 @@ export const ReviewService = {
   }
 };
 
+export const SauceService = {
+  async getActiveSauces() {
+    return FirebaseService.getAll('sauces', {
+      where: ['active', '==', true],
+      orderBy: ['sortOrder', 'asc']
+    });
+  },
+
+  async getSaucesByCategory(category) {
+    // Get all active sauces first, then filter by category
+    const allSauces = await this.getActiveSauces();
+    return allSauces.filter(sauce => sauce.category === category);
+  },
+
+  async getDryRubs() {
+    return this.getSaucesByCategory('dry-rub');
+  },
+
+  async getSignatureSauces() {
+    return this.getSaucesByCategory('signature-sauce');
+  },
+
+  async getDippingSauces() {
+    return this.getSaucesByCategory('dipping-sauce');
+  }
+};
+
 export const SettingsService = {
   async getSettings() {
     return FirebaseService.getById('settings', 'main');
