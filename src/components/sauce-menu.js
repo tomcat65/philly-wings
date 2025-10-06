@@ -1,4 +1,6 @@
-// Sauce Menu Component - Loads sauces from static JSON cache
+// Sauce Menu Component - Loads sauces from Firebase
+import { SauceService } from '../services/firebase-service';
+
 export class SauceMenu {
   constructor() {
     this.dryRubsContainer = document.getElementById('dry-rubs-container');
@@ -18,24 +20,35 @@ export class SauceMenu {
     }
 
     try {
-      // Load sauces from CDN-cached JSON
-      const response = await fetch('/data/sauces.json', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Failed to load sauces');
-
-      const data = await response.json();
-      this.sauces = data.sauces;
-
-      // Derive display values from heat level
-      this.sauces.forEach(sauce => {
-        sauce.displayHeatLabel = this.heatLabels[sauce.heatLevel] || "Mild";
-        sauce.displayHeatDots = this.heatDots[sauce.heatLevel] || "○○○○○";
-      });
-
-      this.renderByCategory();
-    } catch (error) {
-      console.error('Error loading sauces:', error);
-      this.showErrorMessage();
+      // Try Firebase first
+      console.log('Loading sauces from Firebase...');
+      this.sauces = await SauceService.getActiveSauces();
+      console.log(`Loaded ${this.sauces.length} sauces from Firebase`);
+    } catch (firebaseError) {
+      console.warn('Firebase failed, falling back to static JSON:', firebaseError);
+      
+      try {
+        // Fallback to static JSON
+        const response = await fetch('/data/sauces.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Failed to load static JSON');
+        
+        const data = await response.json();
+        this.sauces = data.sauces || [];
+        console.log(`Loaded ${this.sauces.length} sauces from static JSON fallback`);
+      } catch (staticError) {
+        console.error('Both Firebase and static JSON failed:', staticError);
+        this.showErrorMessage();
+        return;
+      }
     }
+
+    // Derive display values from heat level
+    this.sauces.forEach(sauce => {
+      sauce.displayHeatLabel = this.heatLabels[sauce.heatLevel] || "Mild";
+      sauce.displayHeatDots = this.heatDots[sauce.heatLevel] || "○○○○○";
+    });
+
+    this.renderByCategory();
   }
 
   renderByCategory() {
