@@ -787,3 +787,332 @@ exports.phillyGames = functions.https.onRequest((req, res) => {
     }
   });
 });
+
+/**
+ * Callable: createSubscriber
+ * Enhanced subscriber creation with segmentation and game day reminders
+ */
+exports.createSubscriber = functions.https.onCall(async (data, context) => {
+  try {
+    const {
+      email,
+      name,
+      phone,
+      preferences = {},
+      source = 'website',
+      interests = [],
+      sportTeams = [],
+      dietaryPrefs = [],
+      orderFrequency = 'occasional'
+    } = data;
+
+    if (!email) {
+      throw new functions.https.HttpsError('invalid-argument', 'Email is required');
+    }
+
+    // Check if subscriber exists
+    const existingSubscriber = await db.collection('emailSubscribers')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+
+    if (!existingSubscriber.empty) {
+      const existing = existingSubscriber.docs[0];
+      const existingData = existing.data();
+
+      // Update preferences if subscriber exists
+      await existing.ref.update({
+        preferences: { ...existingData.preferences, ...preferences },
+        interests: [...new Set([...(existingData.interests || []), ...interests])],
+        sportTeams: [...new Set([...(existingData.sportTeams || []), ...sportTeams])],
+        dietaryPrefs: [...new Set([...(existingData.dietaryPrefs || []), ...dietaryPrefs])],
+        lastUpdated: new Date(),
+        source: source
+      });
+
+      return {
+        success: true,
+        subscriberId: existing.id,
+        message: 'Subscriber preferences updated',
+        isNewSubscriber: false
+      };
+    }
+
+    // Calculate Customer Lifetime Value prediction
+    const clvScore = calculateCLVScore({
+      interests,
+      sportTeams,
+      dietaryPrefs,
+      orderFrequency,
+      source
+    });
+
+    // Create new subscriber
+    const subscriberData = {
+      email,
+      name: name || null,
+      phone: phone || null,
+      preferences,
+      interests,
+      sportTeams,
+      dietaryPrefs,
+      orderFrequency,
+      source,
+      subscribedAt: new Date(),
+      isActive: true,
+      tags: generateTags({ interests, sportTeams, dietaryPrefs, source }),
+      clvScore,
+      segment: getCustomerSegment(clvScore, interests.length, sportTeams.length),
+      lastEngagement: new Date(),
+      gameReminders: sportTeams.length > 0,
+      emailCount: 0,
+      clickCount: 0,
+      conversionCount: 0
+    };
+
+    const docRef = await db.collection('emailSubscribers').add(subscriberData);
+
+    // Schedule game day reminders if interested in sports
+    if (sportTeams.length > 0) {
+      await scheduleGameDayReminders(docRef.id, email, sportTeams);
+    }
+
+    // Trigger welcome email sequence
+    await triggerWelcomeSequence(docRef.id, email, name, interests);
+
+    return {
+      success: true,
+      subscriberId: docRef.id,
+      message: 'Subscriber created successfully',
+      isNewSubscriber: true,
+      clvScore,
+      segment: subscriberData.segment
+    };
+
+  } catch (error) {
+    console.error('Error creating subscriber:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to create subscriber');
+  }
+});
+
+/**
+ * Helper Functions for Subscriber Pipeline
+ */
+function calculateCLVScore({ interests, sportTeams, dietaryPrefs, orderFrequency, source }) {
+  let score = 50; // Base score
+
+  // Interest multipliers
+  score += interests.length * 5;
+  score += sportTeams.length * 8; // Sports fans order more on game days
+  score += dietaryPrefs.length * 3;
+
+  // Order frequency impact
+  const frequencyScores = {
+    'daily': 40,
+    'weekly': 25,
+    'biweekly': 15,
+    'monthly': 8,
+    'occasional': 3
+  };
+  score += frequencyScores[orderFrequency] || 3;
+
+  // Source quality
+  const sourceScores = {
+    'website': 10,
+    'referral': 15,
+    'social': 8,
+    'ads': 5
+  };
+  score += sourceScores[source] || 5;
+
+  return Math.min(100, Math.max(0, score));
+}
+
+function generateTags({ interests, sportTeams, dietaryPrefs, source }) {
+  const tags = ['newsletter', 'perks'];
+
+  if (interests.includes('wings')) tags.push('wing-lover');
+  if (interests.includes('spicy')) tags.push('heat-seeker');
+  if (interests.includes('combos')) tags.push('combo-buyer');
+  if (sportTeams.length > 0) tags.push('sports-fan');
+  if (dietaryPrefs.includes('vegetarian')) tags.push('vegetarian-options');
+
+  tags.push(`source-${source}`);
+
+  return tags;
+}
+
+function getCustomerSegment(clvScore, interestCount, sportsCount) {
+  if (clvScore >= 80) return 'VIP';
+  if (clvScore >= 60) return 'High-Value';
+  if (sportsCount >= 2) return 'Sports-Fan';
+  if (interestCount >= 3) return 'Engaged';
+  return 'Standard';
+}
+
+async function scheduleGameDayReminders(subscriberId, email, sportTeams) {
+  try {
+    // Get upcoming games for subscriber's teams
+    const gamesResponse = await fetch('https://us-central1-philly-wings.cloudfunctions.net/phillyGames');
+    const gamesData = await gamesResponse.json();
+
+    const relevantGames = gamesData.games.filter(game =>
+      game.isUpcoming && sportTeams.includes(game.teamKey)
+    );
+
+    // Schedule reminders for next 3 games
+    for (const game of relevantGames.slice(0, 3)) {
+      const gameDate = new Date(game.date);
+      const reminderTime = new Date(gameDate.getTime() - (2 * 60 * 60 * 1000)); // 2 hours before
+
+      await db.collection('scheduledReminders').add({
+        subscriberId,
+        email,
+        type: 'game-day',
+        gameId: game.id,
+        sport: game.teamKey,
+        teamName: game.sport,
+        gameDate: gameDate,
+        scheduledFor: reminderTime,
+        sent: false,
+        createdAt: new Date()
+      });
+    }
+  } catch (error) {
+    console.error('Error scheduling game day reminders:', error);
+  }
+}
+
+async function triggerWelcomeSequence(subscriberId, email, name, interests) {
+  try {
+    const welcomeData = {
+      subscriberId,
+      email,
+      name: name || 'Wing Lover',
+      personalizedMessage: generateWelcomeMessage(name, interests),
+      discountCode: generateDiscountCode(),
+      sequence: 'welcome',
+      step: 1,
+      scheduledFor: new Date(),
+      sent: false,
+      createdAt: new Date()
+    };
+
+    await db.collection('emailQueue').add(welcomeData);
+  } catch (error) {
+    console.error('Error triggering welcome sequence:', error);
+  }
+}
+
+function generateWelcomeMessage(name, interests) {
+  const messages = {
+    wings: "Yo! Ready to taste some fire wings that'll knock your socks off?",
+    spicy: "Yooo, another heat seeker! We got levels that'll test your limits.",
+    combos: "Smart choice on combos - more bang for your buck, Philly style!",
+    sports: "Game day wings hit different when you're cheering for the home team!"
+  };
+
+  const greeting = name ? `Yo ${name}!` : "What's good, Wing Lover!";
+  const personalizedPart = interests.length > 0
+    ? messages[interests[0]] || messages.wings
+    : messages.wings;
+
+  return `${greeting} ${personalizedPart} Here's 15% off to get you started - Arleth`;
+}
+
+function generateDiscountCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'WINGS';
+  for (let i = 0; i < 4; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+/**
+ * Scheduled Function: processGameDayReminders
+ * Runs every hour to send game day reminders
+ */
+exports.processGameDayReminders = functions.pubsub.schedule('0 * * * *').onRun(async (context) => {
+  try {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
+
+    // Find reminders due in the next hour
+    const dueReminders = await db.collection('scheduledReminders')
+      .where('sent', '==', false)
+      .where('scheduledFor', '<=', now)
+      .where('scheduledFor', '>', oneHourAgo)
+      .limit(50)
+      .get();
+
+    for (const doc of dueReminders.docs) {
+      const reminder = doc.data();
+
+      try {
+        // Generate Arleth's personalized message
+        const personalizedMessage = generateArlethGameMessage(reminder);
+
+        // Add to email queue
+        await db.collection('emailQueue').add({
+          subscriberId: reminder.subscriberId,
+          email: reminder.email,
+          type: 'game-day-reminder',
+          subject: `🏈 Game Day Special from Arleth!`,
+          message: personalizedMessage,
+          gameInfo: {
+            sport: reminder.sport,
+            teamName: reminder.teamName,
+            gameDate: reminder.gameDate
+          },
+          scheduledFor: now,
+          sent: false,
+          createdAt: new Date()
+        });
+
+        // Mark reminder as sent
+        await doc.ref.update({ sent: true, sentAt: new Date() });
+
+      } catch (error) {
+        console.error(`Error processing reminder ${doc.id}:`, error);
+      }
+    }
+
+    console.log(`Processed ${dueReminders.docs.length} game day reminders`);
+    return null;
+
+  } catch (error) {
+    console.error('Error in processGameDayReminders:', error);
+    return null;
+  }
+});
+
+function generateArlethGameMessage(reminder) {
+  const teamMessages = {
+    nfl: [
+      "Yo! Eagles bout to fly high today! You know what goes perfect with football? My atomic wings that'll have you sweating more than the players. Get 'em delivered before kickoff! 🦅🔥",
+      "Game day special just dropped! As someone who's been feeding Philly since day one, trust me - these wings are gonna hit different during the game. Order now before the rush! 💚",
+      "Listen up, bird gang! Arleth here with your pre-game reminder. These players need fuel, and so do you. Wings that actually taste like they're made with love (and a whole lotta heat)!"
+    ],
+    nba: [
+      "Sixers tip-off soon and I got the perfect fuel for your watch party! These wings been perfected over years of feeding basketball fanatics. Trust the process... and trust these flavors! 🏀",
+      "What's good, Philly! Game time approaching and you know what that means - time for wings that actually pack a punch. None of that weak sauce here, just pure fire! 💙❤️",
+      "Yo Sixers fam! Arleth coming at you with game day realness. Been making wings since before Embiid was dunking, and these recipes still undefeated!"
+    ],
+    mlb: [
+      "Phillies about to take the field! You know what's better than peanuts and cracker jacks? Wings that'll make you forget you're not at the ballpark. Let's go Phils! ⚾",
+      "Game day vibes hitting different! Your girl Arleth got the wings that'll make this Phillies game even sweeter. Red October energy all year round! 🔴",
+      "Baseball and wings - name a more iconic Philly duo! These flavors been perfected through countless innings of perfection. Order up before first pitch!"
+    ],
+    nhl: [
+      "Flyers game tonight means one thing - time for wings that'll warm you up more than that rink action! Been serving hockey fans since the Broad Street Bullies era! 🏒",
+      "Ice cold rink, fire hot wings! That's the Philly way. Arleth here making sure you got the perfect game day fuel. Let's go Flyers! 🧡🖤",
+      "Hockey night in Philly! These wings gonna melt faster than ice on a Flyers power play. Order now and thank me during intermission!"
+    ]
+  };
+
+  const messages = teamMessages[reminder.sport] || teamMessages.nfl;
+  const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+  return `${randomMessage}\n\n- Arleth, Owner & Chief Wing Architect\nPhilly Wings Express 🔥`;
+}

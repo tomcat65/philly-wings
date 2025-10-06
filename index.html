@@ -233,7 +233,7 @@
                     </div>
                 </div>
                 <div class="gallery-item">
-                    <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                    <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;" preload="metadata">
                         <source src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/videos%2Fdallas-crusher-sauce.mp4?alt=media" type="video/mp4">
                         <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fclassic-buffalo-wings_800x800.webp?alt=media" alt="Dallas Crusher wings">
                     </video>
@@ -349,7 +349,7 @@
         <!-- Sauces Section -->
 <div class="menu-category" id="category-sauces">
     <div class="category-hero">
-        <video autoplay muted loop playsinline class="hero-banner">
+        <video autoplay muted loop playsinline class="hero-banner" preload="metadata">
             <source src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/videos%2Fdallas-crusher-sauce.mp4?alt=media" type="video/mp4">
         </video>
         <div class="hero-overlay">
@@ -537,24 +537,21 @@
         </div>
     </div>
 </section>
-    <!-- Email Capture Section -->
+    <!-- VIP Access Section -->
     <section class="email-capture" id="emailCapture">
         <div class="container">
             <div class="email-content">
                 <h2 class="email-headline chalk-text">Get <span class="text-eagles">Game Day Specials</span></h2>
                 <p class="email-subhead">Drop your digits for exclusive deals, VIP perks, and first dibs on new flavors</p>
-                
-                <form id="emailForm" class="email-form">
-                    <div class="form-group">
-                        <input type="email" id="customerEmail" placeholder="Email address" required>
-                        <button type="submit" class="email-submit">
-                            <span>I'm In</span>
-                            <span class="arrow">→</span>
-                        </button>
-                    </div>
+
+                <div class="vip-trigger">
+                    <button id="vipAccessTrigger" class="vip-access-btn">
+                        <span>I'm In</span>
+                        <span class="arrow">→</span>
+                    </button>
                     <p class="email-promise">📧 We keep it real - no spam, just deals that slap</p>
-                </form>
-                
+                </div>
+
                 <div class="email-perks">
                     <div class="perk">
                         <span class="perk-icon">🎫</span>
@@ -572,6 +569,18 @@
             </div>
         </div>
     </section>
+
+    <!-- Acquisition Modal Container -->
+    <div id="acquisitionModal" class="acquisition-modal" style="display: none;">
+        <div class="modal-backdrop">
+            <div class="modal-container">
+                <button class="modal-close" id="modalClose">&times;</button>
+                <div class="modal-content" id="modalContent">
+                    <!-- Dynamic content populated by AcquisitionModal -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- The Closer - Order Section -->
     <section class="order-section" id="orderSection">
@@ -713,6 +722,7 @@
     <script type="module" src="src/components/nutrition-modal-firebase.js"></script>
     <script type="module" src="src/components/story-loader.js"></script>
     <script type="module" src="src/components/philly-sports-banner.js"></script>
+    <script type="module" src="src/components/acquisition-modal.js"></script>
     <script type="module">
         // Initialize the nutrition modal
         import { NutritionModalFirebase } from './src/components/nutrition-modal-firebase.js';
@@ -731,6 +741,10 @@
         import { SauceMenu } from './src/components/sauce-menu.js';
         window.sauceMenu = new SauceMenu();
         window.sauceMenu.init();
+
+        // Initialize acquisition modal
+        import { AcquisitionModal } from './src/components/acquisition-modal.js';
+        window.acquisitionModal = new AcquisitionModal();
     </script>
     <script>
         // Nutrition Info Modal Functions

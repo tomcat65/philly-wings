@@ -143,10 +143,37 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Email subscribers - write only for new signups, admin read
+    // Email subscribers - enhanced for acquisition system
     match /emailSubscribers/{subscriberId} {
       allow read: if isAdmin();
-      allow create: if true; // Anyone can subscribe
+      allow create: if true && // Anyone can subscribe
+        request.resource.data.email is string &&
+        isValidEmail(request.resource.data.email) &&
+        request.resource.data.keys().hasAll(['email', 'subscribedAt']);
+      allow update, delete: if isAdmin();
+    }
+
+    // Scheduled reminders - admin only
+    match /scheduledReminders/{reminderId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Email queue - admin only
+    match /emailQueue/{emailId} {
+      allow read, write: if isAdmin();
+    }
+
+    // A/B test results - admin read, system write
+    match /abTestResults/{testId} {
+      allow read: if isAdmin();
+      allow create: if true; // System can log test results
+      allow update, delete: if isAdmin();
+    }
+
+    // Analytics events - system write, admin read
+    match /analyticsEvents/{eventId} {
+      allow read: if isAdmin();
+      allow create: if true; // System can log events
       allow update, delete: if isAdmin();
     }
 

@@ -25,8 +25,8 @@ class PhillyWingsApp {
       this.initLiveOrders()
     ]);
 
-    // Initialize email capture
-    this.initEmailCapture();
+    // Initialize acquisition system
+    this.initAcquisitionSystem();
 
     // Initialize existing scripts
     this.initExistingScripts();
@@ -112,54 +112,21 @@ class PhillyWingsApp {
     return `${Math.floor(seconds / 86400)} day ago`;
   }
 
-  initEmailCapture() {
-    const emailForm = document.getElementById('emailForm');
-    if (!emailForm) return;
+  initAcquisitionSystem() {
+    // Initialize acquisition modal
+    if (typeof AcquisitionModal !== 'undefined') {
+      window.acquisitionModal = new AcquisitionModal();
 
-    emailForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const emailInput = document.getElementById('customerEmail');
-      const email = emailInput.value.trim();
-      const submitBtn = emailForm.querySelector('.email-submit');
-      
-      if (!email) return;
-
-      // Disable form during submission
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Hold up...</span>';
-
-      try {
-        // Save email to Firebase
-        await FirebaseService.create('emailSubscribers', {
-          email: email,
-          source: 'website',
-          subscribedAt: new Date(),
-          tags: ['newsletter', 'perks']
+      // Set up VIP access trigger
+      const vipTrigger = document.getElementById('vipAccessTrigger');
+      if (vipTrigger) {
+        vipTrigger.addEventListener('click', () => {
+          window.acquisitionModal.show();
         });
-
-        // Show success message
-        emailForm.innerHTML = `
-          <div style="color: #00FF00; font-size: 24px; font-family: 'Bebas Neue', sans-serif;">
-            <p style="margin-bottom: 16px;">Yo, you're in! 🔥</p>
-            <p style="font-size: 18px; color: #F5F5F5;">Check your email for that 15% off jawn</p>
-          </div>
-        `;
-
-        // Track conversion
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'email_signup', {
-            'event_category': 'Engagement',
-            'event_label': 'Newsletter'
-          });
-        }
-      } catch (error) {
-        console.error('Error saving email:', error);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>I\'m In</span><span class="arrow">→</span>';
-        alert('Yo, something went wrong. Try again?');
       }
-    });
+    } else {
+      console.warn('AcquisitionModal not loaded - check script import');
+    }
   }
 
   initExistingScripts() {

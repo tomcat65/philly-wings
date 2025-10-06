@@ -26,8 +26,10 @@ export const auth = getAuth(app);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const functions = getFunctions(app);
 
-// Enable offline persistence
-enableIndexedDbPersistence(db).catch((err) => {
+// Enable offline persistence (updated for Firebase v10+)
+enableIndexedDbPersistence(db, {
+  forceOwnership: false
+}).catch((err) => {
   if (err.code === 'failed-precondition') {
     console.warn('Persistence failed: Multiple tabs open');
   } else if (err.code === 'unimplemented') {

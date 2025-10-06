@@ -86,6 +86,14 @@
         { "fieldPath": "category", "mode": "ASCENDING" },
         { "fieldPath": "sortOrder", "mode": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "sauces",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "sortOrder", "mode": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
