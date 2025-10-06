@@ -108,3 +108,5 @@ functions/*.backup*
 
 firebase-mcp-test/
 firebase-mcp*.*
+
+.ignore/

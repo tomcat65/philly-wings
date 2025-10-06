@@ -92,6 +92,42 @@
       "image": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fgrittys-revenge.png?alt=media",
       "allergens": [],
       "warning": "NOT for rookies!"
+    },
+    {
+      "id": "ranch",
+      "name": "Ranch",
+      "category": "dipping-sauce",
+      "description": "Cool & creamy",
+      "heatLevel": 0,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Franch-dip_1920x1080.webp?alt=media",
+      "allergens": ["dairy", "egg"]
+    },
+    {
+      "id": "honey-mustard",
+      "name": "Honey Mustard",
+      "category": "dipping-sauce",
+      "description": "Sweet & tangy",
+      "heatLevel": 0,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fhoney-mustard_1920x1080.webp?alt=media",
+      "allergens": []
+    },
+    {
+      "id": "blue-cheese",
+      "name": "Blue Cheese",
+      "category": "dipping-sauce",
+      "description": "Classic chunky",
+      "heatLevel": 0,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fblue-cheese_1920x1080.webp?alt=media",
+      "allergens": ["dairy"]
+    },
+    {
+      "id": "cheese-sauce",
+      "name": "Cheese Sauce",
+      "category": "dipping-sauce",
+      "description": "Warm & melty",
+      "heatLevel": 0,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcheese-sauce_1920x1080.webp?alt=media",
+      "allergens": ["dairy"]
     }
   ],
   "dippingSauces": [
