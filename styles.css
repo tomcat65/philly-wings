@@ -1287,12 +1287,22 @@ section {
 .allergen-mark {
     color: var(--sauce-red);
     font-size: 14px;
-    cursor: help;
+    cursor: pointer;
     font-weight: bold;
     background: rgba(255, 255, 255, 0.9);
     padding: 0 4px;
     border-radius: 3px;
     border: 1px solid var(--sauce-red);
+    /* Safari iOS touch improvements */
+    -webkit-tap-highlight-color: rgba(232, 24, 40, 0.3);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    min-width: 24px;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Print Styles */
@@ -2379,6 +2389,30 @@ section {
     right: 8px !important;
     left: auto !important;
     z-index: 10 !important;
+    /* Safari iOS touch improvements */
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(232, 24, 40, 0.3);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    min-width: 28px;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Safari iOS touch feedback states */
+.allergen-info.touched,
+.allergen-mark.touched {
+    background: rgba(232, 24, 40, 0.2) !important;
+    transform: scale(0.95);
+}
+
+.allergen-info:active,
+.allergen-mark:active {
+    background: rgba(232, 24, 40, 0.3) !important;
+    transform: scale(0.9);
 }
 
 /* Hide allergen badges in sports banner and CTA areas completely */

@@ -787,7 +787,8 @@ function generateDipsSection(dips, branding) {
       description: 'Cool & creamy ranch dip • Perfect with wings and vegetables',
       imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Franch-dip_1920x1080.webp?alt=media',
       badge: 'CLASSIC',
-      price: '$0.75'
+      price: '$0.75',
+      allergens: ['dairy', 'egg']
     },
     {
       id: 'honey-mustard',
@@ -795,7 +796,8 @@ function generateDipsSection(dips, branding) {
       description: 'Sweet & tangy honey mustard • Great for dipping wings and sides',
       imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fhoney-mustard_1920x1080.webp?alt=media',
       badge: 'SWEET & TANGY',
-      price: '$0.75'
+      price: '$0.75',
+      allergens: []
     },
     {
       id: 'blue-cheese',
@@ -803,7 +805,8 @@ function generateDipsSection(dips, branding) {
       description: 'Classic chunky blue cheese • Traditional wing dip',
       imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fblue-cheese_1920x1080.webp?alt=media',
       badge: 'CHUNKY',
-      price: '$0.75'
+      price: '$0.75',
+      allergens: ['dairy']
     },
     {
       id: 'cheese-sauce',
@@ -811,7 +814,8 @@ function generateDipsSection(dips, branding) {
       description: 'Warm & melty cheese sauce • Perfect for loaded fries and sides',
       imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcheese-sauce_1920x1080.webp?alt=media',
       badge: 'WARM & MELTY',
-      price: '$0.75'
+      price: '$0.75',
+      allergens: ['dairy']
     }
   ];
 
@@ -830,9 +834,22 @@ function generateDipsSection(dips, branding) {
                              class="dip-category-image"
                              loading="lazy">
                         <div class="dip-category-badge">${dip.badge}</div>
+                        ${dip.allergens && dip.allergens.length > 0 ?
+                          `<div class="allergen-info"
+                                title="Contains: ${dip.allergens.join(', ')}"
+                                data-allergens="${dip.allergens.join(', ')}"
+                                onclick="showAllergenInfo(this)"
+                                ontouchstart="this.classList.add('touched')"
+                                ontouchend="this.classList.remove('touched')">ⓘ</div>` : ''}
                     </div>
                     <div class="dip-category-details">
-                        <h3 class="dip-category-name">${dip.name}</h3>
+                        <h3 class="dip-category-name">${dip.name}${dip.allergens && dip.allergens.length > 0 ?
+                          ` <span class="allergen-mark"
+                                  title="Contains: ${dip.allergens.join(', ')}"
+                                  data-allergens="${dip.allergens.join(', ')}"
+                                  onclick="showAllergenInfo(this)"
+                                  ontouchstart="this.classList.add('touched')"
+                                  ontouchend="this.classList.remove('touched')">ⓘ</span>` : ''}</h3>
                         <p class="dip-category-description">${dip.description}</p>
                         <div class="dip-category-pricing">
                             <div class="price-main">${dip.price}</div>

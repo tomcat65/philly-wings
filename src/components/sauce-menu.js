@@ -131,7 +131,12 @@ export class SauceMenu {
 
     // Add allergen indicator if needed
     const allergenInfo = sauce.allergens && sauce.allergens.length > 0 ?
-      `<div class="allergen-info" title="Contains: ${sauce.allergens.join(', ')}">ⓘ</div>` : '';
+      `<div class="allergen-info"
+            title="Contains: ${sauce.allergens.join(', ')}"
+            data-allergens="${sauce.allergens.join(', ')}"
+            onclick="showAllergenInfo(this)"
+            ontouchstart="this.classList.add('touched')"
+            ontouchend="this.classList.remove('touched')">ⓘ</div>` : '';
 
     // Add badges if present
     const badges = sauce.badges && sauce.badges.length > 0 ?
@@ -164,7 +169,12 @@ export class SauceMenu {
 
     // Add allergen indicator for dipping sauces
     const allergenMark = sauce.allergens && sauce.allergens.length > 0 ?
-      ` <span class="allergen-mark" title="Contains: ${sauce.allergens.join(', ')}">ⓘ</span>` : '';
+      ` <span class="allergen-mark"
+              title="Contains: ${sauce.allergens.join(', ')}"
+              data-allergens="${sauce.allergens.join(', ')}"
+              onclick="showAllergenInfo(this)"
+              ontouchstart="this.classList.add('touched')"
+              ontouchend="this.classList.remove('touched')">ⓘ</span>` : '';
 
     card.innerHTML = `
       <img src="${sauce.imageUrl}"

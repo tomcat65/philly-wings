@@ -518,11 +518,42 @@ function showNutrition() {
 function showAllergens() {
     // TODO: Implement allergen modal
     alert('Common allergens: Wheat, Soy, Dairy, Eggs. Please check with platforms for specific items.');
-    
+
     gtag('event', 'click', {
         'event_category': 'Info',
         'event_label': 'Allergens'
     });
+}
+
+// Safari iOS compatible allergen info display
+function showAllergenInfo(element) {
+    // Get allergen information from data attribute
+    const allergens = element.getAttribute('data-allergens');
+
+    if (!allergens) {
+        return;
+    }
+
+    // For Safari iOS compatibility, use a simple alert modal first
+    // This ensures immediate functionality while we can enhance later
+    alert(`Allergen Information:\n\nContains: ${allergens}\n\nPlease verify with the platform for complete allergen information.`);
+
+    // Track the interaction
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'click', {
+            'event_category': 'Info',
+            'event_label': 'Specific Allergen Info',
+            'custom_parameters': {
+                'allergens': allergens
+            }
+        });
+    }
+
+    // Prevent event bubbling
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
 }
 
 // Exit Intent Detection
