@@ -129,35 +129,5 @@
       "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcheese-sauce_1920x1080.webp?alt=media",
       "allergens": ["dairy"]
     }
-  ],
-  "dippingSauces": [
-    {
-      "id": "ranch",
-      "name": "Ranch",
-      "description": "Cool & creamy",
-      "category": "dip",
-      "allergens": ["dairy", "egg"]
-    },
-    {
-      "id": "honey-mustard",
-      "name": "Honey Mustard",
-      "description": "Sweet & tangy",
-      "category": "dip",
-      "allergens": []
-    },
-    {
-      "id": "blue-cheese",
-      "name": "Blue Cheese",
-      "description": "Classic chunky",
-      "category": "dip",
-      "allergens": ["dairy"]
-    },
-    {
-      "id": "cheese-sauce",
-      "name": "Cheese Sauce",
-      "description": "Warm & melty",
-      "category": "dip",
-      "allergens": ["dairy"]
-    }
   ]
 }
