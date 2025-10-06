@@ -113,19 +113,16 @@ class PhillyWingsApp {
   }
 
   initAcquisitionSystem() {
-    // Initialize acquisition modal
-    if (typeof AcquisitionModal !== 'undefined') {
-      window.acquisitionModal = new AcquisitionModal();
-
-      // Set up VIP access trigger
-      const vipTrigger = document.getElementById('vipAccessTrigger');
-      if (vipTrigger) {
-        vipTrigger.addEventListener('click', () => {
+    // Set up VIP access trigger - modal will be available globally
+    const vipTrigger = document.getElementById('vipAccessTrigger');
+    if (vipTrigger) {
+      vipTrigger.addEventListener('click', () => {
+        if (window.acquisitionModal) {
           window.acquisitionModal.show();
-        });
-      }
-    } else {
-      console.warn('AcquisitionModal not loaded - check script import');
+        } else {
+          console.warn('AcquisitionModal not ready yet');
+        }
+      });
     }
   }
 

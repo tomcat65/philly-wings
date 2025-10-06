@@ -238,8 +238,11 @@ class AcquisitionModal {
 
   async loadSportsData() {
     try {
-      // Use existing phillyGames endpoint
-      const response = await fetch('/philly-wings/us-central1/phillyGames');
+      // Use existing phillyGames endpoint - detect environment
+      const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:5002'
+        : 'https://us-central1-philly-wings.cloudfunctions.net';
+      const response = await fetch(`${baseUrl}/philly-wings/us-central1/phillyGames`);
       const data = await response.json();
 
       this.sportsData = data;
@@ -412,8 +415,26 @@ class AcquisitionModal {
         }
       };
 
-      // Save to Firebase
-      await window.FirebaseService.create('emailSubscribers', subscriberData);
+      // Save using enhanced createSubscriber function
+      const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:5002'
+        : 'https://us-central1-philly-wings.cloudfunctions.net';
+
+      const response = await fetch(`${baseUrl}/philly-wings/us-central1/createSubscriber`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data: subscriberData })
+      });
+
+      const result = await response.json();
+      if (!result.result?.success) {
+        throw new Error(result.error || 'Failed to create subscriber');
+      }
+
+      // Store subscriber info for analytics
+      this.subscriberInfo = result.result;
 
       this.trackEvent('acquisition_complete', {
         session_id: this.getSessionId(),
@@ -554,5 +575,11 @@ class SocialProofManager {
 // Export the class for import usage
 export { AcquisitionModal };
 
-// Initialize global modal instance
-window.acquisitionModal = new AcquisitionModal();
+// Initialize global modal instance when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    window.acquisitionModal = new AcquisitionModal();
+  });
+} else {
+  window.acquisitionModal = new AcquisitionModal();
+}
