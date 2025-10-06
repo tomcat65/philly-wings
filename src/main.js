@@ -171,5 +171,26 @@ class PhillyWingsApp {
   }
 }
 
+// Global function for allergen info display
+window.showAllergenInfo = function(element) {
+  const allergens = element.getAttribute('data-allergens');
+  if (!allergens) return;
+
+  alert(`Allergen Information:\n\nContains: ${allergens}\n\nPlease verify with the platform for complete allergen information.`);
+
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'click', {
+      'event_category': 'Info',
+      'event_label': 'Specific Allergen Info',
+      'custom_parameters': { 'allergens': allergens }
+    });
+  }
+
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+};
+
 // Initialize app
 new PhillyWingsApp();
