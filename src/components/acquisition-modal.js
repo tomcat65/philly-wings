@@ -216,6 +216,15 @@ class AcquisitionModal {
   }
 
   setupEventListeners() {
+    // VIP Access Button trigger
+    const vipButton = document.getElementById('vipAccessTrigger');
+    if (vipButton) {
+      vipButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.show('vip_button_click');
+      });
+    }
+
     // Step 1 form submission
     document.getElementById('step1Form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -238,31 +247,65 @@ class AcquisitionModal {
 
   async loadSportsData() {
     try {
-      // Use existing phillyGames endpoint - detect environment
-      const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://127.0.0.1:5002'
-        : 'https://us-central1-philly-wings.cloudfunctions.net';
-      const response = await fetch(`${baseUrl}/philly-wings/us-central1/phillyGames`);
+      // Use hosting rewrite route for emulator, direct function for production
+      const isLocal = window.location.hostname === 'localhost' ||
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.port === '5003';
+      const apiUrl = isLocal
+        ? '/api/phillygames'  // Use hosting rewrite
+        : 'https://us-central1-philly-wings.cloudfunctions.net/phillyGames';
+
+      console.log('Environment detection:', {
+        hostname: window.location.hostname,
+        port: window.location.port,
+        isLocal,
+        apiUrl
+      });
+
+      const response = await fetch(apiUrl);
       const data = await response.json();
 
       this.sportsData = data;
       this.updateTeamCheckboxes(data.games);
       this.updateArlethMessage(data.games);
     } catch (error) {
-      console.error('Error loading sports data:', error);
-      // Graceful fallback - modal still works without sports data
+      console.warn('Sports data unavailable - using fallback mode:', error.message);
+      // Graceful fallback - show generic sports options
+      this.createFallbackSportsData();
     }
+  }
+
+  createFallbackSportsData() {
+    // Fallback sports data when API unavailable
+    this.sportsData = {
+      games: [
+        { teamKey: 'nfl', sport: 'Eagles', icon: '🦅' },
+        { teamKey: 'nba', sport: '76ers', icon: '🏀' },
+        { teamKey: 'mlb', sport: 'Phillies', icon: '⚾' },
+        { teamKey: 'nhl', sport: 'Flyers', icon: '🏒' }
+      ]
+    };
+    this.updateTeamCheckboxes(this.sportsData.games);
+    this.updateArlethMessage(this.sportsData.games);
   }
 
   updateTeamCheckboxes(games) {
     if (!games || games.length === 0) return;
+
+    // Map API sport names to checkbox values
+    const teamMapping = {
+      'Eagles': 'eagles',
+      '76ers': 'sixers',
+      'Phillies': 'phillies',
+      'Flyers': 'flyers'
+    };
 
     const upcomingGames = games.filter(game =>
       new Date(game.gameTime) <= new Date(Date.now() + 24 * 60 * 60 * 1000)
     );
 
     upcomingGames.forEach(game => {
-      const teamValue = game.team?.toLowerCase();
+      const teamValue = teamMapping[game.sport] || game.teamKey;
       const checkbox = document.querySelector(`input[value="${teamValue}"]`);
       if (checkbox) {
         const gameAlert = checkbox.parentElement.querySelector('.game-alert');
@@ -278,7 +321,7 @@ class AcquisitionModal {
     const nextGame = games.find(game => new Date(game.gameTime) > new Date());
     if (nextGame) {
       const timeToGame = this.formatRelativeTime(nextGame.gameTime);
-      const message = `"Hey! It's Arleth. Big ${nextGame.team} game ${timeToGame} - want me to personally remind you about game day wing specials?" 📱`;
+      const message = `"Hey! It's Arleth. Big ${nextGame.sport} game ${timeToGame} - want me to personally remind you about game day wing specials?" 📱`;
 
       const messageElement = document.getElementById('arlethMessage');
       if (messageElement) {
@@ -381,46 +424,63 @@ class AcquisitionModal {
   }
 
   async submitSubscription() {
+    // Define subscriberData outside try block to fix scope issue
+    const subscriberData = {
+      email: this.userData.email,
+      phone: this.userData.phoneNumber || null,  // Field name expected by createSubscriber
+      phoneNumber: this.userData.phoneNumber || null,
+      source: 'website_modal',
+      subscribedAt: new Date(),
+      status: 'active',
+
+      // Array field expected by createSubscriber function
+      sportTeams: this.userData.selectedTeams || [],
+      selectedTeams: this.userData.selectedTeams || [],  // Keep for fallback
+
+      sportsPreferences: {
+        eagles: this.userData.selectedTeams?.includes('eagles') || false,
+        phillies: this.userData.selectedTeams?.includes('phillies') || false,
+        sixers: this.userData.selectedTeams?.includes('sixers') || false,
+        flyers: this.userData.selectedTeams?.includes('flyers') || false,
+        gameReminders: this.userData.selectedTeams?.length > 0 || false,
+        preferredTiming: this.userData.reminderTiming || '2h_before'
+      },
+
+      customerContext: {
+        signupDevice: window.innerWidth <= 768 ? 'mobile' : 'desktop',
+        signupTime: new Date().toISOString(),
+        pageViews: this.getPageViews(),
+        timeOnSite: Math.round((Date.now() - this.getSessionStart()) / 1000),
+        scrollDepth: this.getMaxScrollDepth(),
+        abTestVariants: this.abTestManager.userVariants
+      },
+
+      preferences: {
+        gameDay: true,
+        newFlavors: true,
+        textAlerts: !!this.userData.phoneNumber,
+        weeklyDeals: true
+      }
+    };
+
     try {
-      const subscriberData = {
-        email: this.userData.email,
-        phoneNumber: this.userData.phoneNumber || null,
-        source: 'website_modal',
-        subscribedAt: new Date(),
-        status: 'active',
-
-        sportsPreferences: {
-          eagles: this.userData.selectedTeams?.includes('eagles') || false,
-          phillies: this.userData.selectedTeams?.includes('phillies') || false,
-          sixers: this.userData.selectedTeams?.includes('sixers') || false,
-          flyers: this.userData.selectedTeams?.includes('flyers') || false,
-          gameReminders: this.userData.selectedTeams?.length > 0 || false,
-          preferredTiming: this.userData.reminderTiming || '2h_before'
-        },
-
-        customerContext: {
-          signupDevice: window.innerWidth <= 768 ? 'mobile' : 'desktop',
-          signupTime: new Date().toISOString(),
-          pageViews: this.getPageViews(),
-          timeOnSite: Math.round((Date.now() - this.getSessionStart()) / 1000),
-          scrollDepth: this.getMaxScrollDepth(),
-          abTestVariants: this.abTestManager.userVariants
-        },
-
-        preferences: {
-          gameDay: true,
-          newFlavors: true,
-          textAlerts: !!this.userData.phoneNumber,
-          weeklyDeals: true
-        }
-      };
 
       // Save using enhanced createSubscriber function
-      const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      const isLocal = window.location.hostname === 'localhost' ||
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.port === '5003';
+      const baseUrl = isLocal
         ? 'http://127.0.0.1:5002'
         : 'https://us-central1-philly-wings.cloudfunctions.net';
 
-      const response = await fetch(`${baseUrl}/philly-wings/us-central1/createSubscriber`, {
+      console.log('Subscriber save - environment detection:', {
+        hostname: window.location.hostname,
+        port: window.location.port,
+        isLocal,
+        baseUrl
+      });
+
+      const response = await fetch(`${baseUrl}/createSubscriber`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -445,8 +505,26 @@ class AcquisitionModal {
       });
 
     } catch (error) {
-      console.error('Error saving subscription:', error);
-      this.showError('Something went wrong. Please try again.');
+      console.warn('Enhanced subscriber creation failed, trying basic save:', error.message);
+
+      try {
+        // Fallback to basic Firebase creation
+        await window.FirebaseService.create('emailSubscribers', {
+          email: subscriberData.email,
+          name: subscriberData.name,
+          subscribedAt: new Date(),
+          source: subscriberData.source,
+          interests: subscriberData.interests,
+          sportTeams: subscriberData.selectedTeams,
+          tags: ['newsletter', 'perks', 'fallback']
+        });
+
+        console.log('Subscriber saved with basic method');
+      } catch (fallbackError) {
+        console.error('Both enhanced and basic subscription failed:', fallbackError);
+        this.showError('Something went wrong. Please try again.');
+        return;
+      }
     }
   }
 
