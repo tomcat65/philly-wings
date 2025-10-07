@@ -75,6 +75,10 @@ class AcquisitionModal {
 
             <form class="modal-form" id="step1Form">
               <div class="form-group">
+                <label for="userName">Who am I hooking up?</label>
+                <input type="text" id="userName" placeholder="Jess from Oxford Circle" maxlength="80" required>
+              </div>
+              <div class="form-group">
                 <label for="userEmail">Drop your email to join the crew</label>
                 <input type="email" id="userEmail" placeholder="you@example.com" required>
               </div>
@@ -420,7 +424,14 @@ class AcquisitionModal {
   }
 
   async handleStep1() {
+    const nameInput = document.getElementById('userName');
+    const name = nameInput ? nameInput.value.trim() : '';
     const email = document.getElementById('userEmail').value.trim();
+
+    if (!name) {
+      this.showError('Let me know who I’m texting—drop your name.');
+      return;
+    }
 
     if (!this.validateEmail(email)) {
       this.showError('Please enter a valid email address');
@@ -430,12 +441,14 @@ class AcquisitionModal {
     const submitBtn = document.querySelector('#step1Form .step-button.primary');
     if (submitBtn) submitBtn.disabled = true;
 
+    this.userData.name = name;
     this.userData.email = email;
     this.userData.step1CompletedAt = new Date();
 
     this.trackEvent('acquisition_step_completed', {
       step_number: 1,
-      email_provided: true
+      email_provided: true,
+      name_provided: true
     });
 
     this.nextStep();
@@ -511,6 +524,7 @@ class AcquisitionModal {
     // Define subscriberData outside try block to fix scope issue
     const subscriberData = {
       email: this.userData.email,
+      name: this.userData.name || null,
       phone: this.userData.phoneNumber || null,  // Field name expected by createSubscriber
       phoneNumber: this.userData.phoneNumber || null,
       source: 'website_modal',
