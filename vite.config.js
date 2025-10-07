@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
-import { copyFileSync, mkdirSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 export default defineConfig({
@@ -10,6 +10,26 @@ export default defineConfig({
     }),
     {
       name: 'copy-firebase-config',
+      buildStart() {
+        const platformConfigPath = 'menu/platform/firebase-config.js';
+
+        if (!existsSync(platformConfigPath)) {
+          const config = {
+            apiKey: process.env.VITE_FIREBASE_API_KEY || '',
+            authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+            projectId: process.env.VITE_FIREBASE_PROJECT_ID || '',
+            storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+            messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+            appId: process.env.VITE_FIREBASE_APP_ID || ''
+          };
+
+          const fileContents = `// Auto-generated during build.\nwindow.__PHILLY_WINGS_FIREBASE_CONFIG__ = ${JSON.stringify(config, null, 2)};\n`;
+
+          mkdirSync('menu/platform', { recursive: true });
+          writeFileSync(platformConfigPath, fileContents, 'utf-8');
+          console.log('✓ Generated menu/platform/firebase-config.js from environment variables');
+        }
+      },
       closeBundle() {
         try {
           mkdirSync('dist/menu/platform', { recursive: true });
