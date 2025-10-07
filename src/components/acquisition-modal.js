@@ -398,13 +398,24 @@ class AcquisitionModal {
   }
 
   nextStep() {
+    const steps = Array.from(document.querySelectorAll('.modal-step'));
+    if (!steps.length) return;
+
+    const nextIndex = this.currentStep; // zero-based progression
+    if (nextIndex >= steps.length) {
+      // already on the final step; keep it visible
+      this.currentStep = steps.length;
+      this.updateProgress();
+      return;
+    }
+
     const currentStepEl = document.querySelector('.modal-step.active');
-    const nextStepEl = document.querySelector(`.modal-step.step-${this.currentStep + 1}`);
+    const nextStepEl = document.querySelector(`.modal-step.step-${nextIndex + 1}`);
 
     if (currentStepEl) currentStepEl.classList.remove('active');
     if (nextStepEl) nextStepEl.classList.add('active');
 
-    this.currentStep++;
+    this.currentStep = Math.min(steps.length, this.currentStep + 1);
     this.updateProgress();
   }
 
@@ -416,6 +427,9 @@ class AcquisitionModal {
       return;
     }
 
+    const submitBtn = document.querySelector('#step1Form .step-button.primary');
+    if (submitBtn) submitBtn.disabled = true;
+
     this.userData.email = email;
     this.userData.step1CompletedAt = new Date();
 
@@ -425,9 +439,14 @@ class AcquisitionModal {
     });
 
     this.nextStep();
+
+    if (submitBtn) submitBtn.disabled = false;
   }
 
   async handleStep2() {
+    const submitBtn = document.querySelector('#step2Form .step-button.primary');
+    if (submitBtn) submitBtn.disabled = true;
+
     const phone = document.getElementById('userPhone').value.trim();
     const selectedTeams = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
       .map(cb => cb.value);
@@ -445,14 +464,27 @@ class AcquisitionModal {
       teams_list: selectedTeams.join(',')
     });
 
-    await this.submitSubscription();
-    this.nextStep();
+    const success = await this.submitSubscription();
+    if (success) {
+      this.nextStep();
+    } else {
+      this.updateProgress();
+    }
+
+    if (submitBtn) submitBtn.disabled = false;
   }
 
-  skipToStep3() {
+  async skipToStep3() {
     this.userData.skippedSports = true;
-    this.submitSubscription();
-    this.nextStep();
+    const submitBtn = document.querySelector('#step2Form .step-button.primary');
+    if (submitBtn) submitBtn.disabled = true;
+    const success = await this.submitSubscription();
+    if (success) {
+      this.nextStep();
+    } else {
+      this.updateProgress();
+    }
+    if (submitBtn) submitBtn.disabled = false;
   }
 
   updateProgress() {
@@ -556,6 +588,8 @@ class AcquisitionModal {
         skipped_sports: this.userData.skippedSports || false
       });
 
+      return true;
+
     } catch (error) {
       console.warn('Enhanced subscriber creation failed, trying basic save:', error.message);
 
@@ -572,10 +606,11 @@ class AcquisitionModal {
         });
 
         console.log('Subscriber saved with basic method');
+        return true;
       } catch (fallbackError) {
         console.error('Both enhanced and basic subscription failed:', fallbackError);
         this.showError('Something went wrong. Please try again.');
-        return;
+        return false;
       }
     }
   }
