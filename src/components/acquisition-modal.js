@@ -22,6 +22,7 @@ class AcquisitionModal {
     this.createModalHTML();
     this.setupTriggers();
     this.setupEventListeners();
+    this.updateProgress();
     this.loadSportsData();
   }
 
@@ -31,58 +32,73 @@ class AcquisitionModal {
         <div class="acquisition-modal">
           <button class="modal-close" onclick="acquisitionModal.hide()">&times;</button>
 
+          <div class="modal-progress">
+            <div class="progress-track"><span class="progress-bar"></span></div>
+            <div class="step-indicators">
+              <span class="step-indicator active">1</span>
+              <span class="step-indicator">2</span>
+              <span class="step-indicator">3</span>
+            </div>
+          </div>
+
           <!-- Step 1: Email Collection -->
-          <div class="modal-step step-1 active">
-            <div class="modal-header">
-              <h2 class="modal-headline">${this.abTestManager.getVariant('modal_headline')}</h2>
-              <span class="social-proof-counter">Join 2,847+ Philly fans</span>
+          <div class="modal-step step-1 active" data-step="1">
+            <div class="modal-hero">
+              <span class="hero-badge">PHILLY VIP CREW</span>
+              <h2 class="modal-headline">🔥 GAME DAY ALERTS DIRECT FROM ARLETH</h2>
+              <p class="modal-subtitle">Get the text the Bird Gang gets—exclusive drops, free delivery nights, and the sauce lineup before kickoff.</p>
             </div>
 
-            <div class="perks-preview">
-              <div class="perk">
-                <span class="perk-icon">🎫</span>
-                <span class="perk-text">15% off first order</span>
+            <div class="perk-grid">
+              <div class="perk-card">
+                <div class="perk-icon">🎯</div>
+                <div class="perk-copy">
+                  <strong>15% OFF TONIGHT</strong>
+                  <span>Your first order hits instantly.</span>
+                </div>
               </div>
-              <div class="perk">
-                <span class="perk-icon">🔥</span>
-                <span class="perk-text">New flavors first</span>
+              <div class="perk-card">
+                <div class="perk-icon">🔥</div>
+                <div class="perk-copy">
+                  <strong>Flavor Drops First</strong>
+                  <span>Be first on new sauces + limited runs.</span>
+                </div>
               </div>
-              <div class="perk">
-                <span class="perk-icon">🏈</span>
-                <span class="perk-text">Game day specials</span>
+              <div class="perk-card">
+                <div class="perk-icon">🏈</div>
+                <div class="perk-copy">
+                  <strong>Game Day Reminders</strong>
+                  <span>Texts when Philly squads take the field.</span>
+                </div>
               </div>
             </div>
 
             <form class="modal-form" id="step1Form">
               <div class="form-group">
-                <input type="email" id="userEmail" placeholder="Your email address" required>
-                <button type="submit" class="step-button primary">
-                  ${this.abTestManager.getVariant('cta_button')}
-                </button>
+                <label for="userEmail">Drop your email to join the crew</label>
+                <input type="email" id="userEmail" placeholder="you@example.com" required>
               </div>
-              <p class="trust-message">📧 No spam - just deals that slap 🤙</p>
+              <button type="submit" class="step-button primary">Text me the game day deals →</button>
+              <p class="cta-microcopy">Arleth texts 1-2× per week. No bots, no spam. Opt out whenever.</p>
             </form>
           </div>
 
           <!-- Step 2: Sports Preferences + Phone -->
-          <div class="modal-step step-2">
-            <div class="modal-header">
-              <h2>🏆 Unlock VIP + Game Day Alerts</h2>
-              <span class="vip-badge">ARLETH'S PERSONAL UPDATES</span>
-            </div>
-
-            <div class="arleth-intro">
-              <div class="owner-photo-placeholder">📸</div>
-              <p id="arlethMessage">"Hey! It's Arleth, the owner. Want me to personally text you about game days? I send the real inside scoop - not robot messages!" 📱</p>
+          <div class="modal-step step-2" data-step="2">
+            <div class="modal-hero">
+              <span class="hero-badge">HYPED FOR PHILLY SPORTS</span>
+              <h2 class="modal-headline">WHO SHOULD I REMIND YOU ABOUT?</h2>
+              <p class="modal-subtitle" id="arlethMessage">“Hey—it’s Arleth. Big game this week. Want me to personally hit you with the specials before kickoff?”</p>
             </div>
 
             <form class="modal-form" id="step2Form">
               <div class="form-group">
-                <input type="tel" id="userPhone" placeholder="Phone (for VIP game day texts from Arleth)">
+                <label for="userPhone">Phone number (for VIP game day texts)</label>
+                <input type="tel" id="userPhone" placeholder="(267) 555-0199">
               </div>
 
               <div class="sports-preferences">
-                <h4>Which Philly teams do you follow?</h4>
+                <h4>Pick your Philly squads:</h4>
                 <div class="team-checkboxes" id="teamCheckboxes">
                   <label class="team-option">
                     <input type="checkbox" value="eagles">
@@ -108,47 +124,53 @@ class AcquisitionModal {
               </div>
 
               <div class="timing-preference">
-                <label>When do you want game reminders?</label>
+                <label for="reminderTiming">When should I ping you?</label>
                 <select name="reminderTiming" id="reminderTiming">
-                  <option value="2h_before">2 hours before (plan ahead)</option>
-                  <option value="1h_before">1 hour before (last minute)</option>
-                  <option value="halftime">During the game (halftime snacks)</option>
+                  <option value="2h_before">2 hours pre-game (prep time)</option>
+                  <option value="1h_before">1 hour pre-game (last call)</option>
+                  <option value="halftime">Halftime (snack attack)</option>
                 </select>
               </div>
 
               <div class="button-group">
-                <button type="submit" class="step-button primary">Yes! Arleth, keep me posted! 🚀</button>
-                <button type="button" class="step-button secondary" onclick="acquisitionModal.skipToStep3()">Just wings, no sports</button>
+                <button type="submit" class="step-button primary">Lock in my Philly alerts 🚀</button>
+                <button type="button" class="step-button secondary" onclick="acquisitionModal.skipToStep3()">I’ll take the deals without sports</button>
               </div>
             </form>
           </div>
 
           <!-- Step 3: Thank You + Next Steps -->
-          <div class="modal-step step-3">
+          <div class="modal-step step-3" data-step="3">
             <div class="success-animation">🎉</div>
-            <h2>Welcome to the Family!</h2>
+            <h2 class="modal-headline">YOU’RE ON THE LIST!</h2>
+            <p class="modal-subtitle">Watch for Arleth’s texts—she’ll hit you with the inside scoop before the rest of Philly hears it.</p>
 
             <div class="next-steps">
               <div class="step">
                 <span class="step-number">1</span>
-                <span>Check your email for 15% off</span>
+                <span>Check your email for the 15% welcome code.</span>
               </div>
               <div class="step">
                 <span class="step-number">2</span>
-                <span>Order your wings on DoorDash/UberEats</span>
+                <span>Save Arleth’s number so you don’t miss the game day blast.</span>
               </div>
               <div class="step">
                 <span class="step-number">3</span>
-                <span>Tag us @phillywingsexpress</span>
+                <span>Craving already? Jump to the ordering section below.</span>
               </div>
             </div>
 
+            <div class="modal-testimonial">
+              <p class="quote">“Arleth’s reminder hit 90 minutes before kickoff—free delivery, extra sauce. Wings were waiting when Hurts took the field.”</p>
+              <span class="author">— Jared R., South Philly</span>
+            </div>
+
             <button class="step-button primary" onclick="document.getElementById('orderSection').scrollIntoView({behavior: 'smooth'}); acquisitionModal.hide();">
-              Order My Wings Now 🔥
+              Take me to the wings →
             </button>
 
             <div class="arleth-signature">
-              <p>"Can't wait to hook you up with the good stuff!" - Arleth</p>
+              <p>“Appreciate you rolling with us—see you on game day!” – Arleth</p>
             </div>
           </div>
         </div>
@@ -348,9 +370,11 @@ class AcquisitionModal {
 
     this.hasShown = true;
     const modal = document.getElementById('acquisitionModal');
-    const modalContent = modal.querySelector('.acquisition-modal');
     modal.style.display = 'flex';
-    modalContent.classList.add('show');
+    const modalContent = modal.querySelector('.acquisition-modal');
+    if (modalContent) {
+      modalContent.classList.remove('is-hiding');
+    }
 
     // Track modal show event
     this.trackEvent('acquisition_modal_shown', {
@@ -365,8 +389,11 @@ class AcquisitionModal {
 
   hide() {
     const modal = document.getElementById('acquisitionModal');
+    if (!modal) return;
     const modalContent = modal.querySelector('.acquisition-modal');
-    modalContent.classList.remove('show');
+    if (modalContent) {
+      modalContent.classList.add('is-hiding');
+    }
     modal.style.display = 'none';
   }
 
@@ -378,6 +405,7 @@ class AcquisitionModal {
     if (nextStepEl) nextStepEl.classList.add('active');
 
     this.currentStep++;
+    this.updateProgress();
   }
 
   async handleStep1() {
@@ -425,6 +453,26 @@ class AcquisitionModal {
     this.userData.skippedSports = true;
     this.submitSubscription();
     this.nextStep();
+  }
+
+  updateProgress() {
+    const indicators = Array.from(document.querySelectorAll('.step-indicator'));
+    if (!indicators.length) return;
+
+    indicators.forEach((indicator, index) => {
+      indicator.classList.remove('active', 'completed');
+      if (index + 1 < this.currentStep) {
+        indicator.classList.add('completed');
+      } else if (index + 1 === this.currentStep) {
+        indicator.classList.add('active');
+      }
+    });
+
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar && indicators.length > 1) {
+      const progress = Math.max(0, Math.min(1, (this.currentStep - 1) / (indicators.length - 1)));
+      progressBar.style.width = `${progress * 100}%`;
+    }
   }
 
   async submitSubscription() {

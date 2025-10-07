@@ -2618,82 +2618,442 @@ section {
     gap: 12px;
 }
 
-/* Modal Base */
-.acquisition-modal {
+/* Acquisition Modal */
+.acquisition-modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10000;
-    display: flex;
+    inset: 0;
+    display: none;
     align-items: center;
     justify-content: center;
+    padding: 32px;
+    background: rgba(8, 12, 21, 0.82);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
-.acquisition-modal.show {
+.acquisition-modal-overlay[style*='display: flex'] {
     opacity: 1;
     visibility: visible;
 }
 
-.modal-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(5px);
-}
-
-.modal-container {
+.acquisition-modal {
     position: relative;
-    background: #1a1a1a;
-    border-radius: 16px;
-    max-width: 600px;
-    width: 90%;
+    width: min(640px, 100%);
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    border: 2px solid #333;
-    transform: scale(0.8);
-    transition: transform 0.3s ease;
+    border-radius: 20px;
+    padding: 48px 40px 36px;
+    background: linear-gradient(160deg, #101826 0%, #151d2c 55%, #0d121c 100%);
+    box-shadow: 0 28px 64px rgba(5, 10, 20, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f7f9ff;
+    animation: modal-pop 0.28s ease;
 }
 
-.acquisition-modal.show .modal-container {
-    transform: scale(1);
+@keyframes modal-pop {
+    from {
+        transform: translateY(18px) scale(0.92);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
 }
 
+/* Modal structure and hero */
 .modal-close {
     position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 28px;
-    cursor: pointer;
-    z-index: 10;
+    top: 16px;
+    right: 18px;
     width: 40px;
     height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f7f9ff;
+    font-size: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.25s ease;
 }
 
 .modal-close:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.18);
     transform: rotate(90deg);
 }
 
-.modal-content {
-    padding: 40px 30px 30px;
+.modal-step {
+    display: none;
+}
+
+.modal-step.active {
+    display: block;
+}
+
+.modal-hero {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(247, 249, 255, 0.85);
+    margin-bottom: 14px;
+}
+
+.modal-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 6vw, 44px);
+    letter-spacing: 0.03em;
+    margin-bottom: 10px;
+}
+
+.modal-subtitle {
+    font-size: 16px;
+    line-height: 1.6;
+    color: rgba(247, 249, 255, 0.78);
+}
+
+.modal-progress {
+    margin-bottom: 20px;
+}
+
+.progress-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(135deg, #ff4655, #ff7a3d);
+    transition: width 0.35s ease;
+}
+
+.step-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.step-indicator {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(247, 249, 255, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.step-indicator.active {
+    transform: scale(1.1);
     color: #fff;
+    background: linear-gradient(135deg, #ff4655, #ff7a3d);
+}
+
+.step-indicator.completed {
+    color: #0b0e17;
+    background: #38ff9c;
+}
+
+.step-indicator.completed::after {
+    content: '✓';
+}
+
+/* Perks + forms */
+.perk-grid {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.perk-card {
+    flex: 1 1 180px;
+    display: flex;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.perk-icon {
+    font-size: 22px;
+}
+
+.perk-copy strong {
+    display: block;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+}
+
+.perk-copy span {
+    display: block;
+    font-size: 13px;
+    color: rgba(247, 249, 255, 0.7);
+    line-height: 1.4;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 14px;
+    color: rgba(247, 249, 255, 0.85);
+}
+
+.form-group input,
+.modal-form select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(8, 12, 21, 0.65);
+    color: #f7f9ff;
+    padding: 14px 16px;
+    font-size: 16px;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.modal-form select:focus {
+    outline: none;
+    border-color: rgba(255, 112, 82, 0.85);
+    box-shadow: 0 0 0 3px rgba(255, 112, 82, 0.2);
+}
+
+.form-group input::placeholder {
+    color: rgba(247, 249, 255, 0.45);
+}
+
+.step-button {
+    border: none;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.step-button.primary {
+    background: linear-gradient(135deg, #ff4655, #ff7a3d);
+    color: #fff;
+    box-shadow: 0 14px 30px rgba(255, 112, 82, 0.38);
+}
+
+.step-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 32px rgba(255, 112, 82, 0.45);
+}
+
+.step-button.secondary {
+    background: rgba(255, 255, 255, 0.12);
+    color: #f7f9ff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cta-microcopy {
+    font-size: 13px;
+    color: rgba(247, 249, 255, 0.6);
+    text-align: center;
+    margin-top: -6px;
+}
+
+.arleth-intro {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 20px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.owner-photo-placeholder {
+    min-width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff7a3d, #ff4655);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.sports-preferences {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 18px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.team-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.team-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(8, 12, 21, 0.55);
+    border: 1px solid transparent;
+    transition: border 0.2s ease, background 0.2s ease;
+}
+
+.team-option input {
+    accent-color: #ff7052;
+}
+
+.team-option.playing-soon {
+    border-color: rgba(255, 112, 82, 0.6);
+    background: rgba(255, 112, 82, 0.12);
+}
+
+.game-alert {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffb347;
+    text-transform: uppercase;
+}
+
+.timing-preference label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.success-animation {
+    font-size: 52px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.next-steps {
+    display: grid;
+    gap: 12px;
+    margin: 24px 0;
+}
+
+.next-steps .step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 14px;
+    border-radius: 12px;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4655, #ff7a3d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.modal-testimonial {
+    margin: 22px 0 28px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-testimonial .quote {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(247, 249, 255, 0.85);
+    margin-bottom: 10px;
+}
+
+.modal-testimonial .author {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: rgba(247, 249, 255, 0.6);
+    text-transform: uppercase;
+}
+
+.arleth-signature {
+    margin-top: 20px;
+    text-align: center;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 520px) {
+    .acquisition-modal {
+        padding: 32px 24px 26px;
+    }
+
+    .perk-grid {
+        flex-direction: column;
+    }
+
+    .team-checkboxes {
+        grid-template-columns: 1fr;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
 }
 
 /* Step Indicators */
@@ -3090,4 +3450,3 @@ section {
         font-size: 16px;
     }
 }
-
