@@ -92,17 +92,30 @@ class AcquisitionModal {
             <div class="modal-hero">
               <span class="hero-badge">HYPED FOR PHILLY SPORTS</span>
               <h2 class="modal-headline">WHO SHOULD I REMIND YOU ABOUT?</h2>
-              <p class="modal-subtitle" id="arlethMessage">“Hey—it’s Arleth. Big game this week. Want me to personally hit you with the specials before kickoff?”</p>
+              <p class="modal-subtitle" id="arlethMessage">"Hey—it's Arleth. Big game this week. Want me to personally hit you with the specials before kickoff?"</p>
             </div>
 
             <form class="modal-form" id="step2Form">
               <div class="form-group">
-                <label for="userPhone">Phone number (for VIP game day texts)</label>
+                <label for="userPhone">Phone number (optional)</label>
                 <input type="tel" id="userPhone" placeholder="(267) 555-0199">
               </div>
 
+              <!-- TCPA-Compliant SMS Opt-In Checkbox -->
+              <div class="sms-consent-section">
+                <label class="sms-consent-label">
+                  <input type="checkbox" id="smsConsent" value="1">
+                  <span class="consent-text">
+                    <strong>Yes, I want to receive SMS updates from Philly Wings Express.</strong>
+                  </span>
+                </label>
+                <p class="sms-disclosure">
+                  By checking this box, you agree to receive text messages including game day reminders, special offers, and order notifications. Message frequency varies (typically 2-4 messages per month). Reply <strong>STOP</strong> to opt-out anytime. Reply <strong>HELP</strong> for assistance. Standard message and data rates may apply. Your mobile information will not be sold or shared with third parties for promotional purposes.
+                </p>
+              </div>
+
               <div class="sports-preferences">
-                <h4>Pick your Philly squads:</h4>
+                <h4>Pick your Philly squads (optional):</h4>
                 <div class="team-checkboxes" id="teamCheckboxes">
                   <label class="team-option">
                     <input type="checkbox" value="eagles">
@@ -138,7 +151,7 @@ class AcquisitionModal {
 
               <div class="button-group">
                 <button type="submit" class="step-button primary">Lock in my Philly alerts 🚀</button>
-                <button type="button" class="step-button secondary" onclick="acquisitionModal.skipToStep3()">I’ll take the deals without sports</button>
+                <button type="button" class="step-button secondary" onclick="acquisitionModal.skipToStep3()">I'll take the deals without sports</button>
               </div>
             </form>
           </div>
@@ -461,11 +474,22 @@ class AcquisitionModal {
     if (submitBtn) submitBtn.disabled = true;
 
     const phone = document.getElementById('userPhone').value.trim();
-    const selectedTeams = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+    const smsConsent = document.getElementById('smsConsent').checked;
+    const selectedTeams = Array.from(document.querySelectorAll('.team-checkboxes input[type="checkbox"]:checked'))
       .map(cb => cb.value);
     const reminderTiming = document.getElementById('reminderTiming').value;
 
-    this.userData.phoneNumber = phone;
+    // Validate: if phone provided, SMS consent must be checked
+    if (phone && !smsConsent) {
+      this.showError('To receive SMS updates, please check the consent box above.');
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
+
+    // Only store phone if SMS consent given
+    this.userData.phoneNumber = smsConsent && phone ? phone : null;
+    this.userData.smsConsent = smsConsent;
+    this.userData.smsConsentTimestamp = smsConsent ? new Date() : null;
     this.userData.selectedTeams = selectedTeams;
     this.userData.reminderTiming = reminderTiming;
     this.userData.step2CompletedAt = new Date();
@@ -473,6 +497,7 @@ class AcquisitionModal {
     this.trackEvent('acquisition_step_completed', {
       step_number: 2,
       phone_provided: !!phone,
+      sms_consent_given: smsConsent,
       teams_selected: selectedTeams.length,
       teams_list: selectedTeams.join(',')
     });
@@ -531,6 +556,12 @@ class AcquisitionModal {
       subscribedAt: new Date(),
       status: 'active',
 
+      // TCPA Compliance Fields
+      smsConsent: this.userData.smsConsent || false,
+      smsConsentTimestamp: this.userData.smsConsentTimestamp || null,
+      smsConsentMethod: 'website_checkbox',
+      smsConsentIPAddress: null, // Could be added if needed
+
       // Array field expected by createSubscriber function
       sportTeams: this.userData.selectedTeams || [],
       selectedTeams: this.userData.selectedTeams || [],  // Keep for fallback
@@ -556,7 +587,7 @@ class AcquisitionModal {
       preferences: {
         gameDay: true,
         newFlavors: true,
-        textAlerts: !!this.userData.phoneNumber,
+        textAlerts: this.userData.smsConsent && !!this.userData.phoneNumber,
         weeklyDeals: true
       }
     };
