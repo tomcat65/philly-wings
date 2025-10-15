@@ -94,6 +94,46 @@
         { "fieldPath": "active", "mode": "ASCENDING" },
         { "fieldPath": "sortOrder", "mode": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "cateringPackages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "tier", "mode": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "plantBasedWings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "sortOrder", "mode": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "desserts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "sortOrder", "mode": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "freshSalads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "sortOrder", "mode": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "coldSides",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "sortOrder", "mode": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

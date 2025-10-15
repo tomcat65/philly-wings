@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="sauce-menu-styles.css">
     <link rel="stylesheet" href="quick-picks.css">
     <link rel="stylesheet" href="src/styles/nutrition-modal-fda2020.css">
+    <link rel="stylesheet" href="src/styles/new-menu-sections.css">
 
     <!-- Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-EBHT2CKRNY"></script>
@@ -279,8 +280,12 @@
     <nav class="menu-nav-sticky">
         <div class="menu-nav-container">
             <button class="menu-nav-btn active" data-category="wings">Wings</button>
-            <button class="menu-nav-btn" data-category="sauces">Sauces</button>
+            <button class="menu-nav-btn" data-category="plant-based">🌱 Plant-Based</button>
             <button class="menu-nav-btn" data-category="sides">Sides</button>
+            <button class="menu-nav-btn" data-category="cold-sides">🥤 Cold Sides</button>
+            <button class="menu-nav-btn" data-category="sauces">Sauces</button>
+            <button class="menu-nav-btn" data-category="salads">🥗 Salads</button>
+            <button class="menu-nav-btn" data-category="desserts">🍰 Desserts</button>
             <button class="menu-nav-btn" data-category="combos">Combos</button>
             <button class="menu-nav-btn" data-category="drinks">Drinks</button>
         </div>
@@ -344,6 +349,20 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Plant-Based Wings Section -->
+        <div class="menu-category" id="category-plant-based">
+            <div class="category-hero">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcauliflower-fried_1920x1080.webp?alt=media"
+                     alt="Plant-Based Wings" class="hero-banner">
+                <div class="hero-overlay">
+                    <h2 class="category-title">🌱 Plant-Based Wings</h2>
+                    <p class="category-subtitle">Crispy cauliflower wings • Vegan friendly</p>
+                </div>
+            </div>
+
+            <div class="menu-items-grid" id="plant-based-container"></div>
         </div>
 
         <!-- Sauces Section -->
@@ -456,6 +475,20 @@
             </div>
         </div>
 
+        <!-- Cold Sides Section -->
+        <div class="menu-category" id="category-cold-sides">
+            <div class="category-hero">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcoleslaw-salad_800x800.webp?alt=media"
+                     alt="Cold Sides" class="hero-banner">
+                <div class="hero-overlay">
+                    <h2 class="category-title">🥤 Cold Sides</h2>
+                    <p class="category-subtitle">Fresh sides & accompaniments</p>
+                </div>
+            </div>
+
+            <div class="menu-items-grid" id="cold-sides-container"></div>
+        </div>
+
         <!-- Combos Section -->
         <div class="menu-category" id="category-combos">
             <div class="category-hero">
@@ -470,6 +503,34 @@
             <div id="combo-menu-items" class="menu-grid">
                 <!-- Combos will be dynamically loaded here -->
             </div>
+        </div>
+
+        <!-- Fresh Salads Section -->
+        <div class="menu-category" id="category-salads">
+            <div class="category-hero">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcaesar-salad_800x800.webp?alt=media"
+                     alt="Fresh Salads" class="hero-banner">
+                <div class="hero-overlay">
+                    <h2 class="category-title">🥗 Fresh Salads</h2>
+                    <p class="category-subtitle">Fresh & crisp, made to order</p>
+                </div>
+            </div>
+
+            <div class="menu-items-grid" id="salads-container"></div>
+        </div>
+
+        <!-- Desserts Section -->
+        <div class="menu-category" id="category-desserts">
+            <div class="category-hero">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcreme-brulee-cheesecake_800x800.webp?alt=media"
+                     alt="Desserts" class="hero-banner">
+                <div class="hero-overlay">
+                    <h2 class="category-title">🍰 Desserts</h2>
+                    <p class="category-subtitle">Sweet endings from premium suppliers</p>
+                </div>
+            </div>
+
+            <div class="menu-items-grid" id="desserts-container"></div>
         </div>
 
         <!-- Drinks Section -->

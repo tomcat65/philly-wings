@@ -26,14 +26,14 @@ export const auth = getAuth(app);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const functions = getFunctions(app);
 
-// Connect to emulators in development
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-  console.log('🧪 Connecting to Firebase Emulators...');
-  connectFirestoreEmulator(db, 'localhost', 8081);
-  connectFunctionsEmulator(functions, 'localhost', 5002);
-  connectStorageEmulator(storage, 'localhost', 9199);
-  connectAuthEmulator(auth, 'http://localhost:9099');
-}
+// Connect to emulators in development (TEMPORARILY DISABLED - using production for testing new sections)
+// if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+//   console.log('🧪 Connecting to Firebase Emulators...');
+//   connectFirestoreEmulator(db, 'localhost', 8081);
+//   connectFunctionsEmulator(functions, 'localhost', 5002);
+//   connectStorageEmulator(storage, 'localhost', 9199);
+//   connectAuthEmulator(auth, 'http://localhost:9099');
+// }
 
 // Enable offline persistence (updated for Firebase v10+)
 enableIndexedDbPersistence(db, {

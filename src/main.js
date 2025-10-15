@@ -5,6 +5,10 @@ import './components/nutrition-modal-firebase';
 import { MenuService, ReviewService, LiveOrderService, FirebaseService } from './services/firebase-service';
 import { initAnalytics, setupSectionObservers, setupBounceTracking } from './analytics';
 import './services/webp-image-service';
+import { PlantBasedMenu } from './components/plant-based-menu.js';
+import { DessertsMenu } from './components/desserts-menu.js';
+import { SaladsMenu } from './components/salads-menu.js';
+import { ColdSidesMenu } from './components/cold-sides-menu.js';
 
 // Dynamic content loaders
 class PhillyWingsApp {
@@ -22,7 +26,11 @@ class PhillyWingsApp {
     await Promise.all([
       // this.loadFlavors(), // Commented out - using new menu system
       this.loadReviews(),
-      this.initLiveOrders()
+      this.initLiveOrders(),
+      this.loadPlantBasedWings(),
+      this.loadDesserts(),
+      this.loadSalads(),
+      this.loadColdSides()
     ]);
 
     // Initialize acquisition system
@@ -68,7 +76,7 @@ class PhillyWingsApp {
     try {
       const reviews = await ReviewService.getFeaturedReviews();
       const reviewsGrid = document.querySelector('.reviews-grid');
-      
+
       if (reviewsGrid && reviews.length > 0) {
         reviewsGrid.innerHTML = reviews.map(review => `
           <div class="review-card">
@@ -80,6 +88,42 @@ class PhillyWingsApp {
       }
     } catch (error) {
       console.error('Error loading reviews:', error);
+    }
+  }
+
+  async loadPlantBasedWings() {
+    try {
+      const menu = new PlantBasedMenu();
+      await menu.init();
+    } catch (error) {
+      console.error('Error initializing plant-based menu:', error);
+    }
+  }
+
+  async loadDesserts() {
+    try {
+      const menu = new DessertsMenu();
+      await menu.init();
+    } catch (error) {
+      console.error('Error initializing desserts menu:', error);
+    }
+  }
+
+  async loadSalads() {
+    try {
+      const menu = new SaladsMenu();
+      await menu.init();
+    } catch (error) {
+      console.error('Error initializing salads menu:', error);
+    }
+  }
+
+  async loadColdSides() {
+    try {
+      const menu = new ColdSidesMenu();
+      await menu.init();
+    } catch (error) {
+      console.error('Error initializing cold sides menu:', error);
     }
   }
 

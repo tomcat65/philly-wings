@@ -137,6 +137,30 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Plant-based wings - public read, admin write
+    match /plantBasedWings/{itemId} {
+      allow read: if true; // Public menu
+      allow write: if isAdmin();
+    }
+
+    // Desserts - public read, admin write
+    match /desserts/{itemId} {
+      allow read: if true; // Public menu
+      allow write: if isAdmin();
+    }
+
+    // Fresh salads - public read, admin write
+    match /freshSalads/{itemId} {
+      allow read: if true; // Public menu
+      allow write: if isAdmin();
+    }
+
+    // Cold sides - public read, admin write
+    match /coldSides/{itemId} {
+      allow read: if true; // Public menu
+      allow write: if isAdmin();
+    }
+
     // Published menus - public read, admin write
     match /publishedMenus/{menuId} {
       allow read: if true; // Public menu snapshots

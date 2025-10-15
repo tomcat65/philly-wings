@@ -1,0 +1,337 @@
+/**
+ * New Menu Sections Styles
+ * Plant-Based Wings, Desserts, Fresh Salads, Cold Sides
+ * Mobile-first responsive design matching platform menus
+ */
+
+/* ===================================
+   BASE SECTION STYLES
+   =================================== */
+
+.menu-items-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.menu-item-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.menu-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.item-header {
+  padding: 1.5rem;
+}
+
+.item-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #004c54;
+  margin: 0 0 0.5rem 0;
+}
+
+.item-description {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}
+
+/* ===================================
+   DUAL PREP METHODS LAYOUT
+   Plant-Based Wings specific
+   =================================== */
+
+.dual-prep-methods {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+}
+
+.prep-method-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.prep-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+.prep-content {
+  padding: 1.25rem;
+}
+
+.prep-method-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #004c54;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ===================================
+   VARIANTS LIST
+   Common across all sections
+   =================================== */
+
+.variants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.variant-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.variant-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.variant-price-note {
+  font-size: 0.875rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* ===================================
+   BADGES
+   Dietary, Supplier, Serving Size, Weight
+   =================================== */
+
+.dietary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.tag-vegan {
+  background: #d4edda;
+  color: #155724;
+}
+
+.tag-vegetarian {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.tag-gluten-free {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.tag-dairy-free {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.supplier-badge {
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.supplier-daisys {
+  background: #ffe4e9;
+  color: #c2185b;
+}
+
+.supplier-chefs-quality {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.supplier-bindi {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.supplier-sysco {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.supplier-garden-fresh,
+.supplier-fresh-produce {
+  background: #f1f8e9;
+  color: #558b2f;
+}
+
+.serving-size-badge,
+.weight-badge {
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: #f3e5f5;
+  color: #6a1b9a;
+  margin-top: 0.5rem;
+}
+
+.thaw-time-badge {
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: #e1f5fe;
+  color: #01579b;
+  margin-top: 0.5rem;
+}
+
+/* ===================================
+   ORDER BUTTON
+   =================================== */
+
+.order-now-btn {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+  background: #004c54;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.order-now-btn:hover {
+  background: #003840;
+}
+
+/* ===================================
+   ERROR MESSAGES
+   =================================== */
+
+.error-message,
+.no-items-message {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #666;
+  font-size: 1.125rem;
+}
+
+.error-message {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  color: #856404;
+}
+
+/* ===================================
+   TABLET BREAKPOINT (768px+)
+   =================================== */
+
+@media (min-width: 768px) {
+  .menu-items-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+
+  .dual-prep-methods {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .prep-image {
+    height: 350px;
+  }
+
+  .item-header {
+    padding: 2rem;
+  }
+
+  .prep-content {
+    padding: 1.5rem;
+  }
+}
+
+/* ===================================
+   DESKTOP BREAKPOINT (1024px+)
+   =================================== */
+
+@media (min-width: 1024px) {
+  .menu-items-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+
+  .prep-image {
+    height: 400px;
+  }
+
+  .item-name {
+    font-size: 1.75rem;
+  }
+
+  .item-description {
+    font-size: 1.125rem;
+  }
+
+  .prep-method-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===================================
+   PLANT-BASED SPECIFIC OVERRIDES
+   =================================== */
+
+.plant-based-card {
+  /* Plant-based cards are wider to accommodate dual layout */
+}
+
+.plant-based-card .dual-prep-methods {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Keep plant-based cards full-width on all screen sizes for dual layout */
+@media (min-width: 768px) {
+  .menu-items-grid .plant-based-card {
+    grid-column: 1 / -1;
+  }
+}
