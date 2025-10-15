@@ -1,6 +1,6 @@
 # Supplier Costs Tracking
 
-## Last Updated: 2025-09-17
+## Last Updated: 2025-10-14
 
 ## Wings (Per Case - 40 lbs)
 - **US Foods Invoice #2345**: $68.50/case (Sept 15, 2025)
@@ -48,3 +48,69 @@
 - Packaging: $0.26
 - Labor: $2.00
 - **Total COGS: $3.86**
+
+## Desserts (Per Slice)
+### Daisy's Bakery (Restaurant Depot)
+- **Marble Pound Cake** (12-pack): $12.71
+  - **Cost per slice: $1.06**
+  - Verified invoice: 10/13/2025
+  - Item #59041, UPC 69441100117
+
+- **Gourmet Brownies** (12-pack): $12.67
+  - **Cost per slice: $1.06**
+  - Verified invoice: 10/13/2025
+  - Item #59015, UPC 69441100127
+
+### Chef's Quality (Restaurant Depot)
+- **Red Velvet Cake** (14 slices): $27.13
+  - **Cost per slice: $1.94**
+  - Verified invoice: 10/13/2025
+  - Item #2360213, UPC 76069502040
+
+- **Creme Brulée Cheesecake** (14 slices): ~$30.00 (estimated)
+  - **Cost per slice: $2.14**
+  - Item #2360234, UPC 76069501885
+
+### Bindi (Restaurant Depot)
+- **NY Cheesecake** (14 slices): $29.28
+  - **Cost per slice: $2.09** (invoice verified)
+  - **Adjusted COGS for calculations: $2.50** (includes overhead)
+  - Verified invoice: 10/13/2025
+  - Item #2360715, UPC 81507301496
+
+## Plant-Based Wings
+### Cauliflower (Restaurant Depot)
+- **Whole cauliflower**: $5.00/head
+  - Yield: 20+ wings per head
+  - **Cost per wing (raw): $0.25**
+  - **Cost per wing (prepared): $0.40** (includes breading, oil, labor)
+
+## Fresh Salads
+### Spring Mix (Restaurant Depot)
+- **3 lb clamshell**: $8.28
+  - **Cost per lb: $2.76**
+  - Verified invoice: 10/13/2025
+  - Item #42640, UPC 82373401300
+
+### Caesar Salad Components
+- Romaine lettuce: ~$2.50/lb
+- Chef's Quality Croutons: Available at Restaurant Depot
+- Caesar dressing: Bulk pricing TBD
+- Parmesan cheese: Bulk pricing TBD
+
+## Cold Sides
+### Sally Sherman (30 lb pails - Restaurant Depot)
+- **Classic Coleslaw**: $57.42
+  - **Cost per lb: $1.91**
+  - Verified invoice: 10/13/2025
+  - Item #10961, UPC 3070301130
+
+- **Potato Salad**: $61.83
+  - **Cost per lb: $2.06**
+  - Verified invoice: 10/13/2025
+  - Item #10960, UPC 3070301330
+
+### Fresh Produce
+- **Celery & Carrot Sticks**: Pre-cut pricing varies
+  - Estimated prep cost: $0.50-0.75 per serving
+  - Bulk produce availability at Restaurant Depot

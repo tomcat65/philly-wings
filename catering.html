@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catering - Philly Wings Express | Feed Your Team the Philly Way</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Philadelphia wing catering with 14 signature sauces. Office lunches, game day parties, corporate events. 10-100 people. Order through ezCater with 24/7 support.">
+  <meta name="keywords" content="philly wings catering, philadelphia catering, office lunch delivery, corporate catering, game day catering, wing catering">
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Catering - Philly Wings Express">
+  <meta property="og:description" content="Feed your team the Philly way! 14 signature sauces, fresh never frozen, serves 10-100 people.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://phillywingsexpress.com/catering">
+  <meta property="og:image" content="https://phillywingsexpress.com/images/catering/hero-spread.webp">
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Catering - Philly Wings Express">
+  <meta name="twitter:description" content="Feed your team the Philly way! 14 signature sauces, fresh never frozen, serves 10-100 people.">
+  <meta name="twitter:image" content="https://phillywingsexpress.com/images/catering/hero-spread.webp">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <!-- Stylesheets (bundled by Vite during build) -->
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Structured Data for Rich Snippets -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Philly Wings Express",
+    "description": "Philadelphia wing catering with 14 signature sauces",
+    "servesCuisine": "American, Wings",
+    "telephone": "+1-215-555-1234",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Oxford Circle",
+      "addressLocality": "Philadelphia",
+      "addressRegion": "PA",
+      "postalCode": "19111",
+      "addressCountry": "US"
+    },
+    "url": "https://phillywingsexpress.com/catering",
+    "priceRange": "$$",
+    "servesCuisine": ["Wings", "American"],
+    "hasMenu": {
+      "@type": "Menu",
+      "name": "Catering Menu",
+      "description": "Packages for 10-100 people with 14 signature sauces"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">
+        <img src="/apple-touch-icon.png" alt="Philly Wings Express Logo">
+      </a>
+      <ul class="nav-menu">
+        <li><a href="/">Home</a></li>
+        <li><a href="/catering" class="active">Catering</a></li>
+        <li><a href="#catering-packages" class="nav-scroll">Choose Package</a></li>
+        <li><a href="/#menu">Menu</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="https://www.ezcater.com/brand/pvt/philly-wings-express" class="btn-nav-cta" target="_blank" rel="noopener noreferrer">🔥 Order Now</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="catering-content">
+    <!-- Content will be loaded here by JavaScript -->
+    <div class="loading-spinner">
+      <p>Loading catering options...</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Philly Wings Express</h3>
+        <p>Born in Oxford Circle, perfected in every kitchen.</p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <p>Phone: <a href="tel:+12155551234">(215) 555-1234</a></p>
+        <p>Email: <a href="mailto:catering@phillywingsexpress.com">catering@phillywingsexpress.com</a></p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/catering">Catering</a></li>
+          <li><a href="/#menu">Menu</a></li>
+          <li><a href="/#about">About</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Order Catering</h4>
+        <p>
+          <a href="https://www.ezcater.com/brand/pvt/philly-wings-express"
+             class="btn-footer-cta"
+             target="_blank"
+             rel="noopener noreferrer">
+            Order on ezCater →
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 Philly Wings Express. All rights reserved.</p>
+      <p>Powered by ezCater</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { renderCateringPage } from '/src/pages/catering.js';
+
+    // Initialize Firebase
+    import '/src/firebase-config.js';
+
+    // Load catering page content
+    async function initCateringPage() {
+      const contentContainer = document.getElementById('catering-content');
+
+      try {
+        const cateringHtml = await renderCateringPage();
+        contentContainer.innerHTML = cateringHtml;
+      } catch (error) {
+        console.error('Error loading catering page:', error);
+        contentContainer.innerHTML = `
+          <div class="error-message">
+            <h2>Oops! Something went wrong</h2>
+            <p>We're having trouble loading our catering packages. Please try again or call us at (215) 555-1234.</p>
+            <a href="https://www.ezcater.com/brand/pvt/philly-wings-express"
+               class="btn-primary"
+               target="_blank"
+               rel="noopener noreferrer">
+              Order on ezCater →
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize mobile navigation toggle
+    function initMobileNav() {
+      const navToggle = document.querySelector('.nav-toggle');
+      const navMenu = document.querySelector('.nav-menu');
+
+      if (navToggle && navMenu) {
+        navToggle.addEventListener('click', () => {
+          navMenu.classList.toggle('active');
+          navToggle.classList.toggle('active');
+        });
+      }
+    }
+
+    // Initialize smooth scroll for nav links
+    function initSmoothScroll() {
+      document.querySelectorAll('a.nav-scroll').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+
+            // Close mobile menu if open
+            const navMenu = document.querySelector('.nav-menu');
+            const navToggle = document.querySelector('.nav-toggle');
+            if (navMenu && navToggle) {
+              navMenu.classList.remove('active');
+              navToggle.classList.remove('active');
+            }
+          }
+        });
+      });
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      initCateringPage();
+      initMobileNav();
+      initSmoothScroll();
+    });
+  </script>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+
+    // Track catering page view
+    gtag('event', 'page_view', {
+      page_title: 'Catering',
+      page_location: window.location.href,
+      page_path: '/catering'
+    });
+  </script>
+</body>
+</html>

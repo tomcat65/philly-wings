@@ -141,4 +141,61 @@
 **Result:** Users focus on food quality, not cost comparison
 **Evidence:** Standard practice for delivery-focused restaurants
 
+## Oct 14, 2025 - Catering Configurator Progressive Disclosure Pattern
+**Decision:** Implement accordion-style progressive disclosure for catering package configuration
+**Why:** Current UI shows all 14 sauces + dips at once = cognitive overload, cramped mobile layout, decision paralysis
+**The Problem:**
+- Overwhelming visual density hurts conversion
+- Mobile users can't process that much info at once
+- High-value catering orders need confidence, not confusion
+
+**Solution Architecture:**
+- **Step 1 (Wing Type):** Open by default, 4 cards visible
+- **Step 2 (Sauce Selection):** Reveals only after wing selection, 3-col grid (desktop) → 1-col (mobile)
+- **Step 3 (Add-Ons):** Reveals after sauce completion
+
+**Collapsed State Format:**
+```
+✓ Boneless Wings (60 pieces) [Edit]
+✓ 3 Sauces: Philly Classic Hot, Buffalo, Nashville Hot [Edit]
+✓ 2 Add-ons: Cauliflower Wings, Cookies [Edit]
+```
+
+**UX Principles Applied:**
+1. **Progressive Disclosure** - Show info only when needed (Chipotle, Domino's, Sweetgreen pattern)
+2. **Mobile-First** - Single column, 48px tap targets, scroll-into-view on expand
+3. **Error Prevention** - Can't proceed until step complete, live counters "2/3 selected"
+4. **Always Editable** - Clear Edit links on collapsed sections, no lost work
+5. **Accessibility** - ARIA attributes, keyboard nav, screen reader support
+
+**Visual Specs:**
+- Card spacing: 24px gap (desktop), 16px (mobile)
+- Animations: 300ms ease-in-out collapse/expand
+- Selection feedback: 150ms scale(1.02)
+- Typography: 24px step headers, 16px counters in orange
+- Summary badges: 14px with green checkmark
+
+**Mobile Priorities:**
+- Single column always
+- Min 48px touch targets
+- Scroll-into-view on step reveal
+- `prefers-reduced-motion` support
+- Fat-finger friendly buttons (60px min height)
+
+**Implementation Priority:**
+1. Core accordion mechanics
+2. State management for selections
+3. Mobile responsive layout
+4. Animations & transitions
+5. Accessibility attributes
+6. Progress indicator (1 → 2 → 3)
+
+**Expected Results:**
+- Reduced cognitive load = higher completion rate
+- Better mobile experience = more catering orders
+- Professional UX = brand credibility boost
+- Clear progress = reduced abandonment
+
+**Reference:** Validated against Chipotle, Domino's Pizza Builder, Sweetgreen ordering flows - all use progressive disclosure for multi-step configuration
+
 <!-- Add new decisions above this line -->

@@ -1105,6 +1105,376 @@ function generateMenuSectionStyles(branding) {
       color: #999;
       font-size: 0.8rem;
     }
+
+    /* Plant-Based Wings Section */
+    .plant-based-section {
+      background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+      padding: 2rem 0;
+      border-radius: 16px;
+    }
+
+    .plant-based-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .plant-based-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .plant-based-dual-image .item-header {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+    }
+
+    .plant-based-dual-image .item-name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+    }
+
+    .plant-based-dual-image .item-description {
+      font-size: 1rem;
+      color: #4a5568;
+      margin-bottom: 0.75rem;
+    }
+
+    .dual-prep-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    @media (max-width: 768px) {
+      .dual-prep-methods {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .prep-method-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prep-method-card .prep-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      display: block;
+    }
+
+    @media (min-width: 768px) {
+      .prep-method-card .prep-image {
+        height: 500px;
+      }
+    }
+
+    .prep-method-card .prep-content {
+      padding: 1.25rem;
+      background: white;
+    }
+
+    .prep-method-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #48bb78;
+    }
+
+    .prep-methods {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .prep-badge {
+      padding: 0.35rem 0.85rem;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #2d3748;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .prep-method-group {
+      margin-bottom: 1rem;
+    }
+
+    /* Salads Section */
+    .salads-section {
+      background: linear-gradient(135deg, #fffff0 0%, #fef9e7 100%);
+      padding: 2rem 0;
+      border-radius: 16px;
+    }
+
+    .salad-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .salad-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .dressing-options {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #f7fafc;
+      border-left: 3px solid #ecc94b;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .dressing-options strong {
+      color: #744210;
+      font-weight: 700;
+    }
+
+    .servings {
+      font-size: 0.85rem;
+      color: #718096;
+      font-style: italic;
+      margin-left: 0.25rem;
+    }
+
+    /* Cold Sides Section */
+    .cold-sides-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 2rem 0;
+      border-radius: 16px;
+    }
+
+    .cold-side-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .cold-side-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .supplier-badge {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      background: #4299e1;
+      color: white;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .includes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .include-item {
+      font-size: 0.9rem;
+      color: #2d3748;
+      padding-left: 0.5rem;
+    }
+
+    .weight {
+      font-size: 0.85rem;
+      color: #718096;
+      font-style: italic;
+      margin-left: 0.25rem;
+    }
+
+    /* Desserts Section */
+    .desserts-section {
+      background: linear-gradient(135deg, #fff5f7 0%, #fed7e2 100%);
+      padding: 2rem 0;
+      border-radius: 16px;
+    }
+
+    .dessert-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dessert-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .supplier-info {
+      margin-top: 0.75rem;
+      padding: 0.65rem;
+      background: #fef5f1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .supplier-info strong {
+      color: #9c4221;
+      font-weight: 700;
+    }
+
+    .slices, .count {
+      font-size: 0.85rem;
+      color: #718096;
+      font-style: italic;
+      margin-left: 0.25rem;
+    }
+
+    /* Dietary Tags (shared across sections) */
+    .dietary-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .tag {
+      padding: 0.3rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .tag-vegan {
+      background: #c6f6d5;
+      color: #22543d;
+      border: 1px solid #9ae6b4;
+    }
+
+    .tag-vegetarian {
+      background: #bee3f8;
+      color: #2c5282;
+      border: 1px solid #90cdf4;
+    }
+
+    .tag-gluten-free {
+      background: #feebc8;
+      color: #7c2d12;
+      border: 1px solid #fbd38d;
+    }
+
+    /* Menu Items Grid (shared by new sections) */
+    .menu-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+
+    .menu-item-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .menu-item-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .item-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item-card:hover .item-image {
+      transform: scale(1.05);
+    }
+
+    .item-content {
+      padding: 1.25rem;
+    }
+
+    .item-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+
+    .item-description {
+      font-size: 0.95rem;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+
+    .variants-list {
+      padding: 1rem 1.25rem;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .variant-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .variant-row:last-child {
+      border-bottom: none;
+    }
+
+    .variant-name {
+      font-size: 0.95rem;
+      color: #2d3748;
+      font-weight: 500;
+    }
+
+    .variant-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ff6b35;
+    }
+
+    .variant-price::before {
+      content: '$';
+    }
+
+    .section-description {
+      font-size: 1rem;
+      color: #666;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    .section-header {
+      padding: 0 1rem;
+      margin-bottom: 1rem;
+    }
   `;
 }
 

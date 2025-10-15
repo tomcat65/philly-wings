@@ -47,7 +47,11 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
             <div class="nav-items" id="navItems">
                 <a href="#combos" class="nav-item" onclick="closeMobileMenu()">Combos</a>
                 <a href="#wings" class="nav-item" onclick="closeMobileMenu()">Wings</a>
+                <a href="#plant-based-wings" class="nav-item" onclick="closeMobileMenu()">Plant-Based</a>
                 <a href="#sides" class="nav-item" onclick="closeMobileMenu()">Sides</a>
+                <a href="#cold-sides" class="nav-item" onclick="closeMobileMenu()">Cold Sides</a>
+                <a href="#fresh-salads" class="nav-item" onclick="closeMobileMenu()">Salads</a>
+                <a href="#desserts" class="nav-item" onclick="closeMobileMenu()">Desserts</a>
                 <a href="#dips" class="nav-item" onclick="closeMobileMenu()">Dips</a>
                 <a href="#beverages" class="nav-item" onclick="closeMobileMenu()">Beverages</a>
                 <a href="#sauces" class="nav-item" onclick="closeMobileMenu()">Sauces</a>
@@ -59,7 +63,11 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
     <main class="menu-content">
         ${generateCombosSection(menuData.combos, branding)}
         ${generateWingsSection(menuData.wings, branding)}
+        ${generatePlantBasedWingsSection(menuData.plantBasedWings, branding)}
         ${generateSidesSection(menuData.sides, branding)}
+        ${generateColdSidesSection(menuData.coldSides, branding)}
+        ${generateSaladsSection(menuData.freshSalads, branding)}
+        ${generateDessertsSection(menuData.desserts, branding)}
         ${generateDipsSection(menuData.sauces.filter(s => s.category === 'dipping-sauce'), branding)}
         ${generateBeveragesSection(menuData, branding)}
         ${generateSaucesSection(menuData.sauces, branding)}
@@ -468,6 +476,246 @@ function generateSidesSection(sides, branding) {
 }
 
 /**
+ * Generate plant-based wings section HTML with dual fried/baked hero images
+ */
+function generatePlantBasedWingsSection(plantBasedWings, branding) {
+  if (!plantBasedWings?.length) return '';
+
+  const cardsHtml = plantBasedWings.map(wing => {
+    const friedImageUrl = wing.images?.fried || '';
+    const bakedImageUrl = wing.images?.baked || '';
+
+    // Group variants by prep method
+    const friedVariants = wing.variants?.filter(v => v.prepMethod === 'fried') || [];
+    const bakedVariants = wing.variants?.filter(v => v.prepMethod === 'baked') || [];
+
+    const dietaryTags = (wing.dietaryTags || []).map(tag =>
+      `<span class="tag tag-${tag}">${tag}</span>`
+    ).join('');
+
+    return `
+      <div class="menu-item-card plant-based-card plant-based-dual-image">
+        <div class="item-header">
+          <h3 class="item-name">${wing.name || 'Plant-Based Wings'}</h3>
+          <p class="item-description">${wing.description || ''}</p>
+          ${dietaryTags ? `<div class="dietary-tags">${dietaryTags}</div>` : ''}
+        </div>
+
+        <div class="dual-prep-methods">
+          ${friedVariants.length > 0 ? `
+            <div class="prep-method-card">
+              ${friedImageUrl ? `
+                <picture>
+                  <source srcset="${friedImageUrl.replace('_800x800', '_1920x1080')}" media="(min-width: 768px)">
+                  <img src="${friedImageUrl}" alt="${wing.name} - Fried" class="prep-image" loading="lazy">
+                </picture>
+              ` : ''}
+              <div class="prep-content">
+                <h4 class="prep-method-title">🔥 Fried</h4>
+                <div class="variants-list">
+                  ${friedVariants.map(v => `
+                    <div class="variant-row">
+                      <span class="variant-name">${v.name || `${v.count} pieces`}</span>
+                      <span class="variant-price">${(v.platformPrice || v.basePrice || 0).toFixed(2)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          ` : ''}
+
+          ${bakedVariants.length > 0 ? `
+            <div class="prep-method-card">
+              ${bakedImageUrl ? `
+                <picture>
+                  <source srcset="${bakedImageUrl.replace('_800x800', '_1920x1080')}" media="(min-width: 768px)">
+                  <img src="${bakedImageUrl}" alt="${wing.name} - Baked" class="prep-image" loading="lazy">
+                </picture>
+              ` : ''}
+              <div class="prep-content">
+                <h4 class="prep-method-title">🍞 Baked</h4>
+                <div class="variants-list">
+                  ${bakedVariants.map(v => `
+                    <div class="variant-row">
+                      <span class="variant-name">${v.name || `${v.count} pieces`}</span>
+                      <span class="variant-price">${(v.platformPrice || v.basePrice || 0).toFixed(2)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+
+        <button class="order-now-btn">ORDER NOW →</button>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <section id="plant-based-wings" class="menu-section plant-based-section">
+      <div class="section-header">
+        <h2 class="section-title">🌱 Plant-Based Wings</h2>
+        <p class="section-description">Crispy cauliflower wings • Vegan friendly • Choice of 14 sauces</p>
+      </div>
+      <div class="menu-items-grid">
+        ${cardsHtml}
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Generate fresh salads section HTML
+ */
+function generateSaladsSection(salads, branding) {
+  if (!salads?.length) return '';
+
+  const cardsHtml = salads.map(salad => {
+    const imageUrl = salad.imageUrl || salad.images?.card || '';
+    const dressingOptions = salad.dressingOptions || [];
+
+    const variantsHtml = (salad.variants || []).map(v => `
+      <div class="variant-row">
+        <span class="variant-name">${v.name || salad.name}</span>
+        <span class="servings">(${v.servings || 1} ${v.servings === 1 ? 'serving' : 'servings'})</span>
+        <span class="variant-price">${(v.platformPrice || v.basePrice || 0).toFixed(2)}</span>
+      </div>
+    `).join('');
+
+    const dietaryTags = (salad.dietaryTags || []).map(tag =>
+      `<span class="tag tag-${tag}">${tag}</span>`
+    ).join('');
+
+    return `
+      <div class="menu-item-card salad-card">
+        ${imageUrl ? `<img src="${imageUrl}" alt="${salad.name}" class="item-image" loading="lazy">` : ''}
+        <div class="item-content">
+          <h3 class="item-name">${salad.name || 'Salad'}</h3>
+          <p class="item-description">${salad.description || ''}</p>
+          ${dressingOptions.length > 0 ? `
+            <div class="dressing-options">
+              <strong>Dressings:</strong> ${dressingOptions.join(', ')}
+            </div>
+          ` : ''}
+          ${dietaryTags ? `<div class="dietary-tags">${dietaryTags}</div>` : ''}
+        </div>
+        ${variantsHtml ? `<div class="variants-list">${variantsHtml}</div>` : ''}
+        <button class="order-now-btn">ORDER NOW →</button>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <section id="fresh-salads" class="menu-section salads-section">
+      <div class="section-header">
+        <h2 class="section-title">🥗 Fresh Salads</h2>
+        <p class="section-description">Made-to-order with premium ingredients</p>
+      </div>
+      <div class="menu-items-grid">
+        ${cardsHtml}
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Generate cold sides section HTML
+ */
+function generateColdSidesSection(coldSides, branding) {
+  if (!coldSides?.length) return '';
+
+  const cardsHtml = coldSides.map(side => {
+    const imageUrl = side.imageUrl || side.images?.card || '';
+    const supplier = side.supplier || '';
+
+    const variantsHtml = (side.variants || []).map(v => `
+      <div class="variant-row">
+        <span class="variant-name">${v.name || side.name}</span>
+        ${v.weight ? `<span class="weight">(${v.weight})</span>` : ''}
+        <span class="variant-price">${(v.platformPrice || v.basePrice || 0).toFixed(2)}</span>
+      </div>
+    `).join('');
+
+    const includes = side.includes || [];
+
+    return `
+      <div class="menu-item-card cold-side-card">
+        ${imageUrl ? `<img src="${imageUrl}" alt="${side.name}" class="item-image" loading="lazy">` : ''}
+        <div class="item-content">
+          <h3 class="item-name">${side.name || 'Side'}</h3>
+          <p class="item-description">${side.description || ''}</p>
+          ${supplier ? `<div class="supplier-badge">${supplier}</div>` : ''}
+          ${includes.length > 0 ? `
+            <div class="includes-list">
+              ${includes.map(item => `<span class="include-item">✓ ${item}</span>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+        ${variantsHtml ? `<div class="variants-list">${variantsHtml}</div>` : ''}
+        <button class="order-now-btn">ORDER NOW →</button>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <section id="cold-sides" class="menu-section cold-sides-section">
+      <div class="section-header">
+        <h2 class="section-title">🥙 Cold Sides</h2>
+        <p class="section-description">Premium cold sides</p>
+      </div>
+      <div class="menu-items-grid">
+        ${cardsHtml}
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Generate desserts section HTML
+ */
+function generateDessertsSection(desserts, branding) {
+  if (!desserts?.length) return '';
+
+  const cardsHtml = desserts.map(dessert => {
+    const imageUrl = dessert.imageUrl || dessert.images?.card || '';
+    const supplier = dessert.supplier || '';
+
+    const variantsHtml = (dessert.variants || []).map(v => `
+      <div class="variant-row">
+        <span class="variant-name">${v.name || dessert.name}</span>
+        <span class="variant-price">${(v.platformPrice || v.basePrice || 0).toFixed(2)}</span>
+      </div>
+    `).join('');
+
+    return `
+      <div class="menu-item-card dessert-card">
+        ${imageUrl ? `<img src="${imageUrl}" alt="${dessert.name}" class="item-image" loading="lazy">` : ''}
+        <div class="item-content">
+          <h3 class="item-name">${dessert.name || 'Dessert'}</h3>
+          <p class="item-description">${dessert.description || ''}</p>
+          ${supplier ? `<div class="supplier-info"><strong>${supplier}</strong></div>` : ''}
+        </div>
+        ${variantsHtml ? `<div class="variants-list">${variantsHtml}</div>` : ''}
+        <button class="order-now-btn">ORDER NOW →</button>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <section id="desserts" class="menu-section desserts-section">
+      <div class="section-header">
+        <h2 class="section-title">🍰 Desserts</h2>
+        <p class="section-description">Premium desserts from Daisy's Bakery, Chef's Quality & Bindi - Ready to Serve</p>
+      </div>
+      <div class="menu-items-grid">
+        ${cardsHtml}
+      </div>
+    </section>
+  `;
+}
+
+/**
  * Generate beverages section HTML
  */
 function generateBeveragesSection(menuData, branding) {
@@ -868,7 +1116,11 @@ module.exports = {
   generateDoorDashHTMLBody: generateDoorDashHTMLBody,
   generateCombosSection,
   generateWingsSection,
+  generatePlantBasedWingsSection,
   generateSidesSection,
+  generateColdSidesSection,
+  generateSaladsSection,
+  generateDessertsSection,
   generateBeveragesSection,
   generateSaucesSection,
   generateDipsSection,

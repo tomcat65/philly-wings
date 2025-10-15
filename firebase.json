@@ -18,6 +18,10 @@
           "destination": "/menu/platform/index.html"
         },
         {
+          "source": "/catering",
+          "destination": "/catering.html"
+        },
+        {
           "source": "/api/sports",
           "function": "getSportsData"
         },
@@ -95,7 +99,7 @@
       "port": 9099
     },
     "firestore": {
-      "port": 8080
+      "port": 8081
     },
     "functions": {
       "port": 5002

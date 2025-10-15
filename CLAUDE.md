@@ -1,6 +1,6 @@
-
+- do not let context reach 75% without updating relevant entities (we need to have full context for next conversation), main entities: philly-wings-project and philly-wings-catering (there might be other entities)
 - use firebase-community for crud operations and firebase-official for project management
-- whenever in doubt or needing more context use context7 mcp
+- whenever in doubt or needing detailed information use context7 mcp
 - DEPLOYMENT: We deploy through GitHub Actions, not directly. User might have a PR that allows preview of changes. User is in charge of deploying when changes are made. DO NOT run firebase deploy commands.
 - GIT COMMITS: User (human) is in charge of committing. ONLY commit when user gives explicit permission. Never commit without permission.
 
@@ -20,12 +20,16 @@ Philly Wings is a sophisticated Firebase-powered platform menu generation system
 - UberEats: http://localhost:5002/philly-wings/us-central1/platformMenu?platform=ubereats
 - GrubHub: http://localhost:5002/philly-wings/us-central1/platformMenu?platform=grubhub
 
-**Note**: Emulators are currently active on port 5002 - no need to restart them!
+**Note**:  IF Emulators are currently active on port 5002 - no need to restart them!
 
 **Production URLs** (what gets passed to platforms):
 - DoorDash: https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=doordash
 - UberEats: https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=ubereats
 - GrubHub: https://us-central1-philly-wings.cloudfunctions.net/platformMenu?platform=grubhub
+
+Else start fresh emulators 
+
+DO NOT USE PORTS 6174, 3004, 6379,7474,and 8080 (they are used in neural collaboration)
 
 ### Menu Generation Process
 1. Firebase Function in `/functions/index.js` receives platform parameter
@@ -55,4 +59,6 @@ Philly Wings is a sophisticated Firebase-powered platform menu generation system
 firebase emulators:start --only hosting,functions
 ```
 - remember to work on the refactored code
-- remember don't use send_ai_message, use DM in search_entities
+## code must be kept simple and compact (NO LARGE FILES)
+use import and modules extensively
+- remember not Erika, its "claude"

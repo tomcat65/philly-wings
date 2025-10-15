@@ -99,10 +99,23 @@ async function fetchCompleteMenu() {
 
   try {
     // Parallel fetch for optimal performance - match original structure
-    const [menuItemsSnapshot, combosSnapshot, saucesSnapshot, settingsDoc] = await Promise.all([
+    const [
+      menuItemsSnapshot,
+      combosSnapshot,
+      saucesSnapshot,
+      plantBasedWingsSnapshot,
+      dessertsSnapshot,
+      saladsSnapshot,
+      coldSidesSnapshot,
+      settingsDoc
+    ] = await Promise.all([
       db.collection('menuItems').get(),
       db.collection('combos').get(),
       db.collection('sauces').get(),
+      db.collection('plantBasedWings').get(),
+      db.collection('desserts').get(),
+      db.collection('freshSalads').get(),
+      db.collection('coldSides').get(),
       db.collection('settings').doc('main').get()
     ]);
 
@@ -151,6 +164,22 @@ async function fetchCompleteMenu() {
           return aWings - bWings;
         }),
       sauces: saucesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+      plantBasedWings: plantBasedWingsSnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => item.active)
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)),
+      desserts: dessertsSnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => item.active)
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)),
+      freshSalads: saladsSnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => item.active)
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)),
+      coldSides: coldSidesSnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => item.active)
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)),
       settings: settingsDoc.exists ? settingsDoc.data() : {}
     };
 
@@ -190,7 +219,11 @@ async function fetchCompleteMenu() {
       bagged_tea: assembled.bagged_tea?.variants?.length || 0,
       boxed_iced_tea: assembled.boxed_iced_tea?.variants?.length || 0,
       combos: assembled.combos?.length || 0,
-      sauces: assembled.sauces?.length || 0
+      sauces: assembled.sauces?.length || 0,
+      plantBasedWings: assembled.plantBasedWings?.length || 0,
+      desserts: assembled.desserts?.length || 0,
+      freshSalads: assembled.freshSalads?.length || 0,
+      coldSides: assembled.coldSides?.length || 0
     });
 
     // Final local fallbacks to ensure sections render in emulator/dev
@@ -272,7 +305,11 @@ async function fetchCompleteMenu() {
       mozzarella: assembled.mozzarella?.variants?.length || 0,
       drinks: assembled.drinks?.variants?.length || 0,
       combos: assembled.combos?.length || 0,
-      sauces: assembled.sauces?.length || 0
+      sauces: assembled.sauces?.length || 0,
+      plantBasedWings: assembled.plantBasedWings?.length || 0,
+      desserts: assembled.desserts?.length || 0,
+      freshSalads: assembled.freshSalads?.length || 0,
+      coldSides: assembled.coldSides?.length || 0
     });
 
     return assembled;
@@ -452,6 +489,146 @@ function processPlatformMenu(menuData, platform) {
   }
 
   processedMenu.sides = sides;
+
+  // Apply pricing to plant-based wings
+  if (processedMenu.plantBasedWings) {
+    processedMenu.plantBasedWings = processedMenu.plantBasedWings.map(item => {
+      const processedVariants = (item.variants || []).map(variant => {
+        const numericBase = typeof variant.basePrice === 'number'
+          ? variant.basePrice
+          : parseFloat(variant.basePrice || variant.price || 0);
+        const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+        const existingPricing = variant.platformPricing || {};
+        const existingPlatformPrice = existingPricing[platform];
+        const computedPrice = typeof existingPlatformPrice === 'number'
+          ? existingPlatformPrice
+          : parseFloat(existingPlatformPrice);
+        const platformPrice = !Number.isNaN(computedPrice) && computedPrice > 0
+          ? parseFloat(computedPrice.toFixed(2))
+          : parseFloat((safeBase * multiplier).toFixed(2));
+
+        return {
+          ...variant,
+          basePrice: safeBase,
+          platformPrice,
+          platformPricing: {
+            ...existingPricing,
+            [platform]: platformPrice
+          }
+        };
+      });
+
+      return {
+        ...item,
+        variants: processedVariants
+      };
+    });
+  }
+
+  // Apply pricing to desserts
+  if (processedMenu.desserts) {
+    processedMenu.desserts = processedMenu.desserts.map(item => {
+      const processedVariants = (item.variants || []).map(variant => {
+        const numericBase = typeof variant.basePrice === 'number'
+          ? variant.basePrice
+          : parseFloat(variant.basePrice || variant.price || 0);
+        const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+        const existingPricing = variant.platformPricing || {};
+        const existingPlatformPrice = existingPricing[platform];
+        const computedPrice = typeof existingPlatformPrice === 'number'
+          ? existingPlatformPrice
+          : parseFloat(existingPlatformPrice);
+        const platformPrice = !Number.isNaN(computedPrice) && computedPrice > 0
+          ? parseFloat(computedPrice.toFixed(2))
+          : parseFloat((safeBase * multiplier).toFixed(2));
+
+        return {
+          ...variant,
+          basePrice: safeBase,
+          platformPrice,
+          platformPricing: {
+            ...existingPricing,
+            [platform]: platformPrice
+          }
+        };
+      });
+
+      return {
+        ...item,
+        variants: processedVariants
+      };
+    });
+  }
+
+  // Apply pricing to fresh salads
+  if (processedMenu.freshSalads) {
+    processedMenu.freshSalads = processedMenu.freshSalads.map(item => {
+      const processedVariants = (item.variants || []).map(variant => {
+        const numericBase = typeof variant.basePrice === 'number'
+          ? variant.basePrice
+          : parseFloat(variant.basePrice || variant.price || 0);
+        const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+        const existingPricing = variant.platformPricing || {};
+        const existingPlatformPrice = existingPricing[platform];
+        const computedPrice = typeof existingPlatformPrice === 'number'
+          ? existingPlatformPrice
+          : parseFloat(existingPlatformPrice);
+        const platformPrice = !Number.isNaN(computedPrice) && computedPrice > 0
+          ? parseFloat(computedPrice.toFixed(2))
+          : parseFloat((safeBase * multiplier).toFixed(2));
+
+        return {
+          ...variant,
+          basePrice: safeBase,
+          platformPrice,
+          platformPricing: {
+            ...existingPricing,
+            [platform]: platformPrice
+          }
+        };
+      });
+
+      return {
+        ...item,
+        variants: processedVariants
+      };
+    });
+  }
+
+  // Apply pricing to cold sides
+  if (processedMenu.coldSides) {
+    processedMenu.coldSides = processedMenu.coldSides.map(item => {
+      const processedVariants = (item.variants || []).map(variant => {
+        const numericBase = typeof variant.basePrice === 'number'
+          ? variant.basePrice
+          : parseFloat(variant.basePrice || variant.price || 0);
+        const safeBase = !Number.isNaN(numericBase) && numericBase > 0 ? numericBase : 0;
+        const existingPricing = variant.platformPricing || {};
+        const existingPlatformPrice = existingPricing[platform];
+        const computedPrice = typeof existingPlatformPrice === 'number'
+          ? existingPlatformPrice
+          : parseFloat(existingPlatformPrice);
+        const platformPrice = !Number.isNaN(computedPrice) && computedPrice > 0
+          ? parseFloat(computedPrice.toFixed(2))
+          : parseFloat((safeBase * multiplier).toFixed(2));
+
+        return {
+          ...variant,
+          basePrice: safeBase,
+          platformPrice,
+          platformPricing: {
+            ...existingPricing,
+            [platform]: platformPrice
+          }
+        };
+      });
+
+      return {
+        ...item,
+        variants: processedVariants
+      };
+    });
+  }
 
   return processedMenu;
 }
@@ -1116,3 +1293,61 @@ function generateArlethGameMessage(reminder) {
 
   return `${randomMessage}\n\n- Arleth, Owner & Chief Wing Architect\nPhilly Wings Express 🔥`;
 }
+
+// ============================================================================
+// CATERING FUNCTIONS - ezCater Integration
+// ============================================================================
+
+const { syncMenuToEzCater, onCateringPackageWrite } = require('./ezcater/menuSync');
+const { handleEzCaterOrderWebhook } = require('./ezcater/orderWebhook');
+
+/**
+ * Manually sync catering menu to ezCater
+ * Callable function from admin dashboard or CLI
+ */
+exports.syncCateringMenuToEzCater = functions.https.onCall(async (data, context) => {
+  // Verify admin auth
+  if (!context.auth || !context.auth.token.admin) {
+    throw new functions.https.HttpsError(
+      'permission-denied',
+      'Only admins can sync catering menu'
+    );
+  }
+
+  try {
+    const config = functions.config();
+    const result = await syncMenuToEzCater(config);
+    return result;
+  } catch (error) {
+    console.error('Error in syncCateringMenuToEzCater:', error);
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to sync menu'
+    );
+  }
+});
+
+/**
+ * HTTP endpoint for ezCater order webhooks
+ * ezCater will POST orders to: https://us-central1-philly-wings.cloudfunctions.net/ezCaterOrderWebhook
+ */
+exports.ezCaterOrderWebhook = functions.https.onRequest(async (req, res) => {
+  // Only accept POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const config = functions.config();
+  await handleEzCaterOrderWebhook(req, res, config);
+});
+
+/**
+ * Firestore trigger: Auto-sync when catering packages change
+ * Triggers on any write to cateringPackages collection
+ */
+exports.onCateringPackageUpdate = functions.firestore
+  .document('cateringPackages/{packageId}')
+  .onWrite(async (change, context) => {
+    const config = functions.config();
+    return await onCateringPackageWrite(change, context, config);
+  });

@@ -264,10 +264,165 @@ export function trackVariant(testName, variant) {
     sessionStorage.setItem(`ab_test_${testName}`, variant);
 }
 
+// ============================================================================
+// CATERING ADD-ONS TRACKING
+// Goal: Track add-on selections, preparation variants, and order totals
+// Spec: Gate 3 prep packet from codex-philly (Oct 2025)
+// ============================================================================
+
+/**
+ * Track add-on selection with optional preparation variant
+ * @param {Object} addOn - Add-on item from Firestore
+ * @param {number} packageTier - Package tier (1, 2, 3)
+ * @param {string} preparationMethod - 'fried', 'baked', or undefined for single-method items
+ * @param {number} selectionCount - Number of this add-on selected (for quantity tracking)
+ */
+export function trackAddOnSelected(addOn, packageTier, preparationMethod, selectionCount = 1) {
+    const eventParams = {
+        'event_category': 'catering',
+        'item_id': addOn.id,
+        'item_name': addOn.name,
+        'category': addOn.category, // 'vegetarian', 'dessert'
+        'price': addOn.basePrice,
+        'package_tier': packageTier,
+        'selection_count': selectionCount
+    };
+
+    // Only include preparation_method when add-on offers variants
+    if (preparationMethod) {
+        eventParams.preparation_method = preparationMethod;
+    }
+
+    gtag('event', 'add_on_selected', eventParams);
+
+    // Track vegetarian interest separately for demand analysis
+    if (addOn.category === 'vegetarian') {
+        gtag('event', 'vegetarian_interest', {
+            'event_category': 'catering',
+            'package_tier': packageTier,
+            'add_on_count': selectionCount,
+            'has_preparation_choice': !!preparationMethod
+        });
+    }
+
+    // Track dessert interest separately
+    if (addOn.category === 'dessert') {
+        gtag('event', 'dessert_interest', {
+            'event_category': 'catering',
+            'package_tier': packageTier,
+            'add_on_count': selectionCount
+        });
+    }
+
+    console.log(`Add-on selected: ${addOn.name} (${preparationMethod || 'default'}) for tier ${packageTier}`);
+}
+
+/**
+ * Track add-on removal
+ * @param {string} addOnId - Add-on ID
+ * @param {string} category - 'vegetarian', 'dessert'
+ * @param {number} packageTier - Package tier
+ * @param {string} preparationMethod - Optional prep method if applicable
+ */
+export function trackAddOnRemoved(addOnId, category, packageTier, preparationMethod) {
+    const eventParams = {
+        'event_category': 'catering',
+        'item_id': addOnId,
+        'category': category,
+        'package_tier': packageTier
+    };
+
+    // Only include preparation_method when applicable
+    if (preparationMethod) {
+        eventParams.preparation_method = preparationMethod;
+    }
+
+    gtag('event', 'add_on_removed', eventParams);
+}
+
+/**
+ * Track preparation method change (fried ↔ baked toggle)
+ * @param {string} addOnId - Add-on ID
+ * @param {string} fromMethod - Previous method ('fried' or 'baked')
+ * @param {string} toMethod - New method ('fried' or 'baked')
+ * @param {number} packageTier - Package tier
+ */
+export function trackPreparationMethodChanged(addOnId, fromMethod, toMethod, packageTier) {
+    gtag('event', 'preparation_method_changed', {
+        'event_category': 'catering',
+        'item_id': addOnId,
+        'from_method': fromMethod,
+        'to_method': toMethod,
+        'package_tier': packageTier
+    });
+
+    console.log(`Prep method changed: ${addOnId} from ${fromMethod} to ${toMethod}`);
+}
+
+/**
+ * Track final order total calculation (fires on add-on adjustments)
+ * @param {string} packageId - Package ID
+ * @param {number} packageTier - Package tier (1, 2, 3)
+ * @param {number} basePrice - Package base price
+ * @param {number} addOnsTotal - Total add-ons cost
+ * @param {number} finalPrice - Final order total
+ * @param {number} addOnCount - Total number of add-ons selected
+ * @param {number} vegetarianCount - Count of vegetarian add-ons
+ * @param {number} dessertCount - Count of dessert add-ons
+ */
+export function trackTotalCalculated(packageId, packageTier, basePrice, addOnsTotal, finalPrice, addOnCount, vegetarianCount, dessertCount) {
+    gtag('event', 'total_calculated', {
+        'event_category': 'catering',
+        'package_id': packageId,
+        'package_tier': packageTier,
+        'base_price': basePrice,
+        'add_ons_total': addOnsTotal,
+        'final_price': finalPrice,
+        'add_on_count': addOnCount,
+        'vegetarian_count': vegetarianCount,
+        'dessert_count': dessertCount,
+        'value': finalPrice // GA4 standard parameter for conversion tracking
+    });
+}
+
+/**
+ * Track ezCater redirect (primary conversion event)
+ * @param {string} packageId - Package ID
+ * @param {number} packageTier - Package tier
+ * @param {number} finalPrice - Order total
+ * @param {Array} selectedAddOns - Array of selected add-on objects
+ */
+export function trackEzCaterRedirect(packageId, packageTier, finalPrice, selectedAddOns) {
+    const timeToOrder = Math.round((Date.now() - sessionStartTime) / 1000);
+
+    gtag('event', 'ezcater_redirect', {
+        'event_category': 'conversion',
+        'package_id': packageId,
+        'package_tier': packageTier,
+        'final_price': finalPrice,
+        'add_ons_count': selectedAddOns.length,
+        'time_to_order': timeToOrder,
+        'value': finalPrice // GA4 standard parameter
+    });
+
+    // Store in session for follow-up tracking
+    sessionStorage.setItem('catering_order_started', packageId);
+    sessionStorage.setItem('catering_add_ons_count', selectedAddOns.length);
+    sessionStorage.setItem('time_to_order', timeToOrder);
+
+    console.log(`ezCater redirect: ${packageId} (tier ${packageTier}) with ${selectedAddOns.length} add-ons after ${timeToOrder}s`);
+}
+
 // Export for window access
 if (typeof window !== 'undefined') {
     window.trackPlatformClick = trackPlatformClick;
     window.trackQuickPickView = trackQuickPickView;
     window.trackSizeView = trackSizeView;
     window.trackSauceView = trackSauceView;
+    // Catering add-ons tracking
+    window.trackAddOnSelected = trackAddOnSelected;
+    window.trackAddOnRemoved = trackAddOnRemoved;
+    window.trackPreparationMethodChanged = trackPreparationMethodChanged;
+    window.trackTotalCalculated = trackTotalCalculated;
+    window.trackEzCaterRedirect = trackEzCaterRedirect;
 }

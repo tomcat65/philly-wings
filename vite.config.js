@@ -48,6 +48,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
+        catering: 'catering.html',
         admin: 'admin/index.html',
         platformMenu: 'admin/platform-menu.html',
         publicMenu: 'admin/public-menu.html',

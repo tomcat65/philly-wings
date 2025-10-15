@@ -150,6 +150,22 @@ Finalize Dynamic Data Architecture & Nutrition Compliance Implementation
   - Improved error handling for missing data
   - Added detailed console logging for debugging
 
+## IN PROGRESS (Oct 14, 2025 - Catering Configurator UX Redesign)
+- [ ] Sally: Design progressive disclosure accordion pattern for catering configurator
+  - Current issue: 14 sauces + dips shown at once = overwhelming, cramped layout
+  - Solution: Accordion pattern with auto-collapse on completion
+  - Step 1 (Wing Type): Open by default, collapse to "✓ Boneless Wings (60 pieces)"
+  - Step 2 (Sauce Selection): Reveal after wing selection, 3-col grid, live counter "2/3 selected"
+  - Step 3 (Add-Ons): Reveal after sauces complete
+- [ ] Sally: Provide UX recommendations on:
+  - Progressive disclosure validation for catering orders
+  - Edit/back navigation patterns
+  - Micro-interactions and animations (300ms transitions recommended)
+  - Card sizing/spacing for sauce selection (24px gaps suggested)
+  - Mobile-first priorities (single column, 48px tap targets)
+- [ ] Codex: Implement accordion pattern with state management
+- [ ] Claude: Coordinate team collaboration and technical implementation
+
 ## NEXT UP - Virtual Kitchen Admin
 - [ ] Test platform menu manager with real data
 - [ ] Extend admin for multi-brand management
