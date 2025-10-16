@@ -46,7 +46,11 @@ function generateSidesFriesJS(menuData = {}) {
 
       function buildFriesVariants() {
         const firestoreVariants = (strategicMenu.fries && Array.isArray(strategicMenu.fries.variants)) ? strategicMenu.fries.variants : FALLBACK_VARIANTS;
-        return normaliseVariants(firestoreVariants);
+        // Filter to only show plain fries (no cheese, no bacon) - just Original and Large sizes
+        const plainFries = firestoreVariants.filter(v =>
+          v.id && v.id.includes('fries_') && !v.id.includes('cheese') && !v.id.includes('bacon')
+        );
+        return normaliseVariants(plainFries.length > 0 ? plainFries : firestoreVariants);
       }
 
       window.openFriesModal = function() {

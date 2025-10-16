@@ -14,27 +14,57 @@ const PRICING_STRATEGIES = {
    * Base price from variant + addons
    */
   'configurable-entree': {
-    calculate(selections, productData, productConfig) {
+    calculate(selections, productData, productConfig, globalData = {}) {
       let base = 0;
       const addons = [];
+      const DOORDASH_MARKUP = 1.35; // 35% markup
 
       // Base price from variant
       if (selections.variant) {
         base = selections.variant.platformPrice || selections.variant.basePrice || 0;
       }
 
-      // Extra dips addon
-      if (selections.extraDips) {
-        const dipIds = Object.keys(selections.extraDips);
-        const dipCount = dipIds.length;
-        if (dipCount > 0) {
-          const dipPrice = 0.99;
-          addons.push({
-            name: `${dipCount}x Extra Dip${dipCount > 1 ? 's' : ''}`,
-            price: parseFloat((dipPrice * dipCount).toFixed(2))
-          });
+      // Process all optional addon steps dynamically
+      const optionalAddonSteps = productConfig.customizationFlow?.filter(step => step.type === 'optional-addons') || [];
+
+      optionalAddonSteps.forEach(step => {
+        const selectedAddons = selections[step.id];
+        if (!selectedAddons || Object.keys(selectedAddons).length === 0) return;
+
+        // Get the correct data source
+        let addonsList = [];
+        if (step.dataSource === 'dippingSauces' && globalData?.dippingSauces) {
+          addonsList = globalData.dippingSauces;
+        } else if (step.dataSource === 'sauces' && globalData?.sauces) {
+          addonsList = globalData.sauces.filter(s =>
+            s.category !== 'dipping-sauce' &&
+            s.category !== 'dry-rub' &&
+            s.active !== false
+          );
         }
-      }
+
+        // Calculate addon prices
+        Object.entries(selectedAddons).forEach(([addonId, qty]) => {
+          if (qty <= 0) return;
+
+          const addon = addonsList.find(a => a.id === addonId);
+          if (!addon) return;
+
+          // Get price: either from Firebase basePrice with markup, or fallback to hardcoded
+          let pricePerItem;
+          if (step.priceSource === 'firebase' && addon.basePrice) {
+            pricePerItem = parseFloat((addon.basePrice * DOORDASH_MARKUP).toFixed(2));
+          } else {
+            pricePerItem = step.pricePerItem || 0.99;
+          }
+
+          const lineTotal = parseFloat((pricePerItem * qty).toFixed(2));
+          addons.push({
+            name: `${qty}x ${addon.name}`,
+            price: lineTotal
+          });
+        });
+      });
 
       // Protein addon (for salads)
       if (selections.protein) {

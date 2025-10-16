@@ -259,7 +259,8 @@ function generateProductConfiguratorJS(menuData = {}) {
               );
             }
 
-            const pricePerItem = stepConfig.pricePerItem || 0.99;
+            // Calculate price per item
+            const DOORDASH_MARKUP = 1.35; // 35% markup
 
             return \`
               <div class="step-optional-addons">
@@ -268,6 +269,15 @@ function generateProductConfiguratorJS(menuData = {}) {
                 <div class="addons-grid">
                   \${options.map(addon => {
                     const quantity = selectedAddons[addon.id] || 0;
+
+                    // Get price: either from Firebase basePrice with markup, or fallback to hardcoded
+                    let pricePerItem;
+                    if (stepConfig.priceSource === 'firebase' && addon.basePrice) {
+                      pricePerItem = parseFloat((addon.basePrice * DOORDASH_MARKUP).toFixed(2));
+                    } else {
+                      pricePerItem = stepConfig.pricePerItem || 0.99;
+                    }
+
                     return \`
                       <div class="addon-card \${quantity > 0 ? 'selected' : ''}">
                         \${addon.imageUrl ? \`<img src="\${addon.imageUrl}" alt="\${addon.name}" class="addon-image">\` : ''}
@@ -375,6 +385,7 @@ function generateProductConfiguratorJS(menuData = {}) {
             }
 
             // Extra Dips / Optional Addons (handle all optional-addons type steps)
+            const DOORDASH_MARKUP = 1.35; // 35% markup
             const optionalAddonSteps = flow.filter(s => s.type === 'optional-addons');
             optionalAddonSteps.forEach(addonsStep => {
               const selectedAddons = currentSelections[addonsStep.id];
@@ -387,12 +398,19 @@ function generateProductConfiguratorJS(menuData = {}) {
                   addonsList = globalData?.dippingSauces || [];
                 }
 
-                const pricePerItem = addonsStep.pricePerItem || 0;
-
                 const addonItems = Object.entries(selectedAddons).map(([addonId, qty]) => {
                   if (qty <= 0) return '';
                   const addon = addonsList.find(a => a.id === addonId);
                   if (!addon) return '';
+
+                  // Get price: either from Firebase basePrice with markup, or fallback to hardcoded
+                  let pricePerItem;
+                  if (addonsStep.priceSource === 'firebase' && addon.basePrice) {
+                    pricePerItem = parseFloat((addon.basePrice * DOORDASH_MARKUP).toFixed(2));
+                  } else {
+                    pricePerItem = addonsStep.pricePerItem || 0.99;
+                  }
+
                   return \`<li>\${qty}x \${addon.name} ($\${pricePerItem.toFixed(2)} each)</li>\`;
                 }).filter(Boolean).join('');
 
@@ -456,39 +474,76 @@ function generateProductConfiguratorJS(menuData = {}) {
       // Pricing Strategies
       const PRICING_STRATEGIES = {
         'configurable-entree': {
-          calculate(selections, productData, productConfig) {
-            let base = selections.variant?.platformPrice || selections.variant?.basePrice || 0;
+          calculate(selections, productData, productConfig, globalData = {}) {
+            let base = 0;
             const addons = [];
+            const DOORDASH_MARKUP = 1.35; // 35% markup
 
-            // Calculate all optional-addons steps dynamically
-            const flow = productConfig?.customizationFlow || [];
-            const optionalAddonSteps = flow.filter(step => step.type === 'optional-addons');
+            // Base price from variant
+            if (selections.variant) {
+              base = selections.variant.platformPrice || selections.variant.basePrice || 0;
+            }
+
+            // Process all optional addon steps dynamically
+            const optionalAddonSteps = productConfig.customizationFlow?.filter(step => step.type === 'optional-addons') || [];
 
             optionalAddonSteps.forEach(step => {
               const selectedAddons = selections[step.id];
-              if (selectedAddons && typeof selectedAddons === 'object') {
-                const pricePerItem = step.pricePerItem || 0;
+              if (!selectedAddons || Object.keys(selectedAddons).length === 0) return;
 
-                // Sum up quantities for this addon step
-                const quantities = Object.entries(selectedAddons)
-                  .filter(([_, qty]) => qty > 0)
-                  .map(([id, qty]) => ({ id, qty }));
-
-                const totalQty = quantities.reduce((sum, item) => sum + item.qty, 0);
-
-                if (totalQty > 0) {
-                  // Use step label for addon name (e.g., "Extra Sauces (Optional)" or "Extra Dipping Sauces")
-                  const label = step.label.replace(/\s*\(Optional\)\s*/i, '').trim();
-                  addons.push({
-                    name: \`\${totalQty}x \${label}\`,
-                    price: pricePerItem * totalQty
-                  });
-                }
+              // Get the correct data source
+              let addonsList = [];
+              if (step.dataSource === 'dippingSauces' && globalData?.dippingSauces) {
+                addonsList = globalData.dippingSauces;
+              } else if (step.dataSource === 'sauces' && globalData?.sauces) {
+                addonsList = globalData.sauces.filter(s =>
+                  s.category !== 'dipping-sauce' &&
+                  s.category !== 'dry-rub' &&
+                  s.active !== false
+                );
               }
+
+              // Calculate addon prices
+              Object.entries(selectedAddons).forEach(([addonId, qty]) => {
+                if (qty <= 0) return;
+
+                const addon = addonsList.find(a => a.id === addonId);
+                if (!addon) return;
+
+                // Get price: either from Firebase basePrice with markup, or fallback to hardcoded
+                let pricePerItem;
+                if (step.priceSource === 'firebase' && addon.basePrice) {
+                  pricePerItem = parseFloat((addon.basePrice * DOORDASH_MARKUP).toFixed(2));
+                } else {
+                  pricePerItem = step.pricePerItem || 0.99;
+                }
+
+                const lineTotal = parseFloat((pricePerItem * qty).toFixed(2));
+                addons.push({
+                  name: \`\${qty}x \${addon.name}\`,
+                  price: lineTotal
+                });
+              });
             });
 
-            const total = parseFloat((base + addons.reduce((s, a) => s + a.price, 0)).toFixed(2));
-            return { base: parseFloat(base.toFixed(2)), addons, total };
+            // Protein addon (for salads)
+            if (selections.protein) {
+              const proteinPrice = 4.99;
+              addons.push({
+                name: 'Added Protein',
+                price: proteinPrice
+              });
+            }
+
+            // Calculate total
+            const addonTotal = addons.reduce((sum, addon) => sum + addon.price, 0);
+            const total = parseFloat((base + addonTotal).toFixed(2));
+
+            return {
+              base: parseFloat(base.toFixed(2)),
+              addons,
+              total
+            };
           }
         }
       };
@@ -534,7 +589,7 @@ function generateProductConfiguratorJS(menuData = {}) {
         recalculatePrice() {
           const strategy = PRICING_STRATEGIES[this.config.productType];
           if (strategy) {
-            this.priceBreakdown = strategy.calculate(this.selections, this.data, this.config);
+            this.priceBreakdown = strategy.calculate(this.selections, this.data, this.config, this.globalData);
           }
         }
       }

@@ -61,9 +61,9 @@ const PRODUCT_CONFIGS = {
         id: 'extra-sauces',
         type: 'optional-addons',
         label: 'Extra Sauces (Optional)',
-        description: 'Add extra 1.5oz sauce cups for $0.85 each - choose any sauce!',
+        description: 'Add extra 1.5oz sauce cups - choose any sauce!',
         dataSource: 'sauces',
-        pricePerItem: 0.85
+        priceSource: 'firebase' // Use basePrice from Firebase with platform markup
       },
       {
         id: 'included-dips',
@@ -77,9 +77,9 @@ const PRODUCT_CONFIGS = {
         id: 'extra-dips',
         type: 'optional-addons',
         label: 'Extra Dipping Sauces (Optional)',
-        description: 'Add extra dips for $0.75 each',
+        description: 'Add extra dips',
         dataSource: 'dippingSauces',
-        pricePerItem: 0.75
+        priceSource: 'firebase' // Use basePrice from Firebase with platform markup
       },
       {
         id: 'summary',
@@ -122,9 +122,9 @@ const PRODUCT_CONFIGS = {
         id: 'extra-sauces',
         type: 'optional-addons',
         label: 'Extra Sauces (Optional)',
-        description: 'Add extra 1.5oz sauce cups for $0.85 each - choose any sauce!',
+        description: 'Add extra 1.5oz sauce cups - choose any sauce!',
         dataSource: 'sauces',
-        pricePerItem: 0.85
+        priceSource: 'firebase' // Use basePrice from Firebase with platform markup
       },
       {
         id: 'includedDips',
@@ -138,10 +138,10 @@ const PRODUCT_CONFIGS = {
         id: 'extraDips',
         type: 'optional-addons',
         label: 'Extra Dipping Sauces',
-        description: 'Add extra dips for $0.99 each',
+        description: 'Add extra dips',
         skipIf: { includedDips: 'no-dip' }, // Skip if "No Dip" selected
         dataSource: 'dippingSauces',
-        pricePerItem: 0.99
+        priceSource: 'firebase' // Use basePrice from Firebase with platform markup
       },
       {
         id: 'summary',
@@ -184,9 +184,9 @@ const PRODUCT_CONFIGS = {
         id: 'extra-sauces',
         type: 'optional-addons',
         label: 'Extra Sauces (Optional)',
-        description: 'Add extra 1.5oz sauce cups for $0.85 each - choose any sauce!',
+        description: 'Add extra 1.5oz sauce cups - choose any sauce!',
         dataSource: 'sauces',
-        pricePerItem: 0.85
+        priceSource: 'firebase' // Use basePrice from Firebase with platform markup
       },
       {
         id: 'includedDips',
@@ -213,7 +213,7 @@ const PRODUCT_CONFIGS = {
         label: 'Extra Dipping Sauces',
         skipIf: { includedDips: 'no-dip' },
         dataSource: 'dippingSauces',
-        pricePerItem: 0.99
+        priceSource: 'firebase' // Use basePrice from Firebase with platform markup
       },
       {
         id: 'summary',
