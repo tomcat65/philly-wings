@@ -3,7 +3,7 @@
  * Coordinates HTML, CSS, and JavaScript generation for DoorDash platform
  */
 
-const { generateDoorDashCSS } = require('./css');
+const { generateDoorDashCSS, generateProductConfiguratorStyles } = require('./css');
 const { generateDoorDashHTMLBody } = require('./html');
 const { generateDoorDashJS } = require('./javascript-modular');
 const { getPlatformBranding } = require('../../data/branding');
@@ -18,7 +18,7 @@ function generateDoorDashMenuPage(menuData, settings = {}) {
   const branding = getPlatformBranding('doordash');
 
   // Generate individual components
-  const css = generateDoorDashCSS(branding);
+  const css = generateDoorDashCSS(branding) + generateProductConfiguratorStyles();
   const javascript = generateDoorDashJS(menuData);
   const htmlBody = generateDoorDashHTMLBody(menuData, branding, settings);
 

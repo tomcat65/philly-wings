@@ -13,6 +13,7 @@ const { generateSidesLoadedFriesJS } = require('./modules/sides-loaded-fries.js'
 const { generateSidesMozzarellaJS } = require('./modules/sides-mozzarella.js');
 const { generateBeverageModalJS } = require('./modules/beverage-modal.js');
 const { generateSharedUtilsJS } = require('./modules/shared-utils.js');
+const { generateProductConfiguratorJS } = require('./modules/product-configurator/index.js');
 
 /**
  * Generate complete DoorDash JavaScript - Modular Version
@@ -66,6 +67,11 @@ function generateDoorDashJS(menuData = {}) {
     ${generateWingsSharedJS()}
 
     // ==============================================
+    // PRODUCT CONFIGURATOR MODULE (Unified System)
+    // ==============================================
+    ${generateProductConfiguratorJS(menuData)}
+
+    // ==============================================
     // ENTRY POINT WRAPPERS (Override legacy to orchestrators)
     // ==============================================
     window.openBonelessWingModal = function() {
@@ -88,7 +94,7 @@ function generateDoorDashJS(menuData = {}) {
       console.warn('No bone-in wing modal implementation available');
     };
 
-    
+
 
     // ==============================================
     // INITIALIZATION

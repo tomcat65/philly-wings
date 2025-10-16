@@ -2351,6 +2351,692 @@ function generateResponsiveStyles() {
   `;
 }
 
+/**
+ * Generate Product Configurator Modal Styles
+ */
+function generateProductConfiguratorStyles() {
+  return `
+    /* Product Configurator Modal */
+    .product-config-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-config-modal .modal-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .product-config-modal .modal-content {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .product-config-modal .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .product-config-modal .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      cursor: pointer;
+      color: #666;
+      line-height: 1;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+    }
+
+    .product-config-modal .modal-title {
+      margin: 0 0 1rem 0;
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    .product-config-modal .modal-progress {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .product-config-modal .progress-step {
+      flex: 1;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      transition: background-color 0.3s;
+    }
+
+    .product-config-modal .progress-step.active {
+      background: #00b887;
+    }
+
+    .product-config-modal .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .product-config-modal .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+
+    .product-config-modal .modal-footer button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #productConfigBackBtn {
+      background: white;
+      border: 1px solid #ddd;
+      color: #333;
+    }
+
+    #productConfigBackBtn:hover {
+      background: #f5f5f5;
+    }
+
+    #productConfigNextBtn, #productConfigAddBtn {
+      background: #00b887;
+      border: none;
+      color: white;
+      flex: 1;
+    }
+
+    #productConfigNextBtn:hover, #productConfigAddBtn:hover {
+      background: #009970;
+    }
+
+    /* Step Styles */
+    .step-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .step-description {
+      color: #666;
+      margin: 0 0 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    /* Single Choice */
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .choice-card {
+      padding: 1.5rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .choice-card:hover {
+      border-color: #00b887;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 184, 135, 0.15);
+    }
+
+    .choice-card.selected {
+      border-color: #00b887;
+      background: #f0fdf9;
+    }
+
+    .choice-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .choice-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0.5rem 0;
+    }
+
+    .choice-description {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0;
+    }
+
+    /* Variant Selector */
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .variant-card {
+      padding: 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .variant-card:hover {
+      border-color: #00b887;
+      transform: translateY(-2px);
+    }
+
+    .variant-card.selected {
+      border-color: #00b887;
+      background: #f0fdf9;
+    }
+
+    .variant-name {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .variant-price {
+      color: #00b887;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Multi Choice */
+    .selection-counter {
+      background: #f5f5f5;
+      padding: 0.75rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 1rem 0;
+      font-weight: 600;
+    }
+
+    .counter-current {
+      color: #00b887;
+      font-size: 1.2rem;
+    }
+
+    .multi-choice-grid, .dips-grid, .addons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .multi-choice-card, .dip-card, .addon-card {
+      padding: 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      text-align: center;
+    }
+
+    .multi-choice-card:hover:not(.disabled),
+    .dip-card:hover:not(.disabled) {
+      border-color: #00b887;
+      transform: translateY(-2px);
+    }
+
+    .multi-choice-card.selected, .dip-card.selected {
+      border-color: #00b887;
+      background: #f0fdf9;
+    }
+
+    .multi-choice-card.disabled, .dip-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .option-image, .dip-image, .addon-image {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .option-name, .dip-name, .addon-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0.5rem 0;
+    }
+
+    .heat-meter {
+      margin: 0.5rem 0;
+    }
+
+    .check-mark {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: #00b887;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    /* Two-Column Sauce Layout */
+    .sauces-two-column-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 1rem;
+    }
+
+    .sauce-column-title {
+      margin: 0 0 12px 0;
+      color: #1a1a1a;
+      font-size: 16px;
+      font-weight: bold;
+      border-bottom: 2px solid #ff6b35;
+      padding-bottom: 6px;
+    }
+
+    .sauce-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sauce-card {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    .sauce-card.selected {
+      border-color: #ff6b35;
+      background: #fff5f2;
+    }
+
+    .sauce-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .sauce-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sauce-info {
+      flex: 1;
+    }
+
+    .sauce-name {
+      margin: 0 0 3px 0;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .sauce-description {
+      margin: 0 0 3px 0;
+      color: #666;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .heat-indicator {
+      font-size: 10px;
+      color: #666;
+      font-weight: bold;
+    }
+
+    .selection-indicator {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sauce-card.selected .selection-indicator {
+      border-color: #ff6b35;
+      background: #ff6b35;
+    }
+
+    .selection-indicator .check-mark {
+      position: static;
+      width: auto;
+      height: auto;
+      background: transparent;
+      color: white;
+      font-size: 12px;
+    }
+
+    /* On the Side Toggle */
+    .sauce-on-side-toggle {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .toggle-label input[type="checkbox"] {
+      display: none;
+    }
+
+    .toggle-slider {
+      position: relative;
+      display: inline-block;
+      width: 30px;
+      height: 16px;
+      background-color: #ccc;
+      border-radius: 16px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .toggle-label input:checked + .toggle-slider {
+      background-color: #ff6b35;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 12px;
+      width: 12px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .toggle-label input:checked + .toggle-slider::before {
+      transform: translateX(14px);
+    }
+
+    /* Included Dips */
+    .no-dip-option {
+      width: 100%;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .no-dip-option:hover {
+      border-color: #ff6b6b;
+    }
+
+    .no-dip-option.selected {
+      border-color: #ff6b6b;
+      background: #fff5f5;
+      color: #ff6b6b;
+    }
+
+    /* Optional Addons */
+    .addon-price {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 0.25rem 0;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border: 2px solid #00b887;
+      background: white;
+      color: #00b887;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: 700;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qty-btn:hover:not(:disabled) {
+      background: #00b887;
+      color: white;
+    }
+
+    .qty-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .quantity {
+      font-size: 1.2rem;
+      font-weight: 700;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .addon-card.selected {
+      border-color: #00b887;
+      background: #f0fdf9;
+    }
+
+    /* Review Step */
+    .summary-items {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .summary-value {
+      color: #333;
+      text-align: right;
+    }
+
+    .price-breakdown {
+      margin-top: 1.5rem;
+      border-top: 2px solid #e0e0e0;
+      padding-top: 1rem;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+    }
+
+    .price-row.addon {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .price-row.total {
+      border-top: 2px solid #333;
+      margin-top: 0.5rem;
+      padding-top: 1rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .price-label {
+      font-weight: 600;
+    }
+
+    .price-value {
+      color: #00b887;
+      font-weight: 700;
+    }
+
+    /* Detailed Review Section Styles */
+    .review-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .review-product-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .review-base-price {
+      font-size: 1rem;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .review-section {
+      margin: 1.25rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .review-section strong {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-size: 1.05rem;
+    }
+
+    .review-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0 0;
+    }
+
+    .review-list li {
+      padding: 0.4rem 0 0.4rem 1.5rem;
+      position: relative;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .review-list li:before {
+      content: "•";
+      position: absolute;
+      left: 0.5rem;
+      color: #00b887;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .review-meta {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #e0e0e0;
+      font-weight: 600;
+      color: #555;
+    }
+
+    @media (max-width: 640px) {
+      .product-config-modal .modal-content {
+        width: 95%;
+        max-height: 95vh;
+      }
+
+      .choice-grid, .variant-grid, .multi-choice-grid, .dips-grid, .addons-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .product-config-modal .modal-footer {
+        flex-direction: column;
+      }
+
+      #productConfigBackBtn, #productConfigNextBtn, #productConfigAddBtn {
+        width: 100%;
+      }
+    }
+  `;
+}
+
 module.exports = {
   generateDoorDashCSS,
   generateBaseStyles,
@@ -2358,5 +3044,6 @@ module.exports = {
   generateNavigationStyles,
   generateMenuSectionStyles,
   generateWingModalStyles,
-  generateResponsiveStyles
+  generateResponsiveStyles,
+  generateProductConfiguratorStyles
 };

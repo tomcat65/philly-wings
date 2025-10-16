@@ -157,6 +157,31 @@ function generateDoorDashHTMLBody(menuData, branding, settings) {
         </div>
     </div>
 
+    <!-- Product Configurator Modal (Unified) -->
+    <div id="productConfigModal" class="product-config-modal" style="display: none;">
+        <div class="modal-backdrop" onclick="window.productConfigurator.close()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="window.productConfigurator.close()">&times;</button>
+                <h2 id="productConfigModalTitle" class="modal-title">Customize Your Order</h2>
+                <div class="modal-progress" id="productConfigModalProgress">
+                    <div class="progress-step active" data-step="1"></div>
+                    <div class="progress-step" data-step="2"></div>
+                    <div class="progress-step" data-step="3"></div>
+                    <div class="progress-step" data-step="4"></div>
+                </div>
+            </div>
+            <div class="modal-body" id="productConfigModalBody">
+                <!-- Dynamic content rendered by product configurator -->
+            </div>
+            <div class="modal-footer">
+                <button id="productConfigBackBtn" onclick="window.productConfigurator.back()">← Back</button>
+                <button id="productConfigNextBtn" onclick="window.productConfigurator.next()">Next →</button>
+                <button id="productConfigAddBtn" onclick="window.productConfigurator.addToCart()" style="display: none;">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Beverage Ordering Modal -->
     <div id="beverageModal" class="wing-modal" style="display: none;">
         <div class="modal-backdrop" onclick="closeBeverageModal()"></div>
@@ -547,7 +572,12 @@ function generatePlantBasedWingsSection(plantBasedWings, branding) {
           ` : ''}
         </div>
 
-        <button class="order-now-btn">ORDER NOW →</button>
+        <button class="order-now-btn"
+                data-product-id="plantBasedWings"
+                data-product-data='${JSON.stringify(wing).replace(/'/g, "&#39;")}'
+                onclick="openPlantBasedWingModal(this)">
+          VIEW OPTIONS →
+        </button>
       </div>
     `;
   }).join('');
