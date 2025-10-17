@@ -9,6 +9,7 @@ import { PlantBasedMenu } from './components/plant-based-menu.js';
 import { DessertsMenu } from './components/desserts-menu.js';
 import { SaladsMenu } from './components/salads-menu.js';
 import { ColdSidesMenu } from './components/cold-sides-menu.js';
+import './components/acquisition-modal.js';
 
 // Dynamic content loaders
 class PhillyWingsApp {
