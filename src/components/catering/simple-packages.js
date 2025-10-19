@@ -5,9 +5,24 @@
 
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
+import { renderPackageConfigurator } from './package-configurator.js';
+import { getAddOnsSplitByCategory } from '../../services/catering-addons-service.js';
 
 export async function renderSimplePackages() {
   const packages = await fetchPackages();
+
+  // Fetch add-ons for each tier (cache to avoid duplicate reads)
+  const tierAddOnsMap = {};
+  const tiers = Array.from(new Set(packages.map(pkg => pkg.tier)));
+
+  for (const tier of tiers) {
+    try {
+      tierAddOnsMap[tier] = await getAddOnsSplitByCategory(tier);
+    } catch (error) {
+      console.warn(`Unable to load add-ons for tier ${tier}:`, error);
+      tierAddOnsMap[tier] = { vegetarian: [], desserts: [], hotBeverages: [] };
+    }
+  }
 
   return `
     <section class="simple-packages-section">
@@ -38,7 +53,7 @@ export async function renderSimplePackages() {
       <!-- Quick Browse View (Default) -->
       <div id="quick-browse-view" class="quick-browse-view">
         <div class="simple-packages-grid">
-          ${packages.map(pkg => renderSimplePackageCard(pkg)).join('')}
+          ${packages.map(pkg => renderSimplePackageCard(pkg, tierAddOnsMap[pkg.tier] || { vegetarian: [], desserts: [], hotBeverages: [] })).join('')}
         </div>
 
         <div class="browse-actions">
@@ -70,7 +85,13 @@ export async function renderSimplePackages() {
   `;
 }
 
-function renderSimplePackageCard(pkg) {
+function renderSimplePackageCard(pkg, tierAddOns = { vegetarian: [], desserts: [], hotBeverages: [] }) {
+  // If package has wingOptions (new schema), render configurator with hot beverages
+  if (pkg.wingOptions && pkg.sauceSelections && pkg.dipsIncluded) {
+    return renderPackageConfigurator(pkg, tierAddOns);
+  }
+
+  // Otherwise, render static card (backward compatibility)
   return `
     <div class="simple-package-card">
       <div class="package-badge-row">
