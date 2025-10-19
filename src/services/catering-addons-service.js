@@ -96,15 +96,16 @@ export async function getAddOnById(addOnId) {
 }
 
 /**
- * Get add-ons split into vegetarian and dessert arrays for rendering
+ * Get add-ons split into categories for rendering
  * @param {number} tier - Package tier
- * @returns {Promise<Object>} { vegetarian: [], desserts: [] }
+ * @returns {Promise<Object>} { vegetarian: [], desserts: [], hotBeverages: [] }
  */
 export async function getAddOnsSplitByCategory(tier) {
   const allAddOns = await getAddOnsForTier(tier);
 
   return {
     vegetarian: allAddOns.filter(addOn => addOn.category === 'vegetarian'),
-    desserts: allAddOns.filter(addOn => addOn.category === 'dessert')
+    desserts: allAddOns.filter(addOn => addOn.category === 'dessert'),
+    hotBeverages: allAddOns.filter(addOn => addOn.category === 'hot-beverages')
   };
 }

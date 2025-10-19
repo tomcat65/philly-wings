@@ -79,7 +79,7 @@ curl -X POST http://localhost:5002/philly-wings/us-central1/ezCaterOrderWebhook 
       "company_name": "Test Company",
       "contact_name": "John Doe",
       "email": "john@test.com",
-      "phone": "555-1234"
+      "phone": "267-376-3113"
     },
     "items": [{
       "name": "The Lunch Box Special",

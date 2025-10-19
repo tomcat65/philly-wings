@@ -1,4 +1,4 @@
-import { renderVegetarianAddOns, renderDessertsAddOns, renderStickySummary } from './add-ons-selector.js';
+import { renderVegetarianAddOns, renderDessertsAddOns, renderHotBeveragesAddOns, renderStickySummary } from './add-ons-selector.js';
 import { initAccordion } from './accordion-state.js';
 
 /**
@@ -6,16 +6,17 @@ import { initAccordion } from './accordion-state.js';
  * Allows customers to customize wing types, sauces, desserts, and add-ons
  */
 
-export function renderPackageConfigurator(packageData, tierAddOns = { vegetarian: [], desserts: [] }) {
+export function renderPackageConfigurator(packageData, tierAddOns = { vegetarian: [], desserts: [], hotBeverages: [] }) {
   if (typeof window !== 'undefined') {
     window.addOnsDataCache = window.addOnsDataCache || {};
-    [...(tierAddOns.vegetarian || []), ...(tierAddOns.desserts || [])].forEach(addOn => {
+    [...(tierAddOns.vegetarian || []), ...(tierAddOns.desserts || []), ...(tierAddOns.hotBeverages || [])].forEach(addOn => {
       window.addOnsDataCache[addOn.id] = addOn;
     });
   }
 
   const vegetarianHtml = renderVegetarianAddOns(tierAddOns.vegetarian || [], packageData.tier, packageData.id);
   const dessertsHtml = renderDessertsAddOns(tierAddOns.desserts || [], packageData.tier, packageData.id);
+  const hotBeveragesHtml = renderHotBeveragesAddOns(tierAddOns.hotBeverages || [], packageData.tier, packageData.id);
 
   return `
     <div class="package-configurator" id="configurator-${packageData.id}">
@@ -30,7 +31,7 @@ export function renderPackageConfigurator(packageData, tierAddOns = { vegetarian
         <div class="configurator-main">
           ${renderWingTypeSelector(packageData)}
           ${renderSauceSelector(packageData)}
-          ${renderAddOnsStep(vegetarianHtml, dessertsHtml, packageData.id)}
+          ${renderAddOnsStep(vegetarianHtml, dessertsHtml, hotBeveragesHtml, packageData.id)}
           ${renderDipsPreview(packageData)}
           ${renderPackageSummary(packageData)}
         </div>
@@ -83,6 +84,10 @@ export function renderPackageConfigurator(packageData, tierAddOns = { vegetarian
         });
 
         updateEncouragementMessage(packageId, maxSauces);
+        const accordion = window.configuratorAccordions?.[packageId];
+        if (accordion && typeof accordion.syncSauceSelections === 'function') {
+          accordion.syncSauceSelections();
+        }
       };
 
       // Update encouragement message based on selection progress
@@ -109,6 +114,20 @@ export function renderPackageConfigurator(packageData, tierAddOns = { vegetarian
           encouragement.className = 'encouragement-message encouragement-error';
         }
       };
+
+      window.completeAddOnsStep = function(packageId, skip = false) {
+        const accordion = window.configuratorAccordions?.[packageId];
+        if (accordion && typeof accordion.commitAddOnsStep === 'function') {
+          accordion.commitAddOnsStep(skip);
+        }
+      };
+
+      window.handleAddOnSelectionChange = function(packageId) {
+        const accordion = window.configuratorAccordions?.[packageId];
+        if (accordion && typeof accordion.handleAddOnSelectionChange === 'function') {
+          accordion.handleAddOnSelectionChange();
+        }
+      };
     </script>
   `;
 }
@@ -129,7 +148,7 @@ function renderProgressIndicator(packageId) {
 
       <div class="progress-connector"></div>
 
-      <div class="progress-step" data-step="2">
+      <div class="progress-step progress-step-pending" data-step="2">
         <div class="progress-circle">
           <span class="step-number">2</span>
           <span class="step-checkmark">✓</span>
@@ -139,13 +158,16 @@ function renderProgressIndicator(packageId) {
 
       <div class="progress-connector"></div>
 
-      <div class="progress-step" data-step="3">
+      <div class="progress-step progress-step-pending" data-step="3">
         <div class="progress-circle">
           <span class="step-number">3</span>
           <span class="step-checkmark">✓</span>
         </div>
         <span class="progress-label">Add-Ons</span>
       </div>
+    </div>
+    <div class="progress-indicator-mobile" id="progress-summary-${packageId}" aria-live="polite">
+      Step 1 of 3
     </div>
   `;
 }
@@ -157,19 +179,33 @@ function renderWingTypeSelector(packageData) {
   const { totalWings, allowMixed, types, boneInOptions } = packageData.wingOptions;
 
   return `
-    <div class="configurator-section wing-type-section step-expanded"
-         data-step="1"
-         data-package="${packageData.id}"
-         data-total-wings="${totalWings}"
-         aria-expanded="true">
+    <div
+      class="configurator-section wing-type-section step-expanded"
+      data-step="1"
+      data-package="${packageData.id}"
+      data-total-wings="${totalWings}"
+      aria-expanded="true"
+      role="region"
+      aria-labelledby="step-${packageData.id}-heading-1"
+    >
 
       <!-- Collapsed Summary (hidden when expanded) -->
       <div class="step-summary">
         <div class="step-summary-main">
           <span class="step-checkmark">✓</span>
-          <span class="step-summary-text">Wing type selected</span>
+          <span
+            class="step-summary-text"
+            data-default-summary="Select your wing style"
+          >
+            Select your wing style
+          </span>
         </div>
-        <button class="step-edit-btn" data-step="1" data-package="${packageData.id}" aria-label="Edit wing type selection">
+        <button
+          class="step-edit-btn"
+          data-step="1"
+          data-package="${packageData.id}"
+          aria-label="Edit wing type selection"
+        >
           Edit
         </button>
       </div>
@@ -177,7 +213,9 @@ function renderWingTypeSelector(packageData) {
       <!-- Expanded Content -->
       <div class="step-content">
         <div class="section-label">
-          <h4 class="step-heading">🍗 Step 1: Choose Your Wing Style</h4>
+          <h4 class="step-heading" id="step-${packageData.id}-heading-1" tabindex="-1">
+            🍗 Step 1: Choose Your Wing Style
+          </h4>
           <span class="required-badge">Required</span>
         </div>
 
@@ -188,7 +226,12 @@ function renderWingTypeSelector(packageData) {
         <div class="wing-type-options">
         <!-- Bone-In Option -->
         <label class="wing-type-card" data-wing-type="bone-in">
-          <input type="radio" name="wing-type-${packageData.id}" value="bone-in" checked onchange="trackWingTypeSelection('${packageData.id}', 'bone-in')">
+          <input
+            type="radio"
+            name="wing-type-${packageData.id}"
+            value="bone-in"
+            onchange="trackWingTypeSelection('${packageData.id}', 'bone-in')"
+          >
           <div class="card-content">
             <div class="card-icon">🍗</div>
             <h5>Classic Bone-In</h5>
@@ -213,7 +256,12 @@ function renderWingTypeSelector(packageData) {
 
         <!-- Boneless Option -->
         <label class="wing-type-card" data-wing-type="boneless">
-          <input type="radio" name="wing-type-${packageData.id}" value="boneless" onchange="trackWingTypeSelection('${packageData.id}', 'boneless')">
+          <input
+            type="radio"
+            name="wing-type-${packageData.id}"
+            value="boneless"
+            onchange="trackWingTypeSelection('${packageData.id}', 'boneless')"
+          >
           <div class="card-content">
             <div class="card-icon">🍖</div>
             <h5>Boneless</h5>
@@ -224,7 +272,12 @@ function renderWingTypeSelector(packageData) {
 
         <!-- Cauliflower Wings Option -->
         <label class="wing-type-card" data-wing-type="cauliflower">
-          <input type="radio" name="wing-type-${packageData.id}" value="cauliflower" onchange="trackWingTypeSelection('${packageData.id}', 'cauliflower')">
+          <input
+            type="radio"
+            name="wing-type-${packageData.id}"
+            value="cauliflower"
+            onchange="trackWingTypeSelection('${packageData.id}', 'cauliflower')"
+          >
           <div class="card-content">
             <span class="dietary-badge dietary-badge--vegan">🌱 VEGAN</span>
             <div class="card-icon">🥦</div>
@@ -237,7 +290,12 @@ function renderWingTypeSelector(packageData) {
         <!-- Mixed Option (if allowed) -->
         ${allowMixed ? `
         <label class="wing-type-card" data-wing-type="mixed">
-          <input type="radio" name="wing-type-${packageData.id}" value="mixed" onchange="trackWingTypeSelection('${packageData.id}', 'mixed')">
+          <input
+            type="radio"
+            name="wing-type-${packageData.id}"
+            value="mixed"
+            onchange="trackWingTypeSelection('${packageData.id}', 'mixed')"
+          >
           <div class="card-content">
             <div class="card-icon">🔥</div>
             <h5>Mix & Match</h5>
@@ -276,18 +334,38 @@ function renderSauceSelector(packageData) {
   ];
 
   return `
-    <div class="configurator-section sauce-selector-section step-collapsed"
-         data-step="2"
-         data-package="${packageData.id}"
-         aria-expanded="false">
+    <div
+      class="configurator-section sauce-selector-section step-collapsed step-locked"
+      data-step="2"
+      data-package="${packageData.id}"
+      data-locked="true"
+      data-max-sauces="${max}"
+      data-min-sauces="${min}"
+      aria-expanded="false"
+      role="region"
+      aria-labelledby="step-${packageData.id}-heading-2"
+    >
 
       <!-- Collapsed Summary (shown when collapsed) -->
       <div class="step-summary">
         <div class="step-summary-main">
           <span class="step-checkmark">✓</span>
-          <span class="step-summary-text">Sauces selected</span>
+          <span
+            class="step-summary-text"
+            data-default-summary="Choose your sauces (locked until Step 1)"
+            data-unlocked-summary="Select your sauces"
+          >
+            Choose your sauces (locked until Step 1)
+          </span>
         </div>
-        <button class="step-edit-btn" data-step="2" data-package="${packageData.id}" aria-label="Edit sauce selection">
+        <button
+          class="step-edit-btn"
+          data-step="2"
+          data-package="${packageData.id}"
+          aria-label="Edit sauce selection"
+          aria-disabled="true"
+          disabled
+        >
           Edit
         </button>
       </div>
@@ -295,8 +373,12 @@ function renderSauceSelector(packageData) {
       <!-- Expanded Content -->
       <div class="step-content">
         <div class="section-label">
-          <h4>🔥 Step 2: Select Your Sauces</h4>
-          <span class="selection-counter">
+          <h4 class="step-heading" id="step-${packageData.id}-heading-2" tabindex="-1">🔥 Step 2: Select Your Sauces</h4>
+          <span
+            class="selection-counter"
+            role="status"
+            aria-live="polite"
+          >
             <span id="sauce-count-${packageData.id}">0</span>/${max} selected
           </span>
         </div>
@@ -337,27 +419,46 @@ function renderSauceSelector(packageData) {
 }
 
 /**
- * Render Step 3: Add-Ons (Vegetarian + Desserts combined)
+ * Render Step 3: Add-Ons (Vegetarian + Desserts + Hot Beverages combined)
  */
-function renderAddOnsStep(vegetarianHtml, dessertsHtml, packageId) {
-  // If both sections are empty, don't render Step 3 at all
-  if (!vegetarianHtml && !dessertsHtml) {
+function renderAddOnsStep(vegetarianHtml, dessertsHtml, hotBeveragesHtml, packageId) {
+  // If all sections are empty, don't render Step 3 at all
+  if (!vegetarianHtml && !dessertsHtml && !hotBeveragesHtml) {
     return '';
   }
 
   return `
-    <div class="configurator-section add-ons-step step-collapsed"
-         data-step="3"
-         data-package="${packageId}"
-         aria-expanded="false">
+    <div
+      class="configurator-section add-ons-step step-collapsed step-locked"
+      data-step="3"
+      data-package="${packageId}"
+      data-locked="true"
+      data-optional="true"
+      aria-expanded="false"
+      role="region"
+      aria-labelledby="step-${packageId}-heading-3"
+    >
 
       <!-- Collapsed Summary (shown when collapsed) -->
       <div class="step-summary">
         <div class="step-summary-main">
           <span class="step-checkmark">✓</span>
-          <span class="step-summary-text">Add-ons selected</span>
+          <span
+            class="step-summary-text"
+            data-default-summary="Optional: Add extras (locked until Step 2)"
+            data-unlocked-summary="Optional: Add extras"
+          >
+            Optional: Add extras (locked until Step 2)
+          </span>
         </div>
-        <button class="step-edit-btn" data-step="3" data-package="${packageId}" aria-label="Edit add-on selection">
+        <button
+          class="step-edit-btn"
+          data-step="3"
+          data-package="${packageId}"
+          aria-label="Edit add-on selection"
+          aria-disabled="true"
+          disabled
+        >
           Edit
         </button>
       </div>
@@ -365,16 +466,36 @@ function renderAddOnsStep(vegetarianHtml, dessertsHtml, packageId) {
       <!-- Expanded Content -->
       <div class="step-content">
         <div class="section-label">
-          <h4 class="step-heading">🌱 Step 3: Add Optional Extras</h4>
+          <h4 class="step-heading" id="step-${packageId}-heading-3" tabindex="-1">
+            🌱 Step 3: Add Optional Extras
+          </h4>
           <span class="optional-badge">Optional</span>
         </div>
 
         <p class="section-description">
-          Enhance your package with vegetarian options and desserts - perfect for dietary preferences and celebrations!
+          Enhance your package with hot beverages, vegetarian options, and desserts - perfect for meetings, dietary preferences, and celebrations!
         </p>
 
+        ${hotBeveragesHtml}
         ${vegetarianHtml}
         ${dessertsHtml}
+
+        <div class="step-actions">
+          <button
+            type="button"
+            class="btn-skip-step"
+            onclick="window.completeAddOnsStep('${packageId}', true)"
+          >
+            Skip Add-Ons
+          </button>
+          <button
+            type="button"
+            class="btn-step-complete"
+            onclick="window.completeAddOnsStep('${packageId}')"
+          >
+            Continue to Order Summary
+          </button>
+        </div>
       </div><!-- end step-content -->
     </div>
   `;
@@ -491,6 +612,10 @@ window.updateSauceCount = function(packageId) {
   const counter = document.getElementById(`sauce-count-${packageId}`);
   if (counter) {
     counter.textContent = checkboxes.length;
+  }
+  const accordion = window.configuratorAccordions?.[packageId];
+  if (accordion && typeof accordion.syncSauceSelections === 'function') {
+    accordion.syncSauceSelections();
   }
 };
 

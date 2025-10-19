@@ -701,6 +701,8 @@ function generateProductConfiguratorJS(menuData = {}) {
             ).join('');
           }
 
+          this.ensureModalStyles();
+
           const modal = document.getElementById('productConfigModal');
           if (modal) {
             modal.style.display = 'flex';
@@ -818,15 +820,407 @@ function generateProductConfiguratorJS(menuData = {}) {
           console.log('Add to cart:', orderItem);
           alert('Order added to cart! (Integration with cart system pending)');
           this.close();
+        },
+
+        ensureModalStyles() {
+          if (!document.getElementById('productConfiguratorFallbackStyles')) {
+            const fallbackStyle = document.createElement('style');
+            fallbackStyle.id = 'productConfiguratorFallbackStyles';
+            fallbackStyle.textContent = \`
+              .product-config-modal .step-title {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: #1a202c;
+                margin-bottom: 1rem;
+              }
+
+              .product-config-modal .step-description {
+                font-size: 0.95rem;
+                color: #4a5568;
+                margin-bottom: 1rem;
+              }
+
+              .product-config-modal .choice-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 1rem;
+              }
+
+              .product-config-modal .choice-card {
+                background: #f7fafc;
+                border: 2px solid transparent;
+                border-radius: 10px;
+                padding: 1.1rem;
+                text-align: left;
+                cursor: pointer;
+                transition: all 0.2s ease;
+              }
+
+              .product-config-modal .choice-card:hover {
+                border-color: #cbd5f5;
+              }
+
+              .product-config-modal .choice-card.selected {
+                border-color: #0f766e;
+                background: #e6fffa;
+              }
+
+              .product-config-modal .choice-icon {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+              }
+
+              .product-config-modal .choice-label {
+                font-size: 1.1rem;
+                margin: 0 0 0.35rem 0;
+                color: #1a202c;
+              }
+
+              .product-config-modal .variant-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+                gap: 0.85rem;
+              }
+
+              .product-config-modal .variant-card {
+                border: 2px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 1rem;
+                text-align: center;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                gap: 0.35rem;
+                transition: all 0.2s ease;
+                background: #ffffff;
+              }
+
+              .product-config-modal .variant-card.selected {
+                border-color: #0f766e;
+                background: #e6fffa;
+              }
+
+              .product-config-modal .variant-name {
+                font-weight: 600;
+                color: #1a202c;
+              }
+
+              .product-config-modal .variant-price {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #047857;
+              }
+
+              .product-config-modal .selection-counter {
+                font-size: 0.95rem;
+                color: #4a5568;
+                margin-bottom: 0.75rem;
+              }
+
+              .product-config-modal .multi-choice-grid,
+              .product-config-modal .dips-grid,
+              .product-config-modal .addons-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 0.75rem;
+              }
+
+              .product-config-modal .multi-choice-card,
+              .product-config-modal .dip-card,
+              .product-config-modal .addon-card {
+                border: 2px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 0.9rem;
+                background: #ffffff;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                position: relative;
+              }
+
+              .product-config-modal .multi-choice-card.selected,
+              .product-config-modal .dip-card.selected,
+              .product-config-modal .addon-card.selected {
+                border-color: #0f766e;
+                background: #e6fffa;
+              }
+
+              .product-config-modal .multi-choice-card.disabled,
+              .product-config-modal .dip-card.disabled,
+              .product-config-modal .addon-card.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+              }
+
+              .product-config-modal .quantity-controls {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.75rem;
+                margin-top: 0.75rem;
+              }
+
+              .product-config-modal .qty-btn {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                border: none;
+                background: #0f766e;
+                color: #ffffff;
+                font-size: 1.25rem;
+                line-height: 1;
+                cursor: pointer;
+                transition: all 0.2s ease;
+              }
+
+              .product-config-modal .qty-btn[disabled] {
+                background: #cbd5f5;
+                cursor: not-allowed;
+              }
+
+              .product-config-modal .modal-footer button {
+                transition: background 0.2s ease, transform 0.2s ease;
+              }
+
+              .product-config-modal .modal-footer button:hover:not([disabled]) {
+                transform: translateY(-1px);
+              }
+
+              @media (max-width: 640px) {
+                .product-config-modal .modal-content {
+                  width: 94%;
+                  max-height: 96vh;
+                }
+
+                .product-config-modal .choice-grid,
+                .product-config-modal .variant-grid,
+                .product-config-modal .multi-choice-grid,
+                .product-config-modal .dips-grid,
+                .product-config-modal .addons-grid {
+                  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                }
+
+                .product-config-modal .modal-footer {
+                  flex-direction: column;
+                }
+
+                .product-config-modal .modal-footer button {
+                  width: 100%;
+                }
+              }
+            \`;
+            document.head.appendChild(fallbackStyle);
+          }
+
+          const modal = document.getElementById('productConfigModal');
+          if (!modal || modal.dataset.pcStyleApplied === 'true') {
+            return;
+          }
+
+          const modalStyles = window.getComputedStyle(modal);
+          if (modalStyles.position === 'static' || modalStyles.position === 'initial') {
+            Object.assign(modal.style, {
+              position: 'fixed',
+              top: '0',
+              left: '0',
+              width: '100%',
+              height: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(0, 0, 0, 0.7)',
+              zIndex: '10000'
+            });
+          }
+
+          const backdrop = modal.querySelector('.modal-backdrop');
+          if (backdrop) {
+            const backdropStyles = window.getComputedStyle(backdrop);
+            if (backdropStyles.position === 'static' || backdropStyles.position === 'initial') {
+              Object.assign(backdrop.style, {
+                position: 'absolute',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer'
+              });
+            }
+          }
+
+          const content = modal.querySelector('.modal-content');
+          if (content) {
+            const contentStyles = window.getComputedStyle(content);
+            if (contentStyles.position === 'static' || contentStyles.maxWidth === 'none') {
+              Object.assign(content.style, {
+                position: 'relative',
+                background: '#ffffff',
+                borderRadius: '12px',
+                width: '90%',
+                maxWidth: '600px',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)'
+              });
+            }
+          }
+
+          const body = modal.querySelector('.modal-body');
+          if (body) {
+            const bodyStyles = window.getComputedStyle(body);
+            if (bodyStyles.overflowY === 'visible') {
+              Object.assign(body.style, {
+                flex: '1 1 auto',
+                padding: '1.5rem',
+                overflowY: 'auto'
+              });
+            }
+          }
+
+          const footer = modal.querySelector('.modal-footer');
+          if (footer) {
+            const footerStyles = window.getComputedStyle(footer);
+            if (footerStyles.display === 'block') {
+              Object.assign(footer.style, {
+                display: 'flex',
+                gap: '1rem',
+                padding: '1.5rem',
+                borderTop: '1px solid #e0e0e0'
+              });
+            }
+          }
+
+          const actionButtons = modal.querySelectorAll('#productConfigBackBtn, #productConfigNextBtn, #productConfigAddBtn');
+          actionButtons.forEach(button => {
+            const buttonStyles = window.getComputedStyle(button);
+            if (buttonStyles.padding === '0px' || buttonStyles.backgroundColor === 'rgba(0, 0, 0, 0)') {
+              Object.assign(button.style, {
+                flex: '1 1 auto',
+                padding: '0.9rem 1.25rem',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer'
+              });
+            }
+          });
+
+          const backBtn = document.getElementById('productConfigBackBtn');
+          if (backBtn && backBtn.dataset.pcAccentApplied !== 'true') {
+            Object.assign(backBtn.style, {
+              background: '#e2e8f0',
+              color: '#1a202c'
+            });
+            backBtn.dataset.pcAccentApplied = 'true';
+          }
+
+          const nextBtn = document.getElementById('productConfigNextBtn');
+          if (nextBtn && nextBtn.dataset.pcAccentApplied !== 'true') {
+            Object.assign(nextBtn.style, {
+              background: '#004c54',
+              color: '#ffffff'
+            });
+            nextBtn.dataset.pcAccentApplied = 'true';
+          }
+
+          const addBtn = document.getElementById('productConfigAddBtn');
+          if (addBtn && addBtn.dataset.pcAccentApplied !== 'true') {
+            Object.assign(addBtn.style, {
+              background: '#ff6b35',
+              color: '#ffffff'
+            });
+            addBtn.dataset.pcAccentApplied = 'true';
+          }
+
+          modal.dataset.pcStyleApplied = 'true';
         }
       };
 
       console.log('✅ Product Configurator initialized');
+
+      // ==============================================
+      // EVENT DELEGATION FOR CROSS-PLATFORM SUPPORT
+      // ==============================================
+      // UberEats and GrubHub strip inline onclick handlers for security
+      // We attach listeners via event delegation to work on all platforms
+
+      function attachProductConfigListeners() {
+        // Find all buttons with data-product-id attribute
+        const buttons = document.querySelectorAll('[data-product-id]');
+
+        buttons.forEach(button => {
+          // Skip if already has listener attached (prevent duplicates)
+          if (button.dataset.listenerAttached === 'true') return;
+
+          button.addEventListener('click', function(event) {
+            try {
+              const productId = this.getAttribute('data-product-id');
+              const productDataStr = this.getAttribute('data-product-data');
+
+              if (!productId || !productDataStr) {
+                console.warn('[Configurator] Missing data attributes on button:', this);
+                return;
+              }
+
+              const productData = JSON.parse(productDataStr);
+              console.log('[Configurator] Event delegation triggered for:', productId);
+              window.productConfigurator.open(productId, productData);
+            } catch (error) {
+              console.error('[Configurator] Error in event delegation:', error);
+            }
+          });
+
+          // Mark as having listener attached
+          button.dataset.listenerAttached = 'true';
+          console.log('[Configurator] Listener attached to:', button.dataset.productId);
+        });
+      }
+
+      // Attach listeners on DOMContentLoaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachProductConfigListeners);
+      } else {
+        // DOM already loaded, attach immediately
+        attachProductConfigListeners();
+      }
+
+      // MutationObserver to handle dynamically inserted buttons
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.addedNodes.length > 0) {
+            // Check if any added nodes contain product config buttons
+            mutation.addedNodes.forEach(function(node) {
+              if (node.nodeType === 1) { // Element node
+                // Check if the node itself has data-product-id
+                if (node.hasAttribute && node.hasAttribute('data-product-id')) {
+                  attachProductConfigListeners();
+                }
+                // Check if any descendants have data-product-id
+                if (node.querySelectorAll) {
+                  const buttons = node.querySelectorAll('[data-product-id]');
+                  if (buttons.length > 0) {
+                    attachProductConfigListeners();
+                  }
+                }
+              }
+            });
+          }
+        });
+      });
+
+      // Start observing the document for changes
+      observer.observe(document.body || document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+
+      console.log('✅ Event delegation and MutationObserver initialized');
     })();
 
     // ==============================================
-    // GLOBAL HELPER FUNCTIONS
+    // GLOBAL HELPER FUNCTIONS (BACKWARD COMPATIBILITY)
     // ==============================================
+    // Keep this for DoorDash which still allows inline handlers
     window.openPlantBasedWingModal = function(buttonElement) {
       try {
         const productId = buttonElement.getAttribute('data-product-id');

@@ -134,6 +134,16 @@
         { "fieldPath": "active", "mode": "ASCENDING" },
         { "fieldPath": "sortOrder", "mode": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "cateringAddOns",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "mode": "ASCENDING" },
+        { "fieldPath": "category", "mode": "ASCENDING" },
+        { "fieldPath": "featured", "mode": "DESCENDING" },
+        { "fieldPath": "basePrice", "mode": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

@@ -355,7 +355,8 @@ export function calculateTotalPrepTime(
 ): number {
   const addOnTime = addOns.reduce((total, addOn) => {
     const selectedMethod = preparationSelections?.[addOn.id];
-    return total + getAddOnPrepTime(addOn, selectedMethod);
+    const quantity = (addOn as any)?.quantity ?? 1;
+    return total + getAddOnPrepTime(addOn, selectedMethod) * quantity;
   }, 0);
   return basePackagePrepTime + addOnTime;
 }
@@ -371,7 +372,10 @@ export function getRequiredEquipment(
   const allEquipment = new Set(packageEquipment);
   addOns.forEach(addOn => {
     const selectedMethod = preparationSelections?.[addOn.id];
-    getAddOnRequiredEquipment(addOn, selectedMethod).forEach(eq => allEquipment.add(eq));
+    const quantity = (addOn as any)?.quantity ?? 1;
+    if (quantity > 0) {
+      getAddOnRequiredEquipment(addOn, selectedMethod).forEach(eq => allEquipment.add(eq));
+    }
   });
   return Array.from(allEquipment);
 }
@@ -395,11 +399,14 @@ export function getAllergens(
   addOns.forEach(addOn => {
     const selectedMethod = preparationSelections?.[addOn.id];
     const variantAllergens = getAddOnAllergens(addOn, selectedMethod);
-    variantAllergens.forEach(allergen => {
-      if (allergen !== Allergen.NONE) {
-        allAllergens.add(allergen);
-      }
-    });
+    const quantity = (addOn as any)?.quantity ?? 1;
+    if (quantity > 0) {
+      variantAllergens.forEach(allergen => {
+        if (allergen !== Allergen.NONE) {
+          allAllergens.add(allergen);
+        }
+      });
+    }
   });
 
   // Remove NONE if other allergens present

@@ -28,15 +28,30 @@
 }
 
 .nav-logo {
-  transition: transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 25px rgba(255, 107, 53, 0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  flex-shrink: 0;
 }
 
 .nav-logo:hover {
   transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 14px 30px rgba(255, 107, 53, 0.35);
 }
 
 .nav-logo img {
-  height: 55px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
   filter: drop-shadow(0 2px 8px rgba(255, 107, 53, 0.3));
 }
 
@@ -354,39 +369,260 @@
   font-size: 1.05rem;
 }
 
-.btn-add-on {
-  position: relative;
-  border: 1px solid rgba(26, 26, 26, 0.12);
-  background: #ffffff;
-  border-radius: 999px;
-  padding: 0.55rem 1.3rem;
+.add-on-quantity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.add-on-quantity input[type="number"] {
+  width: 3.2rem;
+  text-align: center;
+  border: 1px solid rgba(26, 26, 26, 0.18);
+  border-radius: 6px;
+  padding: 0.35rem 0.25rem;
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+.add-on-quantity .qty-btn {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(26, 26, 26, 0.18);
+  border-radius: 6px;
+  background: #ffffff;
   cursor: pointer;
-  transition: all 0.25s ease;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: all 0.2s ease;
 }
 
-.btn-add-on:hover {
-  border-color: rgba(255, 107, 53, 0.4);
+.add-on-quantity .qty-btn:hover {
+  border-color: rgba(255, 107, 53, 0.45);
   color: #ff6b35;
 }
 
-.btn-add-on.active {
-  background: rgba(255, 107, 53, 0.12);
-  border-color: rgba(255, 107, 53, 0.6);
+.add-on-card.selected .add-on-quantity .qty-btn {
+  border-color: rgba(255, 107, 53, 0.5);
   color: #ff6b35;
 }
 
-.btn-add-on .btn-text-remove {
-  display: none;
+.nutrition-info,
+.allergen-info {
+  display: flex;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  margin: 0.35rem 0;
+  color: #4b5563;
+  align-items: center;
 }
 
-.btn-add-on.active .btn-text-add {
-  display: none;
+.nutrition-label,
+.allergen-label {
+  font-weight: 600;
+  color: #1f2937;
 }
 
-.btn-add-on.active .btn-text-remove {
-  display: inline;
+/* ============================================================================
+   HOT BEVERAGES - PREMIUM ADD-ONS
+   ============================================================================ */
+
+.hot-beverages-section {
+  margin-top: 2rem;
+}
+
+.hot-beverages-section .subsection-header h5 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.75rem 0;
+}
+
+.hot-beverages-section .subsection-description {
+  color: #5a5a5a;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+/* Delivery Warning Banner */
+/* Hot Beverage Cards */
+.hot-beverage-card {
+  position: relative;
+}
+
+.hot-beverage-card .add-on-image {
+  position: relative;
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+}
+
+/* Premium & Size Badges */
+.premium-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #1a1a1a;
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  border: 1px solid rgba(255, 215, 0, 0.6);
+}
+
+.size-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(26, 26, 26, 0.85);
+  color: #ffffff;
+  padding: 0.35rem 0.65rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Serving Clarity */
+.serving-clarity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 10px;
+  margin: 0.75rem 0;
+  border: 1px solid #90caf9;
+}
+
+.cup-visual {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.serving-text {
+  font-size: 0.875rem;
+  color: #0d47a1;
+  font-weight: 500;
+}
+
+.serving-text strong {
+  font-weight: 700;
+  color: #01579b;
+}
+
+/* Temperature Guarantee */
+.temperature-guarantee {
+  padding: 0.65rem 1rem;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #c62828;
+  font-weight: 600;
+  border: 1px solid #ef9a9a;
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Brand Heritage Badge */
+.brand-heritage {
+  margin: 0.5rem 0;
+}
+
+.heritage-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #d84315;
+  font-style: italic;
+}
+
+/* What's Included List (Hot Beverage Specific) */
+.hot-beverage-card .includes-list {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+}
+
+.hot-beverage-card .includes-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 0.5rem;
+}
+
+.hot-beverage-card .includes-items {
+  font-size: 0.8rem;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Marketing Hook */
+.marketing-hook {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  border-left: 4px solid #9c27b0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #6a1b9a;
+  font-weight: 600;
+  font-style: italic;
+  margin: 0.75rem 0;
+}
+
+/* Responsive - Mobile */
+@media (max-width: 640px) {
+  .delivery-warning {
+    padding: 0.875rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .warning-icon {
+    font-size: 1.25rem;
+  }
+
+  .warning-text {
+    font-size: 0.85rem;
+  }
+
+  .serving-clarity {
+    padding: 0.65rem 0.875rem;
+    gap: 0.5rem;
+  }
+
+  .cup-visual {
+    font-size: 1.125rem;
+  }
+
+  .serving-text {
+    font-size: 0.8125rem;
+  }
+
+  .temperature-guarantee {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .heritage-badge {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
 }
 
 .preparation-toggle {
@@ -684,6 +920,16 @@
 @media (max-width: 768px) {
   .nav-toggle {
     display: flex;
+  }
+
+  .nav-logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .nav-logo img {
+    width: 44px;
+    height: 44px;
   }
 
   .nav-menu {
@@ -1858,6 +2104,20 @@
   border-bottom: 2px solid #f0f0f0;
 }
 
+.configurator-section:focus {
+  outline: 3px solid var(--primary-orange);
+  outline-offset: 4px;
+}
+
+.configurator-section.step-locked .step-summary {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.configurator-section.step-locked .step-edit-btn {
+  pointer-events: none;
+}
+
 .configurator-section:last-child {
   border-bottom: none;
   margin-bottom: 0;
@@ -1887,6 +2147,12 @@
   margin: 0 0 1rem 0;
   font-weight: 700;
   color: #1a1a1a;
+}
+
+.step-heading:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.35);
+  border-radius: 6px;
 }
 
 .step-description {
@@ -2413,6 +2679,12 @@
   min-height: 44px; /* Mobile tap target */
 }
 
+.step-edit-btn[disabled] {
+  color: #9ca3af;
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
 .step-edit-btn:hover {
   color: #004999;
 }
@@ -2509,7 +2781,8 @@
   .configurator-section,
   .sauce-card,
   .step-summary,
-  .selection-counter span {
+  .selection-counter span,
+  .progress-circle {
     transition: none;
   }
 
@@ -2641,6 +2914,14 @@
   background: #10b981;
 }
 
+.progress-indicator-mobile {
+  display: none;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+}
+
 /* Pending Step */
 .progress-step-pending .progress-circle {
   border-color: var(--text-muted);
@@ -2650,6 +2931,14 @@
 
 /* Mobile Responsive */
 @media (max-width: 640px) {
+  .progress-indicator {
+    display: none;
+  }
+
+  .progress-indicator-mobile {
+    display: block;
+  }
+
   .progress-indicator {
     padding: 1rem;
     margin: 1rem auto;
@@ -2672,6 +2961,10 @@
   .progress-connector {
     margin: 0 0.25rem;
     margin-bottom: 1.5rem;
+  }
+
+  .progress-indicator-mobile {
+    text-align: left;
   }
 }
 
@@ -2803,6 +3096,63 @@
   .encouragement-message {
     padding: 0.875rem;
     font-size: 0.9375rem;
+  }
+}
+
+/* Step actions */
+.step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.btn-step-complete {
+  background: var(--primary-orange);
+  color: #ffffff;
+  border: none;
+  padding: 0.9rem 1.75rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  min-height: 48px;
+}
+
+.btn-step-complete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(255, 107, 53, 0.25);
+}
+
+.btn-skip-step {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: 48px;
+  padding: 0.5rem 0.75rem;
+}
+
+.btn-skip-step:hover {
+  color: var(--primary-orange);
+}
+
+@media (max-width: 640px) {
+  .step-actions {
+    justify-content: flex-start;
+  }
+
+  .btn-step-complete {
+    width: 100%;
+  }
+
+  .btn-skip-step {
+    width: 100%;
+    text-align: center;
   }
 }
 

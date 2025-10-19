@@ -1,25 +1,54 @@
 /**
  * Catering Landing Page
- * Marketing showcase for Philly Wings Express catering
- * Orders processed through ezCater
+ * Dual-path experience: Shared Platters vs Individually Boxed Meals
+ * Future-ready for direct ordering flow
  */
 
 import '../styles/catering.css';
+import '../styles/catering-entry-choice.css';
+import '../styles/simple-packages.css';
+import '../styles/guided-planner.css';
+import '../styles/boxed-meals-v2.css';
+import '../styles/boxed-meals-animations.css';
 import { renderCateringHero } from '../components/catering/hero.js';
 import { renderValueProps } from '../components/catering/value-props.js';
-import { renderCateringPackages } from '../components/catering/packages.js';
-import { renderSauceSelector } from '../components/catering/sauce-selector.js';
+import { renderEntryChoice, initEntryChoice } from '../components/catering/catering-entry-choice.js';
+import { renderSimplePackages, initPackageViewSwitching } from '../components/catering/simple-packages.js';
+import { renderGuidedPlanner } from '../components/catering/guided-planner.js';
+import { renderBoxedMealsFlow, initBoxedMealsFlow } from '../components/catering/boxed-meals-flow-v2.js';
 
 export async function renderCateringPage() {
-  const packagesHtml = await renderCateringPackages();
+  // Pre-render both flows
+  const simplePackagesHtml = await renderSimplePackages();
+  const wizardHtml = await renderGuidedPlanner();
+  const boxedMealsHtml = await renderBoxedMealsFlow();
+
+  // Initialize interactions after render
+  setTimeout(() => {
+    initEntryChoice();
+    initPackageViewSwitching(wizardHtml);
+    initBoxedMealsFlow();
+  }, 100);
 
   return `
     <div class="catering-page">
       ${renderCateringHero()}
       ${renderValueProps()}
-      ${packagesHtml}
-      ${renderSauceSelector()}
-      ${renderCateringCTA()}
+
+      ${renderEntryChoice()}
+
+      <!-- Shared Platters Flow (Default) -->
+      <div id="shared-platters-flow" style="display: block;">
+        <div id="catering-packages">
+          ${simplePackagesHtml}
+        </div>
+      </div>
+
+      <!-- Boxed Meals Flow (Hidden by default) -->
+      <div id="boxed-meals-flow" style="display: none;">
+        ${boxedMealsHtml}
+      </div>
+
       ${renderFAQ()}
     </div>
   `;
@@ -42,8 +71,8 @@ function renderCateringCTA() {
              rel="noopener noreferrer">
             Order Catering on ezCater →
           </a>
-          <a href="tel:+12155551234" class="btn-secondary btn-large">
-            Call Us: (215) 555-1234
+          <a href="tel:+12673763113" class="btn-secondary btn-large">
+            Call Us: (267) 376-3113
           </a>
         </div>
 
@@ -85,11 +114,11 @@ function renderFAQ() {
     },
     {
       question: 'Can I order for dietary restrictions?',
-      answer: 'Our boneless wings can accommodate most dietary needs. Contact us directly at (215) 555-1234 to discuss specific allergen concerns. All our nutrition information is available on our website.'
+      answer: 'Our boneless wings can accommodate most dietary needs. Contact us directly at (267) 376-3113 to discuss specific allergen concerns. All our nutrition information is available on our website.'
     },
     {
       question: 'What if I need to feed more than 100 people?',
-      answer: 'We love large events! Contact us directly at (215) 555-1234 and we\'ll work with you to create a custom package that fits your needs.'
+      answer: 'We love large events! Contact us directly at (267) 376-3113 and we\'ll work with you to create a custom package that fits your needs.'
     }
   ];
 
@@ -111,7 +140,7 @@ function renderFAQ() {
 
       <div class="faq-contact">
         <p>Still have questions?</p>
-        <a href="tel:+12155551234" class="btn-secondary">Call Us: (215) 555-1234</a>
+        <a href="tel:+12673763113" class="btn-secondary">Call Us: (267) 376-3113</a>
       </div>
     </section>
   `;
