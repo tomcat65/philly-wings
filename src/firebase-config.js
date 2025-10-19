@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, connectFirestoreEmulator, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getAnalytics } from 'firebase/analytics';
@@ -22,12 +22,14 @@ const app = initializeApp(firebaseConfig);
 // Check if we should use emulators
 const useEmulators = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-// Initialize Firestore with modern persistence (emulator-aware)
-export const db = getFirestore(app, useEmulators ? undefined : {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
-});
+// Initialize Firestore with modern persistence (production only, emulator uses default settings)
+export const db = useEmulators
+  ? getFirestore(app)
+  : initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    });
 
 // Initialize other services
 export const storage = getStorage(app);
