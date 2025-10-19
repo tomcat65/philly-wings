@@ -1,7 +1,7 @@
 /**
  * Catering Add-Ons Service
- * Firestore data access for add-ons (vegetarian & desserts)
- * Gate 3 implementation - ready for pairing with codex-philly
+ * Firestore data access for add-ons with lightweight reference schema
+ * Updated for packSize field and new category structure
  */
 
 import { db } from '../firebase-config.js';
@@ -18,8 +18,7 @@ export async function getCateringAddOns() {
       addOnsRef,
       where('active', '==', true),
       orderBy('category'),
-      orderBy('featured', 'desc'),
-      orderBy('basePrice')
+      orderBy('displayOrder')
     );
 
     const snapshot = await getDocs(q);
@@ -37,7 +36,7 @@ export async function getCateringAddOns() {
 
 /**
  * Get add-ons filtered by category
- * @param {string} category - 'vegetarian' or 'dessert'
+ * @param {string} category - 'desserts', 'beverages', 'salads', 'sides', 'quick-adds', 'hot-beverages'
  * @returns {Promise<Array>} Filtered add-ons
  */
 export async function getAddOnsByCategory(category) {
@@ -47,8 +46,7 @@ export async function getAddOnsByCategory(category) {
       addOnsRef,
       where('active', '==', true),
       where('category', '==', category),
-      orderBy('featured', 'desc'),
-      orderBy('basePrice')
+      orderBy('displayOrder')
     );
 
     const snapshot = await getDocs(q);
@@ -98,14 +96,36 @@ export async function getAddOnById(addOnId) {
 /**
  * Get add-ons split into categories for rendering
  * @param {number} tier - Package tier
- * @returns {Promise<Object>} { vegetarian: [], desserts: [], hotBeverages: [] }
+ * @returns {Promise<Object>} { desserts: [], beverages: [], salads: [], sides: [], quickAdds: [], hotBeverages: [] }
  */
 export async function getAddOnsSplitByCategory(tier) {
   const allAddOns = await getAddOnsForTier(tier);
 
   return {
-    vegetarian: allAddOns.filter(addOn => addOn.category === 'vegetarian'),
-    desserts: allAddOns.filter(addOn => addOn.category === 'dessert'),
+    desserts: allAddOns.filter(addOn => addOn.category === 'desserts'),
+    beverages: allAddOns.filter(addOn => addOn.category === 'beverages'),
+    salads: allAddOns.filter(addOn => addOn.category === 'salads'),
+    sides: allAddOns.filter(addOn => addOn.category === 'sides'),
+    quickAdds: allAddOns.filter(addOn => addOn.category === 'quick-adds'),
     hotBeverages: allAddOns.filter(addOn => addOn.category === 'hot-beverages')
   };
+}
+
+/**
+ * Get add-ons grouped by packSize within a category
+ * @param {string} category - Category to filter by
+ * @param {number} tier - Package tier
+ * @returns {Promise<Object>} { individual: [], '5pack': [], family: [] }
+ */
+export async function getAddOnsByPackSize(category, tier) {
+  const categoryAddOns = await getAddOnsByCategoryAndTier(category, tier);
+
+  const grouped = {};
+  categoryAddOns.forEach(addOn => {
+    const packSize = addOn.packSize || 'other';
+    if (!grouped[packSize]) grouped[packSize] = [];
+    grouped[packSize].push(addOn);
+  });
+
+  return grouped;
 }

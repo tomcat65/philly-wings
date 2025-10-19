@@ -23,13 +23,14 @@ import {
  */
 
 /**
- * Render Step 3: Vegetarian Add-Ons Section
+ * DEPRECATED: Vegetarian Add-Ons Section (old schema)
+ * Kept for backward compatibility but no longer used in new lightweight schema
  * @param {Array} vegetarianAddOns - Filtered vegetarian add-ons from Firestore
  * @param {number} packageTier - Package tier for analytics
  * @param {string} packageId - Package ID for state tracking
  * @returns {string} HTML for vegetarian section
  */
-export function renderVegetarianAddOns(vegetarianAddOns, packageTier, packageId) {
+function renderVegetarianAddOns_DEPRECATED(vegetarianAddOns, packageTier, packageId) {
   if (!vegetarianAddOns || vegetarianAddOns.length === 0) {
     return '';
   }
@@ -254,27 +255,7 @@ function renderAllergenInfo(addOn) {
  * @param {string} packageId - Package ID for state tracking
  * @returns {string} HTML for desserts section
  */
-export function renderDessertsAddOns(dessertAddOns, packageTier, packageId) {
-  if (!dessertAddOns || dessertAddOns.length === 0) {
-    return '';
-  }
-
-  return `
-    <div class="add-ons-subsection desserts-section" style="margin-top: 2rem;">
-      <div class="subsection-header">
-        <h5>🍰 Desserts</h5>
-      </div>
-
-      <p class="subsection-description">
-        End on a sweet note! Perfect for celebrations and team morale.
-      </p>
-
-      <div class="add-ons-grid">
-        ${dessertAddOns.map(addOn => renderDessertCard(addOn, packageTier, packageId)).join('')}
-      </div>
-    </div>
-  `;
-}
+// REMOVED: Old renderDessertsAddOns - replaced by new version with packSize grouping (see line ~940)
 
 /**
  * Render Hot Beverages Section
@@ -307,9 +288,10 @@ export function renderHotBeveragesAddOns(beverageAddOns, packageTier, packageId,
 }
 
 /**
- * Render individual dessert add-on card
+ * DEPRECATED: Individual dessert add-on card (old schema)
+ * Replaced by renderLightweightAddOnCard
  */
-function renderDessertCard(addOn, packageTier, packageId) {
+function renderDessertCard_DEPRECATED(addOn, packageTier, packageId) {
   const badgeText = addOn.badge || 'Dessert';
 
   return `
@@ -895,4 +877,198 @@ window.handleEzCaterRedirect = function(packageId) {
 function getSelectedPrepMethod(addOnId, packageId) {
   const radio = document.querySelector(`input[name="prep-${addOnId}-${packageId}"]:checked`);
   return radio ? radio.value : undefined;
+}
+
+// ========================================
+// NEW: Lightweight Reference Schema Renderers
+// ========================================
+
+/**
+ * Generic lightweight add-on card renderer
+ * Works for desserts, beverages, salads, sides, quick-adds with new schema
+ */
+function renderLightweightAddOnCard(addOn, packageTier, packageId, category) {
+  const packSizeLabel = addOn.packSize ? ` (${addOn.packSize})` : '';
+
+  // Build serving info with pack size and quantity details
+  const servingParts = [];
+  if (addOn.packSize) servingParts.push(`<strong>${addOn.packSize}</strong>`);
+  if (addOn.servings) servingParts.push(`Serves ${addOn.servings}`);
+  if (addOn.servingSize) servingParts.push(addOn.servingSize);
+  const servingInfo = servingParts.join(' • ');
+
+  // Quantity multiplier badge for bundles
+  const quantityBadge = addOn.quantityMultiplier && addOn.quantityMultiplier > 1
+    ? `<span class="quantity-badge">${addOn.quantityMultiplier}× ${addOn.quantityLabel || 'items'}</span>`
+    : '';
+
+  const dietaryBadges = (addOn.dietaryTags || []).map(tag =>
+    `<span class="dietary-badge">${tag}</span>`
+  ).join('');
+
+  return `
+    <div class="add-on-card" data-addon-id="${addOn.id}" data-category="${category}">
+      <div class="add-on-image">
+        <img src="${addOn.imageUrl}" alt="${addOn.name}" loading="lazy">
+        ${dietaryBadges}
+        ${quantityBadge}
+      </div>
+
+      <div class="add-on-content">
+        <h5 class="add-on-name">${addOn.name}</h5>
+        <p class="add-on-description">${addOn.description || addOn.marketingCopy || ''}</p>
+
+        ${servingInfo ? `<div class="add-on-details">
+          <span class="serving-info">${servingInfo}</span>
+        </div>` : ''}
+
+        ${renderAllergenInfo(addOn)}
+
+        ${renderQuantityControls(addOn, packageTier, packageId, category)}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render Desserts Section (updated for new lightweight schema)
+ */
+export function renderDessertsAddOns(dessertsAddOns, packageTier, packageId) {
+  if (!dessertsAddOns || dessertsAddOns.length === 0) {
+    return '';
+  }
+
+  // Group by packSize for better organization
+  const individual = dessertsAddOns.filter(a => a.packSize === 'individual');
+  const fivePack = dessertsAddOns.filter(a => a.packSize === '5pack');
+
+  return `
+    <div class="add-ons-subsection desserts-section">
+      <div class="subsection-header">
+        <h5>🍰 Desserts</h5>
+      </div>
+
+      <p class="subsection-description">
+        Sweet endings from Daisy's Bakery - individually wrapped or convenient 5-packs!
+      </p>
+
+      ${individual.length > 0 ? `
+        <div class="pack-size-group">
+          <h6 class="pack-size-label">Individual Portions</h6>
+          <div class="add-ons-grid">
+            ${individual.map(addOn => renderLightweightAddOnCard(addOn, packageTier, packageId, 'desserts')).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${fivePack.length > 0 ? `
+        <div class="pack-size-group">
+          <h6 class="pack-size-label">5-Pack Bundles</h6>
+          <div class="add-ons-grid">
+            ${fivePack.map(addOn => renderLightweightAddOnCard(addOn, packageTier, packageId, 'desserts')).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Render Beverages Section
+ */
+export function renderBeveragesAddOns(beveragesAddOns, packageTier, packageId) {
+  if (!beveragesAddOns || beveragesAddOns.length === 0) {
+    return '';
+  }
+
+  return `
+    <div class="add-ons-subsection beverages-section">
+      <div class="subsection-header">
+        <h5>🥤 Cold Beverages</h5>
+      </div>
+
+      <p class="subsection-description">
+        Premium boxed iced tea - sweet or unsweet, served with ice!
+      </p>
+
+      <div class="add-ons-grid">
+        ${beveragesAddOns.map(addOn => renderLightweightAddOnCard(addOn, packageTier, packageId, 'beverages')).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render Salads Section
+ */
+export function renderSaladsAddOns(saladsAddOns, packageTier, packageId) {
+  if (!saladsAddOns || saladsAddOns.length === 0) {
+    return '';
+  }
+
+  return `
+    <div class="add-ons-subsection salads-section">
+      <div class="subsection-header">
+        <h5>🥗 Fresh Salads</h5>
+      </div>
+
+      <p class="subsection-description">
+        Fresh, crisp salads to balance your wings - perfect for sharing!
+      </p>
+
+      <div class="add-ons-grid">
+        ${saladsAddOns.map(addOn => renderLightweightAddOnCard(addOn, packageTier, packageId, 'salads')).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render Sides Section
+ */
+export function renderSidesAddOns(sidesAddOns, packageTier, packageId) {
+  if (!sidesAddOns || sidesAddOns.length === 0) {
+    return '';
+  }
+
+  return `
+    <div class="add-ons-subsection sides-section">
+      <div class="subsection-header">
+        <h5>🥔 Premium Sides</h5>
+      </div>
+
+      <p class="subsection-description">
+        Sally Sherman's signature sides - classic comfort food done right!
+      </p>
+
+      <div class="add-ons-grid">
+        ${sidesAddOns.map(addOn => renderLightweightAddOnCard(addOn, packageTier, packageId, 'sides')).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render Quick-Adds Section
+ */
+export function renderQuickAddsAddOns(quickAddsAddOns, packageTier, packageId) {
+  if (!quickAddsAddOns || quickAddsAddOns.length === 0) {
+    return '';
+  }
+
+  return `
+    <div class="add-ons-subsection quick-adds-section">
+      <div class="subsection-header">
+        <h5>⚡ Quick Additions</h5>
+      </div>
+
+      <p class="subsection-description">
+        Convenient extras for a complete meal - nobody left behind!
+      </p>
+
+      <div class="add-ons-grid">
+        ${quickAddsAddOns.map(addOn => renderLightweightAddOnCard(addOn, packageTier, packageId, 'quick-adds')).join('')}
+      </div>
+    </div>
+  `;
 }

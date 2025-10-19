@@ -1,21 +1,48 @@
-import { renderVegetarianAddOns, renderDessertsAddOns, renderHotBeveragesAddOns, renderStickySummary } from './add-ons-selector.js';
+import {
+  renderDessertsAddOns,
+  renderBeveragesAddOns,
+  renderSaladsAddOns,
+  renderSidesAddOns,
+  renderQuickAddsAddOns,
+  renderHotBeveragesAddOns,
+  renderStickySummary
+} from './add-ons-selector.js';
 import { initAccordion } from './accordion-state.js';
 
 /**
  * Interactive Package Configurator
  * Allows customers to customize wing types, sauces, desserts, and add-ons
+ * Updated for new category structure: desserts, beverages, salads, sides, quickAdds, hotBeverages
  */
 
-export function renderPackageConfigurator(packageData, tierAddOns = { vegetarian: [], desserts: [], hotBeverages: [] }) {
+export function renderPackageConfigurator(packageData, tierAddOns = {
+  desserts: [],
+  beverages: [],
+  salads: [],
+  sides: [],
+  quickAdds: [],
+  hotBeverages: []
+}) {
   if (typeof window !== 'undefined') {
     window.addOnsDataCache = window.addOnsDataCache || {};
-    [...(tierAddOns.vegetarian || []), ...(tierAddOns.desserts || []), ...(tierAddOns.hotBeverages || [])].forEach(addOn => {
+    const allAddOns = [
+      ...(tierAddOns.desserts || []),
+      ...(tierAddOns.beverages || []),
+      ...(tierAddOns.salads || []),
+      ...(tierAddOns.sides || []),
+      ...(tierAddOns.quickAdds || []),
+      ...(tierAddOns.hotBeverages || [])
+    ];
+    allAddOns.forEach(addOn => {
       window.addOnsDataCache[addOn.id] = addOn;
     });
   }
 
-  const vegetarianHtml = renderVegetarianAddOns(tierAddOns.vegetarian || [], packageData.tier, packageData.id);
   const dessertsHtml = renderDessertsAddOns(tierAddOns.desserts || [], packageData.tier, packageData.id);
+  const beveragesHtml = renderBeveragesAddOns(tierAddOns.beverages || [], packageData.tier, packageData.id);
+  const saladsHtml = renderSaladsAddOns(tierAddOns.salads || [], packageData.tier, packageData.id);
+  const sidesHtml = renderSidesAddOns(tierAddOns.sides || [], packageData.tier, packageData.id);
+  const quickAddsHtml = renderQuickAddsAddOns(tierAddOns.quickAdds || [], packageData.tier, packageData.id);
   const hotBeveragesHtml = renderHotBeveragesAddOns(tierAddOns.hotBeverages || [], packageData.tier, packageData.id);
 
   return `
@@ -31,7 +58,7 @@ export function renderPackageConfigurator(packageData, tierAddOns = { vegetarian
         <div class="configurator-main">
           ${renderWingTypeSelector(packageData)}
           ${renderSauceSelector(packageData)}
-          ${renderAddOnsStep(vegetarianHtml, dessertsHtml, hotBeveragesHtml, packageData.id)}
+          ${renderAddOnsStep(dessertsHtml, beveragesHtml, saladsHtml, sidesHtml, quickAddsHtml, hotBeveragesHtml, packageData.id)}
           ${renderDipsPreview(packageData)}
           ${renderPackageSummary(packageData)}
         </div>
@@ -421,9 +448,10 @@ function renderSauceSelector(packageData) {
 /**
  * Render Step 3: Add-Ons (Vegetarian + Desserts + Hot Beverages combined)
  */
-function renderAddOnsStep(vegetarianHtml, dessertsHtml, hotBeveragesHtml, packageId) {
+function renderAddOnsStep(dessertsHtml, beveragesHtml, saladsHtml, sidesHtml, quickAddsHtml, hotBeveragesHtml, packageId) {
   // If all sections are empty, don't render Step 3 at all
-  if (!vegetarianHtml && !dessertsHtml && !hotBeveragesHtml) {
+  const hasAnyAddOns = dessertsHtml || beveragesHtml || saladsHtml || sidesHtml || quickAddsHtml || hotBeveragesHtml;
+  if (!hasAnyAddOns) {
     return '';
   }
 
@@ -467,18 +495,21 @@ function renderAddOnsStep(vegetarianHtml, dessertsHtml, hotBeveragesHtml, packag
       <div class="step-content">
         <div class="section-label">
           <h4 class="step-heading" id="step-${packageId}-heading-3" tabindex="-1">
-            🌱 Step 3: Add Optional Extras
+            🎉 Step 3: Add Optional Extras
           </h4>
           <span class="optional-badge">Optional</span>
         </div>
 
         <p class="section-description">
-          Enhance your package with hot beverages, vegetarian options, and desserts - perfect for meetings, dietary preferences, and celebrations!
+          Enhance your package with beverages, desserts, salads, and sides - perfect for complete meal experiences!
         </p>
 
         ${hotBeveragesHtml}
-        ${vegetarianHtml}
+        ${beveragesHtml}
         ${dessertsHtml}
+        ${saladsHtml}
+        ${sidesHtml}
+        ${quickAddsHtml}
 
         <div class="step-actions">
           <button
