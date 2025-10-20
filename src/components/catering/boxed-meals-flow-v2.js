@@ -678,9 +678,91 @@ function initConfigurationStep() {
     });
   });
 
+  // Input event - visual feedback only, NO updateBoxCount!
   customInput?.addEventListener('input', (e) => {
-    const count = parseInt(e.target.value) || 10;
-    updateBoxCount(count);
+    const value = e.target.value;
+    const num = parseInt(value);
+
+    // Activate custom segment
+    segmentBtns.forEach(btn => btn.classList.remove('active'));
+    customSegment?.classList.add('active');
+
+    // Visual feedback (optional - shows validation state)
+    if (num && (num < 10 || num > 500)) {
+      e.target.style.borderBottomColor = '#ff4444'; // Red for invalid
+    } else if (num >= 10) {
+      e.target.style.borderBottomColor = '#4CAF50'; // Green for valid
+    } else {
+      e.target.style.borderBottomColor = ''; // Reset if empty
+    }
+  });
+
+  // Enter key - validate and update
+  customInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      let value = parseInt(e.target.value);
+      if (!value || isNaN(value)) value = 10;
+      value = Math.max(10, Math.min(500, value));
+      e.target.value = value;
+      updateBoxCount(value);
+      e.target.blur(); // Close keyboard on mobile
+    }
+  });
+
+  // Blur validation - enforce range and update count
+  customInput?.addEventListener('blur', (e) => {
+    let value = parseInt(e.target.value);
+
+    // Handle empty or invalid
+    if (!value || isNaN(value)) {
+      value = 10;
+    }
+
+    // Clamp to valid range (10-500)
+    const clampedValue = Math.max(10, Math.min(500, value));
+
+    // Show alert only if user tried to set < 10
+    if (value > 0 && value < 10) {
+      alert('Minimum 10 boxes required');
+    }
+
+    // Update input and state
+    e.target.value = clampedValue;
+    e.target.style.borderBottomColor = ''; // Reset border color
+    updateBoxCount(clampedValue);
+  });
+
+  // Custom segment click handler - activate and focus input
+  const customSegment = document.querySelector('.segment-custom');
+  customSegment?.addEventListener('click', (e) => {
+    // Always allow clicks on the input to pass through
+    if (e.target === customInput) {
+      e.stopPropagation();
+      return;
+    }
+
+    // Focus the input field with a small delay to ensure it's clickable
+    setTimeout(() => {
+      customInput?.focus();
+      customInput?.click();
+    }, 0);
+
+    // If input is empty, set a default value
+    if (!customInput?.value) {
+      customInput.value = '10';
+      updateBoxCount(10);
+    }
+
+    // Activate custom segment visually
+    segmentBtns.forEach(btn => btn.classList.remove('active'));
+    customSegment.classList.add('active');
+  });
+
+  // Also handle direct focus on input
+  customInput?.addEventListener('focus', () => {
+    segmentBtns.forEach(btn => btn.classList.remove('active'));
+    customSegment?.classList.add('active');
   });
 
   // Bulk actions
@@ -920,6 +1002,12 @@ function updateBoxCount(count) {
   const clampedCount = Math.max(10, Math.min(500, sanitizedCount));
 
   boxedMealState.boxCount = clampedCount;
+
+  // Update configuration zone title
+  const zoneTitle = document.querySelector('.zone-title');
+  if (zoneTitle) {
+    zoneTitle.textContent = `Configure All ${clampedCount} Boxes`;
+  }
 
   // Update UI - Segmented Control
   const isPreset = [10, 20, 50, 100].includes(clampedCount);
@@ -2421,38 +2509,75 @@ function getBoxedMealsTitle(state, pricing) {
 function initReviewContactInteractions() {
   initContactFormInteractions();
 
-  // Back button
+  // Back button - return to extras selection
   document.getElementById('back-to-extras-btn')?.addEventListener('click', () => {
-    boxedMealState.currentStep = 'quick-adds';
-    renderQuickAddsStep();
+    handleEditTransition('quick-adds', 'Returning to extras selection...');
   });
 
-  // Edit config button
+  // Edit config button - return to box configuration
   document.getElementById('edit-config-btn')?.addEventListener('click', () => {
-    boxedMealState.currentStep = 'configuration';
-    renderConfigurationStep();
+    handleEditTransition('configuration', 'Returning to box configuration...');
   });
 
-  // Edit/Add extras buttons
+  // Edit extras button - return to extras with current selections
   const editExtrasBtn = document.getElementById('edit-extras-btn');
-  const addExtrasBtn = document.getElementById('add-extras-btn');
-
   if (editExtrasBtn) {
     editExtrasBtn.addEventListener('click', () => {
-      boxedMealState.currentStep = 'quick-adds';
-      renderQuickAddsStep();
+      handleEditTransition('quick-adds', 'Returning to extras selection...');
     });
   }
 
+  // Add extras button - go to extras selection
+  const addExtrasBtn = document.getElementById('add-extras-btn');
   if (addExtrasBtn) {
     addExtrasBtn.addEventListener('click', () => {
-      boxedMealState.currentStep = 'quick-adds';
-      renderQuickAddsStep();
+      handleEditTransition('quick-adds', 'Adding extras to your order...');
     });
   }
 
   // Submit button
   document.getElementById('submit-order-btn')?.addEventListener('click', handleOrderSubmit);
+}
+
+/**
+ * Handle smooth transition when editing from review screen
+ */
+function handleEditTransition(targetStep, message) {
+  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
+  if (!container) return;
+
+  // Show transition message
+  const messageEl = document.createElement('div');
+  messageEl.className = 'edit-transition-message';
+  messageEl.innerHTML = `
+    <div class="transition-content">
+      <div class="spinner"></div>
+      <p>${message}</p>
+    </div>
+  `;
+  container.appendChild(messageEl);
+
+  // Fade out current view
+  container.style.opacity = '0.5';
+
+  // Navigate after brief delay
+  setTimeout(() => {
+    boxedMealState.currentStep = targetStep;
+
+    // Render appropriate step
+    if (targetStep === 'configuration') {
+      renderConfigurationStep();
+    } else if (targetStep === 'quick-adds') {
+      renderQuickAddsStep();
+    }
+
+    // Remove message and restore opacity
+    messageEl.remove();
+    container.style.opacity = '1';
+
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 400);
 }
 
 /**

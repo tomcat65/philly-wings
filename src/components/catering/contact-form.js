@@ -103,16 +103,30 @@ export function renderContactForm(initialData = {}) {
             value="${initialData.deliveryDate || ''}">
         </div>
         <div class="form-group">
-          <label for="delivery-time" class="form-label">
+          <label for="delivery-time-hour" class="form-label">
             Delivery Time <span class="required">*</span>
           </label>
           <div class="time-input-group">
             <input
-              type="time"
-              id="delivery-time"
-              class="form-input time-input"
+              type="number"
+              id="delivery-time-hour"
+              class="form-input time-hour-input"
+              min="1"
+              max="12"
+              placeholder="12"
               required
-              value="${initialData.deliveryTime || ''}">
+              value="${initialData.deliveryTimeHour || '12'}">
+            <span class="time-separator">:</span>
+            <input
+              type="number"
+              id="delivery-time-minute"
+              class="form-input time-minute-input"
+              min="0"
+              max="59"
+              step="1"
+              placeholder="00"
+              required
+              value="${initialData.deliveryTimeMinute || '00'}">
             <select id="delivery-period" class="form-select period-selector">
               <option value="AM" ${initialData.deliveryPeriod === 'AM' ? 'selected' : ''}>AM</option>
               <option value="PM" ${!initialData.deliveryPeriod || initialData.deliveryPeriod === 'PM' ? 'selected' : ''}>PM</option>
@@ -259,6 +273,45 @@ export function initContactFormInteractions() {
       }
     });
   }
+
+  // Time input validation and auto-padding
+  const hourInput = document.getElementById('delivery-time-hour');
+  const minuteInput = document.getElementById('delivery-time-minute');
+
+  if (hourInput) {
+    // Validate hour input (1-12)
+    hourInput.addEventListener('input', (e) => {
+      let value = parseInt(e.target.value);
+      if (value > 12) e.target.value = '12';
+      if (value < 1 && e.target.value !== '') e.target.value = '1';
+    });
+
+    // Ensure hour is valid on blur
+    hourInput.addEventListener('blur', (e) => {
+      if (e.target.value === '') {
+        e.target.value = '12';
+      }
+    });
+  }
+
+  if (minuteInput) {
+    // Validate minute input (0-59)
+    minuteInput.addEventListener('input', (e) => {
+      let value = parseInt(e.target.value);
+      if (value > 59) e.target.value = '59';
+      if (value < 0) e.target.value = '0';
+    });
+
+    // Auto-pad minutes on blur (7 -> 07)
+    minuteInput.addEventListener('blur', (e) => {
+      if (e.target.value === '') {
+        e.target.value = '00';
+      } else {
+        let value = parseInt(e.target.value);
+        e.target.value = value.toString().padStart(2, '0');
+      }
+    });
+  }
 }
 
 /**
@@ -275,7 +328,8 @@ export function validateContactForm() {
     { id: 'contact-email', label: 'Email' },
     { id: 'contact-phone', label: 'Phone' },
     { id: 'delivery-date', label: 'Delivery Date' },
-    { id: 'delivery-time', label: 'Delivery Time' }
+    { id: 'delivery-time-hour', label: 'Delivery Hour' },
+    { id: 'delivery-time-minute', label: 'Delivery Minute' }
   ];
 
   requiredFields.forEach(({ id, label }) => {
@@ -413,10 +467,17 @@ export function collectContactData() {
       zip: document.getElementById('billing-zip')?.value.trim() || ''
     },
     deliveryDate: document.getElementById('delivery-date')?.value || '',
-    deliveryTime: document.getElementById('delivery-time')?.value || '',
+    deliveryTimeHour: document.getElementById('delivery-time-hour')?.value || '12',
+    deliveryTimeMinute: document.getElementById('delivery-time-minute')?.value || '00',
     deliveryPeriod: document.getElementById('delivery-period')?.value || 'PM',
     notes: document.getElementById('contact-notes')?.value.trim() || ''
   };
+
+  // Create formatted time string for display/storage
+  const hour = contactData.deliveryTimeHour;
+  const minute = contactData.deliveryTimeMinute.toString().padStart(2, '0');
+  const period = contactData.deliveryPeriod;
+  contactData.deliveryTimeFormatted = `${hour}:${minute} ${period}`;
 
   return contactData;
 }
