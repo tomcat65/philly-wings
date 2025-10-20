@@ -90,6 +90,11 @@ export function initEntryChoice() {
     boxedChoice?.classList.remove('active');
     boxedChoice?.setAttribute('aria-pressed', 'false');
 
+    // Hide the choice section entirely
+    if (entryChoiceSection) {
+      entryChoiceSection.style.display = 'none';
+    }
+
     // Show/hide flows
     if (sharedFlow) sharedFlow.style.display = 'block';
     if (boxedFlow) boxedFlow.style.display = 'none';
@@ -99,6 +104,11 @@ export function initEntryChoice() {
 
     // Announce to screen readers
     announceFlowChange('Shared Platters');
+
+    // Auto-scroll to content
+    setTimeout(() => {
+      sharedFlow?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }
 
   /**
@@ -111,6 +121,11 @@ export function initEntryChoice() {
     sharedChoice?.classList.remove('active');
     sharedChoice?.setAttribute('aria-pressed', 'false');
 
+    // Hide the choice section entirely
+    if (entryChoiceSection) {
+      entryChoiceSection.style.display = 'none';
+    }
+
     // Show/hide flows
     if (sharedFlow) sharedFlow.style.display = 'none';
     if (boxedFlow) boxedFlow.style.display = 'block';
@@ -121,7 +136,7 @@ export function initEntryChoice() {
     // Announce to screen readers
     announceFlowChange('Individually Boxed Meals');
 
-    // Scroll to boxed flow content
+    // Auto-scroll to content
     setTimeout(() => {
       boxedFlow?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);

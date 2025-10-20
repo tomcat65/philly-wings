@@ -20,7 +20,7 @@ export async function renderSimplePackages() {
       tierAddOnsMap[tier] = await getAddOnsSplitByCategory(tier);
     } catch (error) {
       console.warn(`Unable to load add-ons for tier ${tier}:`, error);
-      tierAddOnsMap[tier] = { vegetarian: [], desserts: [], hotBeverages: [] };
+      tierAddOnsMap[tier] = { desserts: [], hotBeverages: [], beverages: [], salads: [], sides: [], quickAdds: [] };
     }
   }
 
@@ -53,7 +53,7 @@ export async function renderSimplePackages() {
       <!-- Quick Browse View (Default) -->
       <div id="quick-browse-view" class="quick-browse-view">
         <div class="simple-packages-grid">
-          ${packages.map(pkg => renderSimplePackageCard(pkg, tierAddOnsMap[pkg.tier] || { vegetarian: [], desserts: [], hotBeverages: [] })).join('')}
+          ${packages.map(pkg => renderSimplePackageCard(pkg, tierAddOnsMap[pkg.tier] || { desserts: [], hotBeverages: [], beverages: [], salads: [], sides: [], quickAdds: [] })).join('')}
         </div>
 
         <div class="browse-actions">
@@ -85,7 +85,7 @@ export async function renderSimplePackages() {
   `;
 }
 
-function renderSimplePackageCard(pkg, tierAddOns = { vegetarian: [], desserts: [], hotBeverages: [] }) {
+function renderSimplePackageCard(pkg, tierAddOns = { desserts: [], hotBeverages: [], beverages: [], salads: [], sides: [], quickAdds: [] }) {
   // If package has wingOptions (new schema), render configurator with hot beverages
   if (pkg.wingOptions && pkg.sauceSelections && pkg.dipsIncluded) {
     return renderPackageConfigurator(pkg, tierAddOns);
