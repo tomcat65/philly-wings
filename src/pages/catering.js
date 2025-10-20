@@ -20,13 +20,13 @@ import { renderBoxedMealsFlow, initBoxedMealsFlow } from '../components/catering
 export async function renderCateringPage() {
   // Pre-render both flows
   const simplePackagesHtml = await renderSimplePackages();
-  const wizardHtml = await renderGuidedPlanner();
+  const wizardData = await renderGuidedPlanner(); // Returns { html, packages, sauces, addOns }
   const boxedMealsHtml = await renderBoxedMealsFlow();
 
   // Initialize interactions after render
   setTimeout(() => {
     initEntryChoice();
-    initPackageViewSwitching(wizardHtml);
+    initPackageViewSwitching(wizardData);
     initBoxedMealsFlow();
   }, 100);
 

@@ -14,7 +14,8 @@ let wizardState = {
   eventDetails: {
     guestCount: null,
     eventType: null,
-    eventDate: null
+    eventDate: null,
+    eventTime: null
   },
   selectedPackage: null,
   sauceSelections: [],
@@ -26,6 +27,8 @@ let wizardState = {
  * Main render function for the guided planner
  */
 export async function renderGuidedPlanner() {
+  console.log('🎬 renderGuidedPlanner() called');
+
   // Load data from Firestore
   const packages = await fetchCateringPackages();
   const sauces = await fetchSauces();
@@ -59,10 +62,8 @@ export async function renderGuidedPlanner() {
     </section>
   `;
 
-  // Attach event listeners after render
-  setTimeout(() => initWizardInteractions(packages, sauces, addOns), 100);
-
-  return html;
+  // Return HTML and data - listeners will be attached AFTER insertion
+  return { html, packages, sauces, addOns };
 }
 
 /**
@@ -108,12 +109,15 @@ function renderStep1EventDetails() {
               { range: '26-40', label: '26-40 people', value: 33 },
               { range: '41-60', label: '41-60 people', value: 50 },
               { range: '60+', label: '60+ people', value: 70 }
-            ].map(option => `
-              <button class="guest-count-option" data-count="${option.value}">
-                <span class="count-range">${option.range}</span>
-                <span class="count-label">${option.label}</span>
-              </button>
-            `).join('')}
+            ].map(option => {
+              const isSelected = wizardState.eventDetails.guestCount === option.value;
+              return `
+                <button class="guest-count-option ${isSelected ? 'selected' : ''}" data-count="${option.value}">
+                  <span class="count-range">${option.range}</span>
+                  <span class="count-label">${option.label}</span>
+                </button>
+              `;
+            }).join('')}
           </div>
         </div>
 
@@ -127,22 +131,33 @@ function renderStep1EventDetails() {
               { icon: '👥', label: 'Client Meeting', value: 'client-meeting' },
               { icon: '🎓', label: 'School Event', value: 'school-event' },
               { icon: '🏆', label: 'Other Event', value: 'other' }
-            ].map(type => `
-              <button class="event-type-card" data-type="${type.value}">
-                <span class="event-icon">${type.icon}</span>
-                <span class="event-label">${type.label}</span>
-              </button>
-            `).join('')}
+            ].map(type => {
+              const isSelected = wizardState.eventDetails.eventType === type.value;
+              return `
+                <button class="event-type-card ${isSelected ? 'selected' : ''}" data-type="${type.value}">
+                  <span class="event-icon">${type.icon}</span>
+                  <span class="event-label">${type.label}</span>
+                </button>
+              `;
+            }).join('')}
           </div>
         </div>
 
         <div class="form-group">
           <label for="event-date">When do you need it?</label>
-          <input type="date"
-                 id="event-date"
-                 class="form-input"
-                 min="${getMinDate()}"
-                 placeholder="Select delivery date">
+          <div class="datetime-inputs">
+            <input type="date"
+                   id="event-date"
+                   class="form-input"
+                   min="${getMinDate()}"
+                   placeholder="Select delivery date"
+                   style="flex: 1;">
+            <input type="time"
+                   id="event-time"
+                   class="form-input"
+                   placeholder="Select time"
+                   style="flex: 1;">
+          </div>
           <p class="field-hint">📅 24-hour advance notice required</p>
         </div>
       </div>
@@ -375,14 +390,46 @@ async function fetchCateringPackages() {
     const q = query(
       collection(db, 'cateringPackages'),
       where('active', '==', true),
-      where('type', '==', 'party-platters'),
       orderBy('tier', 'asc')
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const rawPackages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log('📦 Fetched packages (raw):', rawPackages.length, 'packages');
+
+    // Deduplicate packages, preferring ones WITH themes
+    const packageMap = {};
+    rawPackages.forEach(pkg => {
+      const existing = packageMap[pkg.id];
+      if (!existing) {
+        // First time seeing this package
+        packageMap[pkg.id] = pkg;
+      } else {
+        // Duplicate found - keep the one WITH themes
+        if (pkg.themes && pkg.themes.length > 0 && (!existing.themes || existing.themes.length === 0)) {
+          console.warn(`🔄 Replacing ${pkg.id} without themes with version that has themes`);
+          packageMap[pkg.id] = pkg;
+        }
+      }
+    });
+
+    const packages = Object.values(packageMap);
+    console.log('📦 Deduplicated packages:', packages.length, 'packages');
+    console.log('📦 Package IDs:', packages.map(p => p.id));
+
+    // Verify all packages have themes
+    const missingThemes = packages.filter(pkg => !pkg.themes || pkg.themes.length === 0);
+    if (missingThemes.length > 0) {
+      console.error('❌ Packages still missing themes after dedup:', missingThemes.map(p => p.id));
+    } else {
+      console.log('✅ All packages have themes!');
+    }
+
+    return packages;
   } catch (error) {
-    console.error('Error fetching packages:', error);
-    return getSamplePackages();
+    console.error('❌ Error fetching packages:', error);
+    const fallback = getSamplePackages();
+    console.log('⚠️ Using sample packages:', fallback.length);
+    return fallback;
   }
 }
 

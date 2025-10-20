@@ -191,7 +191,7 @@ function getSamplePackages() {
 /**
  * Initialize view switching between quick browse and guided planner
  */
-export function initPackageViewSwitching(wizardHtml) {
+export function initPackageViewSwitching(wizardData) {
   // Tab switching
   const quickBrowseTab = document.getElementById('quick-browse-tab');
   const guidedPlannerTab = document.getElementById('guided-planner-tab');
@@ -215,11 +215,11 @@ export function initPackageViewSwitching(wizardHtml) {
 
       // Inject wizard HTML if not already present
       if (!guidedPlannerView.querySelector('.guided-planner-section')) {
-        guidedPlannerView.innerHTML = wizardHtml;
+        guidedPlannerView.innerHTML = wizardData.html;
 
-        // Re-initialize wizard interactions
-        import('./guided-planner.js').then(module => {
-          // Wizard interactions will auto-initialize
+        // Initialize wizard interactions AFTER DOM insertion
+        import('./wizard-interactions.js').then(module => {
+          module.initWizardInteractions(wizardData.packages, wizardData.sauces, wizardData.addOns);
         });
       }
     }

@@ -1,62 +1,41 @@
-catering:147  GET https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX net::ERR_BLOCKED_BY_CLIENT
-firebase-config.js:37  GET https://www.googletagmanager.com/gtag/js?l=dataLayer&id=G-EBHT2CKRNY net::ERR_BLOCKED_BY_CLIENT
-zb @ index.esm2017.js:168
-cR @ index.esm2017.js:862
-await in cR
-dR @ index.esm2017.js:1048
-(anonymous) @ index.esm2017.js:1248
-getOrInitializeService @ index.esm2017.js:290
-initialize @ index.esm2017.js:234
-pR @ index.esm2017.js:1089
-fR @ index.esm2017.js:1068
-(anonymous) @ firebase-config.js:37
-iframe.js:310 Info: The current domain is not authorized for OAuth operations. This will prevent signInWithPopup, signInWithRedirect, linkWithPopup and linkWithRedirect from working. Add your domain (philly-wings--pr6-catering-ys0b64qj.web.app) to the OAuth redirect domains list in the Firebase console -> Authentication -> Settings -> Authorized domains tab.
-ml @ iframe.js:310
-(anonymous) @ iframe.js:579
-a @ iframe.js:155
-(anonymous) @ iframe.js:155
-c @ iframe.js:155
-e.vd @ iframe.js:163
-lg @ iframe.js:166
-hg @ iframe.js:166
-F.zk @ iframe.js:165
-a @ iframe.js:155
-(anonymous) @ iframe.js:155
-c @ iframe.js:155
-Qf @ iframe.js:156
-a
-Jf @ iframe.js:156
-cg @ iframe.js:162
-k.l @ iframe.js:160
-os @ iframe.js:578
-(anonymous) @ iframe.js:579
-aj @ iframe.js:240
-b @ iframe.js:238
-guided-planner.js:414 Error fetching add-ons: FirebaseError: The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/philly-wings/firestore/indexes?create_composite=ClNwcm9qZWN0cy9waGlsbHktd2luZ3MvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL2NhdGVyaW5nQWRkT25zL2luZGV4ZXMvXxABGgoKBmFjdGl2ZRABGgwKCGNhdGVnb3J5EAEaDAoIX19uYW1lX18QAQ
-tt @ guided-planner.js:414
-await in tt
-ce @ guided-planner.js:32
-await in ce
-Ss @ catering.js:23
-await in Ss
-Cs @ catering.html:12
-(anonymous) @ catering.html:72
+🎬 renderGuidedPlanner() called
+guided-planner.js:397 📦 Fetched packages (raw): 8 packages
+guided-planner.js:409 🔄 Replacing sampler-spread without themes with version that has themes
+(anonymous) @ guided-planner.js:409Understand this warning
+guided-planner.js:416 📦 Deduplicated packages: 6 packages
+guided-planner.js:417 📦 Package IDs: Array(6)
+guided-planner.js:424 ✅ All packages have themes!
 template-selector.js:202 Error fetching templates: FirebaseError: Missing or insufficient permissions.
-oe @ template-selector.js:202
-await in oe
-ct @ template-selector.js:13
-te @ boxed-meals-flow-v2.js:112
-U @ boxed-meals-flow-v2.js:98
-await in U
-Ss @ catering.js:24
-await in Ss
-Cs @ catering.html:12
-(anonymous) @ catering.html:72
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-catering:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+be @ template-selector.js:202Understand this error
+wizard-interactions.js:329 🎮 Initializing wizard interactions
+wizard-interactions.js:330 📦 Packages received: 6
+wizard-interactions.js:331 🌶️ Sauces received: 14
+wizard-interactions.js:332 ➕ AddOns received: 22
+wizard-interactions.js:709 📍 Step 2: Package Selection activated
+wizard-interactions.js:710 📍 Packages available: 6
+wizard-interactions.js:711 📍 Guest count: 20 Event type: office-lunch
+wizard-interactions.js:720 📍 Package cards container found: true
+wizard-interactions.js:722 📍 Cards in container: 6
+wizard-interactions.js:725 🎯 Running recommendation engine: Object
+wizard-interactions.js:181 🔍 Scoring The Lunch Box Special: eventType="office-lunch" (normalized="office-lunch"), weightRules= Objectclassic: 10corporate: 15[[Prototype]]: Object themes= Array(2)0: "classic"1: "corporate"length: 2[[Prototype]]: Array(0)
+wizard-interactions.js:199   ✓ classic: +10 pts
+wizard-interactions.js:199   ✓ corporate: +15 pts
+wizard-interactions.js:205   📊 Total theme score: 25
+wizard-interactions.js:117 📊 The Lunch Box Special: ObjectguestCount: 20popular: 5servesRange: "10-12"size: 2theme: 25themes: (2) ['classic', 'corporate']total: 32[[Prototype]]: Object
+wizard-interactions.js:181 🔍 Scoring The Sampler Spread: eventType="office-lunch" (normalized="office-lunch"), weightRules= Object themes= Array(2)
+wizard-interactions.js:199   ✓ classic: +10 pts
+wizard-interactions.js:205   📊 Total theme score: 10
+wizard-interactions.js:117 📊 The Sampler Spread: ObjectguestCount: 20popular: 0servesRange: "12-15"size: 5theme: 10themes: (2) ['classic', 'crowd']total: 15[[Prototype]]: Object
+wizard-interactions.js:181 🔍 Scoring The Northeast Philly Feast: eventType="office-lunch" (normalized="office-lunch"), weightRules= Object themes= Array(2)
+wizard-interactions.js:205   📊 Total theme score: 0
+wizard-interactions.js:117 📊 The Northeast Philly Feast: ObjectguestCount: 20popular: 0servesRange: "30-35"size: 10theme: 0themes: (2) ['sports', 'celebration']total: 10[[Prototype]]: Object
+wizard-interactions.js:181 🔍 Scoring The Tailgate Party Pack: eventType="office-lunch" (normalized="office-lunch"), weightRules= Object themes= Array(2)
+wizard-interactions.js:205   📊 Total theme score: 0
+wizard-interactions.js:117 📊 The Tailgate Party Pack: ObjectguestCount: 20popular: 5servesRange: "20-25"size: 47.5theme: 0themes: (2) ['sports', 'crowd']total: 52.5[[Prototype]]: Object
+wizard-interactions.js:181 🔍 Scoring The Championship Spread: eventType="office-lunch" (normalized="office-lunch"), weightRules= Object themes= Array(3)
+wizard-interactions.js:205   📊 Total theme score: 0
+wizard-interactions.js:117 📊 The Championship Spread: ObjectguestCount: 20popular: 0servesRange: "90-100"size: 0theme: 0themes: (3) ['sports', 'celebration', 'premium']total: 0[[Prototype]]: Object
+wizard-interactions.js:181 🔍 Scoring The Game Day Blowout: eventType="office-lunch" (normalized="office-lunch"), weightRules= Object themes= Array(3)
+wizard-interactions.js:205   📊 Total theme score: 0
+wizard-interactions.js:117 📊 The Game Day Blowout: ObjectguestCount: 20popular: 5servesRange: "50-60"size: 0theme: 0themes: (3) ['sports', 'crowd', 'celebration']total: 5[[Prototype]]: Object
+wizard-interactions.js:136 🏆 Winner: The Tailgate Party Pack (52.5 pts)

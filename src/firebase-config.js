@@ -40,10 +40,12 @@ export const functions = getFunctions(app);
 // Connect to emulators in development (MUST be before any queries)
 if (useEmulators) {
   console.log('🧪 Connecting to Firebase Emulators...');
-  connectFirestoreEmulator(db, '127.0.0.1', 8081);
+  // TEMP: Firestore emulator disabled - using production Firestore
+  // connectFirestoreEmulator(db, '127.0.0.1', 8081);
   connectFunctionsEmulator(functions, '127.0.0.1', 5002);
-  connectStorageEmulator(storage, '127.0.0.1', 9199);
-  connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+  // Storage and Auth emulators not running
+  // connectStorageEmulator(storage, '127.0.0.1', 9199);
+  // connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 }
 
 export default app;

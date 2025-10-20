@@ -3413,3 +3413,302 @@
     transition: none;
   }
 }
+
+/* ================================
+   GUIDED PLANNER SELECTIONS
+   ================================ */
+
+/* Date & Time Inputs */
+.datetime-inputs {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.datetime-inputs .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Guest Count Selector */
+.guest-count-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.guest-count-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 200ms ease-out;
+  text-align: left;
+  width: 100%;
+}
+
+.guest-count-option:hover {
+  border-color: #ff6b35;
+  background: #fff5f2;
+  transform: translateX(4px);
+}
+
+.guest-count-option.selected {
+  border-color: #ff6b35;
+  background: #fff5f2;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+  position: relative;
+}
+
+.guest-count-option.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  right: 1.25rem;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  background: #ff6b35;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.125rem;
+  animation: checkmark-appear 200ms ease-out;
+}
+
+.count-range {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.count-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Event Type Grid */
+.event-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.event-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 200ms ease-out;
+  text-align: center;
+  min-height: 120px;
+}
+
+.event-type-card:hover {
+  border-color: #ff6b35;
+  background: #fff5f2;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.event-type-card.selected {
+  border-color: #ff6b35;
+  background: #fff5f2;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+  position: relative;
+}
+
+.event-type-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: #ff6b35;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  animation: checkmark-appear 200ms ease-out;
+}
+
+.event-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.event-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* Checkmark animation */
+@keyframes checkmark-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Mobile Optimizations for Guided Planner */
+@media (max-width: 768px) {
+  .event-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .guest-count-option.selected::after {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .datetime-inputs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-type-card {
+    min-height: 100px;
+    padding: 1.25rem 1rem;
+  }
+
+  .event-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* ==========================================
+   RECOMMENDATION SYSTEM STYLING
+   Phase 4: Confidence badges and visual feedback
+   ========================================== */
+
+/* Confidence Badges */
+.confidence-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 0.5rem;
+}
+
+.confidence-badge.best {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.confidence-badge.good {
+  background: #fff5f2;
+  color: #ff6b35;
+  border: 2px solid #ff6b35;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(255, 107, 53, 0.5);
+  }
+}
+
+/* Package card recommendation states */
+.package-card.best-match {
+  border-color: #ff6b35;
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.2);
+  position: relative;
+  transform: scale(1.02);
+  transition: all 300ms ease-out;
+}
+
+.package-card.recommended {
+  border-color: #ff8c42;
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.15);
+  transition: all 300ms ease-out;
+}
+
+/* Alternative recommendation text */
+.alternative {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Screen reader only (accessibility) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Recommendation announcement accessibility */
+.recommendation-announcement {
+  /* Uses .sr-only class for accessibility */
+}
+
+/* Package recommendation text styling */
+#package-recommendation {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-left: 4px solid #ff6b35;
+  border-radius: 8px;
+}
+
+#package-recommendation strong {
+  color: #ff6b35;
+  font-weight: 600;
+}
+
+#package-recommendation .alternative {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
