@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Option 1: Expandable Card System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+
+    .page-header {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .page-header h1 { color: #d94b1e; margin-bottom: 8px; }
+    .page-header p { color: #666; }
+
+    .review-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 16px;
+    }
+    .card-header h3 { color: #333; font-size: 18px; }
+    .edit-btn {
+      background: none;
+      border: none;
+      color: #d94b1e;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .edit-btn:hover { text-decoration: underline; }
+
+    .box-config {
+      background: #f9f9f9;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .box-config h4 { margin-bottom: 12px; color: #333; }
+    .box-config ul { list-style: none; padding-left: 16px; }
+    .box-config li { margin-bottom: 6px; color: #666; }
+    .box-config li:before { content: "• "; color: #d94b1e; font-weight: bold; margin-right: 8px; }
+
+    .price-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px solid #eee;
+    }
+    .price-line.total {
+      font-size: 18px;
+      font-weight: bold;
+      color: #d94b1e;
+      border-top: 2px solid #d94b1e;
+      margin-top: 8px;
+    }
+
+    .extras-section h4 {
+      color: #666;
+      font-size: 14px;
+      text-transform: uppercase;
+      margin: 16px 0 8px 0;
+      letter-spacing: 0.5px;
+    }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      color: #333;
+    }
+    .item-name { flex: 1; }
+    .item-calc { color: #999; font-size: 14px; margin-right: 12px; }
+    .item-price { font-weight: 600; min-width: 70px; text-align: right; }
+
+    .subtotal-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      margin-top: 8px;
+      border-top: 1px solid #eee;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .pricing-summary {
+      background: #fef9f5;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #d94b1e;
+    }
+    .pricing-summary .price-line { border-color: #f0e5dc; }
+    .pricing-summary .price-line.total { border-color: #d94b1e; }
+
+    .disclaimer {
+      background: #f0f7ff;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      border-left: 4px solid #2196f3;
+    }
+    .disclaimer small { color: #555; line-height: 1.6; }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .btn-primary {
+      background: #d94b1e;
+      color: white;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>📦 Your Catering Order</h1>
+      <p>October 25, 2025 • 12:00 PM • 50 Guests</p>
+    </div>
+
+    <!-- BOXED MEALS CARD -->
+    <div class="review-card">
+      <div class="card-header">
+        <h3>✓ Boxed Meals</h3>
+        <button class="edit-btn">✏️ Edit</button>
+      </div>
+
+      <div class="box-config">
+        <h4>50 Individual Boxed Meals</h4>
+        <ul>
+          <li>10pc Boneless Wings</li>
+          <li>Classic Fries</li>
+          <li>2 Sauce Choices (Buffalo, Ranch)</li>
+          <li>Beverage Included</li>
+        </ul>
+      </div>
+
+      <div class="price-line total">
+        <span>50 boxes × $16.00</span>
+        <span>$800.00</span>
+      </div>
+    </div>
+
+    <!-- EXTRAS & ADD-ONS CARD -->
+    <div class="review-card">
+      <div class="card-header">
+        <h3>✓ Extras & Add-Ons</h3>
+        <button class="edit-btn">✏️ Edit</button>
+      </div>
+
+      <h4 class="extras-section">Cold Beverages</h4>
+      <div class="item-row">
+        <span class="item-name">Boxed Iced Tea (3 Gallon)</span>
+        <span class="item-calc">2 × $54.26</span>
+        <span class="item-price">$108.52</span>
+      </div>
+      <div class="item-row">
+        <span class="item-name">Dasani Bottled Water (5-Pack)</span>
+        <span class="item-calc">1 × $10.00</span>
+        <span class="item-price">$10.00</span>
+      </div>
+
+      <h4 class="extras-section">Desserts</h4>
+      <div class="item-row">
+        <span class="item-name">Chocolate Chip Cookies (Dozen)</span>
+        <span class="item-calc">3 × $15.00</span>
+        <span class="item-price">$45.00</span>
+      </div>
+
+      <div class="subtotal-row">
+        <span>Add-ons Total</span>
+        <span>$163.52</span>
+      </div>
+    </div>
+
+    <!-- PRICING SUMMARY CARD -->
+    <div class="review-card">
+      <div class="card-header">
+        <h3>💰 Pricing Summary</h3>
+      </div>
+
+      <div class="pricing-summary">
+        <div class="price-line">
+          <span>Boxed Meals (50)</span>
+          <span>$800.00</span>
+        </div>
+        <div class="price-line">
+          <span>Extras & Add-ons</span>
+          <span>$163.52</span>
+        </div>
+        <div class="price-line">
+          <span>Subtotal</span>
+          <span>$963.52</span>
+        </div>
+        <div class="price-line">
+          <span>Tax (8%)</span>
+          <span>$77.08</span>
+        </div>
+        <div class="price-line total">
+          <span>ESTIMATED TOTAL</span>
+          <span>$1,040.60</span>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <small>
+          ⓘ This is an estimate. Final price includes delivery, setup, service fees, and exact tax calculation.
+          You'll receive final pricing via email within 2 hours.
+        </small>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-secondary">← Back</button>
+      <button class="btn btn-primary">Submit Quote Request</button>
+    </div>
+  </div>
+</body>
+</html>

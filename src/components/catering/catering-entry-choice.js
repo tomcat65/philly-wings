@@ -162,14 +162,52 @@ export function initEntryChoice() {
   sharedChoice?.addEventListener('click', activateSharedPlatters);
   boxedChoice?.addEventListener('click', activateBoxedMeals);
 
-  // Restore previous selection if exists
+  /**
+   * Reset flow to show entry choice (called when navigating from nav)
+   */
+  function resetToEntryChoice() {
+    // Show entry choice section
+    if (entryChoiceSection) {
+      entryChoiceSection.style.display = 'block';
+    }
+
+    // Hide both flows
+    if (sharedFlow) sharedFlow.style.display = 'none';
+    if (boxedFlow) boxedFlow.style.display = 'none';
+
+    // Reset button states to default (shared platters active)
+    sharedChoice?.classList.add('active');
+    sharedChoice?.setAttribute('aria-pressed', 'true');
+    boxedChoice?.classList.remove('active');
+    boxedChoice?.setAttribute('aria-pressed', 'false');
+
+    // Clear session storage
+    sessionStorage.removeItem('cateringFlowType');
+  }
+
+  // Listen for hash changes to detect nav clicks
+  const handleHashChange = () => {
+    if (window.location.hash === '#catering-packages') {
+      resetToEntryChoice();
+    }
+  };
+
+  window.addEventListener('hashchange', handleHashChange);
+
+  // Check if we just navigated to #catering-packages
+  const isDirectNavigation = window.location.hash === '#catering-packages';
+
+  // Restore previous selection if exists (but NOT if coming from nav)
   const savedFlow = sessionStorage.getItem('cateringFlowType');
-  if (savedFlow === 'boxed-meals') {
+  if (savedFlow === 'boxed-meals' && !isDirectNavigation) {
     activateBoxedMeals();
+  } else if (savedFlow === 'party-platters' && !isDirectNavigation) {
+    activateSharedPlatters();
   }
 
   // Cleanup function
   return () => {
     window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('hashchange', handleHashChange);
   };
 }

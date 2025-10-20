@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Extras Design Options - Philly Wings Express</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .demo-header h1 {
+      color: #d94b1e;
+      margin-bottom: 10px;
+    }
+
+    .demo-header p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .option-selector {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .option-btn {
+      padding: 15px 30px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .option-btn:hover {
+      border-color: #d94b1e;
+      color: #d94b1e;
+    }
+
+    .option-btn.active {
+      background: #d94b1e;
+      color: white;
+      border-color: #d94b1e;
+    }
+
+    .design-option {
+      display: none;
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      min-height: 800px;
+    }
+
+    .design-option.active {
+      display: block;
+    }
+
+    /* ========================================
+       OPTION 1: PHOTO CARD GRID LAYOUT
+       ======================================== */
+
+    .option1-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .option1-header h2 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .option1-header p {
+      color: #666;
+      font-size: 18px;
+    }
+
+    .category-section {
+      margin-bottom: 50px;
+    }
+
+    .category-title {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      border-color: #d94b1e;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      position: relative;
+    }
+
+    .product-image.water { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .product-image.chips { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .product-image.coffee { background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%); }
+    .product-image.hotchoc { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .product-image.tea { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+    .product-image.salad { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+    .product-image.coleslaw { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+
+    .product-info {
+      padding: 20px;
+    }
+
+    .product-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .product-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .product-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #d94b1e;
+      margin-bottom: 15px;
+    }
+
+    .add-btn {
+      width: 100%;
+      padding: 12px;
+      background: #d94b1e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .add-btn:hover {
+      background: #c03d15;
+      transform: scale(1.05);
+    }
+
+    .add-btn.added {
+      background: #28a745;
+    }
+
+    /* ========================================
+       OPTION 2: TABBED NAVIGATION
+       ======================================== */
+
+    .tabs-container {
+      margin-bottom: 30px;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #e0e0e0;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 16px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn:hover {
+      color: #d94b1e;
+    }
+
+    .tab-btn.active {
+      color: #d94b1e;
+      border-bottom-color: #d94b1e;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .product-list-item {
+      display: flex;
+      gap: 30px;
+      padding: 30px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .product-list-item:hover {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .product-list-image {
+      width: 200px;
+      height: 200px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      flex-shrink: 0;
+    }
+
+    .product-list-details {
+      flex: 1;
+    }
+
+    .product-list-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .product-list-desc {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .product-list-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .product-list-price {
+      font-size: 28px;
+      font-weight: 700;
+      color: #d94b1e;
+    }
+
+    .qty-selector {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .qty-label {
+      font-size: 16px;
+      color: #666;
+    }
+
+    .qty-input {
+      width: 80px;
+      padding: 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    /* ========================================
+       OPTION 3: MASONRY/DOORDASH LAYOUT
+       ======================================== */
+
+    .masonry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .masonry-title h2 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .masonry-title p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .skip-btn {
+      padding: 12px 24px;
+      background: white;
+      border: 2px solid #d94b1e;
+      color: #d94b1e;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .skip-btn:hover {
+      background: #d94b1e;
+      color: white;
+    }
+
+    .masonry-category {
+      margin-bottom: 40px;
+    }
+
+    .masonry-category-header {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .horizontal-scroll {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 15px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .horizontal-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .horizontal-scroll::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+
+    .horizontal-scroll::-webkit-scrollbar-thumb {
+      background: #d94b1e;
+      border-radius: 4px;
+    }
+
+    .masonry-card {
+      min-width: 280px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      scroll-snap-align: start;
+      transition: all 0.3s ease;
+    }
+
+    .masonry-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .masonry-card.featured {
+      min-width: 400px;
+    }
+
+    .masonry-card-image {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+    }
+
+    .masonry-card.featured .masonry-card-image {
+      height: 250px;
+      font-size: 96px;
+    }
+
+    .masonry-card-content {
+      padding: 20px;
+    }
+
+    .masonry-card-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .masonry-card-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .masonry-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .masonry-card-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #d94b1e;
+    }
+
+    .quick-add {
+      padding: 10px 20px;
+      background: #d94b1e;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .quick-add:hover {
+      background: #c03d15;
+    }
+
+    .sticky-cart {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #333;
+      color: white;
+      padding: 20px;
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+      margin: 40px -40px -40px -40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cart-summary {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .cart-total {
+      color: #ffc107;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .continue-btn {
+      padding: 15px 40px;
+      background: #d94b1e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .continue-btn:hover {
+      background: #c03d15;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      .product-list-item {
+        flex-direction: column;
+      }
+
+      .product-list-image {
+        width: 100%;
+      }
+
+      .masonry-card.featured {
+        min-width: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1>🎨 Add Extras Design Options</h1>
+      <p>Interactive demo showing 3 different design approaches for the add-ons step. Click to explore each option!</p>
+    </div>
+
+    <div class="option-selector">
+      <button class="option-btn active" onclick="showOption(1)">
+        Option 1: Photo Card Grid
+      </button>
+      <button class="option-btn" onclick="showOption(2)">
+        Option 2: Tabbed Navigation
+      </button>
+      <button class="option-btn" onclick="showOption(3)">
+        Option 3: Masonry/DoorDash
+      </button>
+    </div>
+
+    <!-- ========================================
+         OPTION 1: PHOTO CARD GRID LAYOUT
+         ======================================== -->
+    <div id="option1" class="design-option active">
+      <div class="option1-header">
+        <h2>Add Extras? (Optional)</h2>
+        <p>Complete your order with drinks, sides & treats</p>
+      </div>
+
+      <div class="category-section">
+        <div class="category-title">
+          <span>🥤</span>
+          <span>QUICK-ADDS</span>
+        </div>
+        <div class="product-grid">
+          <div class="product-card">
+            <div class="product-image water">💧</div>
+            <div class="product-info">
+              <div class="product-name">Bottled Water</div>
+              <div class="product-desc">5-pack</div>
+              <div class="product-price">$10.00</div>
+              <button class="add-btn" onclick="toggleAdd(this)">+ Add</button>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-image chips">🥔</div>
+            <div class="product-info">
+              <div class="product-name">Miss Vickie's Chips</div>
+              <div class="product-desc">5-pack</div>
+              <div class="product-price">$7.50</div>
+              <button class="add-btn" onclick="toggleAdd(this)">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-section">
+        <div class="category-title">
+          <span>☕</span>
+          <span>HOT BEVERAGES</span>
+        </div>
+        <div class="product-grid">
+          <div class="product-card">
+            <div class="product-image coffee">☕</div>
+            <div class="product-info">
+              <div class="product-name">Lavazza Coffee</div>
+              <div class="product-desc">Premium Italian • Serves 10-12</div>
+              <div class="product-price">$24.99</div>
+              <button class="add-btn" onclick="toggleAdd(this)">+ Add</button>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-image hotchoc">🍫</div>
+            <div class="product-info">
+              <div class="product-name">Ghirardelli Hot Chocolate</div>
+              <div class="product-desc">Rich & Creamy • Serves 10-12</div>
+              <div class="product-price">$19.99</div>
+              <button class="add-btn" onclick="toggleAdd(this)">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-section">
+        <div class="category-title">
+          <span>🧃</span>
+          <span>COLD BEVERAGES</span>
+        </div>
+        <div class="product-grid">
+          <div class="product-card">
+            <div class="product-image tea">🧃</div>
+            <div class="product-info">
+              <div class="product-name">Boxed Iced Tea</div>
+              <div class="product-desc">96oz</div>
+              <div class="product-price">$8.99</div>
+              <button class="add-btn" onclick="toggleAdd(this)">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-section">
+        <div class="category-title">
+          <span>🥗</span>
+          <span>SALADS & VEGGIE OPTIONS</span>
+        </div>
+        <div class="product-grid">
+          <div class="product-card">
+            <div class="product-image salad">🥗</div>
+            <div class="product-info">
+              <div class="product-name">Caesar Salad</div>
+              <div class="product-desc">Family Size</div>
+              <div class="product-price">$27.99</div>
+              <button class="add-btn" onclick="toggleAdd(this)">+ Add</button>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-image salad">🥬</div>
+            <div class="product-info">
+              <div class="product-name">Spring Mix Salad</div>
+              <div class="product-desc">Family Size</div>
+              <div class="product-price">$24.99</div>
+              <button class="add-btn" onclick="toggleAdd(this)">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         OPTION 2: TABBED NAVIGATION
+         ======================================== -->
+    <div id="option2" class="design-option">
+      <div class="option1-header">
+        <h2>Add Extras to Your Order</h2>
+        <p>Browse by category and add what you need</p>
+      </div>
+
+      <div class="tabs-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="showTab(0)">Quick-Adds</button>
+          <button class="tab-btn" onclick="showTab(1)">Cold Drinks</button>
+          <button class="tab-btn" onclick="showTab(2)">Hot Drinks</button>
+          <button class="tab-btn" onclick="showTab(3)">Salads</button>
+          <button class="tab-btn" onclick="showTab(4)">Sides</button>
+        </div>
+
+        <div class="tab-content active">
+          <div class="product-list-item">
+            <div class="product-list-image water">💧</div>
+            <div class="product-list-details">
+              <div class="product-list-name">Bottled Water</div>
+              <div class="product-list-desc">
+                Refreshing spring water, perfect for keeping everyone hydrated during your event. Each pack contains 5 bottles of premium water.
+              </div>
+              <div class="product-list-footer">
+                <div class="product-list-price">$10.00</div>
+                <div class="qty-selector">
+                  <span class="qty-label">Quantity:</span>
+                  <select class="qty-input">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                  </select>
+                  <button class="add-btn" style="width: auto;" onclick="toggleAdd(this)">Add to Order</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-list-item">
+            <div class="product-list-image chips">🥔</div>
+            <div class="product-list-details">
+              <div class="product-list-name">Miss Vickie's Chips</div>
+              <div class="product-list-desc">
+                Kettle cooked potato chips in assorted flavors. A perfect crunchy complement to your meal. Each pack contains 5 bags.
+              </div>
+              <div class="product-list-footer">
+                <div class="product-list-price">$7.50</div>
+                <div class="qty-selector">
+                  <span class="qty-label">Quantity:</span>
+                  <select class="qty-input">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                  </select>
+                  <button class="add-btn" style="width: auto;" onclick="toggleAdd(this)">Add to Order</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content">
+          <div class="product-list-item">
+            <div class="product-list-image tea">🧃</div>
+            <div class="product-list-details">
+              <div class="product-list-name">Boxed Iced Tea</div>
+              <div class="product-list-desc">
+                Premium brewed iced tea served chilled in a convenient 96oz box. Perfect for sharing with the group.
+              </div>
+              <div class="product-list-footer">
+                <div class="product-list-price">$8.99</div>
+                <div class="qty-selector">
+                  <span class="qty-label">Quantity:</span>
+                  <select class="qty-input">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                  </select>
+                  <button class="add-btn" style="width: auto;" onclick="toggleAdd(this)">Add to Order</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content">
+          <div class="product-list-item">
+            <div class="product-list-image coffee">☕</div>
+            <div class="product-list-details">
+              <div class="product-list-name">Lavazza Coffee</div>
+              <div class="product-list-desc">
+                Premium Italian coffee, freshly brewed and served hot. Rich, aromatic, and perfect for coffee lovers. Serves 10-12 people.
+              </div>
+              <div class="product-list-footer">
+                <div class="product-list-price">$24.99</div>
+                <div class="qty-selector">
+                  <span class="qty-label">Quantity:</span>
+                  <select class="qty-input">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                  </select>
+                  <button class="add-btn" style="width: auto;" onclick="toggleAdd(this)">Add to Order</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-list-item">
+            <div class="product-list-image hotchoc">🍫</div>
+            <div class="product-list-details">
+              <div class="product-list-name">Ghirardelli Hot Chocolate</div>
+              <div class="product-list-desc">
+                Rich, creamy hot chocolate made with premium Ghirardelli chocolate. A crowd favorite! Serves 10-12 people.
+              </div>
+              <div class="product-list-footer">
+                <div class="product-list-price">$19.99</div>
+                <div class="qty-selector">
+                  <span class="qty-label">Quantity:</span>
+                  <select class="qty-input">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                  </select>
+                  <button class="add-btn" style="width: auto;" onclick="toggleAdd(this)">Add to Order</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content">
+          <p style="text-align: center; padding: 40px; color: #666;">Salads content here...</p>
+        </div>
+
+        <div class="tab-content">
+          <p style="text-align: center; padding: 40px; color: #666;">Sides content here...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         OPTION 3: MASONRY/DOORDASH LAYOUT
+         ======================================== -->
+    <div id="option3" class="design-option">
+      <div class="masonry-header">
+        <div class="masonry-title">
+          <h2>Nobody Left Behind 🎉</h2>
+          <p>Add drinks, sides & treats to complete your meal</p>
+        </div>
+        <button class="skip-btn">Skip →</button>
+      </div>
+
+      <div class="masonry-category">
+        <div class="masonry-category-header">
+          <span>🥤</span>
+          <span>QUICK-ADDS & ESSENTIALS</span>
+        </div>
+        <div class="horizontal-scroll">
+          <div class="masonry-card">
+            <div class="masonry-card-image water">💧</div>
+            <div class="masonry-card-content">
+              <div class="masonry-card-name">Bottled Water</div>
+              <div class="masonry-card-desc">5-pack</div>
+              <div class="masonry-card-footer">
+                <div class="masonry-card-price">$10.00</div>
+                <button class="quick-add" onclick="toggleAdd(this)">+ Add</button>
+              </div>
+            </div>
+          </div>
+          <div class="masonry-card">
+            <div class="masonry-card-image chips">🥔</div>
+            <div class="masonry-card-content">
+              <div class="masonry-card-name">Miss Vickie's Chips</div>
+              <div class="masonry-card-desc">5-pack assorted</div>
+              <div class="masonry-card-footer">
+                <div class="masonry-card-price">$7.50</div>
+                <button class="quick-add" onclick="toggleAdd(this)">+ Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="masonry-category">
+        <div class="masonry-category-header">
+          <span>☕</span>
+          <span>PREMIUM HOT BEVERAGES</span>
+        </div>
+        <div class="horizontal-scroll">
+          <div class="masonry-card featured">
+            <div class="masonry-card-image coffee">☕</div>
+            <div class="masonry-card-content">
+              <div class="masonry-card-name">Lavazza Coffee</div>
+              <div class="masonry-card-desc">Italian Premium • Serves 10-12</div>
+              <div class="masonry-card-footer">
+                <div class="masonry-card-price">$24.99</div>
+                <button class="quick-add" onclick="toggleAdd(this)">+ Add to Order</button>
+              </div>
+            </div>
+          </div>
+          <div class="masonry-card featured">
+            <div class="masonry-card-image hotchoc">🍫</div>
+            <div class="masonry-card-content">
+              <div class="masonry-card-name">Ghirardelli Hot Chocolate</div>
+              <div class="masonry-card-desc">Rich & Creamy • Serves 10-12</div>
+              <div class="masonry-card-footer">
+                <div class="masonry-card-price">$19.99</div>
+                <button class="quick-add" onclick="toggleAdd(this)">+ Add to Order</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="masonry-category">
+        <div class="masonry-category-header">
+          <span>🧃</span>
+          <span>COLD BEVERAGES</span>
+        </div>
+        <div class="horizontal-scroll">
+          <div class="masonry-card">
+            <div class="masonry-card-image tea">🧃</div>
+            <div class="masonry-card-content">
+              <div class="masonry-card-name">Boxed Iced Tea</div>
+              <div class="masonry-card-desc">96oz</div>
+              <div class="masonry-card-footer">
+                <div class="masonry-card-price">$8.99</div>
+                <button class="quick-add" onclick="toggleAdd(this)">+ Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="masonry-category">
+        <div class="masonry-category-header">
+          <span>🥗</span>
+          <span>FRESH SALADS</span>
+        </div>
+        <div class="horizontal-scroll">
+          <div class="masonry-card">
+            <div class="masonry-card-image salad">🥗</div>
+            <div class="masonry-card-content">
+              <div class="masonry-card-name">Caesar Salad</div>
+              <div class="masonry-card-desc">Family size</div>
+              <div class="masonry-card-footer">
+                <div class="masonry-card-price">$27.99</div>
+                <button class="quick-add" onclick="toggleAdd(this)">+ Add</button>
+              </div>
+            </div>
+          </div>
+          <div class="masonry-card">
+            <div class="masonry-card-image salad">🥬</div>
+            <div class="masonry-card-content">
+              <div class="masonry-card-name">Spring Mix Salad</div>
+              <div class="masonry-card-desc">Family size</div>
+              <div class="masonry-card-footer">
+                <div class="masonry-card-price">$24.99</div>
+                <button class="quick-add" onclick="toggleAdd(this)">+ Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky-cart">
+        <div class="cart-summary">
+          🛒 Your Extras: <span id="item-count">0</span> items • <span class="cart-total" id="cart-total">$0.00</span>
+        </div>
+        <button class="continue-btn">Continue to Review</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let itemCount = 0;
+    let cartTotal = 0;
+
+    function showOption(optionNum) {
+      // Hide all options
+      document.querySelectorAll('.design-option').forEach(opt => opt.classList.remove('active'));
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+
+      // Show selected option
+      document.getElementById('option' + optionNum).classList.add('active');
+      document.querySelectorAll('.option-btn')[optionNum - 1].classList.add('active');
+    }
+
+    function showTab(tabIndex) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-btn');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      tabs[tabIndex].classList.add('active');
+      buttons[tabIndex].classList.add('active');
+    }
+
+    function toggleAdd(button) {
+      if (button.classList.contains('added') || button.textContent.includes('Added')) {
+        button.classList.remove('added');
+        button.textContent = button.textContent.includes('Order') ? '+ Add to Order' : '+ Add';
+        itemCount--;
+        cartTotal -= 10; // Simplified
+      } else {
+        button.classList.add('added');
+        button.textContent = '✓ Added';
+        itemCount++;
+        cartTotal += 10; // Simplified
+      }
+
+      // Update cart in option 3
+      document.getElementById('item-count').textContent = itemCount;
+      document.getElementById('cart-total').textContent = '$' + cartTotal.toFixed(2);
+    }
+  </script>
+</body>
+</html>

@@ -16,16 +16,26 @@ export async function getCateringAddOns() {
     const addOnsRef = collection(db, 'cateringAddOns');
     const q = query(
       addOnsRef,
-      where('active', '==', true),
-      orderBy('category'),
-      orderBy('displayOrder')
+      where('active', '==', true)
     );
 
     const snapshot = await getDocs(q);
-    const addOns = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const addOns = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        price: data.basePrice || data.price || 0  // Map basePrice to price
+      };
+    });
+
+    // Sort in memory to avoid composite index requirement
+    addOns.sort((a, b) => {
+      if (a.category !== b.category) {
+        return a.category.localeCompare(b.category);
+      }
+      return (a.displayOrder || 0) - (b.displayOrder || 0);
+    });
 
     return addOns;
   } catch (error) {
@@ -45,15 +55,21 @@ export async function getAddOnsByCategory(category) {
     const q = query(
       addOnsRef,
       where('active', '==', true),
-      where('category', '==', category),
-      orderBy('displayOrder')
+      where('category', '==', category)
     );
 
     const snapshot = await getDocs(q);
-    const addOns = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const addOns = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        price: data.basePrice || data.price || 0  // Map basePrice to price
+      };
+    });
+
+    // Sort in memory to avoid composite index requirement
+    addOns.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
     return addOns;
   } catch (error) {
@@ -100,6 +116,24 @@ export async function getAddOnById(addOnId) {
  */
 export async function getAddOnsSplitByCategory(tier) {
   const allAddOns = await getAddOnsForTier(tier);
+
+  return {
+    desserts: allAddOns.filter(addOn => addOn.category === 'desserts'),
+    beverages: allAddOns.filter(addOn => addOn.category === 'beverages'),
+    salads: allAddOns.filter(addOn => addOn.category === 'salads'),
+    sides: allAddOns.filter(addOn => addOn.category === 'sides'),
+    quickAdds: allAddOns.filter(addOn => addOn.category === 'quick-adds'),
+    hotBeverages: allAddOns.filter(addOn => addOn.category === 'hot-beverages')
+  };
+}
+
+/**
+ * Get all add-ons split by category (no tier filtering)
+ * Useful for premium services like boxed meals where all add-ons should be available
+ * @returns {Promise<Object>} { desserts: [], beverages: [], salads: [], sides: [], quickAdds: [], hotBeverages: [] }
+ */
+export async function getAllAddOnsSplitByCategory() {
+  const allAddOns = await getCateringAddOns();
 
   return {
     desserts: allAddOns.filter(addOn => addOn.category === 'desserts'),

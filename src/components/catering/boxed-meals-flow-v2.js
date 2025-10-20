@@ -3,7 +3,7 @@
  * Corporate lunch path with template selection and visual configuration
  */
 
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
 import { renderTemplateSelector, initTemplateSelector } from './template-selector.js';
 import { renderLivePreviewPanel, updatePreviewPanel } from './live-preview-panel.js';
@@ -21,10 +21,17 @@ import {
   initSauceSplitSelector,
   getWingCountPrice
 } from './wing-count-selector.js';
+import {
+  renderContactForm,
+  initContactFormInteractions,
+  validateContactForm,
+  collectContactData
+} from './contact-form.js';
+import { getAllAddOnsSplitByCategory } from '../../services/catering-addons-service.js';
 
 // Enhanced state management
 let boxedMealState = {
-  currentStep: 'template-selection',  // template-selection | configuration | review
+  currentStep: 'template-selection',  // template-selection | configuration | quick-adds | review-contact | success
   selectedTemplate: null,
   boxCount: 10,
   currentConfig: {
@@ -46,6 +53,47 @@ let boxedMealState = {
     sauces: [],
     sides: [],
     desserts: []
+  },
+  // NEW: Extras selection
+  extras: {
+    quickAdds: [],       // { id, quantity, name, price }
+    beverages: [],
+    hotBeverages: [],
+    salads: [],
+    premiumSides: []
+  },
+  // NEW: Contact & delivery information
+  contact: {
+    company: '',
+    name: '',
+    email: '',
+    phone: '',
+    deliveryAddress: {
+      street: '',
+      street2: '',
+      city: '',
+      state: '',
+      zip: ''
+    },
+    billingAddress: {
+      sameAsDelivery: true,
+      street: '',
+      street2: '',
+      city: '',
+      state: '',
+      zip: ''
+    },
+    deliveryDate: '',      // YYYY-MM-DD
+    deliveryTime: '',      // HH:MM
+    deliveryPeriod: 'PM',  // 'AM' | 'PM'
+    notes: ''
+  },
+  // NEW: Pricing information
+  pricing: {
+    subtotal: 0,
+    estimatedTotal: 0,
+    taxRate: 0.08,
+    note: 'Final price includes setup fees, staff, delivery distance, tips, and 8% tax. We\'ll provide exact pricing in your quote.'
   }
 };
 
@@ -1529,19 +1577,14 @@ function resetToTemplate() {
 }
 
 /**
- * Handle quote request
+ * Handle quote request - transition to quick-adds step
  */
 function handleQuoteRequest() {
   if (!isConfigurationComplete()) return;
 
-  // TODO: Submit to Firestore
-  console.log('Quote request:', {
-    template: boxedMealState.selectedTemplate?.name,
-    boxCount: boxedMealState.boxCount,
-    config: boxedMealState.currentConfig
-  });
-
-  alert(`Quote request submitted!\n\n${boxedMealState.boxCount} boxes of ${boxedMealState.selectedTemplate?.name || 'Custom Box'}\n\nWe'll contact you within 1 business day.`);
+  // Transition to quick-adds step
+  boxedMealState.currentStep = 'quick-adds';
+  renderQuickAddsStep();
 }
 
 // ========================================
@@ -1672,6 +1715,864 @@ function formatDessertName(dessert) {
   return dessert.split('-').map(word =>
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
+}
+
+// ========================================
+// Quick-Adds Step Functions
+// ========================================
+
+/**
+ * Render quick-adds/extras step
+ */
+async function renderQuickAddsStep() {
+  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
+
+  if (!container) {
+    console.error('Container not found');
+    return;
+  }
+
+  // Fetch ALL add-ons (boxed meals = premium tier)
+  const addOns = await fetchAllAddOns();
+
+  container.innerHTML = `
+    <div class="quick-adds-step masonry-layout">
+      <!-- Masonry Header -->
+      <div class="masonry-header">
+        <div class="masonry-header-content">
+          <button class="btn-back-subtle" id="back-to-config-btn">← Back</button>
+          <div class="masonry-title">
+            <h2>Nobody Left Behind 🎉</h2>
+            <p>Add drinks, sides & treats to complete your meal</p>
+          </div>
+        </div>
+        <button class="skip-extras-btn" id="skip-extras-btn">Skip Extras →</button>
+      </div>
+
+      <!-- Horizontal Scroll Categories -->
+      <div class="masonry-categories">
+        ${renderMasonryCategory('Quick-Adds & Essentials', '🥤', addOns.quickAdds, false)}
+        ${renderMasonryCategory('Premium Hot Beverages', '☕', addOns.hotBeverages, true)}
+        ${renderMasonryCategory('Cold Beverages', '🧃', addOns.beverages, false)}
+        ${renderMasonryCategory('Fresh Salads & Veggies', '🥗', addOns.salads, false)}
+        ${renderMasonryCategory('Premium Sides', '🥔', addOns.sides, false)}
+        ${renderMasonryCategory('Sweet Endings', '🍰', addOns.desserts, false)}
+      </div>
+
+      <!-- Sticky Cart Summary -->
+      <div class="sticky-cart-summary" id="sticky-cart">
+        <div class="cart-info">
+          <span class="cart-icon">🛒</span>
+          <span class="cart-text">Your Extras: <strong id="cart-count">0</strong> items</span>
+          <span class="cart-divider">•</span>
+          <span class="cart-total" id="cart-total">$0.00</span>
+        </div>
+        <button class="btn-primary btn-large" id="continue-with-extras-btn">
+          Continue to Review
+        </button>
+      </div>
+    </div>
+  `;
+
+  initQuickAddsInteractions(addOns);
+}
+
+/**
+ * Render masonry category with horizontal scroll
+ * @param {string} title - Category title
+ * @param {string} icon - Emoji icon
+ * @param {Array} items - Array of add-on items
+ * @param {boolean} featured - Whether items should be featured (larger cards)
+ */
+function renderMasonryCategory(title, icon, items, featured = false) {
+  if (!items || items.length === 0) return '';
+
+  return `
+    <div class="masonry-category">
+      <div class="masonry-category-header">
+        <span class="category-icon">${icon}</span>
+        <span class="category-name">${title}</span>
+      </div>
+      <div class="horizontal-scroll">
+        ${items.map(item => renderMasonryCard(item, featured)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render individual masonry card
+ * @param {Object} item - Add-on item
+ * @param {boolean} featured - Whether card should be featured size
+ */
+function renderMasonryCard(item, featured = false) {
+  const cardClass = featured ? 'masonry-card featured' : 'masonry-card';
+  const price = item.price ? `$${item.price.toFixed(2)}` : 'Price varies';
+  const servingInfo = item.serves ? ` • Serves ${item.serves}` : '';
+  const packInfo = item.packSize ? ` (${item.packSize})` : '';
+
+  return `
+    <div class="${cardClass}" data-addon-id="${item.id}" data-name="${item.name}" data-price="${item.price || 0}" data-category="${item.category}">
+      <div class="masonry-card-image">
+        ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" loading="lazy">` : getIconForCategory(item.category)}
+      </div>
+      <div class="masonry-card-content">
+        <div class="masonry-card-name">${item.name}</div>
+        <div class="masonry-card-desc">${item.description || ''}${packInfo}${servingInfo}</div>
+        <div class="masonry-card-footer">
+          <div class="masonry-card-price">${price}</div>
+          <div class="quantity-controls" style="display: none;">
+            <button class="qty-btn qty-minus" data-addon-id="${item.id}">−</button>
+            <span class="qty-display" data-addon-id="${item.id}">0</span>
+            <button class="qty-btn qty-plus" data-addon-id="${item.id}">+</button>
+          </div>
+          <button class="quick-add-btn" data-addon-id="${item.id}">+ Add</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Get emoji icon for category
+ */
+function getIconForCategory(category) {
+  const icons = {
+    'quick-adds': '🥤',
+    'beverages': '🧃',
+    'hot-beverages': '☕',
+    'salads': '🥗',
+    'sides': '🥔',
+    'desserts': '🍰'
+  };
+  return `<div class="emoji-placeholder">${icons[category] || '🍴'}</div>`;
+}
+
+/**
+ * Render a category of extras with accordion (OLD - kept for backward compatibility)
+ */
+function renderExtrasCategory(title, items, icon, description) {
+  if (!items || items.length === 0) return '';
+
+  const categoryId = title.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and');
+
+  return `
+    <div class="extras-category">
+      <button class="category-header" data-category="${categoryId}">
+        <div class="category-title">
+          <span class="category-icon">${icon}</span>
+          <div>
+            <h3>${title}</h3>
+            <p class="category-desc">${description}</p>
+          </div>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </button>
+      <div class="category-items" data-category="${categoryId}" style="display: none;">
+        <div class="add-ons-grid">
+          ${items.map(item => renderAddOnCard(item, categoryId)).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render individual add-on card with quantity selector
+ */
+function renderAddOnCard(item, category) {
+  const price = item.price || 0;
+  const name = item.name || item.displayName || 'Unknown Item';
+
+  return `
+    <div class="add-on-card" data-item-id="${item.id}" data-category="${category}" data-name="${name}" data-price="${price}">
+      <div class="add-on-content">
+        <h4 class="add-on-name">${name}</h4>
+        ${item.description ? `<p class="add-on-description">${item.description}</p>` : ''}
+        <div class="add-on-price">$${price.toFixed(2)}</div>
+      </div>
+      <div class="add-on-quantity-control">
+        <button class="qty-btn qty-minus" data-item-id="${item.id}">-</button>
+        <input
+          type="number"
+          class="add-on-quantity-input"
+          data-item-id="${item.id}"
+          value="0"
+          min="0"
+          max="99">
+        <button class="qty-btn qty-plus" data-item-id="${item.id}">+</button>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Initialize quick-adds interactions
+ */
+function initQuickAddsInteractions(addOns) {
+  // Track selected items in memory with quantities
+  const selectedItems = new Map(); // { itemId: { name, price, category, quantity } }
+
+  // Quick-add button handlers - shows quantity controls
+  document.querySelectorAll('.quick-add-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const itemId = btn.dataset.addonId;
+      const card = btn.closest('.masonry-card');
+      const itemName = card.dataset.name;
+      const itemPrice = parseFloat(card.dataset.price || 0);
+      const category = card.dataset.category;
+
+      // Map category to state key
+      const categoryMap = {
+        'quick-adds': 'quickAdds',
+        'hot-beverages': 'hotBeverages',
+        'beverages': 'beverages',
+        'salads': 'salads',
+        'sides': 'sides',
+        'desserts': 'desserts'
+      };
+      const stateCategory = categoryMap[category] || 'quickAdds';
+
+      // Add item with quantity 1
+      selectedItems.set(itemId, { name: itemName, price: itemPrice, category: stateCategory, quantity: 1 });
+
+      // Hide "+ Add" button, show quantity controls
+      btn.style.display = 'none';
+      const qtyControls = card.querySelector('.quantity-controls');
+      qtyControls.style.display = 'flex';
+
+      // Update quantity display
+      const qtyDisplay = card.querySelector('.qty-display');
+      qtyDisplay.textContent = '1';
+
+      updateStickyCart(selectedItems);
+    });
+  });
+
+  // Quantity + button handlers
+  document.querySelectorAll('.qty-plus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const itemId = btn.dataset.addonId;
+      const card = btn.closest('.masonry-card');
+      const qtyDisplay = card.querySelector('.qty-display');
+
+      if (selectedItems.has(itemId)) {
+        const item = selectedItems.get(itemId);
+        item.quantity = Math.min(99, item.quantity + 1);
+        qtyDisplay.textContent = item.quantity;
+        updateStickyCart(selectedItems);
+      }
+    });
+  });
+
+  // Quantity - button handlers
+  document.querySelectorAll('.qty-minus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const itemId = btn.dataset.addonId;
+      const card = btn.closest('.masonry-card');
+      const qtyDisplay = card.querySelector('.qty-display');
+      const qtyControls = card.querySelector('.quantity-controls');
+      const addBtn = card.querySelector('.quick-add-btn');
+
+      if (selectedItems.has(itemId)) {
+        const item = selectedItems.get(itemId);
+        item.quantity = Math.max(0, item.quantity - 1);
+
+        if (item.quantity === 0) {
+          // Remove item and reset UI
+          selectedItems.delete(itemId);
+          qtyControls.style.display = 'none';
+          addBtn.style.display = 'block';
+          qtyDisplay.textContent = '0';
+        } else {
+          qtyDisplay.textContent = item.quantity;
+        }
+
+        updateStickyCart(selectedItems);
+      }
+    });
+  });
+
+  // Back button
+  document.getElementById('back-to-config-btn')?.addEventListener('click', () => {
+    boxedMealState.currentStep = 'configuration';
+    renderConfigurationStep();
+  });
+
+  // Skip button
+  document.getElementById('skip-extras-btn')?.addEventListener('click', () => {
+    // Clear extras
+    boxedMealState.extras = {
+      quickAdds: [],
+      beverages: [],
+      hotBeverages: [],
+      salads: [],
+      sides: []
+    };
+    boxedMealState.currentStep = 'review-contact';
+    renderReviewContactStep();
+  });
+
+  // Continue button
+  document.getElementById('continue-with-extras-btn')?.addEventListener('click', () => {
+    collectExtrasSelections(selectedItems);
+    boxedMealState.currentStep = 'review-contact';
+    renderReviewContactStep();
+  });
+}
+
+/**
+ * Update sticky cart summary
+ */
+function updateStickyCart(selectedItems) {
+  const stickyCart = document.getElementById('sticky-cart');
+  const cartCount = document.getElementById('cart-count');
+  const cartTotal = document.getElementById('cart-total');
+
+  if (!stickyCart || !cartCount || !cartTotal) return;
+
+  const totalQuantity = Array.from(selectedItems.values()).reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = Array.from(selectedItems.values()).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  // Update display
+  cartCount.textContent = totalQuantity;
+  cartTotal.textContent = `$${totalPrice.toFixed(2)}`;
+
+  // Show/hide cart based on selections
+  if (totalQuantity > 0) {
+    stickyCart.classList.add('visible');
+  } else {
+    stickyCart.classList.remove('visible');
+  }
+}
+
+/**
+ * Collect extras selections into state
+ */
+function collectExtrasSelections(selectedItems) {
+  const selections = {
+    quickAdds: [],
+    beverages: [],
+    hotBeverages: [],
+    salads: [],
+    sides: [],
+    desserts: []
+  };
+
+  // Convert Map to categorized arrays
+  selectedItems.forEach((item, itemId) => {
+    const category = item.category || 'quickAdds';
+    if (selections[category]) {
+      selections[category].push({
+        id: itemId,
+        quantity: item.quantity || 1,
+        name: item.name,
+        price: item.price
+      });
+    }
+  });
+
+  boxedMealState.extras = selections;
+}
+
+/**
+ * Fetch all add-ons
+ */
+async function fetchAllAddOns() {
+  try {
+    const addOns = await getAllAddOnsSplitByCategory();
+    return addOns;
+  } catch (error) {
+    console.error('Error fetching add-ons:', error);
+    // Return empty structure on error
+    return {
+      quickAdds: [],
+      beverages: [],
+      hotBeverages: [],
+      salads: [],
+      sides: []
+    };
+  }
+}
+
+// ========================================
+// Review & Contact Step Functions
+// ========================================
+
+/**
+ * Render review and contact step
+ */
+async function renderReviewContactStep() {
+  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
+
+  if (!container) {
+    console.error('Container not found');
+    return;
+  }
+
+  // Calculate pricing
+  const pricing = calculatePricing();
+  boxedMealState.pricing = pricing;
+
+  container.innerHTML = `
+    <div class="review-dashboard">
+      <!-- LEFT SIDEBAR -->
+      <div class="review-sidebar">
+        <h2 class="sidebar-title">Order Summary</h2>
+
+        <div class="total-display">
+          <div class="total-amount">$${pricing.subtotal.toFixed(2)}</div>
+          <div class="total-label">Estimated Total</div>
+        </div>
+
+        ${renderSidebarBreakdown(pricing)}
+
+        <div class="event-info">
+          <p><span class="icon">📅</span> ${boxedMealState.eventDate || 'Date TBD'}</p>
+          <p><span class="icon">🕐</span> ${boxedMealState.eventTime || 'Time TBD'}</p>
+          <p><span class="icon">👥</span> ${boxedMealState.boxCount} Guests</p>
+          ${boxedMealState.contact?.address ? `<p><span class="icon">📍</span> ${boxedMealState.contact.address}</p>` : ''}
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="review-panel">
+        <div class="panel-header">
+          <h1>📦 Order Details</h1>
+          <p>Review your complete order before submitting</p>
+        </div>
+
+        <!-- BOXED MEALS SECTION -->
+        <div class="detail-section">
+          <div class="section-header">
+            <div class="section-title">Boxed Meals</div>
+            <button class="edit-btn" id="edit-config-btn">✏️ Edit</button>
+          </div>
+
+          <div class="config-box">
+            <h4>${getBoxedMealsTitle(boxedMealState, pricing)}</h4>
+            <p class="config-subtitle">Each box contains:</p>
+            <ul class="config-list">
+              <li>${boxedMealState.currentConfig.wingCount}pc ${formatWingType(boxedMealState.currentConfig.wingType)} Wings</li>
+              <li>${formatSideName(boxedMealState.currentConfig.side)}</li>
+              <li>${formatSauceName(boxedMealState.currentConfig.sauce)}</li>
+              <li>${formatDessertName(boxedMealState.currentConfig.dessert)}</li>
+              <li>2 Dips + Bottled Water</li>
+            </ul>
+            ${pricing.customizedBoxCount > 0 ? `
+              <p style="color: #d94b1e; margin-top: 12px; font-size: 14px;">
+                <strong>Note:</strong> ${pricing.customizedBoxCount} box${pricing.customizedBoxCount > 1 ? 'es have' : ' has'} custom modifications
+              </p>
+            ` : ''}
+          </div>
+
+          <div class="price-summary">
+            <div class="price-line">
+              <span>Average per box: $${(pricing.boxesSubtotal / boxedMealState.boxCount).toFixed(2)}</span>
+              <span>Total: $${pricing.boxesSubtotal.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXTRAS SECTION -->
+        ${renderExtrasDetails()}
+
+        <!-- Contact Form -->
+        ${renderContactForm(boxedMealState.contact)}
+
+        <!-- ACTIONS -->
+        <div class="panel-actions">
+          <button class="btn-secondary btn-large" id="back-to-extras-btn">
+            ← Back to Extras
+          </button>
+          <button class="btn-primary btn-large" id="submit-order-btn">
+            Submit Quote Request →
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  initReviewContactInteractions();
+}
+
+/**
+ * Render sidebar breakdown
+ */
+function renderSidebarBreakdown(pricing) {
+  const { extras } = boxedMealState;
+
+  // Calculate category totals
+  const beveragesTotal = [...extras.beverages, ...extras.hotBeverages]
+    .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const dessertsTotal = extras.desserts
+    .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const othersTotal = [...extras.quickAdds, ...extras.salads, ...extras.sides]
+    .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  return `
+    <div class="summary-breakdown">
+      <div class="summary-item">
+        <div class="label"><span>📦</span> Meals</div>
+        <div class="amount">$${pricing.boxesSubtotal.toFixed(2)}</div>
+      </div>
+      ${beveragesTotal > 0 ? `
+      <div class="summary-item">
+        <div class="label"><span>🥤</span> Beverages</div>
+        <div class="amount">$${beveragesTotal.toFixed(2)}</div>
+      </div>` : ''}
+      ${dessertsTotal > 0 ? `
+      <div class="summary-item">
+        <div class="label"><span>🍰</span> Desserts</div>
+        <div class="amount">$${dessertsTotal.toFixed(2)}</div>
+      </div>` : ''}
+      ${othersTotal > 0 ? `
+      <div class="summary-item">
+        <div class="label"><span>➕</span> Other Add-ons</div>
+        <div class="amount">$${othersTotal.toFixed(2)}</div>
+      </div>` : ''}
+      <div class="summary-item">
+        <div class="label"><span>💵</span> Tax (8%)</div>
+        <div class="amount">$${(pricing.subtotal * 0.08).toFixed(2)}</div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render extras details for panel
+ */
+function renderExtrasDetails() {
+  const { extras } = boxedMealState;
+  const allExtras = [
+    ...extras.quickAdds,
+    ...extras.beverages,
+    ...extras.hotBeverages,
+    ...extras.salads,
+    ...extras.sides,
+    ...extras.desserts
+  ];
+
+  if (allExtras.length === 0) {
+    return `
+      <div class="detail-section">
+        <div class="section-header">
+          <div class="section-title">Extras & Add-Ons</div>
+          <button class="edit-btn" id="add-extras-btn">➕ Add Extras</button>
+        </div>
+        <p style="color: #999; text-align: center; padding: 40px 0;">No extras selected</p>
+      </div>
+    `;
+  }
+
+  // Group extras by category
+  const groupedExtras = {
+    'Cold Beverages': extras.beverages,
+    'Hot Beverages': extras.hotBeverages,
+    'Salads': extras.salads,
+    'Sides': extras.sides,
+    'Desserts': extras.desserts,
+    'Quick-Adds': extras.quickAdds
+  };
+
+  const categories = Object.entries(groupedExtras).filter(([_, items]) => items.length > 0);
+
+  const extrasTotal = allExtras.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  return `
+    <div class="detail-section">
+      <div class="section-header">
+        <div class="section-title">Extras & Add-Ons</div>
+        <button class="edit-btn" id="edit-extras-btn">✏️ Edit</button>
+      </div>
+
+      <div class="extras-grid">
+        ${categories.map(([categoryName, items]) => `
+          <div class="category-group">
+            <div class="category-title">${categoryName}</div>
+            ${items.map(item => `
+              <div class="extra-item">
+                <div class="item-info">
+                  <div class="item-name">✓ ${item.name}</div>
+                  <div class="item-calc">${item.quantity} × $${item.price.toFixed(2)}</div>
+                </div>
+                <div class="item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+              </div>
+            `).join('')}
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="extras-subtotal">
+        Extras Total: $${extrasTotal.toFixed(2)}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Calculate accurate price per box using full pricing logic
+ * (Same logic as live-preview-panel.js)
+ */
+function calculatePricePerBox(config) {
+  // Base price per box (for 6 wings)
+  let price = 12.50;
+
+  // Wing count adjustment
+  const wingCount = config.wingCount || 6;
+  if (wingCount === 10) price += 3.00;
+  else if (wingCount === 12) price += 4.50;
+
+  // Wing type adjustments
+  if (config.wingType === 'bone-in') price += 1.50;
+  if (config.wingType === 'plant-based') price += 2.00;
+
+  // Wing style adjustments (all drums or all flats upcharge)
+  if (config.wingStyle === 'all-drums' || config.wingStyle === 'all-flats') {
+    price += 1.50;
+  }
+
+  // Sauce adjustments
+  const premiumSauces = ['mango-habanero', 'hot-honey', 'ghost-pepper'];
+
+  if (config.splitSauces && config.sauces?.length === 2) {
+    // Check both sauces for premium pricing
+    if (premiumSauces.includes(config.sauces[0]?.id)) price += 0.25;
+    if (premiumSauces.includes(config.sauces[1]?.id)) price += 0.25;
+  } else if (premiumSauces.includes(config.sauce)) {
+    price += 0.50;
+  }
+
+  // Premium dessert adjustment
+  const premiumDesserts = ['creme-brulee-cheesecake', 'red-velvet-cake'];
+  if (premiumDesserts.includes(config.dessert)) price += 1.00;
+
+  return price;
+}
+
+/**
+ * Calculate pricing breakdown with accurate box pricing
+ */
+function calculatePricing() {
+  const { boxCount, currentConfig, individualOverrides, extras } = boxedMealState;
+
+  // Calculate each box individually (handling customizations)
+  let boxesSubtotal = 0;
+  let customizedBoxCount = 0;
+
+  for (let boxNum = 1; boxNum <= boxCount; boxNum++) {
+    const boxConfig = individualOverrides[boxNum] || currentConfig;
+    const boxPrice = calculatePricePerBox(boxConfig);
+    boxesSubtotal += boxPrice;
+
+    if (individualOverrides[boxNum]) {
+      customizedBoxCount++;
+    }
+  }
+
+  // Extras subtotal
+  const allExtras = [
+    ...extras.quickAdds,
+    ...extras.beverages,
+    ...extras.hotBeverages,
+    ...extras.salads,
+    ...extras.sides,
+    ...extras.desserts
+  ];
+  const extrasSubtotal = allExtras.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  const subtotal = boxesSubtotal + extrasSubtotal;
+
+  return {
+    boxesSubtotal,
+    extrasSubtotal,
+    customizedBoxCount,
+    subtotal,
+    estimatedTotal: subtotal * 1.08, // Tax estimate
+    taxRate: 0.08,
+    note: 'Final price includes setup fees, staff, delivery distance, tips, and 8% tax. We\'ll provide exact pricing in your quote.'
+  };
+}
+
+/**
+ * Generate title for boxed meals section
+ */
+function getBoxedMealsTitle(state, pricing) {
+  const { boxCount, selectedTemplate, customizedBoxCount } = state;
+
+  // If all boxes are customized or no template selected
+  if (customizedBoxCount === boxCount || !selectedTemplate || selectedTemplate.id === 'custom') {
+    return `${boxCount} Customized Individual Boxes`;
+  }
+
+  // If some boxes are customized
+  if (customizedBoxCount > 0) {
+    const templateBoxes = boxCount - customizedBoxCount;
+    return `${templateBoxes} × ${selectedTemplate.name} + ${customizedBoxCount} Customized`;
+  }
+
+  // All boxes use the template
+  return `${boxCount} × ${selectedTemplate.name}`;
+}
+
+/**
+ * Initialize review & contact interactions
+ */
+function initReviewContactInteractions() {
+  initContactFormInteractions();
+
+  // Back button
+  document.getElementById('back-to-extras-btn')?.addEventListener('click', () => {
+    boxedMealState.currentStep = 'quick-adds';
+    renderQuickAddsStep();
+  });
+
+  // Edit config button
+  document.getElementById('edit-config-btn')?.addEventListener('click', () => {
+    boxedMealState.currentStep = 'configuration';
+    renderConfigurationStep();
+  });
+
+  // Edit/Add extras buttons
+  const editExtrasBtn = document.getElementById('edit-extras-btn');
+  const addExtrasBtn = document.getElementById('add-extras-btn');
+
+  if (editExtrasBtn) {
+    editExtrasBtn.addEventListener('click', () => {
+      boxedMealState.currentStep = 'quick-adds';
+      renderQuickAddsStep();
+    });
+  }
+
+  if (addExtrasBtn) {
+    addExtrasBtn.addEventListener('click', () => {
+      boxedMealState.currentStep = 'quick-adds';
+      renderQuickAddsStep();
+    });
+  }
+
+  // Submit button
+  document.getElementById('submit-order-btn')?.addEventListener('click', handleOrderSubmit);
+}
+
+/**
+ * Handle order submission
+ */
+async function handleOrderSubmit() {
+  // Validate contact form
+  const validation = validateContactForm();
+  if (!validation.isValid) {
+    alert('Please fill in all required fields:\n\n' + validation.errors.join('\n'));
+    return;
+  }
+
+  // Collect contact data
+  boxedMealState.contact = collectContactData();
+
+  // Disable button during submission
+  const submitBtn = document.getElementById('submit-order-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+  }
+
+  // Submit to Firestore
+  try {
+    await submitBoxedMealOrder(boxedMealState);
+
+    // Show success
+    boxedMealState.currentStep = 'success';
+    showSuccessMessage();
+  } catch (error) {
+    console.error('Error submitting order:', error);
+    alert('Error submitting order. Please try again or call us at (267) 376-3113');
+
+    // Re-enable button
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Quote Request';
+    }
+  }
+}
+
+/**
+ * Submit order to Firestore
+ */
+async function submitBoxedMealOrder(state) {
+  const orderData = {
+    type: 'boxed-meals',
+    status: 'quote-requested',
+
+    // Box configuration
+    template: state.selectedTemplate?.id || 'custom',
+    templateName: state.selectedTemplate?.name || 'Custom Box',
+    boxCount: state.boxCount,
+    configuration: state.currentConfig,
+    individualOverrides: state.individualOverrides,
+
+    // Extras
+    extras: state.extras,
+
+    // Contact & delivery
+    contact: state.contact,
+
+    // Pricing
+    pricing: state.pricing,
+
+    // Metadata
+    createdAt: serverTimestamp(),
+    source: 'web-catering-flow'
+  };
+
+  const docRef = await addDoc(collection(db, 'cateringOrders'), orderData);
+
+  console.log('✅ Order submitted with ID:', docRef.id);
+
+  return docRef.id;
+}
+
+/**
+ * Show success message
+ */
+function showSuccessMessage() {
+  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
+
+  if (!container) return;
+
+  const { contact, boxCount, selectedTemplate } = boxedMealState;
+
+  container.innerHTML = `
+    <div class="success-message">
+      <div class="success-icon">✓</div>
+      <h2>Quote Request Received!</h2>
+      <p class="success-text">
+        Thank you for your interest in our boxed meals catering.
+        We'll review your order and contact you within 2 hours with a detailed quote.
+      </p>
+
+      <div class="success-details">
+        <h3>Order Summary:</h3>
+        <ul>
+          <li><strong>${boxCount}</strong> boxes of <strong>${selectedTemplate?.name || 'Custom Box'}</strong></li>
+          <li>Delivery to: <strong>${contact.deliveryAddress.city}, ${contact.deliveryAddress.state}</strong></li>
+          <li>Requested for: <strong>${contact.deliveryDate}</strong> at <strong>${contact.deliveryTime} ${contact.deliveryPeriod}</strong></li>
+          <li>Contact: <strong>${contact.name}</strong> (${contact.email})</li>
+        </ul>
+
+        <h3>What's Next:</h3>
+        <ul>
+          <li>We'll review your selections and prepare a detailed quote</li>
+          <li>You'll receive pricing and availability via email</li>
+          <li>We'll call to finalize details and answer any questions</li>
+        </ul>
+      </div>
+
+      <div class="success-actions">
+        <a href="/" class="btn-primary btn-large">Return Home</a>
+        <a href="tel:+12673763113" class="btn-secondary btn-large">Call Us: (267) 376-3113</a>
+      </div>
+    </div>
+  `;
 }
 
 // ========================================
