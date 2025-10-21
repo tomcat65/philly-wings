@@ -242,6 +242,45 @@ service cloud.firestore {
       allow write: if false; // Only Firebase Functions log syncs
     }
 
+    // Catering drafts - state persistence for authenticated users
+    match /catering-drafts/{draftId} {
+      // Extract userId from document ID (format: {userId}_{flowType})
+      function getDraftUserId() {
+        return draftId.split('_')[0];
+      }
+
+      function isStaff() {
+        return isAuthenticated() &&
+          (request.auth.token.staff == true || request.auth.token.admin == true);
+      }
+
+      function validateDraftSchema() {
+        let data = request.resource.data;
+        return data.keys().hasAll(['flowType', 'userId', 'state', 'version']) &&
+          data.flowType is string &&
+          data.flowType in ['boxed-meals', 'guided-planner'] &&
+          data.userId is string &&
+          data.state is map &&
+          data.version is string;
+      }
+
+      // Users can read/write their own drafts, staff can read all
+      allow read: if isAuthenticated() &&
+        (isOwner(getDraftUserId()) || isStaff());
+
+      allow create: if isAuthenticated() &&
+        isOwner(getDraftUserId()) &&
+        validateDraftSchema();
+
+      allow update: if isAuthenticated() &&
+        isOwner(getDraftUserId()) &&
+        validateDraftSchema() &&
+        request.resource.data.userId == resource.data.userId; // Can't change userId
+
+      allow delete: if isAuthenticated() &&
+        (isOwner(getDraftUserId()) || isStaff());
+    }
+
     // Notifications - admin only
     match /notifications/{notificationId} {
       allow read: if isAdmin(); // Admin dashboard notifications

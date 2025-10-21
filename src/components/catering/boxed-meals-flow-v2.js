@@ -5,6 +5,8 @@
 
 import { collection, query, where, getDocs, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
+import { cateringStateService } from '../../services/catering-state-service.js';
+import { openEditModal, renderBoxConfigInModal, renderContactInModal } from './edit-modal.js';
 import { renderTemplateSelector, initTemplateSelector } from './template-selector.js';
 import { renderLivePreviewPanel, updatePreviewPanel } from './live-preview-panel.js';
 import {
@@ -29,7 +31,7 @@ import {
 } from './contact-form.js';
 import { getAllAddOnsSplitByCategory } from '../../services/catering-addons-service.js';
 
-// Enhanced state management
+// Enhanced state management (will be migrated to cateringStateService)
 let boxedMealState = {
   currentStep: 'template-selection',  // template-selection | configuration | quick-adds | review-contact | success
   selectedTemplate: null,
@@ -94,8 +96,40 @@ let boxedMealState = {
     estimatedTotal: 0,
     taxRate: 0.08,
     note: 'Final price includes setup fees, staff, delivery distance, tips, and 8% tax. We\'ll provide exact pricing in your quote.'
-  }
+  },
+  // Edit mode flags
+  isEditMode: false,           // Are we editing from review?
+  editingSection: null,        // 'configuration' | 'extras' | null
+  previousStep: null           // Store where we came from for return navigation
 };
+
+let hasLoadedBoxedMealsState = false;
+let hasSubscribedToBoxedMealsUpdates = false;
+
+function getBoxedMealsWrapper() {
+  const wrapper = document.getElementById('boxed-meals-flow');
+  if (wrapper) return wrapper;
+
+  const section = document.querySelector('.boxed-meals-section');
+  if (section?.parentElement) return section.parentElement;
+
+  const flowSection = document.querySelector('.boxed-meals-flow');
+  return flowSection?.parentElement || flowSection || null;
+}
+
+function initTemplateStepInteractions() {
+  const selectorContainer = document.querySelector('.template-selector');
+  if (!selectorContainer) {
+    return;
+  }
+
+  if (selectorContainer.dataset.initialized === 'true') {
+    return;
+  }
+
+  initTemplateSelector(handleTemplateSelection);
+  selectorContainer.dataset.initialized = 'true';
+}
 
 // ========================================
 // Helper Functions - Dip Counter Conversion
@@ -146,6 +180,9 @@ export async function renderBoxedMealsFlow() {
       return await renderTemplateSelectionStep();
     case 'configuration':
       return renderConfigurationStep();
+    case 'quick-adds':
+      // Return placeholder - actual render happens in rerenderBoxedMealsView
+      return '<section class="boxed-meals-flow boxed-meals-step-quick-adds"><div class="quick-adds-step"></div></section>';
     case 'review':
       return renderReviewStep();
     default:
@@ -572,7 +609,29 @@ function renderBulkActions() {
  */
 function renderConfigurationCTA() {
   const isComplete = isConfigurationComplete();
+  const isEditing = boxedMealState.isEditMode && boxedMealState.editingSection === 'configuration';
 
+  if (isEditing) {
+    // Edit mode: Show "Return to Review" button
+    return `
+      <div class="config-cta">
+        <button
+          class="btn-primary btn-large"
+          id="return-to-review-btn"
+          ${!isComplete ? 'disabled' : ''}>
+          ✓ Save & Return to Review
+        </button>
+
+        <p class="cta-note">
+          ${isComplete
+            ? 'Changes will be saved and you\'ll return to the review dashboard.'
+            : 'Complete all sections above to save changes'}
+        </p>
+      </div>
+    `;
+  }
+
+  // Normal mode: Show "Get Your Free Quote" button
   return `
     <div class="config-cta">
       <button
@@ -614,12 +673,124 @@ function renderReviewStep() {
 /**
  * Initialize boxed meals flow interactions
  */
-export async function initBoxedMealsFlow() {
-  if (boxedMealState.currentStep === 'template-selection') {
-    initTemplateSelector(handleTemplateSelection);
-  } else if (boxedMealState.currentStep === 'configuration') {
-    initConfigurationStep();
+export async function initBoxedMealsFlow(options = {}) {
+  const { skipStateSync = false } = options;
+
+  // Load state once unless explicitly skipped
+  if (!skipStateSync && !hasLoadedBoxedMealsState) {
+    await loadStateFromService();
+    hasLoadedBoxedMealsState = true;
+  } else if (!skipStateSync && hasLoadedBoxedMealsState) {
+    await loadStateFromService();
   }
+
+  // Subscribe once for real-time sync
+  if (!hasSubscribedToBoxedMealsUpdates) {
+    cateringStateService.subscribe('boxed-meals', (newState) => {
+      console.log('🔄 Boxed meals state updated from service');
+      syncFromService(newState);
+    });
+    hasSubscribedToBoxedMealsUpdates = true;
+  }
+
+  const observedStep = detectCurrentStepFromDOM() || boxedMealState.currentStep;
+  console.log('🎬 initBoxedMealsFlow - Step to init:', observedStep);
+
+  if (observedStep === 'template-selection') {
+    initTemplateStepInteractions();
+  } else if (observedStep === 'configuration') {
+    initConfigurationStep();
+  } else if (observedStep === 'quick-adds') {
+    // Quick-adds step initializes its own handlers during render
+    console.log('ℹ️ Quick-adds step detected - handlers already attached during render');
+  } else if (observedStep === 'review-contact') {
+    initReviewContactInteractions();
+  } else {
+    console.warn('⚠️ Unknown step detected:', observedStep, '- attempting template selector init as fallback');
+    initTemplateStepInteractions();
+  }
+
+  // Safety net: if template markup exists but wasn't initialized above, attach handlers now.
+  initTemplateStepInteractions();
+}
+
+/**
+ * Load state from catering state service
+ * Syncs Firestore/localStorage → module-level state
+ */
+async function loadStateFromService() {
+  try {
+    const savedState = await cateringStateService.loadState('boxed-meals');
+    if (savedState) {
+      syncFromService(savedState);
+      console.log('✅ Loaded boxed meals state from service');
+    }
+  } catch (error) {
+    console.warn('Failed to load state from service:', error);
+  }
+}
+
+/**
+ * Sync state from service to module-level state
+ * @param {Object} serviceState - State from cateringStateService
+ */
+function syncFromService(serviceState) {
+  Object.assign(boxedMealState, serviceState);
+}
+
+function detectCurrentStepFromDOM() {
+  if (document.querySelector('.boxed-meals-step-templates')) {
+    return 'template-selection';
+  }
+  if (document.querySelector('.boxed-meals-step-configuration')) {
+    return 'configuration';
+  }
+  if (document.querySelector('.quick-adds-step')) {
+    return 'quick-adds';
+  }
+  if (document.querySelector('.review-dashboard')) {
+    return 'review-contact';
+  }
+  return null;
+}
+
+async function rerenderBoxedMealsView(options = {}) {
+  const { skipStateSync = true } = options;
+  const wrapper = getBoxedMealsWrapper();
+  if (!wrapper) return;
+
+  // quick-adds step handles its own DOM manipulation
+  if (boxedMealState.currentStep === 'quick-adds') {
+    await renderQuickAddsStep();
+  } else {
+    wrapper.innerHTML = await renderBoxedMealsFlow();
+  }
+  await initBoxedMealsFlow({ skipStateSync });
+}
+
+/**
+ * Save current state to service
+ * Module-level state → Firestore/localStorage
+ */
+async function saveStateToService() {
+  try {
+    await cateringStateService.saveState('boxed-meals', boxedMealState);
+  } catch (error) {
+    console.warn('Failed to save state to service:', error);
+  }
+}
+
+/**
+ * Debounced auto-save for configuration changes
+ * Prevents excessive Firestore writes during rapid user interactions
+ */
+let autoSaveTimeout = null;
+function debouncedAutoSave(delay = 1000) {
+  clearTimeout(autoSaveTimeout);
+  autoSaveTimeout = setTimeout(async () => {
+    await saveStateToService();
+    console.log('💾 Auto-saved configuration changes');
+  }, delay);
 }
 
 /**
@@ -670,6 +841,7 @@ function initConfigurationStep() {
   // Box count controls - Segmented Control
   const segmentBtns = document.querySelectorAll('.segment-btn');
   const customInput = document.getElementById('custom-count-input');
+  const customSegment = document.querySelector('.segment-custom');
 
   segmentBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -734,7 +906,6 @@ function initConfigurationStep() {
   });
 
   // Custom segment click handler - activate and focus input
-  const customSegment = document.querySelector('.segment-custom');
   customSegment?.addEventListener('click', (e) => {
     // Always allow clicks on the input to pass through
     if (e.target === customInput) {
@@ -777,6 +948,9 @@ function initConfigurationStep() {
 
   // Quote request
   document.getElementById('request-quote-btn')?.addEventListener('click', handleQuoteRequest);
+
+  // Return to review (edit mode)
+  document.getElementById('return-to-review-btn')?.addEventListener('click', returnToReview);
 }
 
 /**
@@ -808,12 +982,10 @@ async function handleTemplateSelection(template) {
   // Move to configuration step
   boxedMealState.currentStep = 'configuration';
 
-  // Re-render
-  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
-  if (container) {
-    container.innerHTML = await renderBoxedMealsFlow();
-    await initBoxedMealsFlow();
-  }
+  // Save state to service
+  await saveStateToService();
+
+  await rerenderBoxedMealsView();
 }
 
 /**
@@ -928,6 +1100,9 @@ function handleSauceSelection(sauceId) {
 
   updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
   validateAndUpdateCTA();
+
+  // Auto-save with debounce
+  debouncedAutoSave();
 }
 
 function handleSauceOnSideToggle(checked) {
@@ -961,12 +1136,14 @@ function handleSideSelection(sideId) {
   boxedMealState.currentConfig.side = sideId;
   updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
   validateAndUpdateCTA();
+  debouncedAutoSave();
 }
 
 function handleDessertSelection(dessertId) {
   boxedMealState.currentConfig.dessert = dessertId;
   updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
   validateAndUpdateCTA();
+  debouncedAutoSave();
 }
 
 function displayDipValidationFeedback(selectedCount) {
@@ -1090,7 +1267,9 @@ function generateIndividualBoxes() {
   const boxes = [];
 
   for (let i = 1; i <= safeCount; i++) {
-    const boxConfig = boxedMealState.individualOverrides[i] || { ...boxedMealState.currentConfig };
+    const boxConfig = boxedMealState.individualOverrides[i]
+      ? cloneBoxConfig(boxedMealState.individualOverrides[i])
+      : cloneBoxConfig(boxedMealState.currentConfig);
     boxes.push(renderIndividualBox(i, boxConfig, highlightBoxNumber === i));
   }
 
@@ -1122,6 +1301,18 @@ function generateIndividualBoxes() {
       }, 1800);
     });
   }
+}
+
+function cloneBoxConfig(config) {
+  const source = config
+    ? { ...config }
+    : { ...(boxedMealState.currentConfig || {}) };
+  return {
+    ...source,
+    dips: Array.isArray(source.dips) ? [...source.dips] : [],
+    sauces: Array.isArray(source.sauces) ? source.sauces.map(sauce => ({ ...sauce })) : [],
+    boxSpecialInstructions: source.boxSpecialInstructions || ''
+  };
 }
 
 /**
@@ -1240,26 +1431,19 @@ function initIndividualBoxAccordions() {
  */
 function customizeIndividualBox(boxNumber) {
   // Get current config for this box (either override or bulk)
-  const baseConfig = boxedMealState.individualOverrides[boxNumber]
-    || { ...boxedMealState.currentConfig };
-
-  const currentBoxConfig = {
-    ...baseConfig,
-    dips: Array.isArray(baseConfig.dips) ? [...baseConfig.dips] : [],
-    sauces: Array.isArray(baseConfig.sauces)
-      ? baseConfig.sauces.map(sauce => ({ ...sauce }))
-      : [],
-    boxSpecialInstructions: baseConfig.boxSpecialInstructions || ''
-  };
-
-  // Mark as customized
-  boxedMealState.individualOverrides[boxNumber] = currentBoxConfig;
+  const existingOverride = boxedMealState.individualOverrides[boxNumber];
+  const baseConfig = cloneBoxConfig(existingOverride || boxedMealState.currentConfig);
+  const workingConfig = cloneBoxConfig(baseConfig);
 
   // Replace accordion content with editable form
   const content = document.querySelector(`.box-accordion-content[data-box-number="${boxNumber}"]`);
   if (content) {
-    content.innerHTML = renderIndividualBoxEditor(boxNumber, currentBoxConfig);
-    initIndividualBoxEditor(boxNumber);
+    content.innerHTML = renderIndividualBoxEditor(boxNumber, workingConfig);
+    initIndividualBoxEditor(
+      boxNumber,
+      workingConfig,
+      existingOverride ? cloneBoxConfig(existingOverride) : null
+    );
   }
 }
 
@@ -1434,8 +1618,7 @@ function renderIndividualBoxEditor(boxNumber, config) {
 /**
  * Initialize individual box editor interactions
  */
-function initIndividualBoxEditor(boxNumber) {
-  const config = boxedMealState.individualOverrides[boxNumber];
+function initIndividualBoxEditor(boxNumber, config, originalConfig = null) {
   const editorRoot = document.querySelector(`.individual-box-editor[data-box-editor="${boxNumber}"]`);
   if (!editorRoot) return;
 
@@ -1592,6 +1775,9 @@ function initIndividualBoxEditor(boxNumber) {
         return;
       }
 
+      // Persist override state
+      boxedMealState.individualOverrides[boxNumber] = cloneBoxConfig(config);
+
       // Export state to window for pricing panel access
       window.boxedMealState = boxedMealState;
 
@@ -1599,6 +1785,9 @@ function initIndividualBoxEditor(boxNumber) {
       updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
 
       boxedMealState.lastSavedBoxNumber = boxNumber;
+
+      // Persist to service (debounced)
+      debouncedAutoSave();
 
       // Refresh the accordion to show updated summary
       generateIndividualBoxes();
@@ -1609,6 +1798,12 @@ function initIndividualBoxEditor(boxNumber) {
   const cancelBtn = editorRoot.querySelector(`.btn-cancel-edit[data-box="${boxNumber}"]`);
   if (cancelBtn) {
     cancelBtn.addEventListener('click', () => {
+      if (originalConfig) {
+        boxedMealState.individualOverrides[boxNumber] = cloneBoxConfig(originalConfig);
+      } else {
+        delete boxedMealState.individualOverrides[boxNumber];
+      }
+
       // Refresh without saving (revert to previous state)
       generateIndividualBoxes();
     });
@@ -1631,6 +1826,9 @@ function initIndividualBoxEditor(boxNumber) {
 function resetIndividualBox(boxNumber) {
   delete boxedMealState.individualOverrides[boxNumber];
 
+  // Persist reset
+  debouncedAutoSave();
+
   // Refresh drawer
   generateIndividualBoxes();
 
@@ -1647,11 +1845,7 @@ function resetIndividualBox(boxNumber) {
  */
 async function goBackToTemplates() {
   boxedMealState.currentStep = 'template-selection';
-  const container = document.querySelector('.boxed-meals-flow');
-  if (container) {
-    container.innerHTML = await renderBoxedMealsFlow();
-    await initBoxedMealsFlow();
-  }
+  await rerenderBoxedMealsView();
 }
 
 function resetToTemplate() {
@@ -1672,7 +1866,28 @@ function handleQuoteRequest() {
 
   // Transition to quick-adds step
   boxedMealState.currentStep = 'quick-adds';
-  renderQuickAddsStep();
+  return renderQuickAddsStep();
+}
+
+/**
+ * Return to review dashboard after editing
+ * Clears edit mode flags and navigates back
+ */
+async function returnToReview() {
+  // Clear edit mode flags
+  boxedMealState.isEditMode = false;
+  boxedMealState.editingSection = null;
+  boxedMealState.previousStep = null;
+
+  // Save state to service
+  await saveStateToService();
+
+  // Navigate to review-contact step
+  boxedMealState.currentStep = 'review-contact';
+  await renderReviewContactStep();
+
+  // Show success feedback
+  console.log('✓ Changes saved, returned to review dashboard');
 }
 
 // ========================================
@@ -1813,9 +2028,8 @@ function formatDessertName(dessert) {
  * Render quick-adds/extras step
  */
 async function renderQuickAddsStep() {
-  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
-
-  if (!container) {
+  const wrapper = getBoxedMealsWrapper();
+  if (!wrapper) {
     console.error('Container not found');
     return;
   }
@@ -1823,8 +2037,9 @@ async function renderQuickAddsStep() {
   // Fetch ALL add-ons (boxed meals = premium tier)
   const addOns = await fetchAllAddOns();
 
-  container.innerHTML = `
-    <div class="quick-adds-step masonry-layout">
+  wrapper.innerHTML = `
+    <section class="boxed-meals-flow boxed-meals-step-quick-adds">
+      <div class="quick-adds-step masonry-layout">
       <!-- Masonry Header -->
       <div class="masonry-header">
         <div class="masonry-header-content">
@@ -1855,11 +2070,18 @@ async function renderQuickAddsStep() {
           <span class="cart-divider">•</span>
           <span class="cart-total" id="cart-total">$0.00</span>
         </div>
-        <button class="btn-primary btn-large" id="continue-with-extras-btn">
-          Continue to Review
-        </button>
+        ${boxedMealState.isEditMode && boxedMealState.editingSection === 'extras' ? `
+          <button class="btn-primary btn-large" id="return-to-review-from-extras-btn">
+            ✓ Save & Return to Review
+          </button>
+        ` : `
+          <button class="btn-primary btn-large" id="continue-with-extras-btn">
+            Continue to Review
+          </button>
+        `}
       </div>
-    </div>
+      </div>
+    </section>
   `;
 
   initQuickAddsInteractions(addOns);
@@ -2001,6 +2223,49 @@ function initQuickAddsInteractions(addOns) {
   // Track selected items in memory with quantities
   const selectedItems = new Map(); // { itemId: { name, price, category, quantity } }
 
+  // Hydrate selectedItems from existing state (critical for edit mode)
+  if (boxedMealState.extras) {
+    const categoryMap = {
+      'quickAdds': 'quick-adds',
+      'hotBeverages': 'hot-beverages',
+      'beverages': 'beverages',
+      'salads': 'salads',
+      'sides': 'sides',
+      'desserts': 'desserts'
+    };
+
+    // Iterate through all extras categories
+    Object.entries(boxedMealState.extras).forEach(([stateCategory, items]) => {
+      if (Array.isArray(items)) {
+        items.forEach(item => {
+          if (item.id && item.quantity > 0) {
+            selectedItems.set(item.id, {
+              name: item.name,
+              price: item.price,
+              category: stateCategory,
+              quantity: item.quantity
+            });
+
+            // Update UI to reflect existing selection
+            const card = document.querySelector(`.masonry-card[data-addon-id="${item.id}"]`);
+            if (card) {
+              const addBtn = card.querySelector('.quick-add-btn');
+              const qtyControls = card.querySelector('.quantity-controls');
+              const qtyDisplay = card.querySelector('.qty-display');
+
+              if (addBtn) addBtn.style.display = 'none';
+              if (qtyControls) qtyControls.style.display = 'flex';
+              if (qtyDisplay) qtyDisplay.textContent = item.quantity;
+            }
+          }
+        });
+      }
+    });
+
+    // Update sticky cart with hydrated items
+    updateStickyCart(selectedItems);
+  }
+
   // Quick-add button handlers - shows quantity controls
   document.querySelectorAll('.quick-add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2082,13 +2347,13 @@ function initQuickAddsInteractions(addOns) {
   });
 
   // Back button
-  document.getElementById('back-to-config-btn')?.addEventListener('click', () => {
+  document.getElementById('back-to-config-btn')?.addEventListener('click', async () => {
     boxedMealState.currentStep = 'configuration';
-    renderConfigurationStep();
+    await rerenderBoxedMealsView();
   });
 
   // Skip button
-  document.getElementById('skip-extras-btn')?.addEventListener('click', () => {
+  document.getElementById('skip-extras-btn')?.addEventListener('click', async () => {
     // Clear extras
     boxedMealState.extras = {
       quickAdds: [],
@@ -2098,14 +2363,20 @@ function initQuickAddsInteractions(addOns) {
       sides: []
     };
     boxedMealState.currentStep = 'review-contact';
-    renderReviewContactStep();
+    await renderReviewContactStep();
   });
 
   // Continue button
-  document.getElementById('continue-with-extras-btn')?.addEventListener('click', () => {
+  document.getElementById('continue-with-extras-btn')?.addEventListener('click', async () => {
     collectExtrasSelections(selectedItems);
     boxedMealState.currentStep = 'review-contact';
-    renderReviewContactStep();
+    await renderReviewContactStep();
+  });
+
+  // Return to review button (edit mode)
+  document.getElementById('return-to-review-from-extras-btn')?.addEventListener('click', async () => {
+    collectExtrasSelections(selectedItems);
+    await returnToReview();
   });
 }
 
@@ -2191,9 +2462,8 @@ async function fetchAllAddOns() {
  * Render review and contact step
  */
 async function renderReviewContactStep() {
-  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
-
-  if (!container) {
+  const wrapper = getBoxedMealsWrapper();
+  if (!wrapper) {
     console.error('Container not found');
     return;
   }
@@ -2202,8 +2472,9 @@ async function renderReviewContactStep() {
   const pricing = calculatePricing();
   boxedMealState.pricing = pricing;
 
-  container.innerHTML = `
-    <div class="review-dashboard">
+  wrapper.innerHTML = `
+    <section class="boxed-meals-flow boxed-meals-step-review-contact">
+      <div class="review-dashboard">
       <!-- LEFT SIDEBAR -->
       <div class="review-sidebar">
         <h2 class="sidebar-title">Order Summary</h2>
@@ -2265,8 +2536,13 @@ async function renderReviewContactStep() {
         <!-- EXTRAS SECTION -->
         ${renderExtrasDetails()}
 
-        <!-- Contact Form -->
-        ${renderContactForm(boxedMealState.contact)}
+        <!-- CONTACT FORM SECTION -->
+        <div class="detail-section">
+          <div class="section-header">
+            <div class="section-title">Delivery & Contact Details</div>
+          </div>
+          ${renderContactForm(boxedMealState.contact)}
+        </div>
 
         <!-- ACTIONS -->
         <div class="panel-actions">
@@ -2278,7 +2554,7 @@ async function renderReviewContactStep() {
           </button>
         </div>
       </div>
-    </div>
+    </section>
   `;
 
   initReviewContactInteractions();
@@ -2511,19 +2787,28 @@ function initReviewContactInteractions() {
 
   // Back button - return to extras selection
   document.getElementById('back-to-extras-btn')?.addEventListener('click', () => {
+    captureContactDraft();
     handleEditTransition('quick-adds', 'Returning to extras selection...');
   });
 
-  // Edit config button - return to box configuration
+  // Edit config button - navigate back to configuration step
   document.getElementById('edit-config-btn')?.addEventListener('click', () => {
-    handleEditTransition('configuration', 'Returning to box configuration...');
+    captureContactDraft();
+    boxedMealState.isEditMode = true;
+    boxedMealState.editingSection = 'configuration';
+    boxedMealState.previousStep = 'review-contact';
+    handleEditTransition('configuration', 'Editing box configuration...');
   });
 
-  // Edit extras button - return to extras with current selections
+  // Edit extras button - navigate back to extras step
   const editExtrasBtn = document.getElementById('edit-extras-btn');
   if (editExtrasBtn) {
     editExtrasBtn.addEventListener('click', () => {
-      handleEditTransition('quick-adds', 'Returning to extras selection...');
+      captureContactDraft();
+      boxedMealState.isEditMode = true;
+      boxedMealState.editingSection = 'extras';
+      boxedMealState.previousStep = 'review-contact';
+      handleEditTransition('quick-adds', 'Editing order extras...');
     });
   }
 
@@ -2531,6 +2816,7 @@ function initReviewContactInteractions() {
   const addExtrasBtn = document.getElementById('add-extras-btn');
   if (addExtrasBtn) {
     addExtrasBtn.addEventListener('click', () => {
+      captureContactDraft();
       handleEditTransition('quick-adds', 'Adding extras to your order...');
     });
   }
@@ -2539,11 +2825,21 @@ function initReviewContactInteractions() {
   document.getElementById('submit-order-btn')?.addEventListener('click', handleOrderSubmit);
 }
 
+function captureContactDraft() {
+  try {
+    boxedMealState.contact = collectContactData();
+    debouncedAutoSave();
+  } catch (error) {
+    console.warn('Could not collect contact data:', error);
+  }
+}
+
 /**
  * Handle smooth transition when editing from review screen
  */
 function handleEditTransition(targetStep, message) {
-  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
+  const hostSection = document.querySelector('.boxed-meals-flow');
+  const container = hostSection || getBoxedMealsWrapper();
   if (!container) return;
 
   // Show transition message
@@ -2561,15 +2857,10 @@ function handleEditTransition(targetStep, message) {
   container.style.opacity = '0.5';
 
   // Navigate after brief delay
-  setTimeout(() => {
+  setTimeout(async () => {
     boxedMealState.currentStep = targetStep;
 
-    // Render appropriate step
-    if (targetStep === 'configuration') {
-      renderConfigurationStep();
-    } else if (targetStep === 'quick-adds') {
-      renderQuickAddsStep();
-    }
+    await rerenderBoxedMealsView();
 
     // Remove message and restore opacity
     messageEl.remove();
@@ -2593,6 +2884,9 @@ async function handleOrderSubmit() {
 
   // Collect contact data
   boxedMealState.contact = collectContactData();
+
+  // Save state with contact info
+  await saveStateToService();
 
   // Disable button during submission
   const submitBtn = document.getElementById('submit-order-btn');
@@ -2660,14 +2954,14 @@ async function submitBoxedMealOrder(state) {
  * Show success message
  */
 function showSuccessMessage() {
-  const container = document.querySelector('.boxed-meals-section') || document.querySelector('.boxed-meals-flow');
-
-  if (!container) return;
+  const wrapper = getBoxedMealsWrapper();
+  if (!wrapper) return;
 
   const { contact, boxCount, selectedTemplate } = boxedMealState;
 
-  container.innerHTML = `
-    <div class="success-message">
+  wrapper.innerHTML = `
+    <section class="boxed-meals-flow boxed-meals-step-success">
+      <div class="success-message">
       <div class="success-icon">✓</div>
       <h2>Quote Request Received!</h2>
       <p class="success-text">
@@ -2696,7 +2990,8 @@ function showSuccessMessage() {
         <a href="/" class="btn-primary btn-large">Return Home</a>
         <a href="tel:+12673763113" class="btn-secondary btn-large">Call Us: (267) 376-3113</a>
       </div>
-    </div>
+      </div>
+    </section>
   `;
 }
 

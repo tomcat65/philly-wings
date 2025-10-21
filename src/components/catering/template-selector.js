@@ -130,42 +130,64 @@ function renderCustomOption() {
  * Initialize template selector interactions
  */
 export function initTemplateSelector(onTemplateSelect) {
+  console.log('🔧 initTemplateSelector called, callback:', typeof onTemplateSelect);
+
   const templateCards = document.querySelectorAll('.template-card');
   const selectButtons = document.querySelectorAll('.btn-template-select');
 
+  console.log(`📋 Found ${templateCards.length} template cards`);
+  console.log(`📋 Found ${selectButtons.length} select buttons`);
+
   // Card click handlers
-  templateCards.forEach(card => {
+  templateCards.forEach((card, index) => {
+    console.log(`✅ Attaching card click handler #${index + 1}, templateId:`, card.dataset.templateId);
     card.addEventListener('click', (e) => {
+      console.log('🖱️ Card clicked!', card.dataset.templateId);
       // Don't trigger if button was clicked (button has its own handler)
       if (!e.target.closest('.btn-template-select')) {
         const templateId = card.dataset.templateId;
+        console.log('📞 Calling selectTemplate for card:', templateId);
         selectTemplate(templateId, onTemplateSelect);
       }
     });
   });
 
   // Button click handlers
-  selectButtons.forEach(button => {
+  selectButtons.forEach((button, index) => {
+    console.log(`✅ Attaching button click handler #${index + 1}, templateId:`, button.dataset.templateId);
     button.addEventListener('click', (e) => {
+      console.log('🖱️ Button clicked!', button.dataset.templateId);
       e.stopPropagation();
       const templateId = button.dataset.templateId;
+      console.log('📞 Calling selectTemplate for button:', templateId);
       selectTemplate(templateId, onTemplateSelect);
     });
   });
+
+  console.log('✅ Template selector initialization complete');
 }
 
 /**
  * Handle template selection
  */
 async function selectTemplate(templateId, callback) {
+  console.log('🎯 selectTemplate called:', { templateId, callbackType: typeof callback });
+
   // Add loading state
-  const button = document.querySelector(`[data-template-id="${templateId}"] .btn-template-select`);
-  const originalText = button.textContent;
-  button.textContent = 'Loading...';
-  button.disabled = true;
+  const button = document.querySelector(`.btn-template-select[data-template-id="${templateId}"]`);
+  console.log('🔍 Button found:', button ? 'YES' : 'NO');
+  let originalText = '';
+
+  if (button) {
+    originalText = button.textContent;
+    button.textContent = 'Loading...';
+    button.disabled = true;
+    console.log('⏳ Button set to loading state');
+  }
 
   try {
     if (templateId === 'custom') {
+      console.log('📦 Custom template selected');
       // Custom template - no defaults
       callback({
         id: 'custom',
@@ -173,14 +195,19 @@ async function selectTemplate(templateId, callback) {
         defaultConfig: null
       });
     } else {
+      console.log('📦 Fetching template:', templateId);
       // Fetch full template data
       const template = await fetchTemplateById(templateId);
+      console.log('✅ Template fetched:', template);
+      console.log('📞 Calling callback with template');
       callback(template);
     }
   } catch (error) {
-    console.error('Error loading template:', error);
-    button.textContent = originalText;
-    button.disabled = false;
+    console.error('❌ Error loading template:', error);
+    if (button) {
+      button.textContent = originalText;
+      button.disabled = false;
+    }
     alert('Failed to load template. Please try again.');
   }
 }
