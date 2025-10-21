@@ -9,6 +9,7 @@ import { cateringStateService } from '../../services/catering-state-service.js';
 import { openEditModal, renderBoxConfigInModal, renderContactInModal } from './edit-modal.js';
 import { renderTemplateSelector, initTemplateSelector } from './template-selector.js';
 import { renderLivePreviewPanel, updatePreviewPanel } from './live-preview-panel.js';
+import { renderCondensedDashboard, updateCondensedDashboard, initCondensedDashboard } from './condensed-dashboard.js';
 import {
   renderPhotoCardSelector,
   initPhotoCardSelector,
@@ -219,9 +220,9 @@ function renderConfigurationStep() {
           ${renderConfigurationCTA()}
         </div>
 
-        <!-- Right: Live Preview Panel (40%) -->
+        <!-- Right: Condensed Dashboard (40%) -->
         <div class="configuration-sidebar">
-          ${renderLivePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount)}
+          ${renderCondensedDashboard(boxedMealState, false)}
         </div>
       </div>
     </section>
@@ -951,6 +952,9 @@ function initConfigurationStep() {
 
   // Return to review (edit mode)
   document.getElementById('return-to-review-btn')?.addEventListener('click', returnToReview);
+
+  // Initialize condensed dashboard
+  initCondensedDashboard();
 }
 
 /**
@@ -1013,7 +1017,7 @@ function handleWingCountChange(newCount) {
     initConfigurationStep();
   }
 
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 }
 
@@ -1045,13 +1049,13 @@ function handleSplitSaucesToggle(enabled) {
     }
   }
 
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 }
 
 function handleSauceSplitChange({ sauces }) {
   boxedMealState.currentConfig.sauces = sauces;
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 }
 
@@ -1072,7 +1076,7 @@ function handleWingSelection(wingType) {
     initConfigurationStep();
   }
 
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 }
 
@@ -1084,7 +1088,7 @@ function handleWingStyleChange(style) {
     btn.classList.toggle('style-active', btn.dataset.wingStyle === style);
   });
 
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   console.log('Wing style selected:', style);
 }
 
@@ -1098,7 +1102,7 @@ function handleSauceSelection(sauceId) {
     initConfigurationStep();
   }
 
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 
   // Auto-save with debounce
@@ -1108,13 +1112,13 @@ function handleSauceSelection(sauceId) {
 function handleSauceOnSideToggle(checked) {
   boxedMealState.currentConfig.sauceOnSide = checked;
   console.log('Sauce on side:', checked ? 'Yes' : 'No');
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
 }
 
 function handleDipsSelection(dipsArray) {
   boxedMealState.currentConfig.dips = dipsArray;
   displayDipValidationFeedback(dipsArray?.length || 0);
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 }
 
@@ -1128,20 +1132,20 @@ function handleDipCountChange(dipsArray, dipCounts) {
   boxedMealState.currentConfig.dips = dipsArray;
 
   // Update preview panel
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 }
 
 function handleSideSelection(sideId) {
   boxedMealState.currentConfig.side = sideId;
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
   debouncedAutoSave();
 }
 
 function handleDessertSelection(dessertId) {
   boxedMealState.currentConfig.dessert = dessertId;
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
   debouncedAutoSave();
 }
@@ -1204,7 +1208,7 @@ function updateBoxCount(count) {
     btn.classList.toggle('active', presetValue === clampedCount);
   });
 
-  updatePreviewPanel(boxedMealState.currentConfig, clampedCount);
+  updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
 }
 
@@ -1227,7 +1231,7 @@ function handleSpecialInstructionsInput(e) {
   boxedMealState.currentConfig.specialInstructions = value;
 
   // Update preview
-  updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+  updateCondensedDashboard(boxedMealState);
 }
 
 /**
@@ -1782,7 +1786,7 @@ function initIndividualBoxEditor(boxNumber, config, originalConfig = null) {
       window.boxedMealState = boxedMealState;
 
       // Update pricing panel to show itemized pricing
-      updatePreviewPanel(boxedMealState.currentConfig, boxedMealState.boxCount);
+      updateCondensedDashboard(boxedMealState);
 
       boxedMealState.lastSavedBoxNumber = boxNumber;
 
@@ -2039,47 +2043,49 @@ async function renderQuickAddsStep() {
 
   wrapper.innerHTML = `
     <section class="boxed-meals-flow boxed-meals-step-quick-adds">
-      <div class="quick-adds-step masonry-layout">
-      <!-- Masonry Header -->
-      <div class="masonry-header">
-        <div class="masonry-header-content">
-          <button class="btn-back-subtle" id="back-to-config-btn">← Back</button>
-          <div class="masonry-title">
-            <h2>Nobody Left Behind 🎉</h2>
-            <p>Add drinks, sides & treats to complete your meal</p>
+      <div class="quick-adds-container">
+        <!-- Left: Extras Selection (60%) -->
+        <div class="quick-adds-main">
+          <!-- Masonry Header -->
+          <div class="masonry-header">
+            <div class="masonry-header-content">
+              <button class="btn-back-subtle" id="back-to-config-btn">← Back</button>
+              <div class="masonry-title">
+                <h2>Nobody Left Behind 🎉</h2>
+                <p>Add drinks, sides & treats to complete your meal</p>
+              </div>
+            </div>
+            <button class="skip-extras-btn" id="skip-extras-btn">Skip Extras →</button>
+          </div>
+
+          <!-- Horizontal Scroll Categories -->
+          <div class="masonry-categories">
+            ${renderMasonryCategory('Quick-Adds & Essentials', '🥤', addOns.quickAdds, false)}
+            ${renderMasonryCategory('Premium Hot Beverages', '☕', addOns.hotBeverages, true)}
+            ${renderMasonryCategory('Cold Beverages', '🧃', addOns.beverages, false)}
+            ${renderMasonryCategory('Fresh Salads & Veggies', '🥗', addOns.salads, false)}
+            ${renderMasonryCategory('Premium Sides', '🥔', addOns.sides, false)}
+            ${renderMasonryCategory('Sweet Endings', '🍰', addOns.desserts, false)}
+          </div>
+
+          <!-- Continue/Return Button (moved to bottom of left panel) -->
+          <div class="quick-adds-cta">
+            ${boxedMealState.isEditMode && boxedMealState.editingSection === 'extras' ? `
+              <button class="btn-primary btn-large" id="return-to-review-from-extras-btn">
+                ✓ Save & Return to Review
+              </button>
+            ` : `
+              <button class="btn-primary btn-large" id="continue-with-extras-btn">
+                Continue to Review
+              </button>
+            `}
           </div>
         </div>
-        <button class="skip-extras-btn" id="skip-extras-btn">Skip Extras →</button>
-      </div>
 
-      <!-- Horizontal Scroll Categories -->
-      <div class="masonry-categories">
-        ${renderMasonryCategory('Quick-Adds & Essentials', '🥤', addOns.quickAdds, false)}
-        ${renderMasonryCategory('Premium Hot Beverages', '☕', addOns.hotBeverages, true)}
-        ${renderMasonryCategory('Cold Beverages', '🧃', addOns.beverages, false)}
-        ${renderMasonryCategory('Fresh Salads & Veggies', '🥗', addOns.salads, false)}
-        ${renderMasonryCategory('Premium Sides', '🥔', addOns.sides, false)}
-        ${renderMasonryCategory('Sweet Endings', '🍰', addOns.desserts, false)}
-      </div>
-
-      <!-- Sticky Cart Summary -->
-      <div class="sticky-cart-summary" id="sticky-cart">
-        <div class="cart-info">
-          <span class="cart-icon">🛒</span>
-          <span class="cart-text">Your Extras: <strong id="cart-count">0</strong> items</span>
-          <span class="cart-divider">•</span>
-          <span class="cart-total" id="cart-total">$0.00</span>
+        <!-- Right: Condensed Dashboard (40%) -->
+        <div class="quick-adds-sidebar">
+          ${renderCondensedDashboard(boxedMealState, false)}
         </div>
-        ${boxedMealState.isEditMode && boxedMealState.editingSection === 'extras' ? `
-          <button class="btn-primary btn-large" id="return-to-review-from-extras-btn">
-            ✓ Save & Return to Review
-          </button>
-        ` : `
-          <button class="btn-primary btn-large" id="continue-with-extras-btn">
-            Continue to Review
-          </button>
-        `}
-      </div>
       </div>
     </section>
   `;
@@ -2378,31 +2384,20 @@ function initQuickAddsInteractions(addOns) {
     collectExtrasSelections(selectedItems);
     await returnToReview();
   });
+
+  // Initialize condensed dashboard
+  initCondensedDashboard();
 }
 
 /**
- * Update sticky cart summary
+ * Update sticky cart summary and condensed dashboard
  */
 function updateStickyCart(selectedItems) {
-  const stickyCart = document.getElementById('sticky-cart');
-  const cartCount = document.getElementById('cart-count');
-  const cartTotal = document.getElementById('cart-total');
+  // Update extras in state for dashboard
+  collectExtrasSelections(selectedItems);
 
-  if (!stickyCart || !cartCount || !cartTotal) return;
-
-  const totalQuantity = Array.from(selectedItems.values()).reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = Array.from(selectedItems.values()).reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-  // Update display
-  cartCount.textContent = totalQuantity;
-  cartTotal.textContent = `$${totalPrice.toFixed(2)}`;
-
-  // Show/hide cart based on selections
-  if (totalQuantity > 0) {
-    stickyCart.classList.add('visible');
-  } else {
-    stickyCart.classList.remove('visible');
-  }
+  // Update condensed dashboard with new state
+  updateCondensedDashboard(boxedMealState);
 }
 
 /**
