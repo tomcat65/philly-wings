@@ -701,6 +701,24 @@
   background: #fff7ed;
 }
 
+/* Special cards (No Sauce, No Dips, etc.) */
+.photo-card.card-special {
+  border-style: dashed;
+  border-color: var(--gray-300);
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+.photo-card.card-special:hover {
+  border-color: var(--gray-400);
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.photo-card.card-special.card-selected {
+  border-color: var(--gray-500);
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  border-style: solid;
+}
+
 .photo-card.card-clicked {
   animation: cardPulse 300ms ease-out;
 }
@@ -1739,6 +1757,62 @@
   font-weight: 400;
 }
 
+/* No Dips Toggle */
+.no-dips-toggle {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--gray-300);
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  appearance: none;
+  background: var(--gray-300);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggle-switch input[type="checkbox"]:checked {
+  background: var(--gray-600);
+}
+
+.toggle-switch input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: transform var(--transition-fast);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input[type="checkbox"]:checked::before {
+  transform: translateX(24px);
+}
+
+.toggle-label {
+  font-weight: 600;
+  color: var(--gray-700);
+  flex: 1;
+}
+
 /* ========================================
    Sauce Split Selector
    ======================================== */
@@ -2714,6 +2788,30 @@
   color: var(--philly-orange);
 }
 
+/* Per Person Cost Row */
+.total-row-per-person {
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px dashed var(--gray-300);
+  background: var(--gray-50);
+  padding: 12px;
+  border-radius: 6px;
+  margin-left: -12px;
+  margin-right: -12px;
+}
+
+.total-label-per-person {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.total-value-per-person {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--philly-blue);
+}
+
 /* Budget Indicator */
 .budget-indicator {
   padding: 16px 20px;
@@ -2834,4 +2932,93 @@
   .dashboard-expand-btn {
     display: none;
   }
+}
+
+/* ========================================
+   Pack Variant Cards (Option B: Compact Rows)
+   ======================================== */
+
+.pack-variant-card .masonry-card-content {
+  padding-bottom: 0;
+}
+
+.pack-variant-selectors {
+  margin-top: var(--spacing-md);
+  border-top: 1px solid var(--gray-200);
+  padding-top: var(--spacing-md);
+}
+
+.variant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+  gap: var(--spacing-sm);
+}
+
+.variant-row + .variant-row {
+  border-top: 1px dashed var(--gray-200);
+  margin-top: var(--spacing-sm);
+}
+
+.variant-label {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+}
+
+.variant-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.variant-price {
+  font-weight: 700;
+  color: var(--philly-orange);
+  font-size: 0.9375rem;
+}
+
+.variant-qty {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.variant-qty .qty-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--gray-300);
+  background: white;
+  color: var(--gray-700);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.variant-qty .qty-btn:hover:not(:disabled) {
+  background: var(--philly-orange-light);
+  border-color: var(--philly-orange);
+  color: var(--philly-orange);
+  transform: scale(1.1);
+}
+
+.variant-qty .qty-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.variant-qty .qty-display {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: 0.9375rem;
 }

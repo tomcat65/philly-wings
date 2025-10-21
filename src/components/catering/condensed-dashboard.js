@@ -22,10 +22,11 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
   const boxesTotal = calculateBoxesTotal(currentConfig, boxCount, individualOverrides);
   const extrasTotal = calculateExtrasTotal(extras);
   const subtotal = boxesTotal + extrasTotal;
-  const taxRate = 0.09; // 9% tax
+  const taxRate = 0.08; // 8% tax
   const tax = subtotal * taxRate;
   const grandTotal = subtotal + tax;
   const perBoxCost = boxesTotal / boxCount;
+  const perPersonCost = grandTotal / boxCount; // Total cost per person (including extras and tax)
 
   if (isCollapsed) {
     return renderCollapsedDashboard(boxCount, grandTotal, perBoxCost);
@@ -83,13 +84,18 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
         </div>
 
         <div class="total-row total-row-divider">
-          <span class="total-label">Tax (9%):</span>
+          <span class="total-label">Tax (8%):</span>
           <span class="total-value" data-highlight-target="tax">$${tax.toFixed(2)}</span>
         </div>
 
         <div class="total-row total-row-grand">
           <span class="total-label-grand">Grand Total:</span>
           <span class="total-value-grand" data-highlight-target="grand-total">$${grandTotal.toFixed(2)}</span>
+        </div>
+
+        <div class="total-row total-row-per-person">
+          <span class="total-label-per-person">Per Person (Box) Cost:</span>
+          <span class="total-value-per-person" data-highlight-target="per-person-cost">$${perPersonCost.toFixed(2)}</span>
         </div>
       </div>
 
@@ -252,6 +258,8 @@ function renderExtrasBreakdown(extras) {
     salads: { title: 'Salads', icon: '🥗' },
     sides: { title: 'Premium Sides', icon: '🥔' },
     desserts: { title: 'Desserts', icon: '🍰' },
+    saucesToGo: { title: 'Sauces To-Go', icon: '🌶️' },
+    dipsToGo: { title: 'Dips To-Go', icon: '🥫' },
     quickAdds: { title: 'Essentials', icon: '🥤' }
   };
 

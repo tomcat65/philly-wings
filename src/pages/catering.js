@@ -94,11 +94,11 @@ function renderFAQ() {
     },
     {
       question: 'What is your delivery area?',
-      answer: 'We deliver within a 10-mile radius of our Oxford Circle location. This covers most of Philadelphia including Center City, University City, and surrounding neighborhoods.'
+      answer: 'We deliver within a 10-mile radius of our Oxford Circle location. This covers most of NE Philadelphia including Frankford, Tacony, Bridesburg, Port Richmond, Kensington, Mayfair, Holmesburg, Torresdale, Fishtown, Northern Liberties, South Philly, Northern Liberties, Bucks County, Lower Northeast, Germantown, East Falls, Bristol, and surrounding neighborhoods.'
     },
     {
       question: 'How does payment work?',
-      answer: 'All orders are processed securely through ezCater. You\'ll complete payment directly on their platform, and they provide 24/7 customer support for any payment questions.'
+      answer: 'All orders are processed securely through Stripe. You\'ll complete payment directly on their platform, and they provide 24/7 customer support for any payment questions.'
     },
     {
       question: 'Can I customize sauce selections?',

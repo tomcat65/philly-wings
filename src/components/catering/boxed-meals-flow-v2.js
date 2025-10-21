@@ -45,6 +45,7 @@ let boxedMealState = {
     sauces: [],             // Multiple sauces for wingCount >= 10, format: [{id, count}]
     splitSauces: false,     // Toggle for multi-sauce mode
     sauceOnSide: false,     // NEW: Wet sauce on the side (only for wet sauces)
+    noDips: false,          // NEW: Skip dips option
     dips: [],
     side: null,
     dessert: null,
@@ -63,7 +64,10 @@ let boxedMealState = {
     beverages: [],
     hotBeverages: [],
     salads: [],
-    premiumSides: []
+    sides: [],           // Premium sides
+    desserts: [],        // Desserts (individual/5pack)
+    saucesToGo: [],      // Wet sauces to-go (individual/5pack)
+    dipsToGo: []         // Dips to-go (individual/5pack)
   },
   // NEW: Contact & delivery information
   contact: {
@@ -362,14 +366,9 @@ function renderConfigurationZone() {
           ${renderSauceSelector()}
         </div>
 
-        <!-- Dips Selection (Counter-Based) -->
+        <!-- Dips Selection (Counter-Based with No Dips Option) -->
         <div class="config-section" id="config-section-dips">
-          ${renderDipCounterSelector({
-            items: PHOTO_SELECTOR_CONFIGS.dips.items,
-            selectedCounts: convertDipsArrayToCounts(boxedMealState.currentConfig.dips),
-            maxTotal: 2,
-            onCountChange: () => {}
-          })}
+          ${renderDipsSelection()}
         </div>
 
         <!-- Side Selection -->
@@ -495,11 +494,26 @@ function renderSauceSelector() {
     category: s.category || ''
   }));
 
-  const availableSauces = sauceItems.length > 0 ? sauceItems : getSampleSauces();
+  // Add "No Sauce" option as first item
+  const noSauceOption = {
+    id: 'no-sauce',
+    name: 'No Sauce',
+    description: 'Crispy fried wings - no sauce',
+    heatLevel: 0,
+    tags: ['Crispy'],
+    imageUrl: null,  // Will use placeholder styling
+    isDryRub: false,
+    category: 'no-sauce',
+    isSpecial: true  // Flag for special styling
+  };
 
-  // Check if selected sauce is a wet sauce (not dry rub)
+  const availableSauces = sauceItems.length > 0
+    ? [noSauceOption, ...sauceItems]
+    : [noSauceOption, ...getSampleSauces()];
+
+  // Check if selected sauce is a wet sauce (not dry rub, not no-sauce)
   const selectedSauceData = availableSauces.find(s => s.id === sauce);
-  const isWetSauce = selectedSauceData && !selectedSauceData.isDryRub;
+  const isWetSauce = selectedSauceData && !selectedSauceData.isDryRub && sauce !== 'no-sauce';
 
   // If split sauces mode is enabled, show sauce split selector
   if (splitSauces && wingCount >= 10) {
@@ -516,6 +530,39 @@ function renderSauceSelector() {
       onSelect: () => {}
     })}
     ${renderSauceOnSideToggle(boxedMealState.currentConfig.sauceOnSide, isWetSauce)}
+  `;
+}
+
+/**
+ * Dips selection with "No Dips" toggle option
+ */
+function renderDipsSelection() {
+  const { noDips, dips } = boxedMealState.currentConfig;
+
+  return `
+    <div class="dips-selection-wrapper">
+      <!-- No Dips Toggle -->
+      <div class="no-dips-toggle">
+        <label class="toggle-switch">
+          <input
+            type="checkbox"
+            id="no-dips-checkbox"
+            ${noDips ? 'checked' : ''}>
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Skip dips (wings only)</span>
+        </label>
+      </div>
+
+      <!-- Dips Counter (hidden when no-dips is checked) -->
+      <div class="dips-counter-container" style="${noDips ? 'display: none;' : ''}">
+        ${renderDipCounterSelector({
+          items: PHOTO_SELECTOR_CONFIGS.dips.items,
+          selectedCounts: convertDipsArrayToCounts(dips),
+          maxTotal: 2,
+          onCountChange: () => {}
+        })}
+      </div>
+    </div>
   `;
 }
 
@@ -831,6 +878,30 @@ function initConfigurationStep() {
   if (sauceOnSideToggle) {
     sauceOnSideToggle.addEventListener('change', (e) => {
       handleSauceOnSideToggle(e.target.checked);
+    });
+  }
+
+  // No Dips toggle
+  const noDipsCheckbox = document.getElementById('no-dips-checkbox');
+  const dipsCounterContainer = document.querySelector('.dips-counter-container');
+  if (noDipsCheckbox) {
+    noDipsCheckbox.addEventListener('change', (e) => {
+      const isNoDips = e.target.checked;
+      boxedMealState.currentConfig.noDips = isNoDips;
+
+      if (isNoDips) {
+        boxedMealState.currentConfig.dips = [];  // Clear dips
+        if (dipsCounterContainer) {
+          dipsCounterContainer.style.display = 'none';
+        }
+      } else {
+        if (dipsCounterContainer) {
+          dipsCounterContainer.style.display = 'block';
+        }
+      }
+
+      saveStateToService();
+      updateCondensedDashboard(boxedMealState);
     });
   }
 
@@ -2024,6 +2095,15 @@ function formatDessertName(dessert) {
   ).join(' ');
 }
 
+function formatPackSize(packSize) {
+  const formats = {
+    'individual': 'Individual',
+    '5pack': '5-Pack',
+    'family': 'Family Pack'
+  };
+  return formats[packSize] || packSize;
+}
+
 // ========================================
 // Quick-Adds Step Functions
 // ========================================
@@ -2066,6 +2146,8 @@ async function renderQuickAddsStep() {
             ${renderMasonryCategory('Fresh Salads & Veggies', '🥗', addOns.salads, false)}
             ${renderMasonryCategory('Premium Sides', '🥔', addOns.sides, false)}
             ${renderMasonryCategory('Sweet Endings', '🍰', addOns.desserts, false)}
+            ${renderMasonryCategory('Sauces To-Go', '🌶️', addOns.saucesToGo, false)}
+            ${renderMasonryCategory('Dips To-Go', '🥫', addOns.dipsToGo, false)}
           </div>
 
           <!-- Continue/Return Button (moved to bottom of left panel) -->
@@ -2122,6 +2204,12 @@ function renderMasonryCategory(title, icon, items, featured = false) {
  * @param {boolean} featured - Whether card should be featured size
  */
 function renderMasonryCard(item, featured = false) {
+  // Check if item has pack variants (multiple pack sizes)
+  if (item.hasVariants && item.variants) {
+    return renderPackVariantCard(item, featured);
+  }
+
+  // Regular single-variant card
   const cardClass = featured ? 'masonry-card featured' : 'masonry-card';
   const price = item.price ? `$${item.price.toFixed(2)}` : 'Price varies';
   const servingInfo = item.serves ? ` • Serves ${item.serves}` : '';
@@ -2143,6 +2231,49 @@ function renderMasonryCard(item, featured = false) {
             <button class="qty-btn qty-plus" data-addon-id="${item.id}">+</button>
           </div>
           <button class="quick-add-btn" data-addon-id="${item.id}">+ Add</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render pack variant card with multiple pack size options (Option B: Compact Rows)
+ * @param {Object} item - Item with hasVariants:true and variants object
+ * @param {boolean} featured - Whether card should be featured size
+ */
+function renderPackVariantCard(item, featured = false) {
+  const cardClass = featured ? 'masonry-card pack-variant-card featured' : 'masonry-card pack-variant-card';
+  const heatIndicator = item.heatLevel ? `<span class="heat-level">${'🌶️'.repeat(item.heatLevel)}</span>` : '';
+
+  // Get variant pack sizes (individual, 5pack, etc.)
+  const variants = Object.entries(item.variants || {});
+  if (variants.length === 0) return ''; // Safety check
+
+  return `
+    <div class="${cardClass}" data-source-id="${item.sourceId}" data-category="${item.category}">
+      <div class="masonry-card-image">
+        ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.displayName}" loading="lazy">` : getIconForCategory(item.category)}
+      </div>
+      <div class="masonry-card-content">
+        <div class="masonry-card-name">${item.displayName || item.name} ${heatIndicator}</div>
+        <div class="masonry-card-desc">${item.description || ''}</div>
+
+        <!-- Pack Variant Selectors (Option B: Compact Rows) -->
+        <div class="pack-variant-selectors">
+          ${variants.map(([packSize, variant]) => `
+            <div class="variant-row" data-variant="${packSize}" data-variant-id="${variant.id}">
+              <div class="variant-label">
+                <span class="variant-name">${formatPackSize(packSize)}</span>
+                <span class="variant-price">$${variant.price.toFixed(2)}</span>
+              </div>
+              <div class="variant-qty">
+                <button class="qty-btn qty-minus" data-variant-id="${variant.id}" data-variant-price="${variant.price}">−</button>
+                <span class="qty-display" data-variant-id="${variant.id}">0</span>
+                <button class="qty-btn qty-plus" data-variant-id="${variant.id}" data-variant-price="${variant.price}">+</button>
+              </div>
+            </div>
+          `).join('')}
         </div>
       </div>
     </div>
@@ -2237,7 +2368,9 @@ function initQuickAddsInteractions(addOns) {
       'beverages': 'beverages',
       'salads': 'salads',
       'sides': 'sides',
-      'desserts': 'desserts'
+      'desserts': 'desserts',
+      'saucesToGo': 'sauces-to-go',
+      'dipsToGo': 'dips-to-go'
     };
 
     // Iterate through all extras categories
@@ -2288,7 +2421,9 @@ function initQuickAddsInteractions(addOns) {
         'beverages': 'beverages',
         'salads': 'salads',
         'sides': 'sides',
-        'desserts': 'desserts'
+        'desserts': 'desserts',
+        'sauces-to-go': 'saucesToGo',
+        'dips-to-go': 'dipsToGo'
       };
       const stateCategory = categoryMap[category] || 'quickAdds';
 
@@ -2352,6 +2487,94 @@ function initQuickAddsInteractions(addOns) {
     });
   });
 
+  // Pack Variant Quantity Handlers (for Option B compact rows)
+  // These handle the +/- buttons inside pack-variant-card elements
+  document.querySelectorAll('.pack-variant-card .qty-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const variantId = btn.dataset.variantId;
+      const price = parseFloat(btn.dataset.variantPrice);
+      const variantRow = btn.closest('.variant-row');
+      const packSize = variantRow.dataset.variant;
+      const card = btn.closest('.pack-variant-card');
+      const displayName = card.querySelector('.masonry-card-name').textContent.trim().replace(/🌶️/g, '').trim();
+      const category = card.dataset.category;
+      const qtyDisplay = variantRow.querySelector(`.qty-display[data-variant-id="${variantId}"]`);
+
+      // Map category to state key
+      const categoryMap = {
+        'quick-adds': 'quickAdds',
+        'hot-beverages': 'hotBeverages',
+        'beverages': 'beverages',
+        'salads': 'salads',
+        'sides': 'sides',
+        'desserts': 'desserts',
+        'sauces-to-go': 'saucesToGo',
+        'dips-to-go': 'dipsToGo'
+      };
+      const stateCategory = categoryMap[category] || 'quickAdds';
+
+      // Construct item name with pack size
+      const itemName = `${displayName} (${formatPackSize(packSize)})`;
+
+      // Handle increment
+      if (btn.classList.contains('qty-plus')) {
+        if (!selectedItems.has(variantId)) {
+          selectedItems.set(variantId, { name: itemName, price, category: stateCategory, quantity: 1 });
+          qtyDisplay.textContent = '1';
+        } else {
+          const item = selectedItems.get(variantId);
+          item.quantity = Math.min(99, item.quantity + 1);
+          qtyDisplay.textContent = item.quantity;
+        }
+      }
+
+      // Handle decrement
+      if (btn.classList.contains('qty-minus')) {
+        if (selectedItems.has(variantId)) {
+          const item = selectedItems.get(variantId);
+          item.quantity = Math.max(0, item.quantity - 1);
+
+          if (item.quantity === 0) {
+            selectedItems.delete(variantId);
+            qtyDisplay.textContent = '0';
+          } else {
+            qtyDisplay.textContent = item.quantity;
+          }
+        }
+      }
+
+      updateStickyCart(selectedItems);
+    });
+  });
+
+  // Hydrate pack variant cards from state (for edit mode)
+  if (boxedMealState.extras) {
+    Object.entries(boxedMealState.extras).forEach(([stateCategory, items]) => {
+      if (Array.isArray(items)) {
+        items.forEach(item => {
+          if (item.id && item.quantity > 0) {
+            // Find the variant display in pack variant cards
+            const qtyDisplay = document.querySelector(`.pack-variant-card .qty-display[data-variant-id="${item.id}"]`);
+            if (qtyDisplay) {
+              qtyDisplay.textContent = item.quantity;
+
+              // Also update the selectedItems Map
+              selectedItems.set(item.id, {
+                name: item.name,
+                price: item.price,
+                category: stateCategory,
+                quantity: item.quantity
+              });
+            }
+          }
+        });
+      }
+    });
+
+    // Update sticky cart with hydrated pack variants
+    updateStickyCart(selectedItems);
+  }
+
   // Back button
   document.getElementById('back-to-config-btn')?.addEventListener('click', async () => {
     boxedMealState.currentStep = 'configuration';
@@ -2360,13 +2583,16 @@ function initQuickAddsInteractions(addOns) {
 
   // Skip button
   document.getElementById('skip-extras-btn')?.addEventListener('click', async () => {
-    // Clear extras
+    // Clear all extras (match structure from collectExtrasSelections)
     boxedMealState.extras = {
       quickAdds: [],
       beverages: [],
       hotBeverages: [],
       salads: [],
-      sides: []
+      sides: [],
+      desserts: [],
+      saucesToGo: [],
+      dipsToGo: []
     };
     boxedMealState.currentStep = 'review-contact';
     await renderReviewContactStep();
@@ -2410,7 +2636,9 @@ function collectExtrasSelections(selectedItems) {
     hotBeverages: [],
     salads: [],
     sides: [],
-    desserts: []
+    desserts: [],
+    saucesToGo: [],
+    dipsToGo: []
   };
 
   // Convert Map to categorized arrays
@@ -2444,7 +2672,10 @@ async function fetchAllAddOns() {
       beverages: [],
       hotBeverages: [],
       salads: [],
-      sides: []
+      sides: [],
+      desserts: [],
+      saucesToGo: [],
+      dipsToGo: []
     };
   }
 }

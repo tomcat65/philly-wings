@@ -40,7 +40,7 @@ function renderPhotoCard(item, category, selectedId, multiSelect) {
     : selectedId === item.id;
 
   return `
-    <div class="photo-card ${isSelected ? 'card-selected' : ''}"
+    <div class="photo-card ${isSelected ? 'card-selected' : ''} ${item.isSpecial ? 'card-special' : ''}"
          data-item-id="${item.id}"
          data-category="${category}"
          role="${multiSelect ? 'checkbox' : 'radio'}"
