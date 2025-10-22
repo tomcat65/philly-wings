@@ -21,6 +21,7 @@ import {
   deleteDoc
 } from 'firebase/firestore';
 import { db, auth } from '../firebase-config.js';
+import { TAX_RATE } from '../utils/catering-pricing.js';
 
 const STATE_VERSION = '2.0.0';
 const STORAGE_PREFIX = 'philly-catering-state';
@@ -59,7 +60,10 @@ const DEFAULT_STATES = {
       beverages: [],
       hotBeverages: [],
       salads: [],
-      premiumSides: []
+      sides: [],
+      desserts: [],
+      saucesToGo: [],
+      dipsToGo: []
     },
     contact: {
       company: '',
@@ -90,8 +94,8 @@ const DEFAULT_STATES = {
     pricing: {
       subtotal: 0,
       estimatedTotal: 0,
-      taxRate: 0.08,
-      note: 'Final price includes setup fees, staff, delivery distance, tips, and 8% tax. We\'ll provide exact pricing in your quote.'
+      taxRate: TAX_RATE,
+      note: `Final price includes setup fees, staff, delivery distance, tips, and ${Math.round(TAX_RATE * 100)}% tax. We'll provide exact pricing in your quote.`
     }
   },
   'guided-planner': {
@@ -138,7 +142,7 @@ const DEFAULT_STATES = {
       addOnsTotal: 0,
       subtotal: 0,
       estimatedTotal: 0,
-      taxRate: 0.08
+      taxRate: TAX_RATE
     }
   }
 };

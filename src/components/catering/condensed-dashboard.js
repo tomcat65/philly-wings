@@ -1,3 +1,5 @@
+import { TAX_RATE, calculateExtrasSubtotal, EXTRA_CATEGORY_KEYS } from '../../utils/catering-pricing.js';
+
 /**
  * Condensed Dashboard Component
  * Live order summary with detailed pricing for budget-conscious customers
@@ -15,18 +17,20 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
     boxCount = 10,
     individualOverrides = {},
     extras = {},
-    contact = {}
+    contact = {},
+    menuData = {}
   } = boxedMealState;
 
   // Calculate totals
-  const boxesTotal = calculateBoxesTotal(currentConfig, boxCount, individualOverrides);
-  const extrasTotal = calculateExtrasTotal(extras);
+  const boxesTotal = calculateBoxesTotal(currentConfig, boxCount, individualOverrides, menuData);
+  const extrasTotal = calculateExtrasSubtotal(extras);
   const subtotal = boxesTotal + extrasTotal;
-  const taxRate = 0.08; // 8% tax
-  const tax = subtotal * taxRate;
+  const tax = subtotal * TAX_RATE;
   const grandTotal = subtotal + tax;
-  const perBoxCost = boxesTotal / boxCount;
-  const perPersonCost = grandTotal / boxCount; // Total cost per person (including extras and tax)
+  const safeBoxCount = boxCount > 0 ? boxCount : 1;
+  const perBoxCost = boxesTotal / safeBoxCount;
+  const perPersonCost = grandTotal / safeBoxCount; // Total cost per person (including extras and tax)
+  const taxLabel = `Tax (${Math.round(TAX_RATE * 100)}%)`;
 
   if (isCollapsed) {
     return renderCollapsedDashboard(boxCount, grandTotal, perBoxCost);
@@ -54,7 +58,7 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
         </button>
 
         <div class="section-content" data-section-content="boxes">
-          ${renderBoxesBreakdown(currentConfig, boxCount, individualOverrides, perBoxCost)}
+          ${renderBoxesBreakdown(currentConfig, boxCount, individualOverrides, perBoxCost, menuData)}
         </div>
       </div>
 
@@ -84,7 +88,7 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
         </div>
 
         <div class="total-row total-row-divider">
-          <span class="total-label">Tax (8%):</span>
+          <span class="total-label">${taxLabel}:</span>
           <span class="total-value" data-highlight-target="tax">$${tax.toFixed(2)}</span>
         </div>
 
@@ -133,12 +137,12 @@ function renderCollapsedDashboard(boxCount, grandTotal, perBoxCost) {
 /**
  * Render boxes breakdown (detailed itemization)
  */
-function renderBoxesBreakdown(config, boxCount, individualOverrides, perBoxCost) {
+function renderBoxesBreakdown(config, boxCount, individualOverrides, perBoxCost, menuData = {}) {
   const hasIndividualOverrides = Object.keys(individualOverrides).length > 0;
 
   if (hasIndividualOverrides) {
     // Group boxes by configuration and price
-    return renderItemizedBoxes(config, boxCount, individualOverrides);
+    return renderItemizedBoxes(config, boxCount, individualOverrides, menuData);
   }
 
   // All boxes same configuration
@@ -179,6 +183,10 @@ function renderBoxesBreakdown(config, boxCount, individualOverrides, perBoxCost)
             <span class="detail-text">${formatDessertName(config.dessert)}</span>
           </div>
         ` : ''}
+        <div class="detail-item">
+          <span class="detail-icon">💧</span>
+          <span class="detail-text">Bottled Water</span>
+        </div>
       </div>
 
       <div class="breakdown-row breakdown-row-perbox">
@@ -192,13 +200,13 @@ function renderBoxesBreakdown(config, boxCount, individualOverrides, perBoxCost)
 /**
  * Render itemized boxes (when individual customizations exist)
  */
-function renderItemizedBoxes(bulkConfig, totalBoxCount, individualOverrides) {
+function renderItemizedBoxes(bulkConfig, totalBoxCount, individualOverrides, menuData = {}) {
   const priceGroups = {};
 
   // Calculate price for each box and group
   for (let boxNum = 1; boxNum <= totalBoxCount; boxNum++) {
     const boxConfig = individualOverrides[boxNum] || bulkConfig;
-    const boxPrice = calculatePricePerBox(boxConfig);
+    const boxPrice = calculatePricePerBox(boxConfig, menuData);
 
     const priceKey = boxPrice.toFixed(2);
     if (!priceGroups[priceKey]) {
@@ -248,21 +256,22 @@ function renderExtrasBreakdown(extras) {
 
   // Extras are organized by category with arrays
   const categories = {
-    hotBeverages: { title: 'Hot Beverages', icon: '☕' },
+    quickAdds: { title: 'Essentials', icon: '🥤' },
     beverages: { title: 'Cold Beverages', icon: '🧃' },
+    hotBeverages: { title: 'Hot Beverages', icon: '☕' },
     salads: { title: 'Salads', icon: '🥗' },
     sides: { title: 'Premium Sides', icon: '🥔' },
     desserts: { title: 'Desserts', icon: '🍰' },
     saucesToGo: { title: 'Sauces To-Go', icon: '🌶️' },
-    dipsToGo: { title: 'Dips To-Go', icon: '🥫' },
-    quickAdds: { title: 'Essentials', icon: '🥤' }
+    dipsToGo: { title: 'Dips To-Go', icon: '🥫' }
   };
 
   return `
     <div class="extras-breakdown">
-      ${Object.entries(categories).map(([catKey, catData]) => {
-        const items = extras[catKey] || [];
-        if (items.length === 0) return '';
+      ${EXTRA_CATEGORY_KEYS.map(catKey => {
+        const catData = categories[catKey];
+        const items = Array.isArray(extras[catKey]) ? extras[catKey] : [];
+        if (!catData || items.length === 0) return '';
 
         return `
           <div class="extras-category">
@@ -270,16 +279,21 @@ function renderExtrasBreakdown(extras) {
               <span class="category-icon">${catData.icon}</span>
               <span class="category-title">${catData.title}</span>
             </div>
-            ${items.map(item => `
-              <div class="breakdown-row">
-                <span class="breakdown-desc">
-                  ${item.name || item.id}
-                  ${item.packSize ? `<span class="pack-size">(${item.packSize})</span>` : ''}
-                  × ${item.quantity || 1}
-                </span>
-                <span class="breakdown-amount">$${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
-              </div>
-            `).join('')}
+            ${items.map(item => {
+              const quantity = item.quantity || 1;
+              const unitPrice = Number(item.price) || 0;
+              const displayName = item.name || item.id || 'Extra Item';
+              return `
+                <div class="breakdown-row">
+                  <span class="breakdown-desc">
+                    ${displayName}
+                    ${item.packSize ? `<span class="pack-size">(${item.packSize})</span>` : ''}
+                    × ${quantity}
+                  </span>
+                  <span class="breakdown-amount">$${(unitPrice * quantity).toFixed(2)}</span>
+                </div>
+              `;
+            }).join('')}
           </div>
         `;
       }).join('')}
@@ -290,37 +304,21 @@ function renderExtrasBreakdown(extras) {
 /**
  * Calculate total cost of all boxes
  */
-function calculateBoxesTotal(config, boxCount, individualOverrides) {
+function calculateBoxesTotal(config, boxCount, individualOverrides, menuData = {}) {
   let total = 0;
 
   for (let boxNum = 1; boxNum <= boxCount; boxNum++) {
     const boxConfig = individualOverrides[boxNum] || config;
-    total += calculatePricePerBox(boxConfig);
+    total += calculatePricePerBox(boxConfig, menuData);
   }
 
   return total;
 }
 
 /**
- * Calculate total cost of extras
- */
-function calculateExtrasTotal(extras) {
-  if (!extras) return 0;
-
-  // Extras are organized by category with arrays
-  return Object.values(extras).reduce((sum, categoryItems) => {
-    if (!Array.isArray(categoryItems)) return sum;
-
-    return sum + categoryItems.reduce((catSum, item) => {
-      return catSum + ((item.price || 0) * (item.quantity || 1));
-    }, 0);
-  }, 0);
-}
-
-/**
  * Calculate price per box (imported from live-preview-panel.js logic)
  */
-function calculatePricePerBox(config) {
+function calculatePricePerBox(config, menuData = {}) {
   let price = 12.50;
 
   const wingCount = config.wingCount || 6;
@@ -343,10 +341,56 @@ function calculatePricePerBox(config) {
     price += 0.50;
   }
 
-  const premiumDesserts = ['creme-brulee-cheesecake', 'red-velvet-cake'];
-  if (premiumDesserts.includes(config.dessert)) price += 1.00;
+  // Side price adjustment (database-driven)
+  if (config.side && menuData.sides) {
+    const sidePrice = getSidePrice(config.side, menuData.sides);
+    if (sidePrice !== null) {
+      // Base side is chips at $0 (included), so only charge differential
+      const baseSidePrice = 0;
+      price += (sidePrice - baseSidePrice);
+    }
+  }
+
+  // Dessert price adjustment (database-driven)
+  if (config.dessert && menuData.desserts) {
+    const dessertPrice = getDessertPrice(config.dessert, menuData.desserts);
+    if (dessertPrice !== null) {
+      // Base dessert included at $0, charge differential for premium items
+      const baseDessertPrice = 0;
+      price += (dessertPrice - baseDessertPrice);
+    }
+  }
 
   return price;
+}
+
+/**
+ * Helper: Get side price from menuData
+ */
+function getSidePrice(sideId, sides) {
+  if (!sideId || !sides) return null;
+
+  // Map display ID back to Firestore ID
+  const displayToFirestoreId = {
+    'chips': 'miss_vickies_chips',
+    'coleslaw': 'sally_sherman_coleslaw',
+    'potato-salad': 'sally_sherman_potato_salad'
+  };
+
+  const firestoreId = displayToFirestoreId[sideId] || sideId;
+  const side = sides.find(s => s.id === firestoreId);
+
+  return side?.variants?.[0]?.basePrice ?? null;
+}
+
+/**
+ * Helper: Get dessert price from menuData
+ */
+function getDessertPrice(dessertId, desserts) {
+  if (!dessertId || !desserts) return null;
+
+  const dessert = desserts.find(d => d.id === dessertId);
+  return dessert?.variants?.[0]?.basePrice ?? null;
 }
 
 /**

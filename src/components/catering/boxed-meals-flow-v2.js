@@ -3,7 +3,7 @@
  * Corporate lunch path with template selection and visual configuration
  */
 
-import { collection, query, where, getDocs, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
 import { cateringStateService } from '../../services/catering-state-service.js';
 import { openEditModal, renderBoxConfigInModal, renderContactInModal } from './edit-modal.js';
@@ -31,6 +31,7 @@ import {
   collectContactData
 } from './contact-form.js';
 import { getAllAddOnsSplitByCategory } from '../../services/catering-addons-service.js';
+import { TAX_RATE, EXTRA_CATEGORY_KEYS, flattenExtras, calculateExtrasSubtotal } from '../../utils/catering-pricing.js';
 
 // Enhanced state management (will be migrated to cateringStateService)
 let boxedMealState = {
@@ -99,8 +100,8 @@ let boxedMealState = {
   pricing: {
     subtotal: 0,
     estimatedTotal: 0,
-    taxRate: 0.08,
-    note: 'Final price includes setup fees, staff, delivery distance, tips, and 8% tax. We\'ll provide exact pricing in your quote.'
+    taxRate: TAX_RATE,
+    note: `Final price includes setup fees, staff, delivery distance, tips, and ${Math.round(TAX_RATE * 100)}% tax. We'll provide exact pricing in your quote.`
   },
   // Edit mode flags
   isEditMode: false,           // Are we editing from review?
@@ -373,13 +374,7 @@ function renderConfigurationZone() {
 
         <!-- Side Selection -->
         <div class="config-section" id="config-section-sides">
-          ${renderPhotoCardSelector({
-            category: 'sides',
-            items: PHOTO_SELECTOR_CONFIGS.sides.items,
-            selectedId: boxedMealState.currentConfig.side,
-            multiSelect: false,
-            onSelect: () => {}
-          })}
+          ${renderSideSelector()}
         </div>
 
         <!-- Dessert Selection -->
@@ -564,6 +559,45 @@ function renderDipsSelection() {
       </div>
     </div>
   `;
+}
+
+/**
+ * Side selector with actual Firestore data
+ * Maps coldSides collection to display format
+ */
+function renderSideSelector() {
+  const sides = boxedMealState.menuData.sides;
+
+  // Firestore ID to display ID mapping
+  const firestoreToDisplayId = {
+    'miss_vickies_chips': 'chips',
+    'sally_sherman_coleslaw': 'coleslaw',
+    'sally_sherman_potato_salad': 'potato-salad'
+  };
+
+  // Map sides from Firestore with pricing
+  const sideItems = sides.map(side => {
+    const displayId = firestoreToDisplayId[side.id] || side.id;
+    return {
+      id: displayId,
+      name: side.name,
+      description: side.description || '',
+      tags: side.dietaryTags || [],
+      imageUrl: side.imageUrl || side.images?.hero || null,
+      price: side.variants?.[0]?.basePrice || null
+    };
+  });
+
+  // Fallback to hardcoded config if no Firestore data
+  const fallbackItems = PHOTO_SELECTOR_CONFIGS.sides.items;
+
+  return renderPhotoCardSelector({
+    category: 'sides',
+    items: sideItems.length > 0 ? sideItems : fallbackItems,
+    selectedId: boxedMealState.currentConfig.side,
+    multiSelect: false,
+    onSelect: () => {}
+  });
 }
 
 /**
@@ -2042,9 +2076,39 @@ async function fetchSauces() {
 
 async function fetchBoxedSides() {
   try {
-    const q = query(collection(db, 'coldSides'), where('active', '==', true));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // 1. Fetch prepared sides from coldSides collection
+    const coldSidesQuery = query(collection(db, 'coldSides'), where('active', '==', true));
+    const coldSidesSnapshot = await getDocs(coldSidesQuery);
+    const preparedSides = coldSidesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // 2. Fetch chips from menuItems collection (query by id field, not document ID)
+    const chipsQuery = query(
+      collection(db, 'menuItems'),
+      where('id', '==', 'miss_vickies_chips'),
+      where('active', '==', true)
+    );
+    const chipsSnapshot = await getDocs(chipsQuery);
+
+    // 3. Transform chips for boxed meals context (override price to $0)
+    let chipsForBoxedMeals = null;
+    if (!chipsSnapshot.empty) {
+      const chipsDoc = chipsSnapshot.docs[0];
+      const chipsData = chipsDoc.data();
+      chipsForBoxedMeals = {
+        id: chipsDoc.id,
+        ...chipsData,
+        variants: chipsData.variants ? [{
+          ...chipsData.variants[0],
+          basePrice: 0  // Override: chips included in $12.50 base box price
+        }] : [{ basePrice: 0 }]
+      };
+    }
+
+    // 4. Merge chips + prepared sides (chips first as it's the base option)
+    return chipsForBoxedMeals
+      ? [chipsForBoxedMeals, ...preparedSides]
+      : preparedSides;
+
   } catch (error) {
     console.error('Error fetching sides:', error);
     return [];
@@ -2053,7 +2117,11 @@ async function fetchBoxedSides() {
 
 async function fetchDesserts() {
   try {
-    const q = query(collection(db, 'desserts'), where('active', '==', true));
+    const q = query(
+      collection(db, 'desserts'),
+      where('active', '==', true),
+      orderBy('sortOrder', 'asc')
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
@@ -2806,14 +2874,23 @@ async function renderReviewContactStep() {
  */
 function renderSidebarBreakdown(pricing) {
   const { extras } = boxedMealState;
+  const taxLabel = `Tax (${Math.round(TAX_RATE * 100)}%)`;
+  const sumCategory = (items = []) => (Array.isArray(items) ? items.reduce((sum, item) => {
+    const unit = Number(item?.price) || 0;
+    const qty = Number(item?.quantity) || 0;
+    return sum + unit * (qty || 1);
+  }, 0) : 0);
 
   // Calculate category totals
-  const beveragesTotal = [...extras.beverages, ...extras.hotBeverages]
-    .reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const dessertsTotal = extras.desserts
-    .reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const othersTotal = [...extras.quickAdds, ...extras.salads, ...extras.sides]
-    .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const beveragesTotal = sumCategory([...(extras.beverages || []), ...(extras.hotBeverages || [])]);
+  const dessertsTotal = sumCategory(extras.desserts);
+  const othersTotal = sumCategory([
+    ...(extras.quickAdds || []),
+    ...(extras.salads || []),
+    ...(extras.sides || []),
+    ...(extras.saucesToGo || []),
+    ...(extras.dipsToGo || [])
+  ]);
 
   return `
     <div class="summary-breakdown">
@@ -2837,8 +2914,8 @@ function renderSidebarBreakdown(pricing) {
         <div class="amount">$${othersTotal.toFixed(2)}</div>
       </div>` : ''}
       <div class="summary-item">
-        <div class="label"><span>💵</span> Tax (8%)</div>
-        <div class="amount">$${(pricing.subtotal * 0.08).toFixed(2)}</div>
+        <div class="label"><span>💵</span> ${taxLabel}</div>
+        <div class="amount">$${(pricing.subtotal * TAX_RATE).toFixed(2)}</div>
       </div>
     </div>
   `;
@@ -2849,16 +2926,9 @@ function renderSidebarBreakdown(pricing) {
  */
 function renderExtrasDetails() {
   const { extras } = boxedMealState;
-  const allExtras = [
-    ...extras.quickAdds,
-    ...extras.beverages,
-    ...extras.hotBeverages,
-    ...extras.salads,
-    ...extras.sides,
-    ...extras.desserts
-  ];
+  const flattenedExtras = flattenExtras(extras);
 
-  if (allExtras.length === 0) {
+  if (flattenedExtras.length === 0) {
     return `
       <div class="detail-section">
         <div class="section-header">
@@ -2870,19 +2940,25 @@ function renderExtrasDetails() {
     `;
   }
 
-  // Group extras by category
-  const groupedExtras = {
-    'Cold Beverages': extras.beverages,
-    'Hot Beverages': extras.hotBeverages,
-    'Salads': extras.salads,
-    'Sides': extras.sides,
-    'Desserts': extras.desserts,
-    'Quick-Adds': extras.quickAdds
+  const categoryLabels = {
+    quickAdds: 'Quick-Adds',
+    beverages: 'Cold Beverages',
+    hotBeverages: 'Hot Beverages',
+    salads: 'Salads',
+    sides: 'Premium Sides',
+    desserts: 'Desserts',
+    saucesToGo: 'Sauces To-Go',
+    dipsToGo: 'Dips To-Go'
   };
 
-  const categories = Object.entries(groupedExtras).filter(([_, items]) => items.length > 0);
+  const categories = EXTRA_CATEGORY_KEYS
+    .map(key => ({
+      label: categoryLabels[key] || key,
+      items: Array.isArray(extras[key]) ? extras[key] : []
+    }))
+    .filter(category => category.items.length > 0);
 
-  const extrasTotal = allExtras.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const extrasTotal = calculateExtrasSubtotal(extras);
 
   return `
     <div class="detail-section">
@@ -2892,18 +2968,23 @@ function renderExtrasDetails() {
       </div>
 
       <div class="extras-grid">
-        ${categories.map(([categoryName, items]) => `
+        ${categories.map(({ label, items }) => `
           <div class="category-group">
-            <div class="category-title">${categoryName}</div>
-            ${items.map(item => `
-              <div class="extra-item">
-                <div class="item-info">
-                  <div class="item-name">✓ ${item.name}</div>
-                  <div class="item-calc">${item.quantity} × $${item.price.toFixed(2)}</div>
+            <div class="category-title">${label}</div>
+            ${items.map(item => {
+              const quantity = item.quantity || 1;
+              const unitPrice = Number(item.price) || 0;
+              const displayName = item.name || item.id || 'Extra Item';
+              return `
+                <div class="extra-item">
+                  <div class="item-info">
+                    <div class="item-name">✓ ${displayName}</div>
+                    <div class="item-calc">${quantity} × $${unitPrice.toFixed(2)}</div>
+                  </div>
+                  <div class="item-price">$${(unitPrice * quantity).toFixed(2)}</div>
                 </div>
-                <div class="item-price">$${(item.price * item.quantity).toFixed(2)}</div>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         `).join('')}
       </div>
@@ -2913,6 +2994,35 @@ function renderExtrasDetails() {
       </div>
     </div>
   `;
+}
+
+/**
+ * Helper: Get side price from menuData
+ */
+function getSidePrice(sideId) {
+  if (!sideId || !boxedMealState.menuData.sides) return null;
+
+  // Map display ID back to Firestore ID
+  const displayToFirestoreId = {
+    'chips': 'miss_vickies_chips',
+    'coleslaw': 'sally_sherman_coleslaw',
+    'potato-salad': 'sally_sherman_potato_salad'
+  };
+
+  const firestoreId = displayToFirestoreId[sideId] || sideId;
+  const side = boxedMealState.menuData.sides.find(s => s.id === firestoreId);
+
+  return side?.variants?.[0]?.basePrice || null;
+}
+
+/**
+ * Helper: Get dessert price from menuData
+ */
+function getDessertPrice(dessertId) {
+  if (!dessertId || !boxedMealState.menuData.desserts) return null;
+
+  const dessert = boxedMealState.menuData.desserts.find(d => d.id === dessertId);
+  return dessert?.variants?.[0]?.basePrice || null;
 }
 
 /**
@@ -2948,9 +3058,26 @@ function calculatePricePerBox(config) {
     price += 0.50;
   }
 
-  // Premium dessert adjustment
-  const premiumDesserts = ['creme-brulee-cheesecake', 'red-velvet-cake'];
-  if (premiumDesserts.includes(config.dessert)) price += 1.00;
+  // Side price adjustment (database-driven)
+  if (config.side) {
+    const sidePrice = getSidePrice(config.side);
+    if (sidePrice) {
+      // Base side is chips at $0 (included), so only charge differential
+      const baseSidePrice = 0; // Chips included in base price
+      price += (sidePrice - baseSidePrice);
+    }
+  }
+
+  // Dessert price adjustment (database-driven)
+  if (config.dessert) {
+    const dessertPrice = getDessertPrice(config.dessert);
+    if (dessertPrice) {
+      // Base dessert is included, charge differential for premium items
+      // Find cheapest dessert as base (typically $0 for included item)
+      const baseDessertPrice = 0; // Basic dessert included in base price
+      price += (dessertPrice - baseDessertPrice);
+    }
+  }
 
   return price;
 }
@@ -2976,16 +3103,7 @@ function calculatePricing() {
   }
 
   // Extras subtotal
-  const allExtras = [
-    ...extras.quickAdds,
-    ...extras.beverages,
-    ...extras.hotBeverages,
-    ...extras.salads,
-    ...extras.sides,
-    ...extras.desserts
-  ];
-  const extrasSubtotal = allExtras.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
+  const extrasSubtotal = calculateExtrasSubtotal(extras);
   const subtotal = boxesSubtotal + extrasSubtotal;
 
   return {
@@ -2993,9 +3111,9 @@ function calculatePricing() {
     extrasSubtotal,
     customizedBoxCount,
     subtotal,
-    estimatedTotal: subtotal * 1.08, // Tax estimate
-    taxRate: 0.08,
-    note: 'Final price includes setup fees, staff, delivery distance, tips, and 8% tax. We\'ll provide exact pricing in your quote.'
+    estimatedTotal: subtotal * (1 + TAX_RATE), // Tax estimate
+    taxRate: TAX_RATE,
+    note: `Final price includes setup fees, staff, delivery distance, tips, and ${Math.round(TAX_RATE * 100)}% tax. We'll provide exact pricing in your quote.`
   };
 }
 
