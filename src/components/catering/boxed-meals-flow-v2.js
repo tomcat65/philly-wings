@@ -777,12 +777,17 @@ export async function initBoxedMealsFlow(options = {}) {
 
   const observedStep = detectCurrentStepFromDOM() || boxedMealState.currentStep;
   console.log('🎬 initBoxedMealsFlow - Step to init:', observedStep);
+  console.log('🔍 About to start try block');
 
-  if (observedStep === 'template-selection') {
-    initTemplateStepInteractions();
-  } else if (observedStep === 'configuration') {
-    initConfigurationStep();
-  } else if (observedStep === 'quick-adds') {
+  try {
+    console.log('🔍 Inside try block, observedStep:', observedStep);
+    if (observedStep === 'template-selection') {
+      initTemplateStepInteractions();
+    } else if (observedStep === 'configuration') {
+      console.log('🎯 About to call initConfigurationStep()');
+      initConfigurationStep();
+      console.log('✅ initConfigurationStep() completed');
+    } else if (observedStep === 'quick-adds') {
     // Quick-adds step initializes its own handlers during render
     console.log('ℹ️ Quick-adds step detected - handlers already attached during render');
   } else if (observedStep === 'review-contact') {
@@ -790,6 +795,10 @@ export async function initBoxedMealsFlow(options = {}) {
   } else {
     console.warn('⚠️ Unknown step detected:', observedStep, '- attempting template selector init as fallback');
     initTemplateStepInteractions();
+  }
+  } catch (error) {
+    console.error('❌❌❌ ERROR in initBoxedMealsFlow:', error);
+    console.error('Stack:', error.stack);
   }
 
   // Safety net: if template markup exists but wasn't initialized above, attach handlers now.
@@ -879,6 +888,8 @@ function debouncedAutoSave(delay = 1000) {
  * Initialize configuration step interactions
  */
 function initConfigurationStep() {
+  console.log('🚀 initConfigurationStep CALLED!');
+
   // Export state to window for pricing panel access
   window.boxedMealState = boxedMealState;
 
@@ -1052,8 +1063,20 @@ function initConfigurationStep() {
   document.getElementById('back-to-templates')?.addEventListener('click', goBackToTemplates);
   document.getElementById('reset-to-template')?.addEventListener('click', resetToTemplate);
 
+  console.log('✨ Reached quote button section!');
+
   // Quote request
-  document.getElementById('request-quote-btn')?.addEventListener('click', handleQuoteRequest);
+  const quoteBtn = document.getElementById('request-quote-btn');
+  console.log('🔧 Quote button found:', quoteBtn);
+  if (quoteBtn) {
+    console.log('✅ Attaching click handler to quote button');
+    quoteBtn.addEventListener('click', (e) => {
+      console.log('🖱️ QUOTE BUTTON CLICKED!', e);
+      handleQuoteRequest();
+    });
+  } else {
+    console.error('❌ Quote button not found in DOM!');
+  }
 
   // Return to review (edit mode)
   document.getElementById('return-to-review-btn')?.addEventListener('click', returnToReview);
@@ -1985,12 +2008,38 @@ function resetToTemplate() {
 /**
  * Handle quote request - transition to quick-adds step
  */
-function handleQuoteRequest() {
+async function handleQuoteRequest() {
   if (!isConfigurationComplete()) return;
+
+  console.log('🚀 handleQuoteRequest: Starting transition to quick-adds');
+  console.log('📍 Current scroll position:', window.scrollY);
 
   // Transition to quick-adds step
   boxedMealState.currentStep = 'quick-adds';
-  return renderQuickAddsStep();
+  await renderQuickAddsStep();
+
+  console.log('✅ renderQuickAddsStep: Completed');
+
+  // Scroll to the boxed-meals-flow container to show the top of quick-adds content
+  requestAnimationFrame(() => {
+    const boxedMealsContainer = document.getElementById('boxed-meals-flow');
+    console.log('🔍 Looking for boxed-meals-flow container:', boxedMealsContainer);
+
+    if (boxedMealsContainer) {
+      const rect = boxedMealsContainer.getBoundingClientRect();
+      console.log('📐 Container position:', { top: rect.top, bottom: rect.bottom });
+      console.log('📍 Before scroll:', window.scrollY);
+
+      // Scroll container to top of viewport
+      boxedMealsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      setTimeout(() => {
+        console.log('📍 After scroll:', window.scrollY);
+      }, 500);
+    } else {
+      console.error('❌ Boxed meals container not found!');
+    }
+  });
 }
 
 /**
@@ -2256,6 +2305,8 @@ async function renderQuickAddsStep() {
   `;
 
   initQuickAddsInteractions(addOns);
+
+  // Scroll already handled in handleQuoteRequest before content change
 }
 
 /**
@@ -3225,8 +3276,10 @@ function handleEditTransition(targetStep, message) {
     messageEl.remove();
     container.style.opacity = '1';
 
-    // Scroll to top smoothly
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to wrapper (not page top) to show content from beginning
+    if (container) {
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, 400);
 }
 
