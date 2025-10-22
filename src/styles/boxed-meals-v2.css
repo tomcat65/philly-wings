@@ -2479,8 +2479,32 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 40px);
   transition: width 0.3s ease, transform 0.3s ease;
+
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--philly-orange-light) var(--gray-200);
+}
+
+.condensed-dashboard::-webkit-scrollbar {
+  width: 8px;
+}
+
+.condensed-dashboard::-webkit-scrollbar-track {
+  background: var(--gray-200);
+  border-radius: 10px;
+}
+
+.condensed-dashboard::-webkit-scrollbar-thumb {
+  background: var(--philly-orange-light);
+  border-radius: 10px;
+}
+
+.condensed-dashboard::-webkit-scrollbar-thumb:hover {
+  background: var(--philly-orange);
 }
 
 /* Dashboard Header */
@@ -2536,7 +2560,7 @@
 .condensed-dashboard-collapsed .dashboard-header,
 .condensed-dashboard-collapsed .dashboard-section,
 .condensed-dashboard-collapsed .dashboard-totals,
-.condensed-dashboard-collapsed .budget-indicator {
+.condensed-dashboard-collapsed .per-person-section {
   display: none;
 }
 
@@ -2788,62 +2812,39 @@
   color: var(--philly-orange);
 }
 
-/* Per Person Cost Row */
-.total-row-per-person {
-  padding-top: 12px;
-  margin-top: 12px;
-  border-top: 1px dashed var(--gray-300);
-  background: var(--gray-50);
-  padding: 12px;
-  border-radius: 6px;
-  margin-left: -12px;
-  margin-right: -12px;
-}
-
-.total-label-per-person {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-700);
-}
-
-.total-value-per-person {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--philly-blue);
-}
-
-/* Budget Indicator */
-.budget-indicator {
+/* Per Person Cost Section */
+.per-person-section {
   padding: 16px 20px;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border-top: 1px solid var(--gray-200);
 }
 
-.budget-per-box {
+.per-person-cost-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.budget-label {
+.per-person-label {
   font-size: 14px;
   font-weight: 600;
   color: var(--gray-700);
 }
 
-.budget-value {
+.per-person-value {
   font-size: 20px;
   font-weight: 700;
   color: #059669;
 }
 
-.budget-note {
+.per-person-note {
   margin: 0;
   font-size: 12px;
   color: var(--gray-600);
   text-align: center;
 }
+
 
 /* Highlight Animation */
 @keyframes highlightPulse {

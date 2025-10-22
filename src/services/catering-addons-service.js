@@ -5,11 +5,114 @@
  */
 
 import { db } from '../firebase-config.js';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, doc, getDoc } from 'firebase/firestore';
 
 /**
- * Get all active catering add-ons
- * @returns {Promise<Array>} Array of add-on objects
+ * Enrich add-ons with runtime pricing from source collections
+ * Implements Option A: Pure single source of truth
+ * @param {Array} addOns - Array of add-on metadata from cateringAddOns collection
+ * @returns {Promise<Array>} Enriched add-ons with current pricing and details
+ */
+async function enrichAddOnsWithPricing(addOns) {
+  // Group add-ons by source collection for batch fetching
+  const bySource = {
+    desserts: addOns.filter(a => a.sourceCollection === 'desserts'),
+    menuItems: addOns.filter(a => a.sourceCollection === 'menuItems'),
+    freshSalads: addOns.filter(a => a.sourceCollection === 'freshSalads'),
+    coldSides: addOns.filter(a => a.sourceCollection === 'coldSides')
+  };
+
+  // Fetch all source documents in parallel
+  const sourceData = {
+    desserts: {},
+    menuItems: {},
+    freshSalads: {},
+    coldSides: {}
+  };
+
+  await Promise.all([
+    // Fetch desserts
+    ...Array.from(new Set(bySource.desserts.map(a => a.sourceDocumentId))).map(async (docId) => {
+      const docRef = doc(db, 'desserts', docId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        sourceData.desserts[docId] = docSnap.data();
+      }
+    }),
+
+    // Fetch menuItems
+    ...Array.from(new Set(bySource.menuItems.map(a => a.sourceDocumentId))).map(async (docId) => {
+      const docRef = doc(db, 'menuItems', docId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        sourceData.menuItems[docId] = docSnap.data();
+      }
+    }),
+
+    // Fetch freshSalads
+    ...Array.from(new Set(bySource.freshSalads.map(a => a.sourceDocumentId))).map(async (docId) => {
+      const docRef = doc(db, 'freshSalads', docId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        sourceData.freshSalads[docId] = docSnap.data();
+      }
+    }),
+
+    // Fetch coldSides
+    ...Array.from(new Set(bySource.coldSides.map(a => a.sourceDocumentId))).map(async (docId) => {
+      const docRef = doc(db, 'coldSides', docId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        sourceData.coldSides[docId] = docSnap.data();
+      }
+    })
+  ]);
+
+  // Enrich each add-on with source data
+  return addOns.map(addOn => {
+    // Skip enrichment for items without source references (they have direct pricing)
+    if (!addOn.sourceCollection || !addOn.sourceDocumentId) {
+      return addOn;
+    }
+
+    const sourceDoc = sourceData[addOn.sourceCollection]?.[addOn.sourceDocumentId];
+
+    if (!sourceDoc) {
+      console.warn(`Missing source document: ${addOn.sourceCollection}/${addOn.sourceDocumentId}`);
+      return addOn; // Return as-is if source missing
+    }
+
+    // Find the specific variant
+    const variant = sourceDoc.variants?.find(v => v.id === addOn.sourceVariantId);
+
+    if (!variant) {
+      console.warn(`Missing variant ${addOn.sourceVariantId} in ${addOn.sourceDocumentId}`);
+      return addOn; // Return as-is if variant missing
+    }
+
+    // Calculate price with pack multiplier
+    const multiplier = addOn.quantityMultiplier || 1;
+    const basePrice = variant.basePrice || 0;
+    const price = basePrice * multiplier;
+
+    // Return enriched add-on
+    return {
+      ...addOn,
+      name: addOn.name || `${sourceDoc.name} (${addOn.packSize})`,
+      basePrice: price,
+      price: price,
+      servings: variant.servings * multiplier,
+      imageUrl: addOn.imageUrl || sourceDoc.imageUrl,
+      allergens: addOn.allergens || sourceDoc.allergens || [],
+      dietaryTags: addOn.dietaryTags || sourceDoc.dietaryTags || [],
+      description: addOn.description || sourceDoc.description
+    };
+  });
+}
+
+/**
+ * Get all active catering add-ons with runtime pricing from source collections
+ * @returns {Promise<Array>} Array of enriched add-on objects
  */
 export async function getCateringAddOns() {
   try {
@@ -20,24 +123,23 @@ export async function getCateringAddOns() {
     );
 
     const snapshot = await getDocs(q);
-    const addOns = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        price: data.basePrice || data.price || 0  // Map basePrice to price
-      };
-    });
+    const addOns = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Enrich with pricing from source collections
+    const enriched = await enrichAddOnsWithPricing(addOns);
 
     // Sort in memory to avoid composite index requirement
-    addOns.sort((a, b) => {
+    enriched.sort((a, b) => {
       if (a.category !== b.category) {
         return a.category.localeCompare(b.category);
       }
       return (a.displayOrder || 0) - (b.displayOrder || 0);
     });
 
-    return addOns;
+    return enriched;
   } catch (error) {
     console.error('Error fetching catering add-ons:', error);
     throw error;
@@ -45,9 +147,9 @@ export async function getCateringAddOns() {
 }
 
 /**
- * Get add-ons filtered by category
+ * Get add-ons filtered by category with runtime pricing
  * @param {string} category - 'desserts', 'beverages', 'salads', 'sides', 'quick-adds', 'hot-beverages'
- * @returns {Promise<Array>} Filtered add-ons
+ * @returns {Promise<Array>} Filtered add-ons with current pricing
  */
 export async function getAddOnsByCategory(category) {
   try {
@@ -59,19 +161,18 @@ export async function getAddOnsByCategory(category) {
     );
 
     const snapshot = await getDocs(q);
-    const addOns = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        price: data.basePrice || data.price || 0  // Map basePrice to price
-      };
-    });
+    const addOns = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Enrich with pricing from source collections
+    const enriched = await enrichAddOnsWithPricing(addOns);
 
     // Sort in memory to avoid composite index requirement
-    addOns.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    enriched.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
-    return addOns;
+    return enriched;
   } catch (error) {
     console.error(`Error fetching ${category} add-ons:`, error);
     throw error;
@@ -139,10 +240,11 @@ export async function getAllAddOnsSplitByCategory() {
   ]);
 
   const desserts = allAddOns.filter(addOn => addOn.category === 'desserts');
+  const beverages = allAddOns.filter(addOn => addOn.category === 'beverages');
 
   return {
     desserts: groupItemsByPackVariants(desserts),
-    beverages: allAddOns.filter(addOn => addOn.category === 'beverages'),
+    beverages: groupBeveragesByVariants(beverages),
     salads: allAddOns.filter(addOn => addOn.category === 'salads'),
     sides: allAddOns.filter(addOn => addOn.category === 'sides'),
     quickAdds: allAddOns.filter(addOn => addOn.category === 'quick-adds'),
@@ -402,6 +504,60 @@ function groupDipsByVariants(dips) {
   });
 
   return Object.values(grouped);
+}
+
+/**
+ * Group beverages by sourceDocumentId AND packSize into variant objects
+ * Creates separate cards for each pack size (96oz, 3gal) with their own images
+ * Each card shows flavorVariant options (sweet/unsweet)
+ * @param {Array} beverages - Array of beverage items from cateringAddOns
+ * @returns {Array} Array of grouped beverage objects with flavor variants
+ */
+function groupBeveragesByVariants(beverages) {
+  const grouped = {};
+  const singles = [];
+
+  beverages.forEach(item => {
+    if (item.sourceDocumentId && item.flavorVariant && item.packSize) {
+      // Group by source + pack size to create separate cards for each size
+      const groupingKey = `${item.sourceDocumentId}-${item.packSize}`;
+
+      if (!grouped[groupingKey]) {
+        // Extract base name and add pack size
+        const baseName = item.name ? item.name.replace(/\s*\(.*?\)\s*/g, '').trim() : 'Boxed Iced Tea';
+        const displayName = `${baseName} (${item.packSize})`;
+
+        grouped[groupingKey] = {
+          sourceId: item.sourceDocumentId,
+          packSize: item.packSize,
+          displayName: displayName,
+          name: displayName,
+          description: item.description,
+          imageUrl: item.imageUrl, // Each pack size has its own image
+          category: item.category,
+          hasVariants: true,
+          variants: {}
+        };
+      }
+
+      // Variant key is just the flavor (sweet/unsweet)
+      const variantKey = item.flavorVariant;
+
+      // Add flavor variant
+      grouped[groupingKey].variants[variantKey] = {
+        id: item.id,
+        price: item.price,
+        servings: item.servings || 1,
+        flavorVariant: item.flavorVariant,
+        variantLabel: item.flavorVariant.charAt(0).toUpperCase() + item.flavorVariant.slice(1)
+      };
+    } else {
+      // No variants - single item
+      singles.push(item);
+    }
+  });
+
+  return [...Object.values(grouped), ...singles];
 }
 
 /**

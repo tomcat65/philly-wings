@@ -106,7 +106,7 @@ function renderFAQ() {
     },
     {
       question: 'What if I need to change my order?',
-      answer: 'Contact ezCater customer support as soon as possible. Changes can typically be made up to 24 hours before your delivery time.'
+      answer: 'Contact customer support as soon as possible. Changes can typically be made up to 24 hours before your delivery time.'
     },
     {
       question: 'Do you provide serving supplies?',

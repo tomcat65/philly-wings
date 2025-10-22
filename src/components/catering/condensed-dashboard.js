@@ -92,20 +92,15 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
           <span class="total-label-grand">Grand Total:</span>
           <span class="total-value-grand" data-highlight-target="grand-total">$${grandTotal.toFixed(2)}</span>
         </div>
-
-        <div class="total-row total-row-per-person">
-          <span class="total-label-per-person">Per Person (Box) Cost:</span>
-          <span class="total-value-per-person" data-highlight-target="per-person-cost">$${perPersonCost.toFixed(2)}</span>
-        </div>
       </div>
 
-      <!-- Budget Indicator -->
-      <div class="budget-indicator">
-        <div class="budget-per-box">
-          <span class="budget-label">Per Box Cost:</span>
-          <span class="budget-value" data-highlight-target="per-box">$${perBoxCost.toFixed(2)}</span>
+      <!-- Per Person Cost Section -->
+      <div class="per-person-section">
+        <div class="per-person-cost-row">
+          <span class="per-person-label">Per Person (Box) Cost:</span>
+          <span class="per-person-value" data-highlight-target="per-person-cost">$${perPersonCost.toFixed(2)}</span>
         </div>
-        <p class="budget-note">
+        <p class="per-person-note">
           💡 Adjust to stay within budget
         </p>
       </div>
