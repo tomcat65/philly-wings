@@ -2918,6 +2918,27 @@ async function renderReviewContactStep() {
   `;
 
   initReviewContactInteractions();
+
+  // Scroll to top of boxed-meals-flow container to show review content from the beginning
+  requestAnimationFrame(() => {
+    const boxedMealsContainer = document.getElementById('boxed-meals-flow');
+    console.log('🔍 [Review] Looking for boxed-meals-flow container:', boxedMealsContainer);
+
+    if (boxedMealsContainer) {
+      const rect = boxedMealsContainer.getBoundingClientRect();
+      console.log('📐 [Review] Container position:', { top: rect.top, bottom: rect.bottom });
+      console.log('📍 [Review] Before scroll:', window.scrollY);
+
+      // Scroll container to top of viewport
+      boxedMealsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      setTimeout(() => {
+        console.log('📍 [Review] After scroll:', window.scrollY);
+      }, 500);
+    } else {
+      console.error('❌ [Review] Boxed meals container not found!');
+    }
+  });
 }
 
 /**
