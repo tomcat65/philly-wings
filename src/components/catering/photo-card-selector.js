@@ -54,11 +54,9 @@ function renderPhotoCard(item, category, selectedId, multiSelect) {
           loading="lazy"
           class="card-img">
 
-        ${isSelected ? `
-          <div class="card-selected-overlay">
-            <span class="selected-check">✓</span>
-          </div>
-        ` : ''}
+        <div class="card-selected-overlay">
+          <span class="selected-check">✓</span>
+        </div>
 
         ${item.badge ? `
           <span class="card-badge">${item.badge}</span>

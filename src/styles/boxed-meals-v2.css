@@ -751,9 +751,14 @@
   position: absolute;
   inset: 0;
   background: rgba(255, 107, 53, 0.9);
-  display: flex;
+  display: none; /* Hidden by default */
   align-items: center;
   justify-content: center;
+}
+
+/* Show overlay only when parent card is selected */
+.photo-card.card-selected .card-selected-overlay {
+  display: flex;
 }
 
 .selected-check {
