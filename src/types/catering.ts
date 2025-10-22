@@ -154,6 +154,9 @@ export interface CateringAddOn {
   // Preparation variants
   preparationOptions?: PreparationOption[];
 
+  // Selection quantity (for cart/order management)
+  quantity?: number;
+
   // Metadata
   lastUpdated?: Date | string; // Server-set timestamp
 }
@@ -355,7 +358,7 @@ export function calculateTotalPrepTime(
 ): number {
   const addOnTime = addOns.reduce((total, addOn) => {
     const selectedMethod = preparationSelections?.[addOn.id];
-    const quantity = (addOn as any)?.quantity ?? 1;
+    const quantity = addOn.quantity ?? 1;
     return total + getAddOnPrepTime(addOn, selectedMethod) * quantity;
   }, 0);
   return basePackagePrepTime + addOnTime;
@@ -372,7 +375,7 @@ export function getRequiredEquipment(
   const allEquipment = new Set(packageEquipment);
   addOns.forEach(addOn => {
     const selectedMethod = preparationSelections?.[addOn.id];
-    const quantity = (addOn as any)?.quantity ?? 1;
+    const quantity = addOn.quantity ?? 1;
     if (quantity > 0) {
       getAddOnRequiredEquipment(addOn, selectedMethod).forEach(eq => allEquipment.add(eq));
     }
@@ -399,7 +402,7 @@ export function getAllergens(
   addOns.forEach(addOn => {
     const selectedMethod = preparationSelections?.[addOn.id];
     const variantAllergens = getAddOnAllergens(addOn, selectedMethod);
-    const quantity = (addOn as any)?.quantity ?? 1;
+    const quantity = addOn.quantity ?? 1;
     if (quantity > 0) {
       variantAllergens.forEach(allergen => {
         if (allergen !== Allergen.NONE) {
