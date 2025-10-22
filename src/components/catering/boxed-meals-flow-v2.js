@@ -1084,7 +1084,14 @@ function handleWingCountChange(newCount) {
   // Re-render configuration zone to show/hide split sauce option
   const configZone = document.querySelector('.configuration-zone');
   if (configZone) {
-    configZone.innerHTML = renderConfigurationZone().replace('<div class="configuration-zone">', '').replace('</div>\n  `', '');
+    // Create temporary container to parse HTML properly
+    const temp = document.createElement('div');
+    temp.innerHTML = renderConfigurationZone();
+    // Extract inner content from the wrapper div
+    const newContent = temp.firstElementChild;
+    if (newContent) {
+      configZone.innerHTML = newContent.innerHTML;
+    }
     initConfigurationStep();
   }
 
@@ -1143,7 +1150,14 @@ function handleWingSelection(wingType) {
   // Re-render configuration zone to show/hide wing style selector
   const configZone = document.querySelector('.configuration-zone');
   if (configZone) {
-    configZone.innerHTML = renderConfigurationZone().replace('<div class="configuration-zone">', '').replace('</div>\n  `', '');
+    // Create temporary container to parse HTML properly
+    const temp = document.createElement('div');
+    temp.innerHTML = renderConfigurationZone();
+    // Extract inner content from the wrapper div
+    const newContent = temp.firstElementChild;
+    if (newContent) {
+      configZone.innerHTML = newContent.innerHTML;
+    }
     initConfigurationStep();
   }
 

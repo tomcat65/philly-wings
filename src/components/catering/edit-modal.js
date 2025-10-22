@@ -139,8 +139,9 @@ export function openEditModal(flowType, section, options = {}) {
  * @param {HTMLElement} container - Container element
  * @param {Object} draft - Draft state
  * @param {Function} onUpdate - Callback when draft updates
+ * @param {string} flowType - Flow type identifier (e.g., 'boxed-meals')
  */
-export function renderBoxConfigInModal(container, draft, onUpdate) {
+export function renderBoxConfigInModal(container, draft, onUpdate, flowType = 'boxed-meals') {
   const { currentConfig, boxCount } = draft;
 
   container.innerHTML = `
@@ -197,7 +198,7 @@ export function renderBoxConfigInModal(container, draft, onUpdate) {
 
   // Update total wings display
   const updateTotalWings = () => {
-    const currentDraft = cateringStateService.getDraft('boxed-meals');
+    const currentDraft = cateringStateService.getDraft(flowType);
     const total = currentDraft.boxCount * currentDraft.currentConfig.wingCount;
     totalWingsSpan.textContent = total;
   };
@@ -242,7 +243,7 @@ export function renderBoxConfigInModal(container, draft, onUpdate) {
       // Update draft
       onUpdate({
         currentConfig: {
-          ...cateringStateService.getDraft('boxed-meals').currentConfig,
+          ...cateringStateService.getDraft(flowType).currentConfig,
           wingCount: count
         }
       });
@@ -300,8 +301,9 @@ export async function renderContactInModal(container, draft, onUpdate) {
  * @param {HTMLElement} container - Container element
  * @param {Object} draft - Draft state
  * @param {Function} onUpdate - Callback when draft updates
+ * @param {string} flowType - Flow type identifier (e.g., 'boxed-meals')
  */
-export async function renderExtrasInModal(container, draft, onUpdate) {
+export async function renderExtrasInModal(container, draft, onUpdate, flowType = 'boxed-meals') {
   const { extras } = draft;
 
   container.innerHTML = `
@@ -322,7 +324,7 @@ export async function renderExtrasInModal(container, draft, onUpdate) {
     const addOns = await getAllAddOnsSplitByCategory();
 
     // Render extras by category
-    renderExtrasContent(container.querySelector('#modal-extras-content'), addOns, extras, onUpdate);
+    renderExtrasContent(container.querySelector('#modal-extras-content'), addOns, extras, onUpdate, flowType);
   } catch (error) {
     console.error('Error loading add-ons:', error);
     container.querySelector('#modal-extras-content').innerHTML = `
@@ -335,8 +337,9 @@ export async function renderExtrasInModal(container, draft, onUpdate) {
 
 /**
  * Render extras content with add/remove functionality
+ * @param {string} flowType - Flow type identifier (e.g., 'boxed-meals')
  */
-function renderExtrasContent(container, addOns, currentExtras, onUpdate) {
+function renderExtrasContent(container, addOns, currentExtras, onUpdate, flowType = 'boxed-meals') {
   const categories = [
     { key: 'beverages', label: 'Cold Beverages', items: addOns.beverages || [] },
     { key: 'hotBeverages', label: 'Hot Beverages', items: addOns.hotBeverages || [] },
@@ -398,7 +401,7 @@ function renderExtrasContent(container, addOns, currentExtras, onUpdate) {
       addBtn.addEventListener('click', () => {
         updateExtraQuantity(itemId, category, 1, addOns, currentExtras, onUpdate);
         // Re-render to show quantity controls
-        renderExtrasContent(container, addOns, cateringStateService.getDraft('boxed-meals').extras, onUpdate);
+        renderExtrasContent(container, addOns, cateringStateService.getDraft(flowType).extras, onUpdate, flowType);
       });
     }
 
@@ -406,7 +409,7 @@ function renderExtrasContent(container, addOns, currentExtras, onUpdate) {
       minusBtn.addEventListener('click', () => {
         const currentQty = getCurrentQuantity(itemId, category, currentExtras);
         updateExtraQuantity(itemId, category, Math.max(0, currentQty - 1), addOns, currentExtras, onUpdate);
-        renderExtrasContent(container, addOns, cateringStateService.getDraft('boxed-meals').extras, onUpdate);
+        renderExtrasContent(container, addOns, cateringStateService.getDraft(flowType).extras, onUpdate, flowType);
       });
     }
 
@@ -414,7 +417,7 @@ function renderExtrasContent(container, addOns, currentExtras, onUpdate) {
       plusBtn.addEventListener('click', () => {
         const currentQty = getCurrentQuantity(itemId, category, currentExtras);
         updateExtraQuantity(itemId, category, currentQty + 1, addOns, currentExtras, onUpdate);
-        renderExtrasContent(container, addOns, cateringStateService.getDraft('boxed-meals').extras, onUpdate);
+        renderExtrasContent(container, addOns, cateringStateService.getDraft(flowType).extras, onUpdate, flowType);
       });
     }
   });

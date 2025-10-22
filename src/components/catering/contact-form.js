@@ -282,6 +282,14 @@ export function initContactFormInteractions() {
     // Validate hour input (1-12)
     hourInput.addEventListener('input', (e) => {
       let value = parseInt(e.target.value);
+
+      // Handle non-numeric input
+      if (isNaN(value) && e.target.value !== '') {
+        e.target.value = '';
+        return;
+      }
+
+      // Validate numeric range
       if (value > 12) e.target.value = '12';
       if (value < 1 && e.target.value !== '') e.target.value = '1';
     });
@@ -298,6 +306,14 @@ export function initContactFormInteractions() {
     // Validate minute input (0-59)
     minuteInput.addEventListener('input', (e) => {
       let value = parseInt(e.target.value);
+
+      // Handle non-numeric input
+      if (isNaN(value) && e.target.value !== '') {
+        e.target.value = '';
+        return;
+      }
+
+      // Validate numeric range
       if (value > 59) e.target.value = '59';
       if (value < 0) e.target.value = '0';
     });
@@ -308,7 +324,12 @@ export function initContactFormInteractions() {
         e.target.value = '00';
       } else {
         let value = parseInt(e.target.value);
-        e.target.value = value.toString().padStart(2, '0');
+        // Handle non-numeric values (set to 00 if invalid)
+        if (isNaN(value)) {
+          e.target.value = '00';
+        } else {
+          e.target.value = value.toString().padStart(2, '0');
+        }
       }
     });
   }
