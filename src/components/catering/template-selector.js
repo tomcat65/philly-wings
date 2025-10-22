@@ -316,6 +316,30 @@ function getSampleTemplates() {
       },
       sortOrder: 3,
       active: true
+    },
+    {
+      id: 'veggie-delight',
+      name: 'Veggie Delight',
+      tagline: 'Plant-Based & Refreshing',
+      description: 'Perfect for plant-based diets. Delicious plant-based wings with Sweet Teriyaki, fresh veggie sticks, and bottled water.',
+      heroImage: 'templates/veggie-delight.jpg',
+      heatLevel: 1,
+      featured: true,
+      defaultConfig: {
+        wingCount: 6,
+        wingType: 'plant-based',
+        plantBasedPrep: 'fried',  // Default to fried preparation
+        sauce: 'sweet-teriyaki',
+        dips: ['ranch', 'honey-mustard'],
+        side: 'veggie-sticks',
+        dessert: 'no-dessert'  // No dessert included
+      },
+      stats: {
+        ordersThisMonth: 18,
+        avgRating: 4.6
+      },
+      sortOrder: 4,
+      active: true
     }
   ];
 }

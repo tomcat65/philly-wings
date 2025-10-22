@@ -37,11 +37,13 @@ import { TAX_RATE, EXTRA_CATEGORY_KEYS, flattenExtras, calculateExtrasSubtotal }
 let boxedMealState = {
   currentStep: 'template-selection',  // template-selection | configuration | quick-adds | review-contact | success
   selectedTemplate: null,
+  templateIncludedDessert: null,  // Track template's default dessert for pricing baseline
   boxCount: 10,
   currentConfig: {
     wingCount: 6,           // NEW: 6, 10, or 12
     wingType: null,
     wingStyle: null,        // NEW: 'mixed', 'all-drums', 'all-flats' (for bone-in only)
+    plantBasedPrep: null,   // NEW: 'fried', 'baked' (for plant-based only)
     sauce: null,            // Single sauce for wingCount === 6
     sauces: [],             // Multiple sauces for wingCount >= 10, format: [{id, count}]
     splitSauces: false,     // Toggle for multi-sauce mode
@@ -362,6 +364,13 @@ function renderConfigurationZone() {
           </div>
         ` : ''}
 
+        <!-- Plant-Based Preparation Method (Plant-Based only) -->
+        ${boxedMealState.currentConfig.wingType === 'plant-based' ? `
+          <div class="config-section" id="config-section-plant-prep">
+            ${renderPlantBasedPrepSelector(boxedMealState.currentConfig.plantBasedPrep)}
+          </div>
+        ` : ''}
+
         <!-- Sauce Selection -->
         <div class="config-section" id="config-section-sauces">
           ${renderSauceSelector()}
@@ -437,6 +446,52 @@ function renderWingStyleSelector(selectedStyle = 'mixed') {
               <span class="style-label">${style.label}</span>
               <span class="style-description">${style.description}</span>
               ${style.price > 0 ? `<span class="style-price">+$${style.price.toFixed(2)}</span>` : ''}
+            </div>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Plant-Based Preparation Selector (for Plant-Based wings only)
+ */
+function renderPlantBasedPrepSelector(selectedPrep = 'fried') {
+  const prepMethods = [
+    {
+      id: 'fried',
+      label: 'Fried',
+      description: 'Crispy & golden',
+      icon: '🔥',
+      price: 0
+    },
+    {
+      id: 'baked',
+      label: 'Baked',
+      description: 'Lighter option',
+      icon: '✨',
+      price: 0  // Same price as fried
+    }
+  ];
+
+  return `
+    <div class="plant-based-prep-selector config-section">
+      <div class="section-header">
+        <h4 class="section-title">🌱 Preparation Method</h4>
+        <p class="section-subtitle">How would you like your plant-based wings prepared?</p>
+      </div>
+
+      <div class="prep-method-options">
+        ${prepMethods.map(prep => `
+          <button
+            class="prep-method-btn ${selectedPrep === prep.id ? 'prep-active' : ''}"
+            data-plant-prep="${prep.id}"
+            type="button">
+            <span class="prep-icon">${prep.icon}</span>
+            <div class="prep-info">
+              <span class="prep-label">${prep.label}</span>
+              <span class="prep-description">${prep.description}</span>
             </div>
           </button>
         `).join('')}
@@ -615,10 +670,23 @@ function renderDessertSelector() {
     price: dessert.variants?.[0]?.basePrice || null
   }));
 
+  // Add "No Dessert" option at the beginning
+  const itemsWithSkipOption = [
+    {
+      id: 'no-dessert',
+      name: 'Skip Dessert',
+      description: 'Keep it light - no dessert with this box',
+      tags: [],
+      imageUrl: null,
+      price: null
+    },
+    ...(dessertItems.length > 0 ? dessertItems : getSampleDesserts())
+  ];
+
   return renderPhotoCardSelector({
     category: 'desserts',
-    items: dessertItems.length > 0 ? dessertItems : getSampleDesserts(),
-    selectedId: boxedMealState.currentConfig.dessert,
+    items: itemsWithSkipOption,
+    selectedId: boxedMealState.currentConfig.dessert || 'no-dessert',
     multiSelect: false,
     onSelect: () => {}
   });
@@ -918,6 +986,14 @@ function initConfigurationStep() {
     });
   });
 
+  // Plant-based prep selector (if plant-based wings selected)
+  document.querySelectorAll('[data-plant-prep]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prep = btn.dataset.plantPrep;
+      handlePlantBasedPrepChange(prep);
+    });
+  });
+
   // Sauce on side toggle
   const sauceOnSideToggle = document.getElementById('sauce-on-side-toggle');
   if (sauceOnSideToggle) {
@@ -1097,8 +1173,16 @@ async function handleTemplateSelection(template) {
     // This preserves wingCount and other properties not specified in template
     boxedMealState.currentConfig = {
       ...boxedMealState.currentConfig,  // Start with current defaults (includes wingCount: 6)
-      ...template.defaultConfig          // Override with template-specific values
+      ...template.defaultConfig,         // Override with template-specific values
+      // Normalize dessert ID (templates use hyphens, Firestore uses underscores)
+      dessert: template.defaultConfig.dessert
+        ? normalizeDessertId(template.defaultConfig.dessert)
+        : null
     };
+
+    // 🔑 PRICING FIX: Track which dessert came with template for baseline pricing
+    // This allows differential pricing when swapping desserts
+    boxedMealState.templateIncludedDessert = boxedMealState.currentConfig.dessert;
   }
 
   // Initialize box count (always set to ensure no NaN)
@@ -1204,7 +1288,14 @@ function handleWingSelection(wingType) {
     boxedMealState.currentConfig.wingStyle = null;
   }
 
-  // Re-render configuration zone to show/hide wing style selector
+  // Set default plant-based prep when plant-based selected, reset when not
+  if (wingType === 'plant-based') {
+    boxedMealState.currentConfig.plantBasedPrep = boxedMealState.currentConfig.plantBasedPrep || 'fried';
+  } else {
+    boxedMealState.currentConfig.plantBasedPrep = null;
+  }
+
+  // Re-render configuration zone to show/hide wing style/prep selectors
   const configZone = document.querySelector('.configuration-zone');
   if (configZone) {
     // Create temporary container to parse HTML properly
@@ -1232,6 +1323,18 @@ function handleWingStyleChange(style) {
 
   updateCondensedDashboard(boxedMealState);
   console.log('Wing style selected:', style);
+}
+
+function handlePlantBasedPrepChange(prep) {
+  boxedMealState.currentConfig.plantBasedPrep = prep;
+
+  // Update UI
+  document.querySelectorAll('[data-plant-prep]').forEach(btn => {
+    btn.classList.toggle('prep-active', btn.dataset.plantPrep === prep);
+  });
+
+  updateCondensedDashboard(boxedMealState);
+  console.log('Plant-based prep selected:', prep);
 }
 
 function handleSauceSelection(sauceId) {
@@ -1286,7 +1389,8 @@ function handleSideSelection(sideId) {
 }
 
 function handleDessertSelection(dessertId) {
-  boxedMealState.currentConfig.dessert = dessertId;
+  // Normalize ID format (UI may use hyphens, but we store underscores)
+  boxedMealState.currentConfig.dessert = normalizeDessertId(dessertId);
   updateCondensedDashboard(boxedMealState);
   validateAndUpdateCTA();
   debouncedAutoSave();
@@ -2083,7 +2187,8 @@ function isConfigurationComplete() {
     sauceComplete = !!sauce;
   }
 
-  return wingCount && wingType && sauceComplete && dips?.length === 2 && side && dessert;
+  // Dessert is optional (Veggie Delight template has no dessert)
+  return wingCount && wingType && sauceComplete && dips?.length === 2 && side;
 }
 
 function validateAndUpdateCTA() {
@@ -2872,7 +2977,13 @@ async function renderReviewContactStep() {
             <h4>${getBoxedMealsTitle(boxedMealState, pricing)}</h4>
             <p class="config-subtitle">Each box contains:</p>
             <ul class="config-list">
-              <li>${boxedMealState.currentConfig.wingCount}pc ${formatWingType(boxedMealState.currentConfig.wingType)} Wings</li>
+              <li>${boxedMealState.currentConfig.wingCount}pc ${formatWingType(boxedMealState.currentConfig.wingType)} Wings${
+                boxedMealState.currentConfig.wingType === 'plant-based' && boxedMealState.currentConfig.plantBasedPrep
+                  ? ` (${boxedMealState.currentConfig.plantBasedPrep === 'fried' ? 'Fried' : 'Baked'})`
+                  : boxedMealState.currentConfig.wingType === 'bone-in' && boxedMealState.currentConfig.wingStyle
+                    ? ` (${boxedMealState.currentConfig.wingStyle === 'mixed' ? 'Mixed' : boxedMealState.currentConfig.wingStyle === 'all-drums' ? 'All Drums' : 'All Flats'})`
+                    : ''
+              }</li>
               <li>${formatSideName(boxedMealState.currentConfig.side)}</li>
               <li>${formatSauceName(boxedMealState.currentConfig.sauce)}</li>
               <li>${formatDessertName(boxedMealState.currentConfig.dessert)}</li>
@@ -3088,12 +3199,23 @@ function getSidePrice(sideId) {
 }
 
 /**
+ * Helper: Normalize dessert ID (convert hyphens to underscores)
+ * Templates use 'ny-cheesecake', Firestore uses 'ny_cheesecake'
+ */
+function normalizeDessertId(dessertId) {
+  if (!dessertId) return null;
+  return dessertId.replace(/-/g, '_');
+}
+
+/**
  * Helper: Get dessert price from menuData
  */
 function getDessertPrice(dessertId) {
   if (!dessertId || !boxedMealState.menuData.desserts) return null;
 
-  const dessert = boxedMealState.menuData.desserts.find(d => d.id === dessertId);
+  // Normalize ID format (templates use hyphens, Firestore uses underscores)
+  const normalizedId = normalizeDessertId(dessertId);
+  const dessert = boxedMealState.menuData.desserts.find(d => d.id === normalizedId);
   return dessert?.variants?.[0]?.basePrice || null;
 }
 
@@ -3141,12 +3263,17 @@ function calculatePricePerBox(config) {
   }
 
   // Dessert price adjustment (database-driven)
-  if (config.dessert) {
+  if (config.dessert && config.dessert !== 'no-dessert') {
     const dessertPrice = getDessertPrice(config.dessert);
-    if (dessertPrice) {
-      // Base dessert is included, charge differential for premium items
-      // Find cheapest dessert as base (typically $0 for included item)
-      const baseDessertPrice = 0; // Basic dessert included in base price
+    if (dessertPrice !== null) {
+      // 🔑 PRICING FIX: Use template's included dessert as baseline for differential pricing
+      // This ensures the base price ($12.50) includes the template's default dessert
+      // and only charges differential when swapping to a different dessert
+      const templateDessert = boxedMealState.templateIncludedDessert;
+      const baseDessertPrice = (templateDessert && templateDessert !== 'no-dessert')
+        ? (getDessertPrice(templateDessert) || 0)
+        : 0;
+
       price += (dessertPrice - baseDessertPrice);
     }
   }

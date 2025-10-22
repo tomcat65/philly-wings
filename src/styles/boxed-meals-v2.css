@@ -1691,6 +1691,65 @@
   margin-top: 2px;
 }
 
+/* Plant-Based Preparation Selector */
+.plant-based-prep-selector {
+  margin-bottom: var(--spacing-xl);
+}
+
+.prep-method-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.prep-method-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: white;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  min-height: 80px;
+}
+
+.prep-method-btn:hover {
+  border-color: #86efac; /* green-300 for plant-based theme */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.prep-method-btn.prep-active {
+  background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); /* green gradient */
+  border-color: #22c55e; /* green-500 */
+  border-width: 3px;
+}
+
+.prep-icon {
+  font-size: 1.5rem;
+}
+
+.prep-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  text-align: left;
+}
+
+.prep-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.prep-description {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
 /* Multi-sauce Toggle */
 .multi-sauce-toggle {
   margin-top: var(--spacing-lg);

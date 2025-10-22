@@ -18,11 +18,12 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
     individualOverrides = {},
     extras = {},
     contact = {},
-    menuData = {}
+    menuData = {},
+    templateIncludedDessert = null  // 🔑 PRICING FIX: Track template's included dessert
   } = boxedMealState;
 
   // Calculate totals
-  const boxesTotal = calculateBoxesTotal(currentConfig, boxCount, individualOverrides, menuData);
+  const boxesTotal = calculateBoxesTotal(currentConfig, boxCount, individualOverrides, menuData, templateIncludedDessert);
   const extrasTotal = calculateExtrasSubtotal(extras);
   const subtotal = boxesTotal + extrasTotal;
   const tax = subtotal * TAX_RATE;
@@ -58,7 +59,7 @@ export function renderCondensedDashboard(boxedMealState = {}, isCollapsed = fals
         </button>
 
         <div class="section-content" data-section-content="boxes">
-          ${renderBoxesBreakdown(currentConfig, boxCount, individualOverrides, perBoxCost, menuData)}
+          ${renderBoxesBreakdown(currentConfig, boxCount, individualOverrides, perBoxCost, menuData, templateIncludedDessert)}
         </div>
       </div>
 
@@ -137,19 +138,38 @@ function renderCollapsedDashboard(boxCount, grandTotal, perBoxCost) {
 /**
  * Render boxes breakdown (detailed itemization)
  */
-function renderBoxesBreakdown(config, boxCount, individualOverrides, perBoxCost, menuData = {}) {
+function renderBoxesBreakdown(config, boxCount, individualOverrides, perBoxCost, menuData = {}, templateIncludedDessert = null) {
   const hasIndividualOverrides = Object.keys(individualOverrides).length > 0;
 
   if (hasIndividualOverrides) {
     // Group boxes by configuration and price
-    return renderItemizedBoxes(config, boxCount, individualOverrides, menuData);
+    return renderItemizedBoxes(config, boxCount, individualOverrides, menuData, templateIncludedDessert);
   }
 
   // All boxes same configuration
   const template = config.templateName || 'Custom Configuration';
-  const wingDesc = config.wingCount && config.wingType
-    ? `${config.wingCount} ${formatWingType(config.wingType)} Wings`
-    : 'Not configured';
+
+  // Build wing description with prep method for plant-based
+  let wingDesc = 'Not configured';
+  if (config.wingCount && config.wingType) {
+    wingDesc = `${config.wingCount} ${formatWingType(config.wingType)} Wings`;
+
+    // Add preparation method for plant-based wings
+    if (config.wingType === 'plant-based' && config.plantBasedPrep) {
+      const prepMethod = config.plantBasedPrep === 'fried' ? 'Fried' : 'Baked';
+      wingDesc += ` (${prepMethod})`;
+    }
+
+    // Add wing style for bone-in wings
+    if (config.wingType === 'bone-in' && config.wingStyle) {
+      const styleMap = {
+        'mixed': 'Mixed',
+        'all-drums': 'All Drums',
+        'all-flats': 'All Flats'
+      };
+      wingDesc += ` (${styleMap[config.wingStyle] || config.wingStyle})`;
+    }
+  }
 
   return `
     <div class="boxes-breakdown">
@@ -200,13 +220,13 @@ function renderBoxesBreakdown(config, boxCount, individualOverrides, perBoxCost,
 /**
  * Render itemized boxes (when individual customizations exist)
  */
-function renderItemizedBoxes(bulkConfig, totalBoxCount, individualOverrides, menuData = {}) {
+function renderItemizedBoxes(bulkConfig, totalBoxCount, individualOverrides, menuData = {}, templateIncludedDessert = null) {
   const priceGroups = {};
 
   // Calculate price for each box and group
   for (let boxNum = 1; boxNum <= totalBoxCount; boxNum++) {
     const boxConfig = individualOverrides[boxNum] || bulkConfig;
-    const boxPrice = calculatePricePerBox(boxConfig, menuData);
+    const boxPrice = calculatePricePerBox(boxConfig, menuData, templateIncludedDessert);
 
     const priceKey = boxPrice.toFixed(2);
     if (!priceGroups[priceKey]) {
@@ -225,15 +245,47 @@ function renderItemizedBoxes(bulkConfig, totalBoxCount, individualOverrides, men
 
   return `
     <div class="boxes-breakdown boxes-breakdown-itemized">
-      ${sortedGroups.map(group => `
-        <div class="breakdown-row">
-          <span class="breakdown-desc">
-            ${group.count} box${group.count > 1 ? 'es' : ''} @ $${group.price.toFixed(2)}
-            ${group.boxes.length <= 3 ? `<span class="box-nums">#${group.boxes.join(', #')}</span>` : ''}
-          </span>
-          <span class="breakdown-amount">$${(group.price * group.count).toFixed(2)}</span>
-        </div>
-      `).join('')}
+      ${sortedGroups.map(group => {
+        // Build wing description for this group
+        let wingDesc = 'Not configured';
+        if (group.config.wingCount && group.config.wingType) {
+          wingDesc = `${group.config.wingCount} ${formatWingType(group.config.wingType)} Wings`;
+
+          // Add preparation method for plant-based wings
+          if (group.config.wingType === 'plant-based' && group.config.plantBasedPrep) {
+            const prepMethod = group.config.plantBasedPrep === 'fried' ? 'Fried' : 'Baked';
+            wingDesc += ` (${prepMethod})`;
+          }
+
+          // Add wing style for bone-in wings
+          if (group.config.wingType === 'bone-in' && group.config.wingStyle) {
+            const styleMap = {
+              'mixed': 'Mixed',
+              'all-drums': 'All Drums',
+              'all-flats': 'All Flats'
+            };
+            wingDesc += ` (${styleMap[group.config.wingStyle] || group.config.wingStyle})`;
+          }
+        }
+
+        return `
+          <div class="breakdown-group">
+            <div class="breakdown-row">
+              <span class="breakdown-desc">
+                ${group.count} box${group.count > 1 ? 'es' : ''} @ $${group.price.toFixed(2)}
+                ${group.boxes.length <= 3 ? `<span class="box-nums">#${group.boxes.join(', #')}</span>` : ''}
+              </span>
+              <span class="breakdown-amount">$${(group.price * group.count).toFixed(2)}</span>
+            </div>
+            <div class="breakdown-details breakdown-details-compact">
+              <div class="detail-item">
+                <span class="detail-icon">🍗</span>
+                <span class="detail-text">${wingDesc}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
 
       <p class="breakdown-note">
         💡 ${Object.keys(individualOverrides).length} boxes have custom configurations
@@ -304,12 +356,12 @@ function renderExtrasBreakdown(extras) {
 /**
  * Calculate total cost of all boxes
  */
-function calculateBoxesTotal(config, boxCount, individualOverrides, menuData = {}) {
+function calculateBoxesTotal(config, boxCount, individualOverrides, menuData = {}, templateIncludedDessert = null) {
   let total = 0;
 
   for (let boxNum = 1; boxNum <= boxCount; boxNum++) {
     const boxConfig = individualOverrides[boxNum] || config;
-    total += calculatePricePerBox(boxConfig, menuData);
+    total += calculatePricePerBox(boxConfig, menuData, templateIncludedDessert);
   }
 
   return total;
@@ -318,7 +370,7 @@ function calculateBoxesTotal(config, boxCount, individualOverrides, menuData = {
 /**
  * Calculate price per box (imported from live-preview-panel.js logic)
  */
-function calculatePricePerBox(config, menuData = {}) {
+function calculatePricePerBox(config, menuData = {}, templateIncludedDessert = null) {
   let price = 12.50;
 
   const wingCount = config.wingCount || 6;
@@ -351,12 +403,16 @@ function calculatePricePerBox(config, menuData = {}) {
     }
   }
 
-  // Dessert price adjustment (database-driven)
-  if (config.dessert && menuData.desserts) {
+  // 🔑 PRICING FIX: Dessert price adjustment with template-aware baseline
+  if (config.dessert && config.dessert !== 'no-dessert' && menuData.desserts) {
     const dessertPrice = getDessertPrice(config.dessert, menuData.desserts);
     if (dessertPrice !== null) {
-      // Base dessert included at $0, charge differential for premium items
-      const baseDessertPrice = 0;
+      // Use template's included dessert as baseline for differential pricing
+      // This ensures the base price ($12.50) includes the template's default dessert
+      const baseDessertPrice = (templateIncludedDessert && templateIncludedDessert !== 'no-dessert')
+        ? (getDessertPrice(templateIncludedDessert, menuData.desserts) || 0)
+        : 0;
+
       price += (dessertPrice - baseDessertPrice);
     }
   }
