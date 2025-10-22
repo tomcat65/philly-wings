@@ -439,7 +439,7 @@ export const PHOTO_SELECTOR_CONFIGS = {
         name: 'Boneless Wings',
         description: 'Tender all-white meat',
         tags: ['Popular', 'Easy to eat'],
-        imageUrl: null
+        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fphilly-classic-hot_1920x1080.webp?alt=media&token=1d0f025d-9893-45e7-8df1-7899562b92ee'
       },
       {
         id: 'bone-in',
@@ -447,7 +447,7 @@ export const PHOTO_SELECTOR_CONFIGS = {
         description: 'Traditional authentic',
         tags: ['Classic', 'More flavor'],
         price: 1.50,
-        imageUrl: null
+        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbroad-pattison-burn_1920x1080.webp?alt=media&token=0efd0118-108e-4207-85da-4d3fe32b8e58'
       },
       {
         id: 'plant-based',
@@ -456,7 +456,7 @@ export const PHOTO_SELECTOR_CONFIGS = {
         tags: ['Vegetarian', 'Crispy'],
         price: 2.00,
         badge: 'New',
-        imageUrl: null
+        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcauliflower-fried_1920x1080.webp?alt=media&token=ebb8a967-0d76-4b47-b599-11b252ef449f'
       }
     ]
   },
@@ -499,21 +499,21 @@ export const PHOTO_SELECTOR_CONFIGS = {
         name: "Miss Vickie's Chips",
         description: 'Assorted flavors',
         tags: ['Crunchy', 'Variety'],
-        imageUrl: null
+        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmiss-vickies-chips_1920x1080.webp?alt=media&token=50dadac7-2c72-4ffc-96f4-1d9407df0bf3'
       },
       {
         id: 'coleslaw',
         name: 'Coleslaw',
         description: 'Fresh & crisp',
         tags: ['Cold', 'Refreshing'],
-        imageUrl: null
+        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcoleslaw-salad_1920x1080.webp?alt=media&token=70ebf6df-b3e0-4c0b-96c2-fa9e2b3e500f'
       },
       {
         id: 'potato-salad',
         name: 'Potato Salad',
         description: 'Creamy homestyle',
         tags: ['Cold', 'Hearty'],
-        imageUrl: null
+        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fpotato-salad_1920x1080.webp?alt=media&token=86426886-f423-4964-98e3-d2ddb4ef7512'
       }
     ]
   }

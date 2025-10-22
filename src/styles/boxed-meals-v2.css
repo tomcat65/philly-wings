@@ -3023,3 +3023,81 @@
   color: var(--gray-900);
   font-size: 0.9375rem;
 }
+
+/* ========================================
+   Wing Type Button Styles
+   ======================================== */
+
+.wing-type-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.wing-type-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  overflow: hidden;
+}
+
+.wing-type-btn:hover {
+  border-color: var(--philly-orange-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.wing-type-btn.active {
+  border-color: var(--philly-orange);
+  background: var(--gray-50);
+  box-shadow: var(--shadow-lg);
+}
+
+.wing-type-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.wing-type-btn .type-icon {
+  font-size: 1.5rem;
+}
+
+.wing-type-btn .type-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  text-align: center;
+}
+
+.wing-type-btn.active .type-label {
+  color: var(--philly-orange);
+}
+
+@media (max-width: 640px) {
+  .wing-type-options {
+    grid-template-columns: 1fr;
+  }
+
+  .wing-type-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .wing-type-image {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+  }
+}

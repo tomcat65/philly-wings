@@ -1562,15 +1562,16 @@ function renderIndividualBoxEditor(boxNumber, config) {
         <label class="editor-label">Wing Type:</label>
         <div class="wing-type-options">
           ${[
-            { id: 'boneless', label: 'Boneless', icon: '🍗' },
-            { id: 'bone-in', label: 'Bone-In', icon: '🍖' },
-            { id: 'plant-based', label: 'Plant-Based', icon: '🌱' }
+            { id: 'boneless', label: 'Boneless', icon: '🍗', image: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fphilly-classic-hot_1920x1080.webp?alt=media&token=1d0f025d-9893-45e7-8df1-7899562b92ee' },
+            { id: 'bone-in', label: 'Bone-In', icon: '🍖', image: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbroad-pattison-burn_1920x1080.webp?alt=media&token=0efd0118-108e-4207-85da-4d3fe32b8e58' },
+            { id: 'plant-based', label: 'Plant-Based', icon: '🌱', image: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcauliflower-fried_1920x1080.webp?alt=media&token=ebb8a967-0d76-4b47-b599-11b252ef449f' }
           ].map(type => `
             <button
               class="wing-type-btn ${config.wingType === type.id ? 'active' : ''}"
               data-wing-type="${type.id}"
               data-box="${boxNumber}"
               type="button">
+              <img src="${type.image}" alt="${type.label}" class="wing-type-image">
               <span class="type-icon">${type.icon}</span>
               <span class="type-label">${type.label}</span>
             </button>
@@ -2265,12 +2266,12 @@ function renderPackVariantCard(item, featured = false) {
             <div class="variant-row" data-variant="${packSize}" data-variant-id="${variant.id}">
               <div class="variant-label">
                 <span class="variant-name">${formatPackSize(packSize)}</span>
-                <span class="variant-price">$${variant.price.toFixed(2)}</span>
+                <span class="variant-price">$${(variant.price || 0).toFixed(2)}</span>
               </div>
               <div class="variant-qty">
-                <button class="qty-btn qty-minus" data-variant-id="${variant.id}" data-variant-price="${variant.price}">−</button>
+                <button class="qty-btn qty-minus" data-variant-id="${variant.id}" data-variant-price="${variant.price || 0}">−</button>
                 <span class="qty-display" data-variant-id="${variant.id}">0</span>
-                <button class="qty-btn qty-plus" data-variant-id="${variant.id}" data-variant-price="${variant.price}">+</button>
+                <button class="qty-btn qty-plus" data-variant-id="${variant.id}" data-variant-price="${variant.price || 0}">+</button>
               </div>
             </div>
           `).join('')}
