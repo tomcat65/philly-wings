@@ -627,7 +627,8 @@ function renderSideSelector() {
   const firestoreToDisplayId = {
     'miss_vickies_chips': 'chips',
     'sally_sherman_coleslaw': 'coleslaw',
-    'sally_sherman_potato_salad': 'potato-salad'
+    'sally_sherman_potato_salad': 'potato-salad',
+    'veggie_sticks': 'veggie-sticks'
   };
 
   // Map sides from Firestore with pricing
