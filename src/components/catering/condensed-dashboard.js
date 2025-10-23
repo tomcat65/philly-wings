@@ -341,7 +341,7 @@ function renderExtrasBreakdown(extras) {
                   <span class="breakdown-desc">
                     ${displayName}
                     ${item.packSize ? `<span class="pack-size">(${item.packSize})</span>` : ''}
-                    ${totalServings > 0 ? `<span class="item-servings">(${totalServings} ${item.cupSize} servings)</span>` : ''}
+                    ${totalServings > 0 ? `<span class="item-servings">(${totalServings}${item.cupSize ? ` ${item.cupSize}` : ''} servings)</span>` : ''}
                     × ${quantity}
                   </span>
                   <span class="breakdown-amount">$${(unitPrice * quantity).toFixed(2)}</span>

@@ -2508,7 +2508,7 @@ function renderPackVariantCard(item, featured = false) {
                 <span class="variant-name">${formatPackSize(packSize)}</span>
                 <span class="variant-price">$${(variant.price || 0).toFixed(2)}</span>
                 ${variant.servings && variant.servings > 1 ?
-                  `<span class="variant-servings">Serves ${variant.servings} (${variant.cupSize} cups)</span>`
+                  `<span class="variant-servings">Serves ${variant.servings}${variant.cupSize ? ` (${variant.cupSize} cups)` : ''}</span>`
                   : ''}
               </div>
               <div class="variant-qty">
@@ -3181,7 +3181,7 @@ function renderExtrasDetails() {
               return `
                 <div class="extra-item">
                   <div class="item-info">
-                    <div class="item-name">✓ ${displayName}${totalServings > 0 ? ` <span class="item-servings">(${totalServings} ${item.cupSize} servings)</span>` : ''}</div>
+                    <div class="item-name">✓ ${displayName}${totalServings > 0 ? ` <span class="item-servings">(${totalServings}${item.cupSize ? ` ${item.cupSize}` : ''} servings)</span>` : ''}</div>
                     <div class="item-calc">${quantity} × $${unitPrice.toFixed(2)}</div>
                   </div>
                   <div class="item-price">$${(unitPrice * quantity).toFixed(2)}</div>
