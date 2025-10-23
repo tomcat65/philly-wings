@@ -2507,11 +2507,14 @@ function renderPackVariantCard(item, featured = false) {
               <div class="variant-label">
                 <span class="variant-name">${formatPackSize(packSize)}</span>
                 <span class="variant-price">$${(variant.price || 0).toFixed(2)}</span>
+                ${variant.servings && variant.servings > 1 ?
+                  `<span class="variant-servings">Serves ${variant.servings} (${variant.cupSize} cups)</span>`
+                  : ''}
               </div>
               <div class="variant-qty">
-                <button class="qty-btn qty-minus" data-variant-id="${variant.id}" data-variant-price="${variant.price || 0}">−</button>
+                <button class="qty-btn qty-minus" data-variant-id="${variant.id}" data-variant-price="${variant.price || 0}" data-servings="${variant.servings || 0}" data-cup-size="${variant.cupSize || ''}">−</button>
                 <span class="qty-display" data-variant-id="${variant.id}">0</span>
-                <button class="qty-btn qty-plus" data-variant-id="${variant.id}" data-variant-price="${variant.price || 0}">+</button>
+                <button class="qty-btn qty-plus" data-variant-id="${variant.id}" data-variant-price="${variant.price || 0}" data-servings="${variant.servings || 0}" data-cup-size="${variant.cupSize || ''}">+</button>
               </div>
             </div>
           `).join('')}
@@ -2734,6 +2737,8 @@ function initQuickAddsInteractions(addOns) {
     btn.addEventListener('click', () => {
       const variantId = btn.dataset.variantId;
       const price = parseFloat(btn.dataset.variantPrice);
+      const servings = parseInt(btn.dataset.servings) || 0;
+      const cupSize = btn.dataset.cupSize || '';
       const variantRow = btn.closest('.variant-row');
       const packSize = variantRow.dataset.variant;
       const card = btn.closest('.pack-variant-card');
@@ -2760,7 +2765,13 @@ function initQuickAddsInteractions(addOns) {
       // Handle increment
       if (btn.classList.contains('qty-plus')) {
         if (!selectedItems.has(variantId)) {
-          selectedItems.set(variantId, { name: itemName, price, category: stateCategory, quantity: 1 });
+          const itemData = { name: itemName, price, category: stateCategory, quantity: 1 };
+          // Add serving info if available (only for multi-serve containers)
+          if (servings > 1) {
+            itemData.servings = servings;
+            itemData.cupSize = cupSize;
+          }
+          selectedItems.set(variantId, itemData);
           qtyDisplay.textContent = '1';
         } else {
           const item = selectedItems.get(variantId);
@@ -2886,12 +2897,18 @@ function collectExtrasSelections(selectedItems) {
   selectedItems.forEach((item, itemId) => {
     const category = item.category || 'quickAdds';
     if (selections[category]) {
-      selections[category].push({
+      const itemData = {
         id: itemId,
         quantity: item.quantity || 1,
         name: item.name,
         price: item.price
-      });
+      };
+      // Include serving info if available
+      if (item.servings && item.servings > 1) {
+        itemData.servings = item.servings;
+        itemData.cupSize = item.cupSize;
+      }
+      selections[category].push(itemData);
     }
   });
 
@@ -3160,10 +3177,11 @@ function renderExtrasDetails() {
               const quantity = item.quantity || 1;
               const unitPrice = Number(item.price) || 0;
               const displayName = item.name || item.id || 'Extra Item';
+              const totalServings = item.servings && item.servings > 1 ? item.servings * quantity : 0;
               return `
                 <div class="extra-item">
                   <div class="item-info">
-                    <div class="item-name">✓ ${displayName}</div>
+                    <div class="item-name">✓ ${displayName}${totalServings > 0 ? ` <span class="item-servings">(${totalServings} ${item.cupSize} servings)</span>` : ''}</div>
                     <div class="item-calc">${quantity} × $${unitPrice.toFixed(2)}</div>
                   </div>
                   <div class="item-price">$${(unitPrice * quantity).toFixed(2)}</div>

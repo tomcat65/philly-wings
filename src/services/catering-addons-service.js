@@ -102,6 +102,7 @@ async function enrichAddOnsWithPricing(addOns) {
       basePrice: price,
       price: price,
       servings: variant.servings * multiplier,
+      cupSize: variant.cupSize,
       imageUrl: addOn.imageUrl || sourceDoc.imageUrl,
       allergens: addOn.allergens || sourceDoc.allergens || [],
       dietaryTags: addOn.dietaryTags || sourceDoc.dietaryTags || [],
@@ -248,7 +249,7 @@ export async function getAllAddOnsSplitByCategory() {
     salads: allAddOns.filter(addOn => addOn.category === 'salads'),
     sides: allAddOns.filter(addOn => addOn.category === 'sides'),
     quickAdds: allAddOns.filter(addOn => addOn.category === 'quick-adds'),
-    hotBeverages: allAddOns.filter(addOn => addOn.category === 'hot-beverages'),
+    hotBeverages: groupItemsByPackVariants(allAddOns.filter(addOn => addOn.category === 'hot-beverages')),
     saucesToGo: groupSaucesByVariants(saucesAndDips.saucesToGo),
     dipsToGo: groupDipsByVariants(saucesAndDips.dipsToGo)
   };
@@ -548,6 +549,7 @@ function groupBeveragesByVariants(beverages) {
         id: item.id,
         price: item.price,
         servings: item.servings || 1,
+        cupSize: item.cupSize,
         flavorVariant: item.flavorVariant,
         variantLabel: item.flavorVariant.charAt(0).toUpperCase() + item.flavorVariant.slice(1)
       };
@@ -602,7 +604,8 @@ function groupItemsByPackVariants(items) {
       grouped[groupingKey].variants[item.packSize] = {
         id: item.id,
         price: item.price,
-        servings: item.serves || 1,
+        servings: item.servings || 1,
+        cupSize: item.cupSize,
         packSize: item.packSize
       };
     } else if (item.packSize) {

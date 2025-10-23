@@ -335,11 +335,13 @@ function renderExtrasBreakdown(extras) {
               const quantity = item.quantity || 1;
               const unitPrice = Number(item.price) || 0;
               const displayName = item.name || item.id || 'Extra Item';
+              const totalServings = item.servings && item.servings > 1 ? item.servings * quantity : 0;
               return `
                 <div class="breakdown-row">
                   <span class="breakdown-desc">
                     ${displayName}
                     ${item.packSize ? `<span class="pack-size">(${item.packSize})</span>` : ''}
+                    ${totalServings > 0 ? `<span class="item-servings">(${totalServings} ${item.cupSize} servings)</span>` : ''}
                     × ${quantity}
                   </span>
                   <span class="breakdown-amount">$${(unitPrice * quantity).toFixed(2)}</span>
