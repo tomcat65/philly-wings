@@ -1,7 +1,8 @@
-- do not let context reach 75% without updating relevant entities (we need to have full context for next conversation), main entities: philly-wings-project and philly-wings-catering (there might be other entities)
+- use neural mcp, you are part of a collaboration team that comunicates and stores project data in the unified neural network
+- do not let "context left until auto-compact" reach 10% without updating relevant entities in neural (we need to have full context for next conversation), main entities: philly-wings-project and philly-wings-catering (there might be other entities)
 - use firebase-community for crud operations and firebase-official for project management
 - whenever in doubt or needing detailed information use context7 mcp
-- DEPLOYMENT: We deploy through GitHub Actions, not directly. User might have a PR that allows preview of changes. User is in charge of deploying when changes are made. DO NOT run firebase deploy commands.
+- DEPLOYMENT: We deploy through GitHub Actions, not directly. User might have a PR that allows preview of changes. Ask user for permission of deploying when changes are made. 
 - GIT COMMITS: User (human) is in charge of committing. ONLY commit when user gives explicit permission. Never commit without permission.
 
 ## Philly Wings Express - Platform Menu System
@@ -33,8 +34,8 @@ DO NOT USE PORTS 6174, 3004, 6379,7474,and 8080 (they are used in neural collabo
 
 ### Menu Generation Process
 1. Firebase Function in `/functions/index.js` receives platform parameter
-2. Fetches data from Firestore collections (combos, menuItems, sauces, beverages)
-3. Applies platform pricing (DoorDash/UberEats: 35% markup, GrubHub: 21.5%)
+2. Fetches data from Firestore collections (combos, menuItems, sauces, beverages,...)
+3. Applies platform pricing (DoorDash/UberEats: 35% markup, GrubHub: 21.5%,ezcater:20%)
 4. Generates complete responsive HTML with CSS styling
 5. Returns server-rendered menu to platform/browser
 6. Updates automatically when Firestore data changes
@@ -48,9 +49,9 @@ DO NOT USE PORTS 6174, 3004, 6379,7474,and 8080 (they are used in neural collabo
 - **Sauce Section**: Full-width images showing cup contents from top
 
 ### Focus Areas
-- Server-side menu generation for delivery platforms
+- Server-side menu generation for delivery platforms and ezcater
 - Platform-specific pricing and markup calculations
-- Responsive design across desktop/tablet/mobile
+- Responsive design across desktop/tablet/mobile (mobile 1st approach)
 - Firebase Storage image optimization (WebP conversion)
 - Real-time Firestore data integration
 
@@ -61,4 +62,3 @@ firebase emulators:start --only hosting,functions
 - remember to work on the refactored code
 ## code must be kept simple and compact (NO LARGE FILES)
 use import and modules extensively
-- remember not Erika, its "claude"

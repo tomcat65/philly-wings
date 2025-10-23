@@ -1,0 +1,469 @@
+/**
+ * Boxed Meals V2 - Animations & Transitions
+ * Enhanced micro-interactions for better UX
+ */
+
+/* ========================================
+   Loading States
+   ======================================== */
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    #f3f4f6 0%,
+    #e5e7eb 20%,
+    #f3f4f6 40%,
+    #f3f4f6 100%
+  );
+  background-size: 1000px 100%;
+}
+
+.skeleton-card {
+  height: 350px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+/* ========================================
+   Entrance Animations
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apply entrance animations */
+.template-card {
+  animation: fadeIn 400ms ease-out;
+  animation-fill-mode: both;
+}
+
+.template-card:nth-child(1) { animation-delay: 0ms; }
+.template-card:nth-child(2) { animation-delay: 100ms; }
+.template-card:nth-child(3) { animation-delay: 200ms; }
+.template-card:nth-child(4) { animation-delay: 300ms; }
+
+.config-section {
+  animation: fadeIn 300ms ease-out;
+  animation-fill-mode: both;
+}
+
+.config-section:nth-child(1) { animation-delay: 0ms; }
+.config-section:nth-child(2) { animation-delay: 50ms; }
+.config-section:nth-child(3) { animation-delay: 100ms; }
+.config-section:nth-child(4) { animation-delay: 150ms; }
+.config-section:nth-child(5) { animation-delay: 200ms; }
+
+.live-preview-panel {
+  animation: slideInRight 400ms ease-out;
+}
+
+@media (max-width: 1023px) {
+  .live-preview-panel {
+    animation: slideInUp 300ms ease-out;
+  }
+}
+
+/* ========================================
+   Interactive Animations
+   ======================================== */
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Hover animations for interactive elements */
+.photo-card:hover {
+  animation: heartbeat 500ms ease-in-out;
+}
+
+.preset-btn:active {
+  animation: bounce 300ms ease-out;
+}
+
+/* ========================================
+   Success/Completion Animations
+   ======================================== */
+
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.success-animation {
+  animation: scaleIn 300ms ease-out, heartbeat 500ms ease-in-out 300ms;
+}
+
+/* ========================================
+   Progress Indicators
+   ======================================== */
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+}
+
+.progress-bar {
+  animation: progress 500ms ease-out;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 107, 53, 0.3);
+  border-top-color: var(--philly-orange);
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+
+/* ========================================
+   Toast Notifications
+   ======================================== */
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+.toast {
+  animation: toastIn 300ms ease-out;
+}
+
+.toast.toast-exit {
+  animation: toastOut 300ms ease-out;
+}
+
+/* ========================================
+   Price Update Animation
+   ======================================== */
+
+@keyframes priceChange {
+  0% {
+    color: var(--philly-orange);
+    transform: scale(1);
+  }
+  50% {
+    color: var(--philly-orange-dark);
+    transform: scale(1.1);
+  }
+  100% {
+    color: var(--philly-orange);
+    transform: scale(1);
+  }
+}
+
+.price-value-large.price-updating {
+  animation: priceChange 400ms ease-out;
+}
+
+/* ========================================
+   Selection Ripple Effect
+   ======================================== */
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.photo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--philly-orange);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.photo-card:active::after {
+  animation: ripple 600ms ease-out;
+}
+
+/* ========================================
+   Hover Glow Effects
+   ======================================== */
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 107, 53, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+  }
+}
+
+.btn-primary:hover:not(:disabled) {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* ========================================
+   Count Animation
+   ======================================== */
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.count-input[type="number"] {
+  transition: all 200ms ease-out;
+}
+
+.count-input[type="number"]:focus {
+  animation: countUp 200ms ease-out;
+}
+
+/* ========================================
+   Validation States
+   ======================================== */
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.validation-message {
+  animation: shake 400ms ease-out, fadeIn 200ms ease-out;
+}
+
+/* ========================================
+   Drawer Animations
+   ======================================== */
+
+@keyframes drawerOpen {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+@keyframes drawerClose {
+  from {
+    max-height: 1000px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+.individual-config-drawer {
+  animation: drawerOpen 400ms ease-out;
+}
+
+/* ========================================
+   Focus Animations
+   ======================================== */
+
+@keyframes focusRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0);
+  }
+}
+
+.photo-card:focus,
+.preset-btn:focus,
+.count-input:focus {
+  animation: focusRing 600ms ease-out;
+}
+
+/* ========================================
+   Skeleton Loading States
+   ======================================== */
+
+.skeleton-template-card {
+  height: 450px;
+}
+
+.skeleton-config-section {
+  height: 300px;
+  margin-bottom: var(--spacing-xl);
+}
+
+.skeleton-preview {
+  height: 600px;
+}
+
+/* All skeleton elements get shimmer */
+[class*="skeleton-"] {
+  background: linear-gradient(
+    90deg,
+    var(--gray-100) 0%,
+    var(--gray-200) 50%,
+    var(--gray-100) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-lg);
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   Dark Mode Support (Future)
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* Dark mode variables would go here */
+  /* Currently not implemented, but structure ready */
+}

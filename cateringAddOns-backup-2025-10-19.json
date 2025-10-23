@@ -1,0 +1,971 @@
+[
+  {
+    "id": "boxed-iced-tea-96oz",
+    "category": "beverages",
+    "packSize": "96oz",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 1,
+    "active": true,
+    "marketingCopy": "Premium iced tea in convenient 96oz box - perfect for small groups",
+    "sourceCollection": "menuItems",
+    "sourceDocumentId": "4lt9yiHeJgF8nx1Nx5nO",
+    "sourceVariantId": "tea_96oz",
+    "name": "Boxed Iced Tea (96oz - Serves 6)",
+    "basePrice": 12.99,
+    "servings": 6,
+    "servingSize": "16oz cup",
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboxed-iced-tea.webp?alt=media",
+    "allergens": [],
+    "dietaryTags": [
+      "vegan",
+      "gluten-free"
+    ],
+    "description": "Premium iced tea in 96oz box with ice. Choose sweet or unsweet.",
+    "platformPricing": {
+      "ezcater": 15.59
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "boxes"
+  },
+  {
+    "id": "boxed-iced-tea-3gal",
+    "category": "beverages",
+    "packSize": "3gal",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 2,
+    "active": true,
+    "marketingCopy": "Premium iced tea in 3-gallon box - ideal for larger gatherings",
+    "sourceCollection": "menuItems",
+    "sourceDocumentId": "4lt9yiHeJgF8nx1Nx5nO",
+    "sourceVariantId": "tea_3gal",
+    "name": "Boxed Iced Tea (3 Gallon - Serves 24)",
+    "basePrice": 54.26,
+    "servings": 24,
+    "servingSize": "16oz cup",
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fboxed-iced-tea.webp?alt=media",
+    "allergens": [],
+    "dietaryTags": [
+      "vegan",
+      "gluten-free"
+    ],
+    "description": "Premium iced tea in 3 gallon box with ice. Choose sweet or unsweet.",
+    "platformPricing": {
+      "ezcater": 65.11
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3
+    ],
+    "quantityLabel": "boxes"
+  },
+  {
+    "id": "marble-pound-cake-individual",
+    "category": "desserts",
+    "packSize": "individual",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 1,
+    "active": true,
+    "marketingCopy": "Nobody left behind - Daisy's famous marble pound cake slice",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "marble_pound_cake",
+    "sourceVariantId": "marble_pound_cake_slice",
+    "name": "Daisy's Marble Pound Cake (Individual)",
+    "basePrice": 3.5,
+    "servings": 1,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmarble-pound-cake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Individually wrapped marble pound cake slice",
+    "platformPricing": {
+      "ezcater": 4.2
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "quantityLabel": "slices"
+  },
+  {
+    "id": "gourmet-brownies-individual",
+    "category": "desserts",
+    "packSize": "individual",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 2,
+    "active": true,
+    "marketingCopy": "Daisy's signature gourmet brownie - rich and fudgy",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "gourmet_brownies",
+    "sourceVariantId": "brownie_single",
+    "name": "Daisy's Gourmet Brownie (Individual)",
+    "basePrice": 4,
+    "servings": 1,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fgourmet-brownies_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Individually wrapped gourmet brownie",
+    "platformPricing": {
+      "ezcater": 4.8
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "quantityLabel": "brownies"
+  },
+  {
+    "id": "red-velvet-cake-individual",
+    "category": "desserts",
+    "packSize": "individual",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 3,
+    "active": true,
+    "marketingCopy": "Classic southern red velvet cake slice",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "red_velvet_cake",
+    "sourceVariantId": "red_velvet_slice",
+    "name": "Red Velvet Cake (Individual)",
+    "basePrice": 4.25,
+    "servings": 1,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fred-velvet-cake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Individual slice of southern red velvet cake",
+    "platformPricing": {
+      "ezcater": 5.1
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "quantityLabel": "slices"
+  },
+  {
+    "id": "creme-brulee-cheesecake-individual",
+    "category": "desserts",
+    "packSize": "individual",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 4,
+    "active": true,
+    "marketingCopy": "Premium crème brûlée cheesecake - a luxurious treat",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "creme_brulee_cheesecake",
+    "sourceVariantId": "creme_brulee_slice",
+    "name": "Crème Brûlée Cheesecake (Individual)",
+    "basePrice": 4.5,
+    "servings": 1,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcreme-brulee-cheesecake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Premium crème brûlée cheesecake slice",
+    "platformPricing": {
+      "ezcater": 5.4
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "quantityLabel": "slices"
+  },
+  {
+    "id": "ny-cheesecake-individual",
+    "category": "desserts",
+    "packSize": "individual",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 5,
+    "active": true,
+    "marketingCopy": "Classic New York cheesecake - creamy perfection",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "ny_cheesecake",
+    "sourceVariantId": "ny_cheesecake_slice",
+    "name": "NY Cheesecake (Individual)",
+    "basePrice": 4.75,
+    "servings": 1,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fnew-york-cheesecake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Individual slice of classic NY cheesecake",
+    "platformPricing": {
+      "ezcater": 5.7
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "quantityLabel": "slices"
+  },
+  {
+    "id": "marble-pound-cake-5pack",
+    "category": "desserts",
+    "packSize": "5pack",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 6,
+    "active": true,
+    "marketingCopy": "Nobody left behind - Daisy's famous marble pound cake in convenient 5-pack",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "marble_pound_cake",
+    "sourceVariantId": "marble_pound_cake_slice",
+    "name": "Daisy's Marble Pound Cake (5-Pack)",
+    "basePrice": 17.5,
+    "servings": 5,
+    "quantityMultiplier": 5,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmarble-pound-cake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "5 individually wrapped marble pound cake slices",
+    "platformPricing": {
+      "ezcater": 21
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "5-packs"
+  },
+  {
+    "id": "gourmet-brownies-5pack",
+    "category": "desserts",
+    "packSize": "5pack",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 7,
+    "active": true,
+    "marketingCopy": "Daisy's signature gourmet brownies - perfect for sharing",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "gourmet_brownies",
+    "sourceVariantId": "brownie_single",
+    "name": "Daisy's Gourmet Brownies (5-Pack)",
+    "basePrice": 20,
+    "servings": 5,
+    "quantityMultiplier": 5,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fgourmet-brownies_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "5 individually wrapped gourmet brownies",
+    "platformPricing": {
+      "ezcater": 24
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "5-packs"
+  },
+  {
+    "id": "red-velvet-cake-5pack",
+    "category": "desserts",
+    "packSize": "5pack",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 8,
+    "active": true,
+    "marketingCopy": "Classic southern red velvet - perfect for teams",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "red_velvet_cake",
+    "sourceVariantId": "red_velvet_slice",
+    "name": "Red Velvet Cake (5-Pack)",
+    "basePrice": 21.25,
+    "servings": 5,
+    "quantityMultiplier": 5,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fred-velvet-cake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "5 slices of southern red velvet cake",
+    "platformPricing": {
+      "ezcater": 25.5
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "5-packs"
+  },
+  {
+    "id": "creme-brulee-cheesecake-5pack",
+    "category": "desserts",
+    "packSize": "5pack",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 9,
+    "active": true,
+    "marketingCopy": "Premium crème brûlée cheesecake - impress your guests",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "creme_brulee_cheesecake",
+    "sourceVariantId": "creme_brulee_slice",
+    "name": "Crème Brûlée Cheesecake (5-Pack)",
+    "basePrice": 22.5,
+    "servings": 5,
+    "quantityMultiplier": 5,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcreme-brulee-cheesecake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "5 premium crème brûlée cheesecake slices",
+    "platformPricing": {
+      "ezcater": 27
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "5-packs"
+  },
+  {
+    "id": "ny-cheesecake-5pack",
+    "category": "desserts",
+    "packSize": "5pack",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 10,
+    "active": true,
+    "marketingCopy": "Classic New York cheesecake - a crowd favorite",
+    "sourceCollection": "desserts",
+    "sourceDocumentId": "ny_cheesecake",
+    "sourceVariantId": "ny_cheesecake_slice",
+    "name": "NY Cheesecake (5-Pack)",
+    "basePrice": 23.75,
+    "servings": 5,
+    "quantityMultiplier": 5,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fnew-york-cheesecake_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "5 slices of classic New York cheesecake",
+    "platformPricing": {
+      "ezcater": 28.5
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "5-packs"
+  },
+  {
+    "id": "lavazza-coffee-96oz",
+    "name": "Premium Lavazza Coffee (96oz)",
+    "category": "hot-beverages",
+    "displayOrder": 10,
+    "active": true,
+    "servings": 12,
+    "servingSize": "8oz cup",
+    "description": "Premium Lavazza Italian Coffee - Italy's #1 since 1895. Rich hazelnut & brown sugar notes. Freshly ground for each order. Includes cups, lids, cream & sugar.",
+    "marketingHook": "The same authentic Italian coffee served in upscale cafés",
+    "specifications": {
+      "brand": "Lavazza Super Crema",
+      "origin": "Italy",
+      "established": "1895",
+      "volume": "96oz",
+      "servings": 12,
+      "servingSize": "8oz",
+      "staysHot": "2+ hours",
+      "includes": [
+        "8oz cups",
+        "lids",
+        "sleeves",
+        "sugar packets",
+        "creamer",
+        "stirrers"
+      ]
+    },
+    "allergens": [
+      "dairy"
+    ],
+    "dietaryTags": [
+      "vegan-available"
+    ],
+    "nutritionPerServing": {
+      "servingSize": "8 fl oz",
+      "calories": 5,
+      "note": "Black coffee only. Add-ins (cream, sugar) increase calories."
+    },
+    "temperatureGuidelines": {
+      "safeHoldingTemp": 135,
+      "optimalServing": "165-180°F",
+      "maxSafeTime": 4,
+      "warningThreshold": 90,
+      "guarantee": "Delivered in insulated cambros - stays hot 2+ hours"
+    },
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcatering%2Fhot-beverages%2Fhot-bev-96oz.webp?alt=media",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "platformPricing": {
+      "ezcater": 128.39
+    },
+    "basePrice": 106.99,
+    "packSize": "96oz"
+  },
+  {
+    "id": "lavazza-coffee-128oz",
+    "name": "Premium Lavazza Coffee (128oz)",
+    "category": "hot-beverages",
+    "displayOrder": 11,
+    "active": true,
+    "servings": 16,
+    "servingSize": "8oz cup",
+    "description": "Premium Lavazza Italian Coffee - Italy's #1 since 1895. Rich hazelnut & brown sugar notes. Freshly ground for each order. Includes cups, lids, cream & sugar.",
+    "marketingHook": "The same authentic Italian coffee served in upscale cafés",
+    "specifications": {
+      "brand": "Lavazza Super Crema",
+      "origin": "Italy",
+      "established": "1895",
+      "volume": "128oz",
+      "servings": 16,
+      "servingSize": "8oz",
+      "staysHot": "2+ hours",
+      "includes": [
+        "8oz cups",
+        "lids",
+        "sleeves",
+        "sugar packets",
+        "creamer",
+        "stirrers"
+      ]
+    },
+    "allergens": [
+      "dairy"
+    ],
+    "dietaryTags": [
+      "vegan-available"
+    ],
+    "nutritionPerServing": {
+      "servingSize": "8 fl oz",
+      "calories": 5,
+      "note": "Black coffee only. Add-ins (cream, sugar) increase calories."
+    },
+    "temperatureGuidelines": {
+      "safeHoldingTemp": 135,
+      "optimalServing": "165-180°F",
+      "maxSafeTime": 4,
+      "warningThreshold": 90,
+      "guarantee": "Delivered in insulated cambros - stays hot 2+ hours"
+    },
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcatering%2Fhot-beverages%2Fhot-bev-128oz.webp?alt=media",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "platformPricing": {
+      "ezcater": 141.59
+    },
+    "basePrice": 117.99,
+    "packSize": "128oz"
+  },
+  {
+    "id": "ghirardelli-hot-chocolate-96oz",
+    "name": "Premium Ghirardelli Hot Chocolate (96oz)",
+    "category": "hot-beverages",
+    "displayOrder": 12,
+    "active": true,
+    "servings": 12,
+    "servingSize": "8oz cup",
+    "description": "Premium Ghirardelli Hot Chocolate - San Francisco's finest since 1852. Rich, velvety Dutch cocoa. Includes cups, marshmallows & stirrers.",
+    "marketingHook": "Not powder - real chocolate. Perfect for meetings, events & gatherings.",
+    "specifications": {
+      "brand": "Ghirardelli Premium Cocoa",
+      "origin": "San Francisco, USA",
+      "established": "1852",
+      "volume": "96oz",
+      "servings": 12,
+      "servingSize": "8oz",
+      "staysHot": "2+ hours",
+      "includes": [
+        "8oz cups",
+        "lids",
+        "sleeves",
+        "marshmallows",
+        "stirrers"
+      ]
+    },
+    "allergens": [
+      "dairy",
+      "soy"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "nutritionPerServing": {
+      "servingSize": "8 fl oz",
+      "calories": 180,
+      "note": "Estimated. Contains milk and cocoa. Final nutrition data pending supplier confirmation."
+    },
+    "temperatureGuidelines": {
+      "safeHoldingTemp": 135,
+      "optimalServing": "165-180°F",
+      "maxSafeTime": 4,
+      "warningThreshold": 90,
+      "guarantee": "Delivered in insulated cambros - stays hot 2+ hours"
+    },
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcatering%2Fhot-beverages%2Fhot-bev-96oz.webp?alt=media",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "platformPricing": {
+      "ezcater": 143.99
+    },
+    "basePrice": 119.99,
+    "packSize": "96oz"
+  },
+  {
+    "id": "ghirardelli-hot-chocolate-128oz",
+    "name": "Premium Ghirardelli Hot Chocolate (128oz)",
+    "category": "hot-beverages",
+    "displayOrder": 13,
+    "active": true,
+    "servings": 16,
+    "servingSize": "8oz cup",
+    "description": "Premium Ghirardelli Hot Chocolate - San Francisco's finest since 1852. Rich, velvety Dutch cocoa. Includes cups, marshmallows & stirrers.",
+    "marketingHook": "Not powder - real chocolate. Perfect for meetings, events & gatherings.",
+    "specifications": {
+      "brand": "Ghirardelli Premium Cocoa",
+      "origin": "San Francisco, USA",
+      "established": "1852",
+      "volume": "128oz",
+      "servings": 16,
+      "servingSize": "8oz",
+      "staysHot": "2+ hours",
+      "includes": [
+        "8oz cups",
+        "lids",
+        "sleeves",
+        "marshmallows",
+        "stirrers"
+      ]
+    },
+    "allergens": [
+      "dairy",
+      "soy"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "nutritionPerServing": {
+      "servingSize": "8 fl oz",
+      "calories": 180,
+      "note": "Estimated. Contains milk and cocoa. Final nutrition data pending supplier confirmation."
+    },
+    "temperatureGuidelines": {
+      "safeHoldingTemp": 135,
+      "optimalServing": "165-180°F",
+      "maxSafeTime": 4,
+      "warningThreshold": 90,
+      "guarantee": "Delivered in insulated cambros - stays hot 2+ hours"
+    },
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fcatering%2Fhot-beverages%2Fhot-bev-128oz.webp?alt=media",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "platformPricing": {
+      "ezcater": 161.99
+    },
+    "basePrice": 134.99,
+    "packSize": "128oz"
+  },
+  {
+    "id": "bottled-water-5pack",
+    "category": "quick-adds",
+    "packSize": "5pack",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 1,
+    "active": true,
+    "marketingCopy": "Nobody left behind - premium bottled water 5-pack",
+    "sourceCollection": "menuItems",
+    "sourceDocumentId": "kEJTNxzMmNApCqqkwYpO",
+    "sourceVariantId": "bottled_water",
+    "name": "Bottled Water (5-Pack)",
+    "basePrice": 10,
+    "servings": 5,
+    "quantityMultiplier": 5,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fbottled-water.webp?alt=media",
+    "allergens": [],
+    "dietaryTags": [
+      "vegan",
+      "gluten-free"
+    ],
+    "description": "5 premium bottled waters - nobody left behind",
+    "platformPricing": {
+      "ezcater": 12
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "5-packs"
+  },
+  {
+    "id": "chips-5pack",
+    "category": "quick-adds",
+    "packSize": "5pack",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 2,
+    "active": true,
+    "marketingCopy": "Miss Vickie's premium kettle chips - variety flavors",
+    "sourceCollection": "menuItems",
+    "sourceDocumentId": "HDtMAgkIiERc9bsIJ12j",
+    "sourceVariantId": "chips_single",
+    "name": "Miss Vickie's Chips (5-Pack)",
+    "basePrice": 7.5,
+    "servings": 5,
+    "quantityMultiplier": 5,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmiss-vickies-chips.webp?alt=media",
+    "allergens": [],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "5 bags of Miss Vickie's premium kettle chips - variety flavors",
+    "platformPricing": {
+      "ezcater": 9
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "quantityLabel": "5-packs"
+  },
+  {
+    "id": "caesar-salad-family",
+    "category": "salads",
+    "packSize": "family",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 1,
+    "active": true,
+    "marketingCopy": "Classic Caesar salad - perfect for any gathering",
+    "sourceCollection": "freshSalads",
+    "sourceDocumentId": "caesar_salad",
+    "sourceVariantId": "caesar_salad_family",
+    "name": "Caesar Salad (Family Size)",
+    "basePrice": 27.99,
+    "servings": 8,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcaesar-salad_800x800.webp?alt=media",
+    "allergens": [
+      "gluten",
+      "dairy",
+      "fish"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Romaine, parmesan, croutons, caesar dressing - serves 8",
+    "platformPricing": {
+      "ezcater": 33.59
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3
+    ],
+    "quantityLabel": "trays"
+  },
+  {
+    "id": "spring-mix-family",
+    "category": "salads",
+    "packSize": "family",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 2,
+    "active": true,
+    "marketingCopy": "Fresh spring mix salad - light and healthy",
+    "sourceCollection": "freshSalads",
+    "sourceDocumentId": "spring_mix_salad",
+    "sourceVariantId": "spring_mix_family",
+    "name": "Spring Mix Salad (Family Size)",
+    "basePrice": 24.99,
+    "servings": 8,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fgarden-salad_800x800.webp?alt=media",
+    "allergens": [],
+    "dietaryTags": [
+      "vegetarian",
+      "vegan",
+      "gluten-free"
+    ],
+    "description": "Fresh greens, choice of dressing - serves 8",
+    "platformPricing": {
+      "ezcater": 29.99
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3
+    ],
+    "quantityLabel": "trays"
+  },
+  {
+    "id": "coleslaw-family",
+    "category": "sides",
+    "packSize": "family",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 1,
+    "active": true,
+    "marketingCopy": "Sally Sherman's premium creamy coleslaw",
+    "sourceCollection": "coldSides",
+    "sourceDocumentId": "sally_sherman_coleslaw",
+    "sourceVariantId": "coleslaw_family",
+    "name": "Coleslaw (Family Size)",
+    "basePrice": 19.99,
+    "servings": 8,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcoleslaw-salad_800x800.webp?alt=media",
+    "allergens": [
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Premium creamy coleslaw - serves 8",
+    "platformPricing": {
+      "ezcater": 23.99
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3
+    ],
+    "quantityLabel": "trays"
+  },
+  {
+    "id": "potato-salad-family",
+    "category": "sides",
+    "packSize": "family",
+    "availableForTiers": [
+      1,
+      2,
+      3
+    ],
+    "displayOrder": 2,
+    "active": true,
+    "marketingCopy": "Sally Sherman's classic creamy potato salad",
+    "sourceCollection": "coldSides",
+    "sourceDocumentId": "sally_sherman_potato_salad",
+    "sourceVariantId": "potato_salad_family",
+    "name": "Potato Salad (Family Size)",
+    "basePrice": 22.99,
+    "servings": 8,
+    "quantityMultiplier": 1,
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fpotato-salad_800x800.webp?alt=media",
+    "allergens": [
+      "dairy",
+      "eggs"
+    ],
+    "dietaryTags": [
+      "vegetarian"
+    ],
+    "description": "Classic creamy potato salad - serves 8",
+    "platformPricing": {
+      "ezcater": 27.59
+    },
+    "sourceLastUpdated": "2025-10-19T18:25:44.405Z",
+    "lastSyncedAt": "2025-10-19T18:25:44.405Z",
+    "suggestedQuantities": [
+      1,
+      2,
+      3
+    ],
+    "quantityLabel": "trays"
+  }
+]

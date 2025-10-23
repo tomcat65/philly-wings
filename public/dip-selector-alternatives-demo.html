@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dip Selector Alternatives Demo</title>
+  <style>
+    :root {
+      --philly-orange: #ff6b35;
+      --philly-orange-dark: #e55a28;
+      --philly-orange-light: #ff8555;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --success: #10b981;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      background: white;
+      padding: 2rem;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+    }
+
+    .demo-header h1 {
+      color: var(--gray-900);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .demo-header p {
+      color: var(--gray-600);
+      margin: 0;
+    }
+
+    .alternatives-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .alternative-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .alternative-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .alternative-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .alternative-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--philly-orange);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      text-transform: uppercase;
+      margin-left: 8px;
+    }
+
+    .alternative-description {
+      color: var(--gray-600);
+      margin: 0;
+    }
+
+    .pros-list {
+      margin: 1rem 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pros-list li {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 4px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+    }
+
+    /* ========================================
+       ALTERNATIVE 1: Compact Horizontal Cards
+       ======================================== */
+    .alt1-dip-counter-selector {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: var(--radius-xl);
+    }
+
+    .alt1-card-selector-header {
+      margin-bottom: 1rem;
+    }
+
+    .alt1-selector-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .alt1-selector-subtitle {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin: 0;
+    }
+
+    .alt1-dip-total-counter {
+      float: right;
+      padding: 0.5rem 1rem;
+      background: white;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alt1-dip-total-counter.counter-complete {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .alt1-dip-counter-grid {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 8px;
+    }
+
+    .alt1-dip-counter-card {
+      min-width: 140px;
+      max-width: 140px;
+      scroll-snap-align: start;
+      background: white;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .alt1-dip-counter-card:hover {
+      border-color: var(--philly-orange-light);
+      transform: translateY(-2px);
+    }
+
+    .alt1-dip-counter-card.has-selection {
+      border-color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt1-dip-card-image {
+      position: relative;
+      height: 100px;
+      overflow: hidden;
+      background: var(--gray-100);
+    }
+
+    .alt1-dip-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .alt1-dip-count-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--philly-orange);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.875rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .alt1-dip-card-content {
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .alt1-card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0;
+    }
+
+    .alt1-dip-counter-controls {
+      padding: 8px;
+      background: var(--gray-50);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alt1-btn-dip-decrement,
+    .alt1-btn-dip-increment {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-300);
+      background: white;
+      color: var(--gray-700);
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alt1-btn-dip-increment:not(.disabled):hover {
+      border-color: var(--philly-orange);
+      color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt1-btn-dip-decrement:not(.disabled):hover {
+      border-color: var(--philly-orange);
+      color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt1-btn-dip-increment.disabled,
+    .alt1-btn-dip-decrement.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .alt1-dip-count-display {
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--gray-900);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* ========================================
+       ALTERNATIVE 2: Inline List with Thumbnails
+       ======================================== */
+    .alt2-dip-counter-selector {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: var(--radius-xl);
+    }
+
+    .alt2-card-selector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .alt2-selector-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0;
+    }
+
+    .alt2-selector-subtitle {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin: 0.25rem 0 0 0;
+    }
+
+    .alt2-dip-total-counter {
+      padding: 0.5rem 1rem;
+      background: white;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alt2-dip-total-counter.counter-complete {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .alt2-dip-counter-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .alt2-dip-counter-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 12px;
+      background: white;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius-lg);
+      transition: all 0.2s;
+    }
+
+    .alt2-dip-counter-card:hover {
+      border-color: var(--philly-orange-light);
+    }
+
+    .alt2-dip-counter-card.has-selection {
+      border-color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt2-dip-card-image {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--gray-100);
+    }
+
+    .alt2-dip-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .alt2-dip-card-content {
+      flex: 1;
+      padding: 0 12px;
+    }
+
+    .alt2-card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0;
+    }
+
+    .alt2-dip-counter-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .alt2-btn-dip-decrement,
+    .alt2-btn-dip-increment {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-300);
+      background: white;
+      color: var(--gray-700);
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alt2-btn-dip-increment:not(.disabled):hover {
+      border-color: var(--philly-orange);
+      color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt2-btn-dip-decrement:not(.disabled):hover {
+      border-color: var(--philly-orange);
+      color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt2-btn-dip-increment.disabled,
+    .alt2-btn-dip-decrement.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .alt2-dip-count-display {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--gray-900);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* ========================================
+       ALTERNATIVE 3: Chip/Badge Style
+       ======================================== */
+    .alt3-dip-counter-selector {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: var(--radius-xl);
+    }
+
+    .alt3-card-selector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .alt3-selector-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0;
+    }
+
+    .alt3-selector-subtitle {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin: 0.25rem 0 0 0;
+    }
+
+    .alt3-dip-total-counter {
+      padding: 0.5rem 1rem;
+      background: white;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alt3-dip-total-counter.counter-complete {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .alt3-dip-counter-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .alt3-dip-counter-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: white;
+      border: 2px solid var(--gray-300);
+      border-radius: 24px;
+      transition: all 0.2s;
+    }
+
+    .alt3-dip-counter-card:hover {
+      border-color: var(--philly-orange-light);
+    }
+
+    .alt3-dip-counter-card.has-selection {
+      border-color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt3-dip-card-icon {
+      font-size: 1.5rem;
+    }
+
+    .alt3-dip-card-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      min-width: 90px;
+    }
+
+    .alt3-dip-counter-controls {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .alt3-btn-dip-decrement,
+    .alt3-btn-dip-increment {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-300);
+      background: white;
+      color: var(--gray-700);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alt3-btn-dip-increment:not(.disabled):hover {
+      border-color: var(--philly-orange);
+      color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt3-btn-dip-decrement:not(.disabled):hover {
+      border-color: var(--philly-orange);
+      color: var(--philly-orange);
+      background: #fff7ed;
+    }
+
+    .alt3-btn-dip-increment.disabled,
+    .alt3-btn-dip-decrement.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .alt3-dip-count-display {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--gray-900);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .demo-container {
+        padding: 1rem;
+      }
+
+      .demo-header {
+        padding: 1rem;
+      }
+
+      .alternative-card {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1>🥣 Dip Selector - 3 Design Alternatives</h1>
+      <p>Compare the designs and choose your favorite!</p>
+    </div>
+
+    <div class="alternatives-grid">
+      <!-- ALTERNATIVE 1 -->
+      <div class="alternative-card">
+        <div class="alternative-header">
+          <h2 class="alternative-title">
+            Alternative 1: Compact Horizontal Cards
+          </h2>
+          <p class="alternative-description">Visual appeal with horizontal scrolling</p>
+          <ul class="pros-list">
+            <li>✅ Clear dip images</li>
+            <li>✅ Reduces vertical space by ~50%</li>
+            <li>✅ Modern swipeable design</li>
+          </ul>
+        </div>
+
+        <div class="alt1-dip-counter-selector">
+          <div class="alt1-card-selector-header">
+            <div>
+              <h4 class="alt1-selector-title">🥣 Select Dips</h4>
+              <p class="alt1-selector-subtitle">Select 2 total (can choose same dip multiple times)</p>
+            </div>
+            <div class="alt1-dip-total-counter counter-complete">
+              <span class="counter-label">Selected:</span>
+              <span class="counter-value">2 / 2</span>
+            </div>
+          </div>
+
+          <div class="alt1-dip-counter-grid">
+            <!-- Blue Cheese -->
+            <div class="alt1-dip-counter-card has-selection">
+              <div class="alt1-dip-card-image">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.appspot.com/o/images%2Fresized%2Fblue-cheese-800x800.webp?alt=media" alt="Blue Cheese">
+                <div class="alt1-dip-count-badge">2</div>
+              </div>
+              <div class="alt1-dip-card-content">
+                <h5 class="alt1-card-title">Blue Cheese</h5>
+              </div>
+              <div class="alt1-dip-counter-controls">
+                <button class="alt1-btn-dip-decrement">−</button>
+                <span class="alt1-dip-count-display">2</span>
+                <button class="alt1-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+
+            <!-- Ranch -->
+            <div class="alt1-dip-counter-card">
+              <div class="alt1-dip-card-image">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.appspot.com/o/images%2Fresized%2Franch-800x800.webp?alt=media" alt="Ranch">
+              </div>
+              <div class="alt1-dip-card-content">
+                <h5 class="alt1-card-title">Ranch</h5>
+              </div>
+              <div class="alt1-dip-counter-controls">
+                <button class="alt1-btn-dip-decrement disabled">−</button>
+                <span class="alt1-dip-count-display">0</span>
+                <button class="alt1-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+
+            <!-- Honey Mustard -->
+            <div class="alt1-dip-counter-card">
+              <div class="alt1-dip-card-image">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.appspot.com/o/images%2Fresized%2Fhoney-mustard-800x800.webp?alt=media" alt="Honey Mustard">
+              </div>
+              <div class="alt1-dip-card-content">
+                <h5 class="alt1-card-title">Honey Mustard</h5>
+              </div>
+              <div class="alt1-dip-counter-controls">
+                <button class="alt1-btn-dip-decrement disabled">−</button>
+                <span class="alt1-dip-count-display">0</span>
+                <button class="alt1-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALTERNATIVE 2 -->
+      <div class="alternative-card">
+        <div class="alternative-header">
+          <h2 class="alternative-title">
+            Alternative 2: Inline List with Thumbnails
+            <span class="alternative-badge">Your Pick</span>
+          </h2>
+          <p class="alternative-description">Maximum space efficiency</p>
+          <ul class="pros-list">
+            <li>✅ Minimal vertical space (~120px)</li>
+            <li>✅ All 3 dips visible</li>
+            <li>✅ Quick scanning</li>
+          </ul>
+        </div>
+
+        <div class="alt2-dip-counter-selector">
+          <div class="alt2-card-selector-header">
+            <div>
+              <h4 class="alt2-selector-title">🥣 Select Dips</h4>
+              <p class="alt2-selector-subtitle">Select 2 total (can choose same dip multiple times)</p>
+            </div>
+            <div class="alt2-dip-total-counter counter-complete">
+              <span class="counter-value">2 / 2</span>
+            </div>
+          </div>
+
+          <div class="alt2-dip-counter-grid">
+            <!-- Blue Cheese -->
+            <div class="alt2-dip-counter-card has-selection">
+              <div class="alt2-dip-card-image">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.appspot.com/o/images%2Fresized%2Fblue-cheese-800x800.webp?alt=media" alt="Blue Cheese">
+              </div>
+              <div class="alt2-dip-card-content">
+                <h5 class="alt2-card-title">Blue Cheese</h5>
+              </div>
+              <div class="alt2-dip-counter-controls">
+                <button class="alt2-btn-dip-decrement">−</button>
+                <span class="alt2-dip-count-display">2</span>
+                <button class="alt2-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+
+            <!-- Ranch -->
+            <div class="alt2-dip-counter-card">
+              <div class="alt2-dip-card-image">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.appspot.com/o/images%2Fresized%2Franch-800x800.webp?alt=media" alt="Ranch">
+              </div>
+              <div class="alt2-dip-card-content">
+                <h5 class="alt2-card-title">Ranch</h5>
+              </div>
+              <div class="alt2-dip-counter-controls">
+                <button class="alt2-btn-dip-decrement disabled">−</button>
+                <span class="alt2-dip-count-display">0</span>
+                <button class="alt2-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+
+            <!-- Honey Mustard -->
+            <div class="alt2-dip-counter-card">
+              <div class="alt2-dip-card-image">
+                <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.appspot.com/o/images%2Fresized%2Fhoney-mustard-800x800.webp?alt=media" alt="Honey Mustard">
+              </div>
+              <div class="alt2-dip-card-content">
+                <h5 class="alt2-card-title">Honey Mustard</h5>
+              </div>
+              <div class="alt2-dip-counter-controls">
+                <button class="alt2-btn-dip-decrement disabled">−</button>
+                <span class="alt2-dip-count-display">0</span>
+                <button class="alt2-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALTERNATIVE 3 -->
+      <div class="alternative-card">
+        <div class="alternative-header">
+          <h2 class="alternative-title">
+            Alternative 3: Chip/Badge Style
+          </h2>
+          <p class="alternative-description">Modern UI with ultra-compact design (no images)</p>
+          <ul class="pros-list">
+            <li>✅ Extremely compact (~80px)</li>
+            <li>✅ Modern aesthetic</li>
+            <li>✅ Fast rendering</li>
+          </ul>
+        </div>
+
+        <div class="alt3-dip-counter-selector">
+          <div class="alt3-card-selector-header">
+            <div>
+              <h4 class="alt3-selector-title">🥣 Select Dips</h4>
+              <p class="alt3-selector-subtitle">Select 2 total (can choose same dip multiple times)</p>
+            </div>
+            <div class="alt3-dip-total-counter counter-complete">
+              <span class="counter-value">2 / 2</span>
+            </div>
+          </div>
+
+          <div class="alt3-dip-counter-grid">
+            <!-- Blue Cheese -->
+            <div class="alt3-dip-counter-card has-selection">
+              <span class="alt3-dip-card-icon">🥣</span>
+              <span class="alt3-dip-card-name">Blue Cheese</span>
+              <div class="alt3-dip-counter-controls">
+                <button class="alt3-btn-dip-decrement">−</button>
+                <span class="alt3-dip-count-display">2</span>
+                <button class="alt3-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+
+            <!-- Ranch -->
+            <div class="alt3-dip-counter-card">
+              <span class="alt3-dip-card-icon">🥣</span>
+              <span class="alt3-dip-card-name">Ranch</span>
+              <div class="alt3-dip-counter-controls">
+                <button class="alt3-btn-dip-decrement disabled">−</button>
+                <span class="alt3-dip-count-display">0</span>
+                <button class="alt3-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+
+            <!-- Honey Mustard -->
+            <div class="alt3-dip-counter-card">
+              <span class="alt3-dip-card-icon">🥣</span>
+              <span class="alt3-dip-card-name">Honey Mustard</span>
+              <div class="alt3-dip-counter-controls">
+                <button class="alt3-btn-dip-decrement disabled">−</button>
+                <span class="alt3-dip-count-display">0</span>
+                <button class="alt3-btn-dip-increment disabled">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Make buttons interactive for demo purposes
+    document.querySelectorAll('[class*="btn-dip-"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!btn.classList.contains('disabled')) {
+          console.log('Button clicked:', btn.className);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

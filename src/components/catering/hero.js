@@ -36,7 +36,7 @@ export function renderCateringHero() {
               <span class="stat-label">Happy People</span>
             </div>
             <div class="stat">
-              <span class="stat-number">2HR</span>
+              <span class="stat-number">24HR</span>
               <span class="stat-label">Minimum Notice</span>
             </div>
           </div>
@@ -46,7 +46,7 @@ export function renderCateringHero() {
               🔥 FEED THE SQUAD NOW 🔥
             </button>
             <p class="hero-note">⚡ Office parties • Game day madness • Corporate events that stand out ⚡<br>
-            <em>2-hour minimum notice • Advanced orders get the VIP treatment!</em></p>
+            <em>24-hour minimum notice • Advanced orders get the VIP treatment!</em></p>
           </div>
         </div>
       </div>
