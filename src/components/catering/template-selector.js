@@ -254,7 +254,7 @@ function getSampleTemplates() {
       name: 'Office Favorite',
       tagline: 'Mild & Crowd-Pleasing',
       description: 'Perfect for mixed teams. Boneless wings with Sweet BBQ, classic dips, and NY Cheesecake.',
-      heroImage: 'templates/office-favorite.jpg',
+      heroImage: 'images/resized/office-favorite_1920x1080.webp',
       heatLevel: 1,
       featured: true,
       defaultConfig: {
@@ -277,7 +277,7 @@ function getSampleTemplates() {
       name: 'Game Day Combo',
       tagline: 'Classic Buffalo Heat',
       description: 'Authentic sports bar experience. Bone-in wings with Classic Buffalo and Gourmet Brownie.',
-      heroImage: 'templates/game-day.jpg',
+      heroImage: 'images/resized/game-day-template_1920x1080.webp',
       heatLevel: 2,
       defaultConfig: {
         wingCount: 6,
@@ -300,7 +300,7 @@ function getSampleTemplates() {
       name: 'Fire & Ice',
       tagline: 'Bold & Adventurous',
       description: 'For heat lovers. Boneless wings with spicy sauce blend, cooling dips, and premium cheesecake.',
-      heroImage: 'templates/fire-ice.jpg',
+      heroImage: 'images/resized/fire-ice_1920x1080.webp',
       heatLevel: 4,
       defaultConfig: {
         wingCount: 6,
@@ -322,7 +322,7 @@ function getSampleTemplates() {
       name: 'Veggie Delight',
       tagline: 'Plant-Based & Refreshing',
       description: 'Perfect for plant-based diets. Delicious plant-based wings with Sweet Teriyaki, fresh veggie sticks, and bottled water.',
-      heroImage: 'templates/veggie-delight.jpg',
+      heroImage: 'images/resized/veggie-delight_1920x1080.webp',
       heatLevel: 1,
       featured: true,
       defaultConfig: {
@@ -360,6 +360,15 @@ function formatWingType(type) {
  * Helper: Get Firebase Storage URL
  */
 function getImageUrl(path) {
-  // For now, return placeholder - will integrate Firebase Storage URLs
-  return `https://placehold.co/400x300/ff6b35/white?text=${encodeURIComponent(path)}`;
+  if (!path) return `https://placehold.co/400x300/ff6b35/white?text=No+Image`;
+
+  // If it's already a full URL, return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+
+  // Construct Firebase Storage URL
+  const bucket = 'philly-wings.firebasestorage.app';
+  const encodedPath = encodeURIComponent(path);
+  return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}?alt=media`;
 }
