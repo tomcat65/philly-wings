@@ -662,6 +662,7 @@ function renderSideSelector() {
 function renderDessertSelector() {
   const desserts = boxedMealState.menuData.desserts;
 
+  // Use Firestore IDs directly (state already has normalized Firestore IDs)
   const dessertItems = desserts.map(dessert => ({
     id: dessert.id,
     name: dessert.name,
@@ -3200,12 +3201,23 @@ function getSidePrice(sideId) {
 }
 
 /**
- * Helper: Normalize dessert ID (convert hyphens to underscores)
- * Templates use 'ny-cheesecake', Firestore uses 'ny_cheesecake'
+ * Helper: Normalize dessert ID (map template IDs to Firestore IDs)
+ * Templates use hyphens and may have different names than Firestore
  */
 function normalizeDessertId(dessertId) {
   if (!dessertId) return null;
-  return dessertId.replace(/-/g, '_');
+
+  // Map template IDs to exact Firestore document IDs
+  const templateToFirestoreId = {
+    'gourmet-brownie': 'gourmet_brownies',
+    'ny-cheesecake': 'ny_cheesecake',
+    'creme-brulee-cheesecake': 'creme_brulee_cheesecake',
+    'marble-pound-cake': 'marble_pound_cake',
+    'red-velvet-cake': 'red_velvet_cake',
+    'no-dessert': 'no-dessert'  // Keep this as-is
+  };
+
+  return templateToFirestoreId[dessertId] || dessertId.replace(/-/g, '_');
 }
 
 /**
