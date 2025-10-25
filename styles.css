@@ -26,7 +26,7 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
     line-height: 1.6;
     color: var(--text-primary);
     overflow-x: hidden;
@@ -43,7 +43,7 @@ body {
 
 /* Typography */
 h1, h2, h3 {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Roboto Condensed', 'Roboto', sans-serif;
     line-height: 1.2;
     letter-spacing: 0.02em;
 }
@@ -58,12 +58,17 @@ h1, h2, h3 {
 }
 
 .chalk-text {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Roboto Condensed', 'Roboto', sans-serif;
     color: var(--chalk-white) !important;
     text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.05em;
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+/* Brand Exception: Keep Bebas Neue for main hero headline only */
+.hero-headline {
+    font-family: 'Bebas Neue', sans-serif !important;
 }
 
 /* Made in Philadelphia Badge */

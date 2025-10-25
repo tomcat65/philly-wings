@@ -13,7 +13,7 @@ let wizardState = {
   totalSteps: 5,
   eventDetails: {
     guestCount: null,
-    eventType: null,
+    dietaryNeeds: 'none', // 'none' | 'vegetarian' | 'vegan'
     eventDate: null,
     eventTime: null
   },
@@ -91,7 +91,7 @@ function renderProgressIndicator() {
 }
 
 /**
- * Step 1: Event Details
+ * Step 1: Smart Event Details (SHARD-0-v2)
  */
 function renderStep1EventDetails() {
   return `
@@ -101,7 +101,7 @@ function renderStep1EventDetails() {
         <p class="step-description">Help us recommend the perfect package</p>
 
         <div class="form-group">
-          <label for="guest-count">How many people are you feeding?</label>
+          <label for="guest-count">How many people are you feeding? *</label>
           <div class="guest-count-selector">
             ${[
               { range: '10-15', label: '10-15 people', value: 12 },
@@ -119,24 +119,42 @@ function renderStep1EventDetails() {
               `;
             }).join('')}
           </div>
+          <button class="btn-text portion-guide-trigger" onclick="openPortionGuide()" type="button">
+            💡 Not sure? View Portion Guide
+          </button>
         </div>
 
         <div class="form-group">
-          <label for="event-type">What's the occasion?</label>
-          <div class="event-type-grid">
+          <label for="dietary-needs">Any dietary restrictions?</label>
+          <div class="dietary-needs-selector">
             ${[
-              { icon: '💼', label: 'Office Lunch', value: 'office-lunch' },
-              { icon: '🏈', label: 'Game Day Party', value: 'game-day' },
-              { icon: '🎉', label: 'Team Celebration', value: 'celebration' },
-              { icon: '👥', label: 'Client Meeting', value: 'client-meeting' },
-              { icon: '🎓', label: 'School Event', value: 'school-event' },
-              { icon: '🏆', label: 'Other Event', value: 'other' }
-            ].map(type => {
-              const isSelected = wizardState.eventDetails.eventType === type.value;
+              {
+                value: 'none',
+                label: 'None',
+                icon: '🍗',
+                description: 'No dietary restrictions'
+              },
+              {
+                value: 'vegetarian',
+                label: 'Vegetarian Options Needed',
+                icon: '🥗',
+                description: 'Some guests prefer meatless options'
+              },
+              {
+                value: 'vegan',
+                label: 'Vegan Only',
+                icon: '🌱',
+                description: 'Plant-based wings only'
+              }
+            ].map(option => {
+              const isSelected = wizardState.eventDetails.dietaryNeeds === option.value;
               return `
-                <button class="event-type-card ${isSelected ? 'selected' : ''}" data-type="${type.value}">
-                  <span class="event-icon">${type.icon}</span>
-                  <span class="event-label">${type.label}</span>
+                <button class="dietary-option ${isSelected ? 'selected' : ''}" data-dietary="${option.value}">
+                  <span class="option-icon">${option.icon}</span>
+                  <div class="option-content">
+                    <span class="option-label">${option.label}</span>
+                    <span class="option-description">${option.description}</span>
+                  </div>
                 </button>
               `;
             }).join('')}
@@ -144,7 +162,7 @@ function renderStep1EventDetails() {
         </div>
 
         <div class="form-group">
-          <label for="event-date">When do you need it?</label>
+          <label for="event-date">When do you need it? *</label>
           <div class="datetime-inputs">
             <input type="date"
                    id="event-date"
@@ -158,7 +176,7 @@ function renderStep1EventDetails() {
                    placeholder="Select time"
                    style="flex: 1;">
           </div>
-          <p class="field-hint">📅 24-hour advance notice required</p>
+          <p class="field-hint">📌 24-hour advance notice required</p>
         </div>
       </div>
     </div>

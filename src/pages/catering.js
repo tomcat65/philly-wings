@@ -10,12 +10,16 @@ import '../styles/simple-packages.css';
 import '../styles/guided-planner.css';
 import '../styles/boxed-meals-v2.css';
 import '../styles/boxed-meals-animations.css';
+import '../styles/smart-questionnaire.css';
+import '../styles/recommendation-card.css';
+import '../styles/portion-guide.css';
 import { renderCateringHero } from '../components/catering/hero.js';
-import { renderValueProps } from '../components/catering/value-props.js';
 import { renderEntryChoice, initEntryChoice } from '../components/catering/catering-entry-choice.js';
 import { renderSimplePackages, initPackageViewSwitching } from '../components/catering/simple-packages.js';
 import { renderGuidedPlanner } from '../components/catering/guided-planner.js';
 import { renderBoxedMealsFlow, initBoxedMealsFlow } from '../components/catering/boxed-meals-flow-v2.js';
+import { renderSmartQuestionnaire } from '../components/catering/smart-questionnaire.js';
+import { renderPortionGuide } from '../components/catering/portion-guide.js';
 
 export async function renderCateringPage() {
   // Pre-render both flows
@@ -33,7 +37,6 @@ export async function renderCateringPage() {
   return `
     <div class="catering-page">
       ${renderCateringHero()}
-      ${renderValueProps()}
 
       ${renderEntryChoice()}
 
@@ -50,6 +53,12 @@ export async function renderCateringPage() {
       </div>
 
       ${renderFAQ()}
+
+      <!-- Smart Questionnaire Modal -->
+      ${renderSmartQuestionnaire()}
+
+      <!-- Portion Guide Modal -->
+      ${renderPortionGuide()}
     </div>
   `;
 }

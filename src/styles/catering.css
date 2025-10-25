@@ -978,6 +978,17 @@
   background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #f8f8f8 100%);
 }
 
+/* About Page Hero - Same background as catering */
+.about-hero {
+  position: relative;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #f8f8f8 100%);
+}
+
 .hero-background {
   position: absolute;
   top: 0;
@@ -1048,7 +1059,7 @@
   margin: 0 auto;
 }
 
-/* Logo at top of hero with white circle */
+/* Logo at top of hero with enhanced shadow */
 .hero-logo {
   margin-bottom: 2rem;
   animation: fadeInDown 1s ease-out;
@@ -1059,7 +1070,10 @@
   padding: 15px;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 8px 25px rgba(255, 107, 53, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(255, 107, 53, 0.15);
 }
 
 @keyframes fadeInDown {
@@ -1957,6 +1971,10 @@
 
 @media (max-width: 768px) {
   .catering-hero {
+    min-height: 600px;
+  }
+
+  .about-hero {
     min-height: 600px;
   }
 
@@ -5249,4 +5267,52 @@
   .count-presets {
     grid-template-columns: 1fr;
   }
+}
+
+/* ================================
+   PACKAGE HIGHLIGHT ANIMATION
+   ================================ */
+
+@keyframes highlightPulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+    transform: scale(1.02);
+  }
+}
+
+/* Recommendation Error State */
+.recommendation-error {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 16px;
+  margin: 40px auto;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recommendation-error p {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+.recommendation-error .btn-primary {
+  padding: 12px 32px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+  color: white;
+  border: none;
+  transition: all 0.2s;
+}
+
+.recommendation-error .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
 }

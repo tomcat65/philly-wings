@@ -12,7 +12,7 @@ export function renderCateringHero() {
 
       <div class="hero-content">
         <div class="hero-logo">
-          <img src="/apple-touch-icon.png"
+          <img src="https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fphilly-wings-logo_1920x1080.webp?alt=media&token=d7825b4a-8ea5-4a81-88e0-de452fc6b41c"
                alt="Philly Wings Express Logo"
                loading="eager">
         </div>
@@ -42,8 +42,11 @@ export function renderCateringHero() {
           </div>
 
           <div class="hero-cta">
-            <button class="btn-primary btn-large" onclick="scrollToPackages()">
-              🔥 FEED THE SQUAD NOW 🔥
+            <button class="btn-primary btn-large" onclick="scrollToPlanner()">
+              🔥 PLAN YOUR EVENT 🔥
+            </button>
+            <button class="btn-secondary btn-large" onclick="scrollToPackages()" style="margin-top: 12px;">
+              Browse All Packages
             </button>
             <p class="hero-note">⚡ Office parties • Game day madness • Corporate events that stand out ⚡<br>
             <em>24-hour minimum notice • Advanced orders get the VIP treatment!</em></p>
@@ -53,6 +56,17 @@ export function renderCateringHero() {
     </section>
   `;
 }
+
+// Scroll to guided planner section
+window.scrollToPlanner = () => {
+  const plannerSection = document.querySelector('#catering-planner');
+  if (plannerSection) {
+    plannerSection.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+};
 
 // Scroll to packages section
 window.scrollToPackages = () => {

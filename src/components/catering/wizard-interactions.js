@@ -4,6 +4,7 @@
  */
 
 import { wizardState } from './guided-planner.js';
+import { getRecommendations } from '../../utils/recommendations.js';
 
 // ==================== RECOMMENDATION ENGINE ====================
 
@@ -332,6 +333,109 @@ function announceRecommendation(packageName, guestCount) {
   setTimeout(() => announcement.remove(), 3000);
 }
 
+// ==================== NEW RECOMMENDATION UI (SHARD-1-v2) ====================
+
+/**
+ * Render smart recommendation with match badges (V2)
+ */
+function renderRecommendationV2(recommended, guestCount, dietaryNeeds) {
+  const recElement = document.getElementById('package-recommendation');
+  if (!recElement) {
+    console.warn('⚠️ Recommendation element not found');
+    return;
+  }
+
+  if (!recommended || recommended.length === 0) {
+    recElement.innerHTML = `<p>📋 No packages found for ${guestCount} guests with your dietary preferences.</p>`;
+    return;
+  }
+
+  const top = recommended[0];
+  const topScore = top.matchScore || 0;
+
+  // Match badge based on score
+  let matchBadge = '';
+  if (topScore >= 85) {
+    matchBadge = '⭐ <strong>PERFECT MATCH</strong>';
+  } else if (topScore >= 70) {
+    matchBadge = '✨ <strong>HIGHLY RECOMMENDED</strong>';
+  } else if (topScore >= 50) {
+    matchBadge = '👍 <strong>GOOD OPTION</strong>';
+  }
+
+  // Build recommendation text
+  let html = `<p>${matchBadge} for ${guestCount} people</p>`;
+
+  if (top.matchReasons && top.matchReasons.length > 0) {
+    html += `<p><strong>${top.name}</strong>:</p>`;
+    html += '<ul class="match-reasons">';
+    top.matchReasons.forEach(reason => {
+      html += `<li>✓ ${reason}</li>`;
+    });
+    html += '</ul>';
+  }
+
+  recElement.innerHTML = html;
+  recElement.style.display = 'block';
+
+  // Accessibility announcement
+  announceRecommendation(top.name, guestCount);
+}
+
+/**
+ * Reorder package cards by match score and add badges (V2)
+ */
+function reorderPackageCardsV2(recommended) {
+  if (!recommended || recommended.length === 0) return;
+
+  recommended.forEach((pkg, index) => {
+    const card = document.querySelector(`[data-package-id="${pkg.id}"]`);
+
+    if (card) {
+      // Set visual order
+      card.style.order = index;
+
+      // Remove any existing badges and reasons
+      const existingBadge = card.querySelector('.match-badge');
+      const existingReasons = card.querySelector('.match-reasons-card');
+      if (existingBadge) existingBadge.remove();
+      if (existingReasons) existingReasons.remove();
+
+      // Add match badges based on score
+      const score = pkg.matchScore || 0;
+      let badgeHTML = '';
+
+      if (score >= 85) {
+        card.classList.add('perfect-match');
+        badgeHTML = '<div class="match-badge perfect">⭐ Perfect Match</div>';
+      } else if (score >= 70) {
+        card.classList.add('highly-recommended');
+        badgeHTML = '<div class="match-badge highly">✨ Highly Recommended</div>';
+      } else if (score >= 50) {
+        card.classList.add('good-option');
+        badgeHTML = '<div class="match-badge good">👍 Good Option</div>';
+      }
+
+      // Add match reasons if available
+      if (pkg.matchReasons && pkg.matchReasons.length > 0) {
+        badgeHTML += '<div class="match-reasons-card">';
+        pkg.matchReasons.forEach(reason => {
+          badgeHTML += `<div class="match-reason">✓ ${reason}</div>`;
+        });
+        badgeHTML += '</div>';
+      }
+
+      // Insert badges and reasons at the top of the card
+      if (badgeHTML) {
+        const packageHeader = card.querySelector('.package-header');
+        if (packageHeader) {
+          packageHeader.insertAdjacentHTML('beforebegin', badgeHTML);
+        }
+      }
+    }
+  });
+}
+
 // ==================== END RECOMMENDATION UI ====================
 
 export function initWizardInteractions(packages, sauces, addOns) {
@@ -369,7 +473,7 @@ export function initWizardInteractions(packages, sauces, addOns) {
 }
 
 /**
- * Step 1: Event Details Interactions
+ * Step 1: Event Details Interactions (SHARD-0-v2)
  */
 function initStep1Interactions() {
   // Guest count selection
@@ -380,17 +484,32 @@ function initStep1Interactions() {
       guestCountButtons.forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       wizardState.eventDetails.guestCount = parseInt(btn.dataset.count);
+
+      // Track analytics
+      if (window.gtag) {
+        gtag('event', 'guest_count_selected', {
+          count_range: btn.querySelector('.count-range')?.textContent || 'unknown',
+          count_value: parseInt(btn.dataset.count)
+        });
+      }
     });
   });
 
-  // Event type selection
-  const eventTypeCards = document.querySelectorAll('.event-type-card');
-  eventTypeCards.forEach(card => {
-    card.addEventListener('click', (e) => {
+  // Dietary needs selection
+  const dietaryButtons = document.querySelectorAll('.dietary-option');
+  dietaryButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
       e.preventDefault();
-      eventTypeCards.forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      wizardState.eventDetails.eventType = normalizeEventType(card.dataset.type);
+      dietaryButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      wizardState.eventDetails.dietaryNeeds = btn.dataset.dietary;
+
+      // Track analytics
+      if (window.gtag) {
+        gtag('event', 'dietary_filter_selected', {
+          filter: btn.dataset.dietary
+        });
+      }
     });
   });
 
@@ -622,15 +741,12 @@ function validateCurrentStep() {
   const step = wizardState.currentStep;
 
   switch (step) {
-    case 1: // Event Details
+    case 1: // Event Details (SHARD-0-v2)
       if (!wizardState.eventDetails.guestCount) {
         alert('Please select the number of guests');
         return false;
       }
-      if (!wizardState.eventDetails.eventType) {
-        alert('Please select your event type');
-        return false;
-      }
+      // dietaryNeeds is optional, defaults to 'none'
       if (!wizardState.eventDetails.eventDate) {
         alert('Please select your event date');
         return false;
@@ -639,6 +755,16 @@ function validateCurrentStep() {
         alert('Please select your event time');
         return false;
       }
+
+      // Track step completion analytics
+      if (window.gtag) {
+        gtag('event', 'wizard_step1_completed', {
+          guest_count: wizardState.eventDetails.guestCount,
+          dietary_needs: wizardState.eventDetails.dietaryNeeds,
+          time_spent: performance.now() / 1000 // rough estimate
+        });
+      }
+
       return true;
 
     case 2: // Package Selection
@@ -712,12 +838,12 @@ function updateNavigationButtons() {
  */
 function prepareStepContent(stepNum, packages, sauces, addOns) {
   switch (stepNum) {
-    case 2: // Package Selection
-      const { guestCount, eventType } = wizardState.eventDetails;
+    case 2: // Package Selection (SHARD-1-v2)
+      const { guestCount, dietaryNeeds } = wizardState.eventDetails;
 
       console.log('📍 Step 2: Package Selection activated');
       console.log('📍 Packages available:', packages ? packages.length : 0);
-      console.log('📍 Guest count:', guestCount, 'Event type:', eventType);
+      console.log('📍 Guest count:', guestCount, 'Dietary needs:', dietaryNeeds);
 
       if (!packages || packages.length === 0) {
         console.error('❌ No packages available for step 2');
@@ -731,16 +857,28 @@ function prepareStepContent(stepNum, packages, sauces, addOns) {
         console.log('📍 Cards in container:', packageCardsContainer.children.length);
       }
 
-      console.log('🎯 Running recommendation engine:', { guestCount, eventType });
+      console.log('🎯 Running NEW recommendation engine:', { guestCount, dietaryNeeds });
 
-      // Score and rank packages (using internal event type code)
-      const ranked = recommendPackages(packages, guestCount, eventType);
+      // Create filters object for new recommendation algorithm
+      const filters = {
+        peopleCount: guestCount,
+        dietaryNeeds: dietaryNeeds || 'none'
+      };
 
-      // Render smart recommendation (using internal code for messaging lookup)
-      renderRecommendation(ranked, guestCount, eventType);
+      // Use new recommendation algorithm
+      const recommended = getRecommendations(packages, filters);
 
-      // Reorder cards by score and add badges
-      reorderPackageCards(ranked);
+      console.log('📊 Recommendations:', recommended.map(p => ({
+        name: p.name,
+        score: p.matchScore,
+        reasons: p.matchReasons
+      })));
+
+      // Render smart recommendation with match scores
+      renderRecommendationV2(recommended, guestCount, dietaryNeeds);
+
+      // Reorder cards by match score and add badges
+      reorderPackageCardsV2(recommended);
 
       // Keep existing opacity logic for visual hints
       filterPackagesByGuestCount(packages);
