@@ -245,8 +245,10 @@ service cloud.firestore {
     // Catering drafts - state persistence for authenticated users
     match /catering-drafts/{draftId} {
       // Extract userId from document ID (format: {userId}_{flowType})
+      // Handles userIds with underscores by removing only the last segment (flowType)
       function getDraftUserId() {
-        return draftId.split('_')[0];
+        let parts = draftId.split('_');
+        return parts.slice(0, parts.size() - 1).join('_');
       }
 
       function isStaff() {

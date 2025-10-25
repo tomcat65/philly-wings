@@ -776,9 +776,11 @@ const cateringAddOns = [
     marketingCopy: "Miss Vickie's premium kettle chips - variety flavors",
     sourceCollection: 'menuItems',
     sourceDocumentId: 'HDtMAgkIiERc9bsIJ12j',
+    // References single chip variant - runtime enrichment multiplies basePrice by quantityMultiplier (5)
+    // to calculate 5-pack price. This ensures single source of truth for pricing.
     sourceVariantId: 'chips_single',
     name: "Miss Vickie's Chips (5-Pack)",
-    basePrice: 7.50,
+    basePrice: 7.50, // Reference price - overwritten at runtime by enrichment (single chip price * 5)
     servings: 5,
     quantityMultiplier: 5,
     imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmiss-vickies-chips.webp?alt=media',

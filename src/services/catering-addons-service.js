@@ -101,7 +101,7 @@ async function enrichAddOnsWithPricing(addOns) {
       name: addOn.name || `${sourceDoc.name} (${addOn.packSize})`,
       basePrice: price,
       price: price,
-      servings: variant.servings * multiplier,
+      servings: (variant.servings || 1) * multiplier,
       cupSize: variant.cupSize,
       imageUrl: addOn.imageUrl || sourceDoc.imageUrl,
       allergens: addOn.allergens || sourceDoc.allergens || [],
