@@ -8,6 +8,7 @@ import '../styles/catering.css';
 import '../styles/catering-entry-choice.css';
 import '../styles/simple-packages.css';
 import '../styles/guided-planner.css';
+import '../styles/wing-customization.css'; // SHARD-2
 import '../styles/boxed-meals-v2.css';
 import '../styles/boxed-meals-animations.css';
 import '../styles/smart-questionnaire.css';

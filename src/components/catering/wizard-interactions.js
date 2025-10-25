@@ -3,7 +3,7 @@
  * Handles step navigation, form validation, and user selections
  */
 
-import { wizardState } from './guided-planner.js';
+import { wizardState, initWingCustomization } from './guided-planner.js';
 import { getRecommendations } from '../../utils/recommendations.js';
 
 // ==================== RECOMMENDATION ENGINE ====================
@@ -884,14 +884,9 @@ function prepareStepContent(stepNum, packages, sauces, addOns) {
       filterPackagesByGuestCount(packages);
       break;
 
-    case 3: // Sauce Selection
-      // Update instruction text
-      const instructionEl = document.getElementById('sauce-instruction');
-      if (instructionEl) {
-        const maxSauces = wizardState.selectedPackage?.sauceCount || 3;
-        instructionEl.textContent = `Select ${maxSauces} sauce flavors for your ${wizardState.selectedPackage?.name}`;
-        updateSauceCounter(maxSauces);
-      }
+    case 3: // Wing Customization (SHARD-2)
+      console.log('📍 Step 3: Wing Customization activated');
+      initWingCustomization();
       break;
 
     case 5: // Review & Contact

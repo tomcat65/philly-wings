@@ -6,6 +6,7 @@
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
 import { initWizardInteractions } from './wizard-interactions.js';
+import { WingCustomization } from './wing-customization.js';
 
 // Wizard state management
 let wizardState = {
@@ -18,10 +19,14 @@ let wizardState = {
     eventTime: null
   },
   selectedPackage: null,
+  wingDistribution: null, // SHARD-2: Wing customization data
   sauceSelections: [],
   addOns: [],
   contactInfo: {}
 };
+
+// Wing customization component instance (SHARD-2)
+let wingCustomizationComponent = null;
 
 /**
  * Main render function for the guided planner
@@ -46,7 +51,7 @@ export async function renderGuidedPlanner() {
       <div class="planner-wizard">
         ${renderStep1EventDetails()}
         ${renderStep2PackageSelection(packages)}
-        ${renderStep3SauceCustomization(sauces)}
+        ${renderStep3WingCustomization()}
         ${renderStep4AddOns(addOns)}
         ${renderStep5ReviewContact()}
       </div>
@@ -254,36 +259,14 @@ function renderPackageCard(pkg) {
 }
 
 /**
- * Step 3: Sauce Customization
+ * Step 3: Wing Customization (SHARD-2)
+ * Dynamic container for WingCustomization component
  */
-function renderStep3SauceCustomization(sauces) {
+function renderStep3WingCustomization() {
   return `
     <div class="wizard-step" id="step-3" style="display: none;">
       <div class="step-content">
-        <h3 class="step-title">Choose Your Sauces</h3>
-        <p class="step-description" id="sauce-instruction"></p>
-
-        <div class="sauce-selector-wizard">
-          <div class="sauce-grid">
-            ${sauces.map(sauce => `
-              <div class="sauce-card" data-sauce-id="${sauce.id}">
-                <div class="sauce-name">${sauce.name}</div>
-                <div class="sauce-heat">
-                  ${'🌶️'.repeat(sauce.heatLevel || 1)}
-                </div>
-                ${sauce.description ? `<p class="sauce-desc">${sauce.description}</p>` : ''}
-                <button class="btn-select-sauce" data-sauce-id="${sauce.id}">
-                  Select
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <div class="sauce-selections">
-          <h4>Your Selections (<span id="sauce-count">0</span>/<span id="sauce-max">0</span>)</h4>
-          <div id="selected-sauces" class="selected-sauce-list"></div>
-        </div>
+        <div id="wing-customization-container"></div>
       </div>
     </div>
   `;
@@ -530,4 +513,33 @@ function getMinDate() {
   return tomorrow.toISOString().split('T')[0];
 }
 
-export { wizardState };
+/**
+ * Initialize wing customization component for Step 3 (SHARD-2)
+ */
+export function initWingCustomization() {
+  if (!wizardState.selectedPackage) {
+    console.error('Cannot initialize wing customization: no package selected');
+    return;
+  }
+
+  const container = document.getElementById('wing-customization-container');
+  if (!container) {
+    console.error('Wing customization container not found');
+    return;
+  }
+
+  // Create or recreate the component
+  wingCustomizationComponent = new WingCustomization({
+    package: wizardState.selectedPackage,
+    context: null, // TODO: Integrate with CateringCustomizationContext from SHARD-8A
+    container: container,
+    onCustomizationChange: (data) => {
+      wizardState.wingDistribution = data;
+      console.log('Wing distribution updated:', data);
+    }
+  });
+
+  console.log('🍗 Wing customization component initialized');
+}
+
+export { wizardState, wingCustomizationComponent };
