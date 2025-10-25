@@ -72,22 +72,29 @@ async function enrichAddOnsWithPricing(addOns) {
   return addOns.map(addOn => {
     // Skip enrichment for items without source references (they have direct pricing)
     if (!addOn.sourceCollection || !addOn.sourceDocumentId) {
+      // Ensure direct-priced items have valid pricing
+      if (typeof addOn.basePrice !== 'number' || isNaN(addOn.basePrice)) {
+        console.error(`Add-on ${addOn.id} has no source reference and no valid basePrice`);
+        return { ...addOn, basePrice: 0, price: 0, pricingError: true };
+      }
       return addOn;
     }
 
     const sourceDoc = sourceData[addOn.sourceCollection]?.[addOn.sourceDocumentId];
 
     if (!sourceDoc) {
-      console.warn(`Missing source document: ${addOn.sourceCollection}/${addOn.sourceDocumentId}`);
-      return addOn; // Return as-is if source missing
+      console.error(`Missing source document: ${addOn.sourceCollection}/${addOn.sourceDocumentId} for add-on ${addOn.id}`);
+      // Return with zero price and error flag instead of undefined price
+      return { ...addOn, basePrice: 0, price: 0, pricingError: true };
     }
 
     // Find the specific variant
     const variant = sourceDoc.variants?.find(v => v.id === addOn.sourceVariantId);
 
     if (!variant) {
-      console.warn(`Missing variant ${addOn.sourceVariantId} in ${addOn.sourceDocumentId}`);
-      return addOn; // Return as-is if variant missing
+      console.error(`Missing variant ${addOn.sourceVariantId} in ${addOn.sourceDocumentId} for add-on ${addOn.id}`);
+      // Return with zero price and error flag instead of undefined price
+      return { ...addOn, basePrice: 0, price: 0, pricingError: true };
     }
 
     // Calculate price with pack multiplier

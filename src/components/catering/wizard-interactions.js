@@ -880,8 +880,8 @@ function prepareStepContent(stepNum, packages, sauces, addOns) {
       // Reorder cards by match score and add badges
       reorderPackageCardsV2(recommended);
 
-      // Keep existing opacity logic for visual hints
-      filterPackagesByGuestCount(packages);
+      // Note: Removed filterPackagesByGuestCount() to avoid conflict with V2 ordering
+      // V2 system already handles package filtering via match scores
       break;
 
     case 3: // Wing Customization (SHARD-2)

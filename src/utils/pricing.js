@@ -59,10 +59,12 @@ function calculateAddOns(state) {
     });
   }
 
-  // Desserts
+  // Desserts (beyond included)
   if (state.desserts) {
     state.desserts.forEach(dessert => {
-      total += dessert.price * dessert.fivePacks;
+      if (dessert.isAddon) {
+        total += dessert.price * dessert.fivePacks;
+      }
     });
   }
 
