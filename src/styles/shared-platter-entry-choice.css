@@ -1,0 +1,407 @@
+/**
+ * Shared Platters V2 - Entry Choice Screen Styles
+ * Story: SP-001
+ * Design: Sally (UX Expert)
+ * Created: 2025-10-27
+ */
+
+/* ========================================
+   Variables & Design Tokens
+   ======================================== */
+
+:root {
+  --philly-red: #e74c3c;
+  --philly-red-hover: #c0392b;
+  --philly-red-light: #fadbd8;
+
+  --gray-900: #2c3e50;
+  --gray-800: #34495e;
+  --gray-700: #555;
+  --gray-600: #7f8c8d;
+  --gray-500: #95a5a6;
+  --gray-300: #bdc3c7;
+  --gray-200: #dfe6e9;
+  --gray-100: #ecf0f1;
+  --gray-50: #f8f9fa;
+
+  --success-green: #27ae60;
+  --white: #ffffff;
+
+  /* Spacing (8px grid) */
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 1rem;     /* 16px */
+  --space-3: 1.5rem;   /* 24px */
+  --space-4: 2rem;     /* 32px */
+  --space-5: 2.5rem;   /* 40px */
+  --space-6: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px */
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --heading-size: 2.25rem;   /* 36px */
+  --card-title-size: 1.5rem; /* 24px */
+  --body-size: 0.9375rem;    /* 15px */
+  --subtitle-size: 0.875rem; /* 14px */
+
+  /* Borders & Shadows */
+  --border-radius: 16px;
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Transitions */
+  --transition-fast: 200ms ease;
+  --transition-medium: 300ms ease;
+}
+
+/* ========================================
+   Screen Reader Only Utility
+   ======================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ========================================
+   Entry Choice Section
+   ======================================== */
+
+.entry-choice-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-3);
+  background-color: var(--white);
+}
+
+/* ========================================
+   Section Header
+   ======================================== */
+
+.entry-choice-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.entry-choice-header h2 {
+  font-size: var(--heading-size);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 var(--space-2) 0;
+  line-height: 1.2;
+}
+
+.entry-choice-subtitle {
+  font-size: var(--body-size);
+  color: var(--gray-600);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ========================================
+   Cards Container
+   ======================================== */
+
+.entry-choice-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+/* Desktop: 2-column split */
+@media (min-width: 768px) {
+  .entry-choice-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ========================================
+   Entry Choice Card
+   ======================================== */
+
+.entry-choice-card {
+  /* Base styles for article element acting as button */
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  cursor: pointer;
+  font-family: var(--font-family);
+  text-align: left;
+  width: 100%;
+
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--space-4);
+  border-radius: var(--border-radius);
+
+  /* Visual effects */
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition-medium);
+
+  /* Accessibility */
+  position: relative;
+  outline: none; /* We'll use custom focus styles */
+}
+
+/* Hover state */
+.entry-choice-card:hover {
+  border-color: var(--philly-red);
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-4px);
+}
+
+/* Focus state (keyboard navigation) */
+.entry-choice-card:focus {
+  outline: 3px solid var(--philly-red);
+  outline-offset: 2px;
+}
+
+/* Active/pressed state */
+.entry-choice-card:active {
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   Card Icon
+   ======================================== */
+
+.card-icon {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+
+/* ========================================
+   Card Content
+   ======================================== */
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.card-title {
+  font-size: var(--card-title-size);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.card-subtitle {
+  font-size: var(--subtitle-size);
+  font-weight: 600;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.card-description {
+  font-size: var(--body-size);
+  color: var(--gray-700);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ========================================
+   Card Benefits List
+   ======================================== */
+
+.card-benefits {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.card-benefits li {
+  font-size: var(--subtitle-size);
+  color: var(--gray-600);
+  line-height: 1.5;
+  padding-left: var(--space-3);
+  position: relative;
+}
+
+/* Checkmark bullet */
+.card-benefits li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--success-green);
+  font-weight: 700;
+}
+
+/* ========================================
+   Card CTA Button
+   ======================================== */
+
+.card-cta-button {
+  display: block;
+  margin-top: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--philly-red);
+  color: var(--white);
+  font-size: var(--body-size);
+  font-weight: 600;
+  text-align: center;
+  border-radius: 8px;
+  transition: background-color var(--transition-fast);
+}
+
+.entry-choice-card:hover .card-cta-button {
+  background-color: var(--philly-red-hover);
+}
+
+.entry-choice-card:focus .card-cta-button {
+  background-color: var(--philly-red-hover);
+}
+
+/* ========================================
+   Tablet Adjustments (640px - 1023px)
+   ======================================== */
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .entry-choice-header h2 {
+    font-size: 2rem; /* 32px */
+  }
+
+  .card-title {
+    font-size: 1.375rem; /* 22px */
+  }
+}
+
+/* ========================================
+   Mobile Optimizations (< 640px)
+   ======================================== */
+
+@media (max-width: 639px) {
+  .entry-choice-section {
+    padding: var(--space-4) var(--space-2);
+  }
+
+  .entry-choice-header {
+    margin-bottom: var(--space-4);
+  }
+
+  .entry-choice-header h2 {
+    font-size: 1.75rem; /* 28px */
+  }
+
+  .entry-choice-subtitle {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  .entry-choice-cards {
+    gap: var(--space-3);
+  }
+
+  .entry-choice-card {
+    padding: var(--space-3);
+  }
+
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-2);
+  }
+
+  .card-title {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  .card-description {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  .card-benefits li {
+    font-size: 0.8125rem; /* 13px */
+  }
+
+  .card-cta-button {
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+/* ========================================
+   Dark Mode Support (Future-Proofing)
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .entry-choice-section {
+    background-color: var(--gray-900);
+  }
+
+  .entry-choice-header h2,
+  .card-title {
+    color: var(--white);
+  }
+
+  .entry-choice-subtitle,
+  .card-subtitle,
+  .card-description,
+  .card-benefits li {
+    color: var(--gray-300);
+  }
+
+  .entry-choice-card {
+    background-color: var(--gray-800);
+    border-color: var(--gray-700);
+  }
+
+  .entry-choice-card:hover {
+    border-color: var(--philly-red);
+    background-color: var(--gray-700);
+  }
+}
+
+/* ========================================
+   High Contrast Mode (Accessibility)
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  .entry-choice-card {
+    border-width: 3px;
+  }
+
+  .entry-choice-card:focus {
+    outline-width: 4px;
+  }
+
+  .card-cta-button {
+    border: 2px solid var(--white);
+  }
+}
+
+/* ========================================
+   Reduced Motion (Accessibility)
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-choice-card,
+  .card-cta-button {
+    transition: none;
+  }
+
+  .entry-choice-card:hover {
+    transform: none;
+  }
+
+  .entry-choice-card:active {
+    transform: none;
+  }
+}

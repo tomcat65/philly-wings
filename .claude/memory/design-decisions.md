@@ -1,5 +1,84 @@
 # Design Decisions Log
 
+## Oct 26, 2025 - Shared Platters V2 Entry Choice Screen (SP-001)
+**Decision:** Split hero card layout for entry path selection
+**Why:** Users need clear, confident choice between browsing vs guided experience
+**User Research Insight:**
+- Experienced catering customers know what they want (Quick Browse)
+- First-time corporate planners need help (Guided Planner)
+- Forcing everyone through questionnaire = friction for experienced users
+- No guidance for first-timers = decision paralysis
+
+**Design Pattern Used:** Chipotle-style equal-weight path selection
+**Similar To:**
+- Domino's: Easy Order vs Pizza Builder
+- Apple: Basic vs Advanced setup
+- Sweetgreen: Build Your Own vs Chef Creations
+
+**Visual Hierarchy:**
+```
+Section Heading (36px bold) → Card Titles (24px bold) → Benefits (15px) → CTAs
+```
+
+**Icon Selection:**
+- 🏃 (Quick Browse): Conveys speed, experience, confidence
+- 🧭 (Guided Planner): Universal symbol for guidance/navigation
+- Alternatives considered: 👀, ⚡, 🎯, 🤝 (less intuitive)
+
+**Layout Rationale:**
+- **Side-by-side (desktop):** Neither path is "default", equal importance
+- **Stacked (mobile):** Natural reading order, maintains clarity
+- **No modal:** Users need to see both options before committing
+
+**Interaction Design:**
+- **Hover state:** Lift 4px, red border, gradient accent bar appears
+- **Card-as-button:** Entire card clickable (larger touch target)
+- **CTA redundancy:** Text CTA inside card (clear affordance)
+
+**Accessibility Priorities:**
+1. WCAG AA contrast (all text 4.5:1+)
+2. Keyboard navigation (Tab, Enter, Space)
+3. Screen reader announcements ("Loading Quick Browse experience...")
+4. Touch targets 48px minimum
+5. Reduced motion support
+
+**Brand Consistency:**
+- Matches boxed meals flow colors/spacing
+- Same border radius system (16px cards, 12px buttons)
+- Same shadow elevation hierarchy
+- Same Philly red (#e74c3c) primary color
+
+**Copy Strategy:**
+- **Quick Browse:** Emphasizes speed, control, directness
+- **Guided Planner:** Emphasizes intelligence, ease, curation
+- **Benefit bullets:** 3 per card (cognitive sweet spot)
+- **Time anchor:** "Takes less than 60 seconds" (reduces anxiety)
+
+**Responsive Strategy:**
+- Mobile-first CSS approach
+- Breakpoint: 768px (2-col vs stacked)
+- Desktop: 1000px max-width (optimal line length)
+- Mobile: Full-width with 16px side padding
+
+**Expected Results:**
+- Reduced bounce rate (clearer path forward)
+- Higher completion rate (matched to user expertise)
+- Faster time-to-order for experienced users
+- Better recommendations for first-timers
+
+**Validation Metrics (Future):**
+- Track path selection rate (expect 60% Quick Browse, 40% Guided)
+- Measure decision time (target <5 seconds)
+- Track completion rate per path
+- A/B test copy variations
+
+**Implementation Priority:** URGENT - Blocking Sprint 1
+**Designer:** Sally (UX Expert)
+**Estimated Dev Time:** 2-3 hours
+**Dependencies:** None (standalone component)
+
+---
+
 ## Sep 17, 2025 - Dynamic Data Architecture & FDA Compliance
 **Decision:** Implement dynamic loading with static JSON caching for performance
 **Why:** Firebase real-time queries cost money; static JSON at CDN is free and faster

@@ -9,6 +9,13 @@ import '../styles/catering-entry-choice.css';
 import '../styles/simple-packages.css';
 import '../styles/guided-planner.css';
 import '../styles/wing-customization.css'; // SHARD-2
+import '../styles/sauce-allocation.css'; // Phase 2: Sauce allocation UI
+import '../styles/customize-package.css'; // NEW: Step 5 - Customize Package
+import '../styles/shared-photo-cards.css'; // PHASE 0: Shared visual components
+import '../styles/shared-platter-entry-choice.css'; // SP-001: Shared Platters V2 Entry Choice
+import '../styles/package-recommendations.css'; // SP-004: Package Recommendations
+import '../styles/customization-screen.css'; // SP-006: Split-Screen Customization
+import '../styles/wing-distribution-selector.css'; // SP-007: Wing Distribution Selector
 import '../styles/boxed-meals-v2.css';
 import '../styles/boxed-meals-animations.css';
 import '../styles/smart-questionnaire.css';
@@ -21,6 +28,9 @@ import { renderGuidedPlanner } from '../components/catering/guided-planner.js';
 import { renderBoxedMealsFlow, initBoxedMealsFlow } from '../components/catering/boxed-meals-flow-v2.js';
 import { renderSmartQuestionnaire } from '../components/catering/smart-questionnaire.js';
 import { renderPortionGuide } from '../components/catering/portion-guide.js';
+import { renderEntryChoiceV2, initEntryChoiceV2 } from '../components/catering/shared-platter-entry-choice.js';
+import { renderPackageRecommendations, initPackageRecommendations } from '../components/catering/package-recommendations.js';
+import { renderCustomizationScreen, initCustomizationScreen } from '../components/catering/customization-screen.js';
 
 export async function renderCateringPage() {
   // Pre-render both flows
@@ -28,12 +38,18 @@ export async function renderCateringPage() {
   const wizardData = await renderGuidedPlanner(); // Returns { html, packages, sauces, addOns }
   const boxedMealsHtml = await renderBoxedMealsFlow();
 
-  // Initialize interactions after render
-  setTimeout(() => {
-    initEntryChoice();
-    initPackageViewSwitching(wizardData);
-    initBoxedMealsFlow();
-  }, 100);
+  // Initialize interactions after DOM is fully ready
+  // Use requestAnimationFrame for more reliable DOM readiness
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      initEntryChoice();
+      initEntryChoiceV2(); // SP-001: Initialize Shared Platters V2 entry choice
+      initPackageViewSwitching(wizardData);
+      initBoxedMealsFlow();
+      initPackageRecommendations(); // SP-004: Initialize package recommendations
+      initCustomizationScreen(); // SP-006: Initialize customization screen
+    });
+  });
 
   return `
     <div class="catering-page">
@@ -43,6 +59,25 @@ export async function renderCateringPage() {
 
       <!-- Shared Platters Flow (Default) -->
       <div id="shared-platters-flow" style="display: block;">
+        <!-- SP-001: Shared Platters V2 Entry Choice (Quick Browse vs Guided Planner) -->
+        ${renderEntryChoiceV2()}
+
+        <!-- SP-002: Package Gallery (Quick Browse path) -->
+        <div id="package-gallery-view" style="display: none;">
+          <!-- Package gallery will be rendered here -->
+        </div>
+
+        <!-- SP-003: Event Details Form (Guided Planner path) -->
+        <div id="event-details-form-container" style="display: none;">
+          <!-- Event details form will be rendered here -->
+        </div>
+
+        <!-- SP-004: Package Recommendations (Guided Planner path) -->
+        ${renderPackageRecommendations()}
+
+        <!-- SP-006: Customization Screen (Convergence point for both flows) -->
+        ${renderCustomizationScreen()}
+
         <div id="catering-packages">
           ${simplePackagesHtml}
         </div>

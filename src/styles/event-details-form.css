@@ -1,0 +1,602 @@
+/**
+ * Event Details Form Styles - SP-003
+ * Guided Planner - FLOW B Step 1
+ *
+ * Mobile-first responsive design for event information capture
+ * - Guest count slider with visual feedback
+ * - Event type photo cards
+ * - Dietary checkboxes
+ * - Form validation states
+ *
+ * Story: SP-003
+ * Created: 2025-10-26
+ */
+
+/* ===== CONTAINER ===== */
+.event-details-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* ===== PROGRESS INDICATOR ===== */
+.form-progress {
+  margin-bottom: 2rem;
+}
+
+.progress-text {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b35 0%, #ff8555 100%);
+  transition: width 0.3s ease-out;
+  border-radius: 3px;
+}
+
+/* ===== FORM HEADER ===== */
+.form-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.form-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem;
+}
+
+.form-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* ===== FORM SECTIONS ===== */
+.form-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-label {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+}
+
+.section-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin: -0.5rem 0 1rem;
+}
+
+.required-asterisk {
+  color: #e63946;
+  margin-left: 0.25rem;
+}
+
+.optional-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #999;
+  margin-left: 0.5rem;
+}
+
+/* ===== GUEST COUNT CONTROL ===== */
+.guest-count-control {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.count-display-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.count-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+}
+
+.count-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #e63946;
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.btn-count-adjust {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-count-adjust:hover {
+  background: #e63946;
+  color: #fff;
+  border-color: #e63946;
+  transform: scale(1.05);
+}
+
+.btn-count-adjust:active {
+  transform: scale(0.95);
+}
+
+.btn-count-adjust:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+}
+
+/* Guest Count Slider */
+.slider-wrapper {
+  margin-top: 0.5rem;
+}
+
+.guest-count-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #e5e7eb;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.guest-count-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e63946;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.guest-count-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
+.guest-count-slider::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+/* Firefox */
+.guest-count-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e63946;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.guest-count-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
+.guest-count-slider::-moz-range-thumb:active {
+  transform: scale(0.95);
+}
+
+/* Slider track fill (visual feedback) */
+.guest-count-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    #e63946 0%,
+    #e63946 var(--slider-fill, 20%),
+    #e5e7eb var(--slider-fill, 20%),
+    #e5e7eb 100%
+  );
+  height: 8px;
+  border-radius: 4px;
+}
+
+.guest-count-slider::-moz-range-track {
+  background: #e5e7eb;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* ===== EVENT TYPE CARDS ===== */
+.event-type-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.event-type-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.event-type-card:hover {
+  border-color: #ff8555;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.event-type-card:focus {
+  outline: none;
+  border-color: #e63946;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+}
+
+.event-type-card.card-selected {
+  border-color: #e63946;
+  background: #fff7ed;
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.15);
+}
+
+.event-type-card.card-clicked {
+  animation: cardPulse 300ms ease-out;
+}
+
+@keyframes cardPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+}
+
+.event-card-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.event-card-content {
+  flex: 1;
+}
+
+.event-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.25rem;
+}
+
+.event-card-description {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.event-card-check {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e63946;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.2s;
+}
+
+.event-type-card.card-selected .event-card-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.check-icon {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* ===== DIETARY CHECKBOXES ===== */
+.dietary-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dietary-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dietary-checkbox-label:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.dietary-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #e63946;
+  flex-shrink: 0;
+}
+
+.checkbox-text {
+  font-size: 0.9375rem;
+  color: #1a1a1a;
+  user-select: none;
+}
+
+/* Other dietary input */
+.other-dietary-input {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.other-dietary-input.hidden {
+  display: none;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: #e63946;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+}
+
+/* ===== FIELD ERRORS ===== */
+.field-error {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #e63946;
+  font-weight: 500;
+  min-height: 1.25rem;
+  display: none;
+}
+
+.field-error.active {
+  display: block;
+}
+
+/* ===== FORM ACTIONS ===== */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-secondary {
+  padding: 0.875rem 1.5rem;
+  background: #fff;
+  color: #1a1a1a;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  max-width: 200px;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  padding: 0.875rem 1.5rem;
+  background: #e63946;
+  color: #fff;
+  border: 2px solid #e63946;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #d62839;
+  border-color: #d62839;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background: #e5e7eb;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== VALIDATION SUMMARY ===== */
+.validation-summary {
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.validation-summary.hidden {
+  display: none;
+}
+
+.validation-message {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #e63946;
+  font-weight: 500;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet (640px+) */
+@media (min-width: 640px) {
+  .event-type-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dietary-checkboxes {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .dietary-checkbox-label {
+    flex: 1;
+    min-width: calc(50% - 0.375rem);
+  }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+  .event-details-form {
+    padding: 3rem 2rem;
+  }
+
+  .form-title {
+    font-size: 2.25rem;
+  }
+
+  .form-subtitle {
+    font-size: 1.125rem;
+  }
+
+  .count-value {
+    font-size: 4rem;
+  }
+
+  .event-type-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .event-card-emoji {
+    font-size: 3rem;
+  }
+
+  .dietary-checkbox-label {
+    min-width: calc(33.333% - 0.5rem);
+  }
+
+  .form-actions {
+    justify-content: flex-end;
+  }
+
+  .btn-secondary {
+    flex: 0;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .event-type-card {
+    border-width: 3px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    border-width: 3px;
+  }
+}

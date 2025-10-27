@@ -54,20 +54,6 @@ let firestoreDataCache = {
 };
 
 /**
- * Fetch Firestore data for photo cards (alias for fetchStep5FirestoreData)
- * Populates the firestoreDataCache with cold sides, salads, desserts, and beverages
- */
-async function fetchFirestoreDataForPhotoCards() {
-  const data = await fetchStep5FirestoreData();
-  // Populate cache
-  firestoreDataCache.coldSides = data.coldSides;
-  firestoreDataCache.salads = data.salads;
-  firestoreDataCache.desserts = data.desserts;
-  firestoreDataCache.beverages = data.beverages;
-  return data;
-}
-
-/**
  * Fetch Firestore data WHEN Step 5 is rendered (direct fetch, no cache)
  * Returns complete Firestore objects ready for photo card selector
  */
