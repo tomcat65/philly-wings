@@ -176,7 +176,6 @@
 .card-badge {
   position: absolute;
   top: var(--space-2);
-  right: var(--space-2);
   padding: var(--space-1) var(--space-2);
   border-radius: 8px;
   font-size: 0.875rem;
@@ -188,11 +187,20 @@
 .best-match-badge {
   background: linear-gradient(135deg, #ffd700, #ffed4e);
   color: var(--gray-900);
+  right: var(--space-2);
 }
 
 .popular-badge {
   background: var(--philly-red);
   color: var(--white);
+  right: var(--space-2);
+}
+
+.customizable-badge {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: var(--white);
+  left: var(--space-2);
+  font-size: 0.8125rem;
 }
 
 /* ========================================
@@ -262,8 +270,24 @@
 .card-serves {
   font-size: 0.9375rem;
   color: var(--gray-600);
+  margin: 0 0 var(--space-2) 0;
+  font-weight: 500;
+}
+
+.card-customization-note {
+  font-size: 0.875rem;
+  color: var(--success-green);
   margin: 0 0 var(--space-3) 0;
   font-weight: 500;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.card-customization-note::before {
+  content: '🔀';
+  font-style: normal;
 }
 
 /* ========================================

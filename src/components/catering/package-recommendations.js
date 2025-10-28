@@ -292,6 +292,7 @@ function renderPackageCard(pkg) {
 
       <!-- Badges -->
       ${pkg.popular ? '<div class="card-badge popular-badge">🔥 Popular</div>' : ''}
+      <div class="card-badge customizable-badge">🔀 Fully Customizable</div>
 
       <!-- Hero Image -->
       <div class="card-image-wrapper">
@@ -313,10 +314,12 @@ function renderPackageCard(pkg) {
 
         ${pkg.description ? `<p class="card-description">${pkg.description}</p>` : ''}
 
+        <p class="card-customization-note">Can split between traditional and plant-based wings</p>
+
         <div class="card-footer">
           <span class="card-price">${formattedPrice}</span>
           <button class="btn-select-package" data-package-id="${pkg.id}">
-            Select Package →
+            Select & Customize →
           </button>
         </div>
       </div>
@@ -355,6 +358,7 @@ function renderRecommendationCard(pkg, index) {
       <!-- Badges -->
       ${isBestMatch ? '<div class="card-badge best-match-badge">⭐ Best Match</div>' : ''}
       ${pkg.popular && !isBestMatch ? '<div class="card-badge popular-badge">🔥 Popular</div>' : ''}
+      <div class="card-badge customizable-badge">🔀 Fully Customizable</div>
 
       <!-- Hero Image -->
       <div class="card-image-wrapper">
@@ -373,6 +377,8 @@ function renderRecommendationCard(pkg, index) {
         </div>
 
         <p class="card-serves">${servesText}</p>
+
+        <p class="card-customization-note">Can split between traditional and plant-based wings</p>
 
         <!-- Why We Chose This -->
         ${pkg.reasoning && pkg.reasoning.length > 0 ? `
@@ -395,7 +401,7 @@ function renderRecommendationCard(pkg, index) {
           type="button"
           class="btn-select-package ${isBestMatch ? 'btn-primary' : 'btn-secondary'}"
           data-package-id="${pkg.id}">
-          ${isBestMatch ? 'Choose This Package' : 'Select Package'}
+          ${isBestMatch ? 'Choose & Customize' : 'Select & Customize'} →
         </button>
       </div>
     </article>
