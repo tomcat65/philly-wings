@@ -13,6 +13,7 @@ import '../styles/sauce-allocation.css'; // Phase 2: Sauce allocation UI
 import '../styles/customize-package.css'; // NEW: Step 5 - Customize Package
 import '../styles/shared-photo-cards.css'; // PHASE 0: Shared visual components
 import '../styles/shared-platter-entry-choice.css'; // SP-001: Shared Platters V2 Entry Choice
+import '../styles/event-details-form.css'; // SP-003: Event Details Form
 import '../styles/package-recommendations.css'; // SP-004: Package Recommendations
 import '../styles/customization-screen.css'; // SP-006: Split-Screen Customization
 import '../styles/wing-distribution-selector.css'; // SP-007: Wing Distribution Selector
@@ -21,6 +22,7 @@ import '../styles/boxed-meals-animations.css';
 import '../styles/smart-questionnaire.css';
 import '../styles/recommendation-card.css';
 import '../styles/portion-guide.css';
+import '../styles/conversational-wing-distribution.css'; // SP-003 Enhancement: Conversational wizard
 import { renderCateringHero } from '../components/catering/hero.js';
 import { renderEntryChoice, initEntryChoice } from '../components/catering/catering-entry-choice.js';
 import { renderSimplePackages, initPackageViewSwitching } from '../components/catering/simple-packages.js';
@@ -29,8 +31,9 @@ import { renderBoxedMealsFlow, initBoxedMealsFlow } from '../components/catering
 import { renderSmartQuestionnaire } from '../components/catering/smart-questionnaire.js';
 import { renderPortionGuide } from '../components/catering/portion-guide.js';
 import { renderEntryChoiceV2, initEntryChoiceV2 } from '../components/catering/shared-platter-entry-choice.js';
-import { renderPackageRecommendations, initPackageRecommendations } from '../components/catering/package-recommendations.js';
+import { renderPackageRecommendations, initPackageRecommendations, loadAndRenderRecommendations } from '../components/catering/package-recommendations.js';
 import { renderCustomizationScreen, initCustomizationScreen } from '../components/catering/customization-screen.js';
+import { renderDistributionConfirmation, initDistributionConfirmation } from '../components/catering/distribution-confirmation.js';
 
 export async function renderCateringPage() {
   // Pre-render both flows
@@ -48,8 +51,68 @@ export async function renderCateringPage() {
       initBoxedMealsFlow();
       initPackageRecommendations(); // SP-004: Initialize package recommendations
       initCustomizationScreen(); // SP-006: Initialize customization screen
+      initDistributionConfirmation(); // SP-003 Enhancement: Initialize confirmation modal
+
+      // SP-003 & SP-004: Listen for navigation events from Event Details Form
+      setupNavigationListeners();
     });
   });
+
+  // Setup navigation event listeners
+  function setupNavigationListeners() {
+    // Navigate to recommendations (from event details form)
+    window.addEventListener('navigate-to-recommendations', (event) => {
+      console.log('Navigating to recommendations with event details:', event.detail);
+
+      // Hide event details form
+      const eventDetailsContainer = document.getElementById('event-details-form-container');
+      if (eventDetailsContainer) {
+        eventDetailsContainer.style.display = 'none';
+      }
+
+      // Show package recommendations
+      const recommendationsContainer = document.getElementById('package-recommendations-container');
+      if (recommendationsContainer) {
+        recommendationsContainer.style.display = 'block';
+        recommendationsContainer.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+
+        // Load and render recommendations with event details
+        loadAndRenderRecommendations();
+      } else {
+        console.warn('Package recommendations container not found');
+      }
+    });
+
+    // Navigate back to entry choice
+    window.addEventListener('navigate-to-entry-choice', () => {
+      console.log('Navigating back to entry choice');
+
+      // Hide event details form
+      const eventDetailsContainer = document.getElementById('event-details-form-container');
+      if (eventDetailsContainer) {
+        eventDetailsContainer.style.display = 'none';
+      }
+
+      // Hide recommendations
+      const recommendationsContainer = document.getElementById('package-recommendations-container');
+      if (recommendationsContainer) {
+        recommendationsContainer.style.display = 'none';
+      }
+
+      // Show entry choice section
+      const entrySection = document.querySelector('.entry-choice-section');
+      if (entrySection) {
+        entrySection.style.display = 'block';
+        entrySection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  }
 
   return `
     <div class="catering-page">
@@ -95,6 +158,9 @@ export async function renderCateringPage() {
 
       <!-- Portion Guide Modal -->
       ${renderPortionGuide()}
+
+      <!-- Distribution Confirmation Modal (SP-003 Enhancement) -->
+      ${renderDistributionConfirmation()}
     </div>
   `;
 }

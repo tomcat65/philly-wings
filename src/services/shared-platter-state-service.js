@@ -36,7 +36,9 @@ const INITIAL_STATE = {
     wingDistribution: {
       boneless: 0,
       boneIn: 0,
-      boneInStyle: 'mixed'            // 'mixed' | 'flats' | 'drums'
+      cauliflower: 0,                  // NEW: Plant-based wings
+      boneInStyle: 'mixed',            // 'mixed' | 'flats' | 'drums'
+      distributionSource: null         // NEW: 'conversational-wizard' | 'manual' | null
     },
 
     // Sauces (multiple selections based on package)
@@ -421,12 +423,26 @@ function migrateDraft(draft) {
 function deepMerge(target, source) {
   const result = { ...target };
 
+  const cloneValue = value => {
+    if (Array.isArray(value)) {
+      return value.map(item => cloneValue(item));
+    }
+    if (value && typeof value === 'object') {
+      return deepMerge({}, value);
+    }
+    return value;
+  };
+
   for (const key in source) {
-    if (source.hasOwnProperty(key)) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        result[key] = deepMerge(target[key] || {}, source[key]);
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      const value = source[key];
+
+      if (Array.isArray(value)) {
+        result[key] = cloneValue(value);
+      } else if (value && typeof value === 'object') {
+        result[key] = deepMerge(target[key] || {}, value);
       } else {
-        result[key] = source[key];
+        result[key] = value;
       }
     }
   }

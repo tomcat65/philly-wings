@@ -20,6 +20,10 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { updateState, setPackage } from '../../services/shared-platter-state-service.js';
 
+function isPlantBasedPackage(pkg) {
+  return Boolean(pkg?.isPlantBased || (pkg?.id && pkg.id.includes('plant-based')));
+}
+
 // ===== COMPONENT STATE =====
 let allPackages = [];
 let filteredPackages = [];
@@ -106,7 +110,7 @@ function filterPackages(packages, filters) {
     // Dietary filter
     if (filters.dietary.length > 0) {
       if (filters.dietary.includes('vegetarian') || filters.dietary.includes('vegan')) {
-        if (!pkg.id.includes('plant-based')) return false;
+        if (!isPlantBasedPackage(pkg)) return false;
       }
     }
 

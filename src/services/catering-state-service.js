@@ -590,7 +590,14 @@ class CateringStateService {
     for (const key in source) {
       // Arrays should be replaced entirely, not merged
       if (Array.isArray(source[key])) {
-        output[key] = [...source[key]]; // Clone the array
+        output[key] = source[key].map(item => {
+          if (item && typeof item === 'object') {
+            return Array.isArray(item)
+              ? item.map(inner => (inner && typeof inner === 'object' ? this._deepMerge({}, inner) : inner))
+              : this._deepMerge({}, item);
+          }
+          return item;
+        });
       } else if (source[key] && typeof source[key] === 'object') {
         // Deep merge for plain objects only
         output[key] = this._deepMerge(output[key] || {}, source[key]);

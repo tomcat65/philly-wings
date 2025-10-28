@@ -489,7 +489,7 @@ export function collectContactData() {
     },
     deliveryDate: document.getElementById('delivery-date')?.value || '',
     deliveryTimeHour: document.getElementById('delivery-time-hour')?.value || '12',
-    deliveryTimeMinute: document.getElementById('delivery-time-minute')?.value || '00',
+    deliveryTimeMinute: document.getElementById('delivery-time-minute')?.value?.padStart(2, '0') || '00',
     deliveryPeriod: document.getElementById('delivery-period')?.value || 'PM',
     notes: document.getElementById('contact-notes')?.value.trim() || ''
   };

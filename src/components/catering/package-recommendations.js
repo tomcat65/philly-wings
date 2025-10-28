@@ -15,6 +15,10 @@
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
 import { getCateringPackages } from '../../services/catering-service.js';
 
+function isPlantBasedPackage(pkg) {
+  return Boolean(pkg?.isPlantBased || (pkg?.id && pkg.id.includes('plant-based')));
+}
+
 // ========================================
 // Component Initialization
 // ========================================
@@ -104,8 +108,8 @@ function getPackageRecommendations(allPackages, eventDetails) {
 
   // Step 2: Prioritize by dietary needs
   if (dietaryNeeds.includes('vegetarian') || dietaryNeeds.includes('vegan')) {
-    const plantBased = recommended.filter(pkg => pkg.id && pkg.id.includes('plant-based'));
-    const others = recommended.filter(pkg => !pkg.id || !pkg.id.includes('plant-based'));
+    const plantBased = recommended.filter(isPlantBasedPackage);
+    const others = recommended.filter(pkg => !isPlantBasedPackage(pkg));
     recommended = [...plantBased, ...others];
   }
 
@@ -172,7 +176,7 @@ function generateReasoning(pkg, eventDetails, isBestMatch) {
 
   // Dietary
   const hasVegetarianNeeds = dietaryNeeds.includes('vegetarian') || dietaryNeeds.includes('vegan');
-  if (pkg.id && pkg.id.includes('plant-based') && hasVegetarianNeeds) {
+  if (isPlantBasedPackage(pkg) && hasVegetarianNeeds) {
     reasons.push('Plant-based options available');
   }
 

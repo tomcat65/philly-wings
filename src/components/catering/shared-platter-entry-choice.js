@@ -13,6 +13,7 @@
 
 import { updateState } from '../../services/shared-platter-state-service.js';
 import { loadAndRenderRecommendations } from './package-recommendations.js';
+import { initEventDetailsForm } from './event-details-form.js';
 
 /**
  * Initialize the entry choice screen
@@ -58,8 +59,14 @@ export function initEntryChoiceV2() {
 function handlePathSelection(path, label) {
   // Update state service
   updateState('flowType', path);
-  // Both paths start with package selection (event details comes at END of guided planner)
-  updateState('currentStep', 'package-recommendations');
+
+  // Set appropriate starting step
+  if (path === 'quick-browse') {
+    updateState('currentStep', 'package-recommendations');
+  } else {
+    // Guided Planner starts with event details form (SP-003)
+    updateState('currentStep', 'event-details');
+  }
 
   // Announce selection for screen readers
   announceSelection(label);
@@ -120,7 +127,7 @@ function navigateToQuickBrowse() {
 
 /**
  * Navigate to Guided Planner view
- * Shows package recommendations immediately (event details form comes at END)
+ * Shows SP-003 Event Details Form FIRST to collect guest count and event type
  */
 function navigateToGuidedPlanner() {
   // Hide entry choice section
@@ -129,19 +136,19 @@ function navigateToGuidedPlanner() {
     entrySection.style.display = 'none';
   }
 
-  // Show package recommendations (SP-004)
-  const recommendationsContainer = document.getElementById('package-recommendations-container');
-  if (recommendationsContainer) {
-    recommendationsContainer.style.display = 'block';
-    recommendationsContainer.scrollIntoView({
+  // Show event details form (SP-003) - FIRST STEP in Guided Planner
+  const eventDetailsContainer = document.getElementById('event-details-form-container');
+  if (eventDetailsContainer) {
+    eventDetailsContainer.style.display = 'block';
+    eventDetailsContainer.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
     });
 
-    // Load and render recommendations (shows all if no event details)
-    loadAndRenderRecommendations();
+    // Initialize the event details form
+    initEventDetailsForm();
   } else {
-    console.warn('Package recommendations container not found');
+    console.warn('Event details form container not found');
   }
 }
 

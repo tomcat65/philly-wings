@@ -13,6 +13,8 @@
 
 import { getState, updateState, validateState } from '../../services/shared-platter-state-service.js';
 import { renderPhotoCardSelector, initPhotoCardSelector } from './photo-card-selector.js';
+import { renderConversationalWingDistribution, initConversationalWingDistribution } from './conversational-wing-distribution.js';
+import { showDistributionConfirmation } from './distribution-confirmation.js';
 
 // ========================================
 // Component Initialization
@@ -29,8 +31,10 @@ export function initEventDetailsForm() {
   setupGuestCountSlider();
   setupEventTypeCards();
   setupDietaryCheckboxes();
+  initConversationalWingDistribution(); // NEW: Initialize conversational wizard
   setupFormValidation();
   setupNavigation();
+  setupPortionGuide();
 
   // Load existing state if available
   loadExistingState();
@@ -46,6 +50,12 @@ function renderEventDetailsForm() {
 
   return `
     <div class="event-details-form">
+      <!-- Form Header -->
+      <div class="form-header">
+        <h2 class="form-title">Plan Your Perfect Spread</h2>
+        <p class="form-subtitle">Tell us about your event and we'll recommend the best packages</p>
+      </div>
+
       <!-- Progress Indicator -->
       <div class="form-progress">
         <span class="progress-text">Step 1 of 7</span>
@@ -54,69 +64,99 @@ function renderEventDetailsForm() {
         </div>
       </div>
 
-      <!-- Form Header -->
-      <div class="form-header">
-        <h2 class="form-title">Plan Your Perfect Spread</h2>
-        <p class="form-subtitle">Tell us about your event and we'll recommend the best packages</p>
-      </div>
-
       <!-- Guest Count Section -->
       <div class="form-section">
-        <label class="section-label" for="guest-count-slider">
-          How many people are you feeding? <span class="required-asterisk">*</span>
-        </label>
-        <div class="guest-count-control">
-          <div class="count-display-wrapper">
-            <button type="button" class="btn-count-adjust" id="btn-decrease-guests" aria-label="Decrease guest count by 5">
-              <span aria-hidden="true">−</span>
-            </button>
-            <div class="count-display">
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">👥</span>
+          </div>
+          <div class="section-content">
+            <div class="section-label">🍗 Step 1</div>
+            <h3 class="section-title">
+              How many people are you feeding?
+              <span class="required-badge">Required</span>
+            </h3>
+            <p class="section-subtitle">Select your guest count to get the right portion recommendations</p>
+          </div>
+        </div>
+
+        <div class="guest-count-display">
+          <div class="count-controls">
+            <button type="button" class="btn-count" id="btn-decrease-guests" aria-label="Decrease guest count by 5">−</button>
+            <div class="count-value-wrapper">
               <span class="count-value" id="guest-count-value">${eventDetails.guestCount || 25}</span>
-              <span class="count-label">guests</span>
+              <div class="count-label">Guests</div>
             </div>
-            <button type="button" class="btn-count-adjust" id="btn-increase-guests" aria-label="Increase guest count by 5">
-              <span aria-hidden="true">+</span>
-            </button>
+            <button type="button" class="btn-count" id="btn-increase-guests" aria-label="Increase guest count by 5">+</button>
           </div>
 
-          <div class="slider-wrapper">
-            <input
-              type="range"
-              id="guest-count-slider"
-              class="guest-count-slider"
-              min="10"
-              max="100"
-              step="1"
-              value="${eventDetails.guestCount || 25}"
-              aria-valuemin="10"
-              aria-valuemax="100"
-              aria-valuenow="${eventDetails.guestCount || 25}">
-            <div class="slider-labels">
-              <span class="slider-label-min">10</span>
-              <span class="slider-label-max">100+</span>
-            </div>
+          <input
+            type="range"
+            id="guest-count-slider"
+            class="guest-slider"
+            min="10"
+            max="100"
+            step="1"
+            value="${eventDetails.guestCount || 25}"
+            aria-valuemin="10"
+            aria-valuemax="100"
+            aria-valuenow="${eventDetails.guestCount || 25}">
+          <div class="slider-labels">
+            <span>10 people</span>
+            <span>100+ people</span>
           </div>
+        </div>
+
+        <div class="portion-guide-trigger">
+          <button type="button" class="btn-portion-guide" id="btn-open-portion-guide">
+            <div class="guide-icon-wrapper">
+              <svg class="guide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div class="guide-content">
+              <div class="guide-label">🍗 Helpful Tool</div>
+              <div class="guide-title">Not sure how many wings to order? Use our portion calculator</div>
+            </div>
+          </button>
         </div>
         <div class="field-error" id="guest-count-error" role="alert"></div>
       </div>
 
       <!-- Event Type Section -->
       <div class="form-section">
-        <label class="section-label">
-          What type of event is this? <span class="required-asterisk">*</span>
-        </label>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">🎯</span>
+          </div>
+          <div class="section-content">
+            <div class="section-label">🎉 Step 2</div>
+            <h3 class="section-title">
+              What type of event is this?
+              <span class="required-badge">Required</span>
+            </h3>
+            <p class="section-subtitle">Help us recommend the perfect spread for your occasion</p>
+          </div>
+        </div>
         ${renderEventTypeCards()}
         <div class="field-error" id="event-type-error" role="alert"></div>
       </div>
 
       <!-- Dietary Considerations Section -->
       <div class="form-section">
-        <label class="section-label">
-          Any dietary restrictions? <span class="optional-label">(Optional)</span>
-        </label>
-        <p class="section-hint">Select all that apply to your group</p>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <span class="section-icon">🥗</span>
+          </div>
+          <div class="section-content">
+            <div class="section-label">🌱 Step 3</div>
+            <h3 class="section-title">Any dietary restrictions?</h3>
+            <p class="section-subtitle">Optional - Select all that apply to your group</p>
+          </div>
+        </div>
 
-        <div class="dietary-checkboxes">
+        <div class="dietary-grid">
           ${renderDietaryCheckbox('vegetarian', 'Vegetarian options needed', eventDetails.dietaryNeeds)}
           ${renderDietaryCheckbox('vegan', 'Vegan options needed', eventDetails.dietaryNeeds)}
           ${renderDietaryCheckbox('gluten-free', 'Gluten-free options needed', eventDetails.dietaryNeeds)}
@@ -138,6 +178,9 @@ function renderEventDetailsForm() {
             maxlength="100">
         </div>
       </div>
+
+      <!-- Conversational Wing Distribution (NEW: SP-003 Enhancement) -->
+      ${renderConversationalWingDistribution()}
 
       <!-- Form Actions -->
       <div class="form-actions">
@@ -193,19 +236,21 @@ function renderEventTypeCards() {
   ];
 
   return `
-    <div class="event-type-cards">
+    <div class="event-type-grid">
       ${eventTypes.map(type => `
-        <div class="event-type-card ${selectedType === type.id ? 'card-selected' : ''}"
+        <div class="event-type-card ${selectedType === type.id ? 'selected' : ''}"
              data-event-type="${type.id}"
              role="radio"
              aria-checked="${selectedType === type.id}"
              tabindex="0">
-          <div class="event-card-emoji" aria-hidden="true">${type.emoji}</div>
-          <div class="event-card-content">
-            <h4 class="event-card-title">${type.name}</h4>
-            <p class="event-card-description">${type.description}</p>
+          <div class="event-icon-wrapper">
+            <span class="event-icon" aria-hidden="true">${type.emoji}</span>
           </div>
-          <div class="event-card-check">
+          <div class="event-content">
+            <h4 class="event-title">${type.name}</h4>
+            <p class="event-description">${type.description}</p>
+          </div>
+          <div class="event-check">
             <span class="check-icon">✓</span>
           </div>
         </div>
@@ -222,13 +267,16 @@ function renderDietaryCheckbox(id, label, selectedNeeds = []) {
   const isChecked = selectedNeeds?.includes(id);
 
   return `
-    <label class="dietary-checkbox-label">
+    <label class="dietary-option ${isChecked ? 'selected' : ''}">
       <input
         type="checkbox"
         class="dietary-checkbox"
         data-dietary-id="${id}"
         ${isChecked ? 'checked' : ''}>
-      <span class="checkbox-text">${label}</span>
+      <span class="dietary-label">${label}</span>
+      <div class="dietary-check">
+        <span class="check-icon">✓</span>
+      </div>
     </label>
   `;
 }
@@ -245,10 +293,14 @@ function setupGuestCountSlider() {
 
   if (!slider || !valueDisplay) return;
 
+  // Initialize slider gradient
+  updateSliderGradient(slider);
+
   // Slider change handler
   slider.addEventListener('input', (e) => {
     const value = parseInt(e.target.value);
     updateGuestCount(value);
+    updateSliderGradient(e.target);
   });
 
   // Decrease button (-5 guests)
@@ -256,6 +308,7 @@ function setupGuestCountSlider() {
     const currentValue = parseInt(slider.value);
     const newValue = Math.max(10, currentValue - 5);
     updateGuestCount(newValue);
+    updateSliderGradient(slider);
   });
 
   // Increase button (+5 guests)
@@ -263,6 +316,7 @@ function setupGuestCountSlider() {
     const currentValue = parseInt(slider.value);
     const newValue = Math.min(100, currentValue + 5);
     updateGuestCount(newValue);
+    updateSliderGradient(slider);
   });
 
   // Keyboard navigation on slider
@@ -273,12 +327,26 @@ function setupGuestCountSlider() {
       e.preventDefault();
       const newValue = Math.min(100, parseInt(slider.value) + 10);
       updateGuestCount(newValue);
+      updateSliderGradient(slider);
     } else if (e.key === 'PageDown') {
       e.preventDefault();
       const newValue = Math.max(10, parseInt(slider.value) - 10);
       updateGuestCount(newValue);
+      updateSliderGradient(slider);
     }
   });
+}
+
+function updateSliderGradient(slider) {
+  const value = parseInt(slider.value);
+  const min = parseInt(slider.min);
+  const max = parseInt(slider.max);
+
+  // Calculate percentage (0-100)
+  const percentage = ((value - min) / (max - min)) * 100;
+
+  // Update CSS custom property for gradient fill
+  slider.style.setProperty('--slider-fill', `${percentage}%`);
 }
 
 function updateGuestCount(value) {
@@ -333,12 +401,12 @@ function selectEventType(card) {
 
   // Deselect all cards
   document.querySelectorAll('.event-type-card').forEach(c => {
-    c.classList.remove('card-selected');
+    c.classList.remove('selected');
     c.setAttribute('aria-checked', 'false');
   });
 
   // Select clicked card
-  card.classList.add('card-selected');
+  card.classList.add('selected');
   card.setAttribute('aria-checked', 'true');
 
   // Update state
@@ -380,6 +448,16 @@ function setupDietaryCheckboxes() {
 function handleDietaryCheckboxChange(checkbox) {
   const dietaryId = checkbox.dataset.dietaryId;
   const isChecked = checkbox.checked;
+
+  // Toggle 'selected' class on the parent label
+  const label = checkbox.closest('.dietary-option');
+  if (label) {
+    if (isChecked) {
+      label.classList.add('selected');
+    } else {
+      label.classList.remove('selected');
+    }
+  }
 
   // Get current dietary needs
   const state = getState();
@@ -507,12 +585,21 @@ function navigateToRecommendations() {
   updateState('flowType', 'guided-planner');
   updateState('currentStep', 'recommendations');
 
-  // Dispatch navigation event
-  window.dispatchEvent(new CustomEvent('navigate-to-recommendations', {
-    detail: {
-      eventDetails: getState().eventDetails
-    }
-  }));
+  // NEW: Show confirmation modal instead of navigating directly
+  const state = getState();
+  const hasDistributionPreference = state.eventDetails?.wingDistributionPreference;
+
+  if (hasDistributionPreference) {
+    // Show confirmation modal
+    showDistributionConfirmation();
+  } else {
+    // Skip confirmation if no distribution selected (all traditional by default)
+    window.dispatchEvent(new CustomEvent('navigate-to-recommendations', {
+      detail: {
+        eventDetails: state.eventDetails
+      }
+    }));
+  }
 }
 
 function navigateToEntryChoice() {
@@ -521,6 +608,31 @@ function navigateToEntryChoice() {
 
   // Dispatch navigation event
   window.dispatchEvent(new CustomEvent('navigate-to-entry-choice'));
+}
+
+// ========================================
+// Portion Guide Setup
+// ========================================
+
+function setupPortionGuide() {
+  const portionGuideBtn = document.getElementById('btn-open-portion-guide');
+
+  if (portionGuideBtn) {
+    portionGuideBtn.addEventListener('click', () => {
+      // Show the portion guide modal
+      const portionGuideModal = document.getElementById('portion-guide-modal');
+      if (portionGuideModal) {
+        portionGuideModal.style.display = 'block';
+        // Focus on close button for accessibility
+        const closeBtn = portionGuideModal.querySelector('.portion-guide-close');
+        if (closeBtn) {
+          setTimeout(() => closeBtn.focus(), 100);
+        }
+      } else {
+        console.warn('Portion guide modal not found');
+      }
+    });
+  }
 }
 
 // ========================================

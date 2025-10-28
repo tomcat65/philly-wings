@@ -57,7 +57,7 @@ DO NOT USE PORTS 6174, 3004, 6379,7474,and 8080 (they are used in neural collabo
 
 ### Start Emulators
 ```bash
-firebase emulators:start --only hosting,functions
+firebase emulators:start --only hosting,functions,firestore
 ```
 - remember to work on the refactored code
 ## code must be kept simple and compact (NO LARGE FILES)

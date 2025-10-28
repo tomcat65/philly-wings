@@ -8,6 +8,7 @@
 
 const admin = require('firebase-admin');
 const path = require('path');
+const fs = require('fs');
 
 // Parse command line args
 const useEmulator = process.argv.includes('--emulator');
@@ -20,9 +21,22 @@ if (useEmulator) {
     projectId: 'philly-wings'
   });
 } else {
-  const serviceAccountPath = '/home/tomcat65/projects/docs/Phillywingsexpress/philly-wings-firebase-adminsdk-fbsvc-b9a46d307f.json';
+  const rawServiceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+    path.join(__dirname, '..', 'serviceAccountKey.json');
+  const serviceAccountPath = path.isAbsolute(rawServiceAccountPath)
+    ? rawServiceAccountPath
+    : path.resolve(process.cwd(), rawServiceAccountPath);
+
+  if (!fs.existsSync(serviceAccountPath)) {
+    console.error(
+      '❌ Service account file not found. Set GOOGLE_APPLICATION_CREDENTIALS or place serviceAccountKey.json in project root.'
+    );
+    process.exit(1);
+  }
+
+  const serviceAccount = require(serviceAccountPath);
   admin.initializeApp({
-    credential: admin.credential.cert(require(serviceAccountPath))
+    credential: admin.credential.cert(serviceAccount)
   });
 }
 
@@ -295,6 +309,19 @@ const cateringPackages = [
     active: true
   }
 ];
+
+const PLANT_BASED_PACKAGE_IDS = new Set([
+  'plant-based-lunch-special',
+  'plant-based-sampler-spread'
+]);
+
+cateringPackages.forEach(pkg => {
+  if (PLANT_BASED_PACKAGE_IDS.has(pkg.id)) {
+    pkg.isPlantBased = true;
+  } else if (pkg.isPlantBased === undefined) {
+    pkg.isPlantBased = false;
+  }
+});
 
 /**
  * Seed catering packages to Firestore
@@ -796,6 +823,15 @@ const cateringAddOns = [
     quantityLabel: '5-packs'
   }
 ];
+
+cateringAddOns.forEach(addOn => {
+  if (addOn.basePrice === 0 && addOn.sourceVariantId) {
+    console.warn(`⚠️  ${addOn.id} has basePrice of 0 and relies on enrichment. Consider setting fallback price.`);
+  }
+  if (addOn.basePrice === 0 && !addOn.sourceVariantId) {
+    throw new Error(`❌ ${addOn.id} has invalid pricing: basePrice is 0 with no sourceVariantId`);
+  }
+});
 
 /**
  * Seed catering add-ons to Firestore with lightweight reference schema

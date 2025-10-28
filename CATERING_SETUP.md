@@ -158,6 +158,8 @@ firebase functions:config:get
 node scripts/seed-catering-data.js
 ```
 
+> ℹ️ **Service account required:** Set `GOOGLE_APPLICATION_CREDENTIALS` to your Firebase service account JSON before running the production seed command, or place `serviceAccountKey.json` in the project root. The seed script reads this path automatically.
+
 ### Step 4: Deploy Functions
 
 ```bash
