@@ -27,17 +27,116 @@ export function renderWingDistributionSelector(packageData) {
 
   const state = getState();
   const config = state.currentConfig || {};
-  const totalWings = packageData.totalWings || 250; // Default if not specified
+  const totalWings = packageData.wingOptions?.totalWings || packageData.totalWings || 250; // Check nested field first
 
-  // Current distribution or defaults
-  const distribution = config.wingDistribution || {
-    boneless: totalWings,
-    boneIn: 0,
-    plantBased: 0
-  };
+  console.log('🐛 [DEBUG] renderWingDistributionSelector called');
+  console.log('  config.wingDistribution:', config.wingDistribution);
+  console.log('  state.eventDetails?.wingDistributionPercentages:', state.eventDetails?.wingDistributionPercentages);
+
+  // Check if draft's wingDistribution is stale (doesn't match wizard percentages)
+  const wizardPercentages = state.eventDetails?.wingDistributionPercentages;
+  let distribution;
+
+  if (config.wingDistribution && wizardPercentages && wizardPercentages.plantBased > 0) {
+    // Wizard says there should be plant-based wings - verify draft matches
+    const expectedCauliflower = Math.round((totalWings * wizardPercentages.plantBased) / 100);
+    const actualCauliflower = config.wingDistribution.cauliflower || 0;
+
+    console.log('  🔍 Stale draft check:');
+    console.log('    expectedCauliflower:', expectedCauliflower);
+    console.log('    actualCauliflower:', actualCauliflower);
+
+    if (actualCauliflower !== expectedCauliflower) {
+      // Draft is STALE - recalculate from wizard percentages
+      console.log('  ⚠️ STALE DRAFT DETECTED - recalculating from wizard percentages');
+      distribution = calculateSmartWingDefaults(totalWings, state.eventDetails);
+    } else {
+      // Draft matches wizard - use it
+      console.log('  ✅ Draft matches wizard - using draft');
+      distribution = config.wingDistribution;
+    }
+  } else if (config.wingDistribution) {
+    // No wizard percentages or no plant-based - use draft as-is
+    console.log('  📋 Using draft (no wizard percentages conflict)');
+    distribution = config.wingDistribution;
+  } else {
+    // No draft - calculate from wizard
+    console.log('  🆕 No draft - calculating from wizard');
+    distribution = calculateSmartWingDefaults(totalWings, state.eventDetails);
+  }
+
+  console.log('  FINAL distribution:', {
+    boneless: distribution.boneless,
+    boneIn: distribution.boneIn,
+    cauliflower: distribution.cauliflower,
+    boneInStyle: distribution.boneInStyle,
+    distributionSource: distribution.distributionSource
+  });
 
   const boneInStyle = config.boneInStyle || 'mixed';
 
+  // Check if plant-based wings were set from event planner
+  const hasPlantBased = distribution.cauliflower > 0 || distribution.plantBased > 0;
+  const plantBasedCount = distribution.cauliflower || distribution.plantBased || 0;
+  const traditionalCount = distribution.boneless + distribution.boneIn;
+
+  console.log('  hasPlantBased:', hasPlantBased);
+  console.log('  plantBasedCount:', plantBasedCount);
+  console.log('  traditionalCount:', traditionalCount);
+
+  // TWO-SECTION LAYOUT: Separate traditional and plant-based
+  if (hasPlantBased) {
+    console.log('✅ Rendering TWO-SECTION layout');
+    return `
+      <div class="wing-distribution-selector wing-distribution-two-section">
+        <!-- Overall Header -->
+        <div class="section-header">
+          <h3 class="section-title">🍗 Customize Your Wings</h3>
+          <p class="section-subtitle">
+            Your ${totalWings} wings are split based on your dietary needs
+          </p>
+        </div>
+
+        <!-- Live Wing Counter (shows all three types) -->
+        ${renderWingCounter(distribution, totalWings)}
+
+        <!-- SECTION 1: Traditional Wings (adjustable) -->
+        <div class="wing-section wing-section-traditional">
+          <div class="section-divider">
+            <h4 class="section-subtitle-secondary">Traditional Wings (${traditionalCount} wings)</h4>
+            <p class="section-description">Customize your boneless and bone-in split</p>
+          </div>
+
+          ${renderTraditionalOnlySlider(distribution, traditionalCount)}
+
+          ${distribution.boneIn > 0 ? renderBoneInStyleSelector(boneInStyle) : ''}
+        </div>
+
+        <!-- SECTION 2: Plant-Based Wings (locked) -->
+        <div class="wing-section wing-section-plant-based">
+          <div class="section-divider">
+            <h4 class="section-subtitle-secondary">Plant-Based Wings (${plantBasedCount} wings)</h4>
+            <p class="section-description">From your dietary needs selection</p>
+          </div>
+
+          <div class="plant-based-locked">
+            <div class="locked-display">
+              <span class="locked-icon">🌱</span>
+              <span class="locked-count">${plantBasedCount} Plant-Based Wings</span>
+              <span class="locked-badge">Locked</span>
+            </div>
+            <p class="locked-note">
+              This count was set based on your event planner selections.
+              To change it, go back to the event details step.
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // SINGLE-SECTION LAYOUT: Original behavior (no plant-based)
+  console.log('⚠️ Rendering SINGLE-SECTION layout');
   return `
     <div class="wing-distribution-selector">
       <!-- Section Header -->
@@ -67,7 +166,8 @@ export function renderWingDistributionSelector(packageData) {
  * Render live wing counter display
  */
 function renderWingCounter(distribution, totalWings) {
-  const { boneless, boneIn, plantBased } = distribution;
+  const { boneless, boneIn } = distribution;
+  const plantBased = distribution.cauliflower || distribution.plantBased || 0;
   const allSet = (boneless + boneIn + plantBased) === totalWings;
 
   return `
@@ -285,6 +385,60 @@ function renderDistributionSlider(distribution, totalWings) {
 }
 
 /**
+ * Render traditional-only slider (for two-section layout with plant-based locked)
+ * This slider only adjusts boneless/bone-in within the traditional wing count
+ */
+function renderTraditionalOnlySlider(distribution, traditionalCount) {
+  const bonelessPercent = traditionalCount > 0
+    ? Math.round((distribution.boneless / traditionalCount) * 100)
+    : 0;
+
+  return `
+    <div class="distribution-slider-section traditional-slider">
+      <div class="slider-container">
+        <div class="slider-labels">
+          <span class="slider-label-start">All Boneless</span>
+          <span class="slider-label-end">All Bone-In</span>
+        </div>
+
+        <div class="slider-track">
+          <input
+            type="range"
+            id="traditional-boneless-slider"
+            class="wing-slider"
+            min="0"
+            max="${traditionalCount}"
+            step="10"
+            value="${distribution.boneless}"
+            aria-label="Adjust traditional wing boneless/bone-in split"
+            aria-valuenow="${distribution.boneless}"
+            aria-valuemin="0"
+            aria-valuemax="${traditionalCount}">
+
+          <div class="slider-fill" style="width: ${bonelessPercent}%"></div>
+        </div>
+
+        <div class="slider-values">
+          <div class="slider-value-item">
+            <span class="value-label">Boneless:</span>
+            <span class="value-number" id="traditional-boneless-count">${distribution.boneless}</span>
+          </div>
+          <div class="slider-value-item">
+            <span class="value-label">Bone-In:</span>
+            <span class="value-number" id="traditional-bonein-count">${distribution.boneIn}</span>
+          </div>
+        </div>
+
+        <div class="slider-note">
+          <span class="note-icon">💡</span>
+          <span class="note-text">Adjust your traditional wing mix (plant-based wings are set separately)</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Render bone-in style selector (Mixed/Drums/Flats)
  */
 function renderBoneInStyleSelector(selectedStyle) {
@@ -414,7 +568,7 @@ function initPresetCards() {
  */
 function selectPreset(presetId) {
   const state = getState();
-  const totalWings = state.selectedPackage?.totalWings || 250;
+  const totalWings = state.selectedPackage?.wingOptions?.totalWings || state.selectedPackage?.totalWings || 250;
 
   const presets = {
     'all-boneless': {
@@ -471,6 +625,14 @@ function initCustomSlider() {
       updateDistributionFromSlider(parseInt(e.target.value));
     });
   }
+
+  // Handle traditional-only slider (two-section layout)
+  const traditionalSlider = document.getElementById('traditional-boneless-slider');
+  if (traditionalSlider) {
+    traditionalSlider.addEventListener('input', (e) => {
+      updateTraditionalDistributionFromSlider(parseInt(e.target.value));
+    });
+  }
 }
 
 /**
@@ -478,7 +640,7 @@ function initCustomSlider() {
  */
 function updateDistributionFromSlider(bonelessCount) {
   const state = getState();
-  const totalWings = state.selectedPackage?.totalWings || 250;
+  const totalWings = state.selectedPackage?.wingOptions?.totalWings || state.selectedPackage?.totalWings || 250;
   const boneInCount = totalWings - bonelessCount;
 
   const distribution = {
@@ -498,6 +660,45 @@ function updateDistributionFromSlider(bonelessCount) {
   if (boneInDisplay) boneInDisplay.textContent = boneInCount;
   if (sliderFill) {
     const percent = Math.round((bonelessCount / totalWings) * 100);
+    sliderFill.style.width = `${percent}%`;
+  }
+
+  // Update counter
+  renderSection();
+}
+
+/**
+ * Update traditional distribution (preserves plant-based count)
+ * Used in two-section layout where plant-based is locked
+ */
+function updateTraditionalDistributionFromSlider(bonelessCount) {
+  const state = getState();
+  const currentDistribution = state.currentConfig?.wingDistribution || {};
+  const plantBasedCount = currentDistribution.cauliflower || currentDistribution.plantBased || 0;
+
+  const totalWings = state.selectedPackage?.wingOptions?.totalWings || state.selectedPackage?.totalWings || 250;
+  const traditionalCount = totalWings - plantBasedCount;
+  const boneInCount = traditionalCount - bonelessCount;
+
+  const distribution = {
+    boneless: bonelessCount,
+    boneIn: boneInCount,
+    cauliflower: plantBasedCount,
+    boneInStyle: currentDistribution.boneInStyle || 'mixed',
+    distributionSource: currentDistribution.distributionSource || 'event-planner'
+  };
+
+  updateState('currentConfig.wingDistribution', distribution);
+
+  // Update UI
+  const bonelessDisplay = document.getElementById('traditional-boneless-count');
+  const boneInDisplay = document.getElementById('traditional-bonein-count');
+  const sliderFill = document.querySelector('.traditional-slider .slider-fill');
+
+  if (bonelessDisplay) bonelessDisplay.textContent = bonelessCount;
+  if (boneInDisplay) boneInDisplay.textContent = boneInCount;
+  if (sliderFill) {
+    const percent = traditionalCount > 0 ? Math.round((bonelessCount / traditionalCount) * 100) : 0;
     sliderFill.style.width = `${percent}%`;
   }
 
@@ -537,6 +738,34 @@ function selectBoneInStyle(styleId) {
   renderSection();
 
   console.log(`✓ Selected bone-in style: ${styleId}`);
+}
+
+/**
+ * Calculate smart wing defaults from wizard selection
+ * @param {number} totalWings - Total wings in package
+ * @param {Object} eventDetails - Event details from wizard
+ * @returns {Object} Distribution with boneless, boneIn, plantBased
+ */
+function calculateSmartWingDefaults(totalWings, eventDetails = {}) {
+  // Get wizard distribution percentages
+  const wizardDistribution = eventDetails.wingDistributionPercentages || {
+    traditional: 100,
+    plantBased: 0
+  };
+
+  // Calculate wing counts from percentages
+  const traditionalWings = Math.round(totalWings * wizardDistribution.traditional / 100);
+  const plantBasedWings = Math.round(totalWings * wizardDistribution.plantBased / 100);
+
+  // Smart split for traditional: 60% boneless, 40% bone-in
+  const boneless = Math.round(traditionalWings * 0.6);
+  const boneIn = traditionalWings - boneless;
+
+  return {
+    boneless,
+    boneIn,
+    plantBased: plantBasedWings
+  };
 }
 
 /**

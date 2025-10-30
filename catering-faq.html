@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Frequently asked questions about Philly Wings Express catering - delivery, payment, customization, and more.">
+    <title>Catering FAQ - Philly Wings Express</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#004c54">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/src/styles/catering.css">
+
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EBHT2CKRNY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-EBHT2CKRNY');
+    </script>
+
+    <style>
+        /* FAQ Page Specific Styles */
+        .breadcrumb-nav {
+            background: #f8f9fa;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #004c54;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: #e8f5f7;
+            color: #006570;
+        }
+
+        .faq-hero {
+            background: linear-gradient(135deg, #004c54 0%, #006570 100%);
+            padding: 4rem 1rem 3rem;
+            text-align: center;
+            color: white;
+        }
+
+        .faq-hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .faq-hero .hero-subtitle {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+
+        .catering-faq {
+            padding: 4rem 1rem;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .faq-hero h1 {
+                font-size: 2rem;
+            }
+
+            .faq-hero {
+                padding: 3rem 1rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <img src="/apple-touch-icon.png" alt="Philly Wings Express Logo">
+            </a>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/catering" class="active">Catering</a></li>
+                <li><a href="/#menu">Menu</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="https://www.ezcater.com/brand/pvt/philly-wings-express" class="btn-nav-cta" target="_blank" rel="noopener noreferrer">🔥 Order Now</a></li>
+            </ul>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb-nav">
+        <div class="container">
+            <button onclick="goBackToCatering()" class="back-button">
+                ← Back to Catering
+            </button>
+        </div>
+    </div>
+
+    <!-- FAQ Hero Section -->
+    <section class="faq-hero">
+        <div class="hero-content">
+            <h1>Frequently Asked Questions</h1>
+            <p class="hero-subtitle">Everything you need to know about catering with us</p>
+        </div>
+    </section>
+
+    <!-- FAQ Content -->
+    <section class="catering-faq">
+        <div class="container">
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h4 class="faq-question">How far in advance do I need to order?</h4>
+                    <p class="faq-answer">We require 24 hours advance notice for all catering orders. For orders over 100 people, we recommend 48 hours notice to ensure we can accommodate your event.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 class="faq-question">What is your delivery area?</h4>
+                    <p class="faq-answer">We deliver within a 10-mile radius of our Oxford Circle location. This covers most of NE Philadelphia including Frankford, Tacony, Bridesburg, Port Richmond, Kensington, Mayfair, Holmesburg, Torresdale, Fishtown, Northern Liberties, South Philly, Northern Liberties, Bucks County, Lower Northeast, Germantown, East Falls, Bristol, and surrounding neighborhoods.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 class="faq-question">How does payment work?</h4>
+                    <p class="faq-answer">All orders are processed securely through Stripe. You'll complete payment directly on their platform, and they provide 24/7 customer support for any payment questions.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 class="faq-question">Can I customize sauce selections?</h4>
+                    <p class="faq-answer">Absolutely! Each package includes a specific number of sauce selections. You can choose any combination from our 14 signature sauces. We recommend mixing heat levels to accommodate everyone on your team.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 class="faq-question">What if I need to change my order?</h4>
+                    <p class="faq-answer">Contact customer support as soon as possible. Changes can typically be made up to 24 hours before your delivery time.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 class="faq-question">Do you provide serving supplies?</h4>
+                    <p class="faq-answer">Yes! All packages include plates, napkins, wet wipes, and serving utensils. We also label each sauce container so your team knows what they're getting.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 class="faq-question">Can I order for dietary restrictions?</h4>
+                    <p class="faq-answer">Our boneless wings can accommodate most dietary needs. Contact us directly at (267) 376-3113 to discuss specific allergen concerns. All our nutrition information is available on our website.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4 class="faq-question">What if I need to feed more than 100 people?</h4>
+                    <p class="faq-answer">We love large events! Contact us directly at (267) 376-3113 and we'll work with you to create a custom package that fits your needs.</p>
+                </div>
+            </div>
+
+            <div class="faq-contact">
+                <p>Still have questions?</p>
+                <a href="tel:+12673763113" class="btn-secondary">Call Us: (267) 376-3113</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Philly Wings Express</h3>
+                <p>Born in Oxford Circle, perfected in every kitchen.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p>Phone: <a href="tel:+12673763113">(267) 376-3113</a></p>
+                <p>Email: <a href="mailto:catering@phillywingsexpress.com">catering@phillywingsexpress.com</a></p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/catering">Catering</a></li>
+                    <li><a href="/#menu">Menu</a></li>
+                    <li><a href="/about">About Us</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Order Catering</h4>
+                <p>
+                    <a href="https://www.ezcater.com/brand/pvt/philly-wings-express"
+                       class="btn-footer-cta"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Order on ezCater →
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 Philly Wings Express. All rights reserved.</p>
+            <p>Powered by ezCater</p>
+        </div>
+    </footer>
+
+    <!-- Back Navigation Script -->
+    <script>
+        function goBackToCatering() {
+            // Check if there's a referrer from the same site
+            if (document.referrer && document.referrer.includes(window.location.hostname)) {
+                // Go back to previous page (preserves scroll position and state)
+                window.history.back();
+            } else {
+                // Fallback: navigate to catering page
+                window.location.href = '/catering.html';
+            }
+        }
+    </script>
+</body>
+</html>

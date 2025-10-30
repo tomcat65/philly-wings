@@ -3,6 +3,9 @@
  * Hero section for catering landing page
  */
 
+import { updateState } from '../../services/shared-platter-state-service.js';
+import { initEventDetailsForm } from './event-details-form.js';
+
 export function renderCateringHero() {
   return `
     <section class="catering-hero">
@@ -57,24 +60,54 @@ export function renderCateringHero() {
   `;
 }
 
-// Scroll to guided planner section
+// Scroll to guided planner section (skip entry choice, go directly to event details form)
 window.scrollToPlanner = () => {
-  const plannerSection = document.querySelector('#catering-planner');
+  // Hide entry choice section (skip the "which way do you want to order?" question)
+  const entrySection = document.querySelector('.entry-choice-section');
+  if (entrySection) {
+    entrySection.style.display = 'none';
+  }
+
+  // Update state to indicate Guided Planner flow
+  updateState('flowType', 'guided-planner');
+  updateState('currentStep', 'event-details');
+
+  // Show event details form directly
+  const eventDetailsContainer = document.getElementById('event-details-form-container');
+  if (eventDetailsContainer) {
+    eventDetailsContainer.style.display = 'block';
+    eventDetailsContainer.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+    // Initialize the event details form
+    initEventDetailsForm();
+  } else {
+    console.warn('Event details form container not found');
+  }
+};
+
+// Scroll to packages section (Quick Browse)
+window.scrollToPackages = () => {
+  const plannerSection = document.querySelector('.entry-choice-section');
   if (plannerSection) {
+    plannerSection.style.display = 'block'; // Ensure visible
     plannerSection.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
     });
-  }
-};
 
-// Scroll to packages section
-window.scrollToPackages = () => {
-  const packagesSection = document.querySelector('#catering-packages');
-  if (packagesSection) {
-    packagesSection.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+    // Auto-click Quick Browse after scroll completes
+    setTimeout(() => {
+      const quickBrowseCard = document.querySelector('[data-path="quick-browse"]');
+      if (quickBrowseCard) {
+        quickBrowseCard.click(); // Triggers existing navigateToQuickBrowse()
+      } else {
+        console.warn('Quick Browse card not found');
+      }
+    }, 500);
+  } else {
+    console.warn('Entry choice section not found');
   }
 };

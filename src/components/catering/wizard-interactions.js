@@ -6,6 +6,10 @@
 import { wizardState, initWingCustomization, initializeStep4SauceAllocation, initializeStep5CustomizePackage } from './guided-planner.js';
 import { getRecommendations } from '../../utils/recommendations.js';
 
+let cachedPackages = [];
+let cachedSauces = [];
+let cachedAddOns = [];
+
 // ==================== RECOMMENDATION ENGINE ====================
 
 // Map internal event type codes to display labels
@@ -443,6 +447,10 @@ export function initWizardInteractions(packages, sauces, addOns) {
   console.log('📦 Packages received:', packages ? packages.length : 0);
   console.log('🌶️ Sauces received:', sauces ? sauces.length : 0);
   console.log('➕ AddOns received:', addOns ? addOns.length : 0);
+
+  cachedPackages = Array.isArray(packages) ? packages : [];
+  cachedSauces = Array.isArray(sauces) ? sauces : [];
+  cachedAddOns = Array.isArray(addOns) ? addOns : [];
 
   // Navigation buttons
   const nextBtn = document.getElementById('wizard-next');
@@ -1097,6 +1105,36 @@ function handlePrevStep() {
   }
 }
 
+async function goToStep(stepNum, packages = cachedPackages, sauces = cachedSauces, addOns = cachedAddOns) {
+  if (typeof stepNum !== 'number' || stepNum < 1 || stepNum > wizardState.totalSteps) {
+    console.warn('⚠️ Invalid step requested:', stepNum);
+    return;
+  }
+
+  const currentStep = wizardState.currentStep;
+  if (currentStep === stepNum) {
+    return;
+  }
+
+  const currentStepEl = document.getElementById(`step-${currentStep}`);
+  if (currentStepEl) {
+    currentStepEl.style.display = 'none';
+  }
+
+  const targetStepEl = document.getElementById(`step-${stepNum}`);
+  if (targetStepEl) {
+    targetStepEl.style.display = 'block';
+  }
+
+  wizardState.currentStep = stepNum;
+  updateProgressIndicator();
+  updateNavigationButtons();
+
+  await prepareStepContent(stepNum, packages, sauces, addOns);
+
+  document.getElementById('catering-planner')?.scrollIntoView({ behavior: 'smooth' });
+}
+
 /**
  * Validate current step before proceeding
  */
@@ -1209,6 +1247,12 @@ function validateCurrentStep() {
 
       const remaining = totalWings - allocatedTotal;
       if (remaining > 0) {
+        const confirmPlain = window.confirm(`You still have ${remaining} wings without a sauce selected. Do you want to keep them plain?`);
+        if (!confirmPlain) {
+          alert('Please assign the remaining wings to a sauce or choose “Skip all sauces”.');
+          return false;
+        }
+
         let noSauceRow = normalizedAllocations.find(allocation => allocation.sauceId === 'no-sauce');
         if (!noSauceRow) {
           noSauceRow = {
@@ -1219,7 +1263,6 @@ function validateCurrentStep() {
           normalizedAllocations.push(noSauceRow);
         }
         noSauceRow.wingCount = (parseInt(noSauceRow.wingCount, 10) || 0) + remaining;
-        console.info(`ℹ️ ${remaining} wings left unassigned – automatically marked as plain wings.`);
       }
 
       wizardState.skipAllSauces = false;

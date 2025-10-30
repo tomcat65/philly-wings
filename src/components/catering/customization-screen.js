@@ -11,6 +11,7 @@
 
 import { getState, updateState, onStateChange } from '../../services/shared-platter-state-service.js';
 import { renderWingDistributionSelector, initWingDistributionSelector } from './wing-distribution-selector.js';
+import { renderSaucePhotoCardSelector, initSaucePhotoCardSelector } from './sauce-photo-card-selector.js';
 
 /**
  * Initialize customization screen
@@ -23,9 +24,10 @@ export function initCustomizationScreen() {
     return;
   }
 
-  // Only initialize if visible
-  if (container.style.display === 'none') {
-    console.log('📦 Customization screen hidden - skipping initialization');
+  // Skip if already initialized (check for loaded content, not visibility)
+  const contentContainer = document.getElementById('customization-content');
+  if (contentContainer && contentContainer.dataset.initialized === 'true') {
+    console.log('📦 Customization screen already initialized - skipping');
     return;
   }
 
@@ -43,6 +45,14 @@ export function initCustomizationScreen() {
   // Initial render
   updatePricingSummary();
   updateProgressIndicator();
+
+  // Load default section (wings)
+  activateSection('wings');
+
+  // Mark as initialized
+  if (contentContainer) {
+    contentContainer.dataset.initialized = 'true';
+  }
 
   console.log('✅ Customization screen initialized');
 }
@@ -66,7 +76,9 @@ export function renderCustomizationScreen() {
         <div class="customization-panel">
           ${renderPanelHeader(selectedPackage)}
           ${renderSectionNavigation()}
-          ${renderSectionContent()}
+          <div id="customization-content" class="section-content">
+            <div class="section-loading">Loading...</div>
+          </div>
           ${renderPanelFooter()}
         </div>
 
@@ -293,7 +305,7 @@ function initSectionNavigation() {
 /**
  * Activate a specific section
  */
-function activateSection(sectionId) {
+async function activateSection(sectionId) {
   // Update tabs
   document.querySelectorAll('.section-tab').forEach(tab => {
     const isActive = tab.dataset.section === sectionId;
@@ -307,7 +319,12 @@ function activateSection(sectionId) {
   // Load section content
   const contentContainer = document.getElementById('customization-content');
   if (contentContainer) {
-    contentContainer.innerHTML = renderSectionContent(sectionId);
+    // Show loading state
+    contentContainer.innerHTML = '<div class="section-loading">Loading...</div>';
+
+    // Render content (may be async for sauces section)
+    const content = await renderSectionContent(sectionId);
+    contentContainer.innerHTML = content;
 
     // Initialize section-specific interactions
     initializeSectionInteractions(sectionId);
@@ -322,15 +339,26 @@ function activateSection(sectionId) {
 /**
  * Render section content based on section ID
  */
-function renderSectionContent(sectionId) {
+async function renderSectionContent(sectionId) {
   const state = getState();
   const packageData = state.selectedPackage;
+  const currentConfig = state.currentConfig || {};
 
   switch (sectionId) {
     case 'wings':
       return renderWingDistributionSelector(packageData);
 
     case 'sauces':
+      // Get smart defaults or current selection
+      const preSelectedSauces = currentConfig.sauces || [];
+      const maxSauceSelections = packageData.sauceSelections?.max || packageData.sauceSelections || 3;
+
+      return await renderSaucePhotoCardSelector({
+        maxSelections: maxSauceSelections,
+        preSelectedIds: preSelectedSauces,
+        onSelectionChange: handleSauceSelectionChange
+      });
+
     case 'dips':
     case 'sides':
     case 'desserts':
@@ -346,18 +374,26 @@ function renderSectionContent(sectionId) {
  * Initialize section-specific interactions
  */
 function initializeSectionInteractions(sectionId) {
+  const state = getState();
+  const packageData = state.selectedPackage;
+
   switch (sectionId) {
     case 'wings':
       initWingDistributionSelector();
       break;
 
-    // Other sections will be initialized here as they're built
     case 'sauces':
+      const maxSauceSelections = packageData.sauceSelections?.max || packageData.sauceSelections || 3;
+      initSaucePhotoCardSelector(maxSauceSelections, handleSauceSelectionChange);
+      console.log('🌶️ Sauce selector initialized');
+      break;
+
+    // Other sections will be initialized here as they're built
     case 'dips':
     case 'sides':
     case 'desserts':
     case 'beverages':
-      console.log(`📍 ${sectionId} section - component pending (SP-008 through SP-012)`);
+      console.log(`📍 ${sectionId} section - component pending (SP-009 through SP-012)`);
       break;
   }
 }
@@ -628,6 +664,24 @@ function updatePricingSummary() {
 
   // Update progress
   updateProgressIndicator();
+}
+
+/**
+ * Handle sauce selection change
+ */
+function handleSauceSelectionChange(selectedSauceIds) {
+  const state = getState();
+
+  // Update state with selected sauces
+  updateState('currentConfig', {
+    ...state.currentConfig,
+    sauces: selectedSauceIds,
+    saucesSource: 'manual'
+  });
+
+  console.log(`🌶️ Sauce selection updated: ${selectedSauceIds.length} sauces selected`);
+
+  // Pricing will update automatically via onStateChange listener
 }
 
 /**

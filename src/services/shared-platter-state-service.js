@@ -551,17 +551,56 @@ export function getValue(path) {
 export function setPackage(packageObj) {
   currentState.selectedPackage = packageObj;
 
-  // Initialize wing distribution (default to all boneless)
   const totalWings = packageObj.wingOptions?.totalWings || 0;
-  currentState.currentConfig.wingDistribution = {
-    boneless: totalWings,
-    boneIn: 0,
-    boneInStyle: 'mixed'
-  };
+
+  // Check if user made plant-based choice in event planner wizard
+  const wizardPercentages = currentState.eventDetails?.wingDistributionPercentages;
+
+  if (wizardPercentages && wizardPercentages.plantBased > 0) {
+    // PRESERVE user's wizard choice
+    const plantBasedCount = Math.round((totalWings * wizardPercentages.plantBased) / 100);
+    const traditionalCount = totalWings - plantBasedCount;
+
+    // Split traditional between boneless/bone-in (default 60/40)
+    const bonelessCount = Math.round(traditionalCount * 0.6);
+    const boneInCount = traditionalCount - bonelessCount;
+
+    currentState.currentConfig.wingDistribution = {
+      boneless: bonelessCount,
+      boneIn: boneInCount,
+      cauliflower: plantBasedCount,
+      boneInStyle: 'mixed',
+      distributionSource: 'event-planner'
+    };
+  } else {
+    // No wizard choice - use default (all boneless)
+    currentState.currentConfig.wingDistribution = {
+      boneless: totalWings,
+      boneIn: 0,
+      cauliflower: 0,
+      boneInStyle: 'mixed',
+      distributionSource: null
+    };
+  }
 
   // Initialize base price
   currentState.pricing.basePrice = packageObj.basePrice || 0;
   recalculatePricing();
+
+  console.log('🐛 [DEBUG] setPackage() completed');
+  console.log('  totalWings:', totalWings);
+  console.log('  wizardPercentages:', wizardPercentages);
+  if (wizardPercentages && wizardPercentages.plantBased > 0) {
+    console.log('  plantBasedCount calculated:', Math.round((totalWings * wizardPercentages.plantBased) / 100));
+    console.log('  traditionalCount calculated:', totalWings - Math.round((totalWings * wizardPercentages.plantBased) / 100));
+  }
+  console.log('  wingDistribution SET TO:', {
+    boneless: currentState.currentConfig.wingDistribution.boneless,
+    boneIn: currentState.currentConfig.wingDistribution.boneIn,
+    cauliflower: currentState.currentConfig.wingDistribution.cauliflower,
+    boneInStyle: currentState.currentConfig.wingDistribution.boneInStyle,
+    distributionSource: currentState.currentConfig.wingDistribution.distributionSource
+  });
 
   publishStateChange('selectedPackage', packageObj);
   saveDraft();

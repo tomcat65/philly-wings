@@ -27,6 +27,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <!-- Stylesheets (bundled by Vite during build) -->
+  <link rel="stylesheet" href="/src/styles/aural-spinner.css">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,7 +88,8 @@
   <!-- Main Content -->
   <main id="catering-content">
     <!-- Content will be loaded here by JavaScript -->
-    <div class="loading-spinner">
+    <div class="loading-spinner" role="status" aria-live="polite">
+      <div class="aural-spinner" aria-hidden="true"></div>
       <p>Loading catering options...</p>
     </div>
   </main>

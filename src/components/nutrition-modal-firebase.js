@@ -29,8 +29,8 @@ export class NutritionModalFirebase {
           </div>
 
           <!-- Loading State -->
-          <div id="nutritionLoading" class="nutrition-loading" style="display: none;">
-            <div class="loading-spinner"></div>
+          <div id="nutritionLoading" class="nutrition-loading" style="display: none;" role="status" aria-live="polite">
+            <div class="aural-spinner" aria-hidden="true"></div>
             <p>Loading nutrition data from Firebase...</p>
           </div>
 

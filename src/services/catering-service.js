@@ -31,13 +31,14 @@ function normalizeAddonArray(field, category) {
 export function normalizePackageRecord(pkg) {
   return {
     ...pkg,
+    isPlantBased: Boolean(pkg.isPlantBased),
     // Force-cast to arrays with image fallbacks
     coldSides: normalizeAddonArray(pkg.coldSides, 'cold-sides'),
     salads: normalizeAddonArray(pkg.salads, 'salads'),
     desserts: normalizeAddonArray(pkg.desserts, 'desserts'),
     beverages: normalizeAddonArray(pkg.beverages, 'beverages'),
-    // Package hero image fallback
-    heroImage: pkg.heroImage || '/images/placeholders/package-default.webp'
+    // Package hero image fallback - check both heroImage and imageUrl
+    heroImage: pkg.heroImage || pkg.imageUrl || '/images/placeholders/package-default.webp'
   };
 }
 

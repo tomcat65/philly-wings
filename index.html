@@ -45,6 +45,7 @@
     <link rel="stylesheet" href="quick-picks.css">
     <link rel="stylesheet" href="src/styles/nutrition-modal-fda2020.css">
     <link rel="stylesheet" href="src/styles/new-menu-sections.css">
+    <link rel="stylesheet" href="src/styles/aural-spinner.css">
 
     <!-- Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-EBHT2CKRNY"></script>
@@ -61,8 +62,8 @@
 <body>
     <!-- Philadelphia Sports Banner -->
     <div class="philly-sports-banner" id="phillySportsBanner" style="display: none;">
-        <div class="banner-loading">
-            <div class="loading-spinner"></div>
+        <div class="banner-loading" role="status" aria-live="polite">
+            <div class="aural-spinner" aria-hidden="true"></div>
             <span>Loading Philadelphia sports...</span>
         </div>
     </div>

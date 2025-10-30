@@ -14,7 +14,6 @@
 import { getState, updateState, validateState } from '../../services/shared-platter-state-service.js';
 import { renderPhotoCardSelector, initPhotoCardSelector } from './photo-card-selector.js';
 import { renderConversationalWingDistribution, initConversationalWingDistribution } from './conversational-wing-distribution.js';
-import { showDistributionConfirmation } from './distribution-confirmation.js';
 
 // ========================================
 // Component Initialization
@@ -585,21 +584,14 @@ function navigateToRecommendations() {
   updateState('flowType', 'guided-planner');
   updateState('currentStep', 'recommendations');
 
-  // NEW: Show confirmation modal instead of navigating directly
+  // User already confirmed distribution via slider adjustment UI
+  // Navigate directly to recommendations (no redundant modal needed)
   const state = getState();
-  const hasDistributionPreference = state.eventDetails?.wingDistributionPreference;
-
-  if (hasDistributionPreference) {
-    // Show confirmation modal
-    showDistributionConfirmation();
-  } else {
-    // Skip confirmation if no distribution selected (all traditional by default)
-    window.dispatchEvent(new CustomEvent('navigate-to-recommendations', {
-      detail: {
-        eventDetails: state.eventDetails
-      }
-    }));
-  }
+  window.dispatchEvent(new CustomEvent('navigate-to-recommendations', {
+    detail: {
+      eventDetails: state.eventDetails
+    }
+  }));
 }
 
 function navigateToEntryChoice() {
@@ -643,12 +635,21 @@ function loadExistingState() {
   const state = getState();
   const eventDetails = state.eventDetails || {};
 
-  // Guest count already loaded in render
-  // Event type already loaded in render
-  // Dietary needs already loaded in render
+  // SYNC: Ensure state matches rendered UI defaults
+  // If UI renders with default 25 guests but state has 10, update state to match UI
+  const guestSlider = document.getElementById('guest-count-slider');
+  const renderedGuestCount = parseInt(guestSlider?.value || 25);
+  if (eventDetails.guestCount !== renderedGuestCount) {
+    updateState('eventDetails.guestCount', renderedGuestCount, true); // Silent update
+  }
 
-  // Validate form on load to enable/disable submit button
+  // Validate form immediately
   validateForm();
+
+  // Delayed re-validation as safety net to catch timing issues
+  setTimeout(() => {
+    validateForm();
+  }, 150);
 }
 
 // ========================================

@@ -96,6 +96,80 @@ export function renderConversationalWingDistribution() {
           Want to customize wing distribution?
         </button>
       ` : ''}
+
+      <!-- Wing Distribution Adjustment Panel -->
+      <div class="distribution-adjustment-panel" style="display: none;">
+        <div class="adjustment-header">
+          <h4>🎯 Adjust Your Split</h4>
+          <p class="adjustment-subtitle">Fine-tune the percentage to match your group's preferences</p>
+        </div>
+
+        <!-- Visual Wing Distribution Preview -->
+        <div class="wing-distribution-preview"></div>
+
+        <!-- Package Context Cards -->
+        <div class="package-context-cards"></div>
+
+        <!-- Slider Container -->
+        <div class="slider-container">
+          <div class="slider-labels">
+            <div class="slider-label-left">
+              <span class="label-icon">🍗</span>
+              <span class="label-text">Traditional</span>
+              <span class="percentage-display traditional" id="traditional-percentage">75</span>%
+            </div>
+            <div class="slider-label-right">
+              <span class="label-icon">🌱</span>
+              <span class="label-text">Plant-Based</span>
+              <span class="percentage-display plant-based" id="plant-based-percentage">25</span>%
+            </div>
+          </div>
+
+          <div class="slider-track">
+            <div class="slider-fill" id="slider-fill"></div>
+            <input
+              type="range"
+              id="traditional-slider"
+              class="distribution-slider"
+              min="0"
+              max="100"
+              value="75"
+              step="1"
+              aria-label="Adjust traditional to plant-based wing distribution"
+              aria-valuetext="75 percent traditional, 25 percent plant-based"
+            >
+            <div class="slider-markers">
+              <span class="snap-point" data-value="0" style="left: 0%"></span>
+              <span class="snap-point" data-value="25" style="left: 25%"></span>
+              <span class="snap-point" data-value="50" style="left: 50%"></span>
+              <span class="snap-point" data-value="75" style="left: 75%"></span>
+              <span class="snap-point" data-value="100" style="left: 100%"></span>
+            </div>
+          </div>
+
+          <!-- Guest Preview -->
+          <div class="guest-preview" id="guest-preview">
+            <span class="preview-traditional">~19 traditional guests</span>
+            <span class="preview-divider">•</span>
+            <span class="preview-plant-based">~6 plant-based guests</span>
+          </div>
+
+          <!-- Constraint Info -->
+          <div class="constraint-info">
+            ⚠️ Minimum 6 wings per type (½ dozen)
+          </div>
+        </div>
+
+        <!-- Contextual Recommendation -->
+        <div class="recommendation-box" id="recommendation-box"></div>
+
+        <!-- Reset Button -->
+        <div class="adjustment-cta">
+          <button type="button" class="cta-button secondary" id="reset-to-preset">
+            Reset to Preset
+          </button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -232,6 +306,122 @@ export function validateWingDistribution(distribution) {
 }
 
 /**
+ * Renders visual wing distribution preview with icons
+ */
+function renderWingDistributionPreview(traditional, plantBased, totalWings = 120) {
+  const traditionalWings = Math.round(totalWings * traditional / 100);
+  const plantBasedWings = Math.round(totalWings * plantBased / 100);
+
+  // Calculate boneless vs bone-in split (60/40 for traditional)
+  const boneless = Math.round(traditionalWings * 0.6);
+  const boneIn = traditionalWings - boneless;
+
+  return `
+    <div class="wing-preview-content">
+      <h5>Your ${totalWings} Wings Look Like This:</h5>
+
+      ${traditional > 0 ? `
+        <div class="wing-type-row traditional">
+          <div class="wing-type-label">
+            <span class="wing-icon">🍗</span>
+            <strong>Traditional (${traditionalWings} wings)</strong>
+          </div>
+          <div class="wing-breakdown">
+            <span class="breakdown-item">🍗 Boneless (${boneless})</span>
+            <span class="breakdown-divider">•</span>
+            <span class="breakdown-item">🦴 Bone-in (${boneIn})</span>
+          </div>
+        </div>
+      ` : ''}
+
+      ${plantBased > 0 ? `
+        <div class="wing-type-row plant-based">
+          <div class="wing-type-label">
+            <span class="wing-icon">🥦</span>
+            <strong>Plant-Based (${plantBasedWings} wings)</strong>
+          </div>
+          <div class="wing-breakdown">
+            <span class="breakdown-item">🥦 Cauliflower (${plantBasedWings})</span>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Gets contextual recommendation based on percentages and guest count
+ */
+function getContextualRecommendation(traditional, plantBased, guestCount, dietaryNeeds = []) {
+  const traditionalGuests = Math.round(guestCount * traditional / 100);
+  const plantBasedGuests = Math.round(guestCount * plantBased / 100);
+  const wingsPerGuest = 120 / guestCount; // Assuming 120 wing package
+
+  let icon = '🎯';
+  let message = '';
+  let level = 'success';
+
+  // Check portions per guest
+  if (wingsPerGuest >= 4 && wingsPerGuest <= 6) {
+    icon = '🎯';
+    message = 'This split is PERFECT for your group! About 4-6 wings per person is ideal.';
+    level = 'success';
+  } else if (wingsPerGuest < 4) {
+    icon = '⚠️';
+    message = 'Might not be enough wings. Consider a larger package or adjust your split.';
+    level = 'warning';
+  } else if (wingsPerGuest > 6) {
+    icon = '✨';
+    message = 'You\'ll have plenty! Great for big eaters or leftovers.';
+    level = 'info';
+  }
+
+  // Removed confusing warning that compared checkbox count vs guest count
+  // User's percentage selection is intentional and should be trusted
+
+  return { icon, message, level };
+}
+
+/**
+ * Debounce utility function
+ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/**
+ * Snap to nearest value in snap points
+ */
+function snapToNearest(value, snapPoints) {
+  return snapPoints.reduce((prev, curr) =>
+    Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+  );
+}
+
+/**
+ * Apply magnetic snap effect when near snap points
+ */
+function applyMagneticSnap(rawValue, snapPoints, threshold = 3) {
+  for (const snapPoint of snapPoints) {
+    const distance = Math.abs(rawValue - snapPoint);
+    if (distance <= threshold) {
+      // Magnetic pull strength (stronger when closer)
+      const pullStrength = 1 - (distance / threshold);
+      return snapPoint * pullStrength + rawValue * (1 - pullStrength);
+    }
+  }
+  return rawValue;
+}
+
+/**
  * Initialize conversational wing distribution
  */
 export function initConversationalWingDistribution() {
@@ -268,9 +458,241 @@ export function initConversationalWingDistribution() {
         }
       });
 
+      // Clear any stale wingDistribution from draft - will be recalculated by setPackage()
+      updateState('currentConfig', {
+        ...state.currentConfig,
+        wingDistribution: null
+      });
+
+      // Show adjustment panel after selection
+      const adjustmentPanel = container.querySelector('.distribution-adjustment-panel');
+      if (adjustmentPanel) {
+        adjustmentPanel.style.display = 'block';
+        initAdjustmentPanel(distribution.traditional, distribution.plantBased, selection);
+      }
+
       console.log('Wing distribution selected:', selection, distribution);
     });
   });
+
+  // Check if there's already a selection and initialize adjustment panel
+  let currentState = getState();
+  const existingPreference = currentState.eventDetails?.wingDistributionPreference;
+  const existingPercentages = currentState.eventDetails?.wingDistributionPercentages;
+
+  if (existingPreference && existingPercentages) {
+    const adjustmentPanel = container.querySelector('.distribution-adjustment-panel');
+    if (adjustmentPanel && adjustmentPanel.style.display !== 'none') {
+      // Re-initialize adjustment panel with existing values
+      initAdjustmentPanel(
+        existingPercentages.traditional,
+        existingPercentages.plantBased,
+        existingPreference
+      );
+    }
+  }
+
+  // Initialize adjustment panel functionality
+  function initAdjustmentPanel(initialTraditional, initialPlantBased, presetKey) {
+    const state = getState();
+    const guestCount = state.eventDetails?.guestCount || 25;
+    const dietaryNeeds = state.eventDetails?.dietaryNeeds || [];
+
+    const slider = container.querySelector('#traditional-slider');
+    const sliderFill = container.querySelector('#slider-fill');
+    const traditionalPercentage = container.querySelector('#traditional-percentage');
+    const plantBasedPercentage = container.querySelector('#plant-based-percentage');
+    const guestPreview = container.querySelector('#guest-preview');
+    const wingPreview = container.querySelector('.wing-distribution-preview');
+    const recommendationBox = container.querySelector('#recommendation-box');
+    const resetButton = container.querySelector('#reset-to-preset');
+    const ctaButton = container.querySelector('.wing-distribution-cta');
+    const ctaSubtext = container.querySelector('.cta-subtext');
+
+    // Snap points for magnetic effect
+    const snapPoints = [0, 25, 50, 75, 100];
+    let adjustmentCount = 0;
+    const originalPercentages = { traditional: initialTraditional, plantBased: initialPlantBased };
+
+    // Set initial slider value
+    slider.value = initialTraditional;
+    updateUI(initialTraditional, false);
+
+    // Debounced state update (300ms)
+    const debouncedStateUpdate = debounce((traditional, plantBased) => {
+      const currentState = getState();
+      updateState('eventDetails', {
+        ...currentState.eventDetails,
+        wingDistributionPercentages: {
+          traditional,
+          plantBased
+        },
+        isAdjusted: traditional !== originalPercentages.traditional
+      });
+
+      // Clear stale wingDistribution - will be recalculated by setPackage()
+      updateState('currentConfig', {
+        ...currentState.currentConfig,
+        wingDistribution: null
+      });
+    }, 300);
+
+    // Handle slider input (real-time UI updates)
+    slider.addEventListener('input', (e) => {
+      let value = parseInt(e.target.value);
+
+      // Apply magnetic snap during drag
+      value = Math.round(applyMagneticSnap(value, snapPoints));
+
+      // Update slider value if magnetic snap changed it
+      if (value !== parseInt(e.target.value)) {
+        slider.value = value;
+      }
+
+      updateUI(value, true);
+      debouncedStateUpdate(value, 100 - value);
+
+      // Haptic feedback on snap points (mobile)
+      if (navigator.vibrate && snapPoints.includes(value)) {
+        navigator.vibrate(10);
+      }
+    });
+
+    // Handle slider change (final value on release)
+    slider.addEventListener('change', (e) => {
+      let value = parseInt(e.target.value);
+
+      // Snap to nearest snap point on release
+      value = snapToNearest(value, snapPoints);
+      slider.value = value;
+
+      updateUI(value, false);
+      adjustmentCount++;
+
+      // Update state immediately on release
+      debouncedStateUpdate.cancel();
+      updateState('eventDetails', {
+        ...state.eventDetails,
+        wingDistributionPercentages: {
+          traditional: value,
+          plantBased: 100 - value
+        },
+        isAdjusted: value !== originalPercentages.traditional
+      });
+
+      // Track adjustment in analytics
+      console.log('Slider adjusted:', {
+        fromTraditional: initialTraditional,
+        toTraditional: value,
+        delta: value - initialTraditional,
+        adjustmentCount
+      });
+    });
+
+    // Update all UI elements
+    function updateUI(traditional, isDragging) {
+      const plantBased = 100 - traditional;
+
+      // Update percentages
+      traditionalPercentage.textContent = traditional;
+      plantBasedPercentage.textContent = plantBased;
+
+      // Update slider fill
+      sliderFill.style.width = `${traditional}%`;
+
+      // Update slider thumb position via CSS variable
+      container.querySelector('.slider-track').style.setProperty('--slider-value', traditional);
+
+      // Update aria-valuetext
+      slider.setAttribute('aria-valuetext', `${traditional} percent traditional, ${plantBased} percent plant-based`);
+
+      // Update guest preview
+      const tradGuests = Math.round(guestCount * traditional / 100);
+      const plantGuests = Math.round(guestCount * plantBased / 100);
+
+      guestPreview.innerHTML = `
+        <span class="preview-traditional">~${tradGuests} traditional guests</span>
+        <span class="preview-divider">•</span>
+        <span class="preview-plant-based">~${plantGuests} plant-based guests</span>
+      `;
+
+      // Update wing preview (debounced)
+      if (!isDragging) {
+        wingPreview.innerHTML = renderWingDistributionPreview(traditional, plantBased);
+      }
+
+      // Update recommendation box
+      const recommendation = getContextualRecommendation(traditional, plantBased, guestCount, dietaryNeeds);
+      recommendationBox.innerHTML = `
+        <div class="recommendation-content ${recommendation.level}">
+          <span class="recommendation-icon">${recommendation.icon}</span>
+          <p class="recommendation-message">${recommendation.message}</p>
+        </div>
+      `;
+      recommendationBox.className = `recommendation-box ${recommendation.level}`;
+
+      // Update CTA button text (if elements exist)
+      if (ctaButton && ctaSubtext && resetButton) {
+        const isModified = traditional !== originalPercentages.traditional;
+        if (isModified) {
+          const ctaTextEl = ctaButton.querySelector('.cta-text');
+          if (ctaTextEl) ctaTextEl.textContent = `Continue with ${traditional}/${plantBased} split`;
+          ctaSubtext.textContent = `Modified from ${DISTRIBUTION_PRESETS[presetKey].label}`;
+          resetButton.style.display = 'block';
+        } else {
+          const ctaTextEl = ctaButton.querySelector('.cta-text');
+          if (ctaTextEl) ctaTextEl.textContent = 'Continue to Packages';
+          ctaSubtext.textContent = '';
+          resetButton.style.display = 'none';
+        }
+      }
+    }
+
+    // Handle reset button (if it exists)
+    if (resetButton) {
+      resetButton.addEventListener('click', () => {
+        slider.value = originalPercentages.traditional;
+        updateUI(originalPercentages.traditional, false);
+
+        updateState('eventDetails', {
+          ...state.eventDetails,
+          wingDistributionPercentages: {
+            traditional: originalPercentages.traditional,
+            plantBased: originalPercentages.plantBased
+          },
+          isAdjusted: false
+        });
+
+        console.log('Reset to preset:', presetKey);
+      });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (!slider.matches(':focus')) return;
+
+      let currentValue = parseInt(slider.value);
+      let newValue = currentValue;
+
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        newValue = currentValue - (e.shiftKey ? 1 : 5);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        newValue = currentValue + (e.shiftKey ? 1 : 5);
+      } else if (e.key === 'Home') {
+        newValue = 0;
+      } else if (e.key === 'End') {
+        newValue = 100;
+      } else {
+        return;
+      }
+
+      e.preventDefault();
+      newValue = Math.max(0, Math.min(100, newValue));
+      slider.value = newValue;
+      slider.dispatchEvent(new Event('input'));
+      slider.dispatchEvent(new Event('change'));
+    });
+  }
 
   // Auto-select based on dietary needs
   const state = getState();

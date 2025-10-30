@@ -16,7 +16,18 @@ import { getState, updateState } from '../../services/shared-platter-state-servi
 import { getCateringPackages } from '../../services/catering-service.js';
 
 function isPlantBasedPackage(pkg) {
-  return Boolean(pkg?.isPlantBased || (pkg?.id && pkg.id.includes('plant-based')));
+  if (!pkg) return false;
+  if (pkg.isPlantBased === true) return true;
+  if (pkg.isPlantBased === false) return false;
+
+  if (Array.isArray(pkg.dietaryTags)) {
+    const normalizedTags = pkg.dietaryTags.map(tag => tag.toLowerCase());
+    if (normalizedTags.some(tag => tag === 'plant-based' || tag === 'vegan')) {
+      return true;
+    }
+  }
+
+  return Boolean(pkg.id && pkg.id.includes('plant-based'));
 }
 
 // ========================================
@@ -100,20 +111,40 @@ export async function loadAndRenderRecommendations() {
 function getPackageRecommendations(allPackages, eventDetails) {
   const { guestCount, eventType, dietaryNeeds = [] } = eventDetails;
 
-  // Step 1: Filter by guest count
-  let recommended = allPackages.filter(pkg =>
+  // Step 1: Find perfect fits (guest count within range)
+  const perfectFits = allPackages.filter(pkg =>
     guestCount >= pkg.servesMin &&
     guestCount <= pkg.servesMax
   );
 
-  // Step 2: Prioritize by dietary needs
+  // Step 2: Sort ALL packages by distance from guest count (as fallback)
+  const sortedByDistance = [...allPackages].sort((a, b) => {
+    const aMidpoint = (a.servesMin + a.servesMax) / 2;
+    const bMidpoint = (b.servesMin + b.servesMax) / 2;
+    const aDistance = Math.abs(aMidpoint - guestCount);
+    const bDistance = Math.abs(bMidpoint - guestCount);
+    return aDistance - bDistance;
+  });
+
+  // Step 3: Combine - prioritize perfect fits, fill remainder with closest alternatives
+  let recommended = [...perfectFits];
+
+  // Add closest alternatives until we have 3 packages
+  for (const pkg of sortedByDistance) {
+    if (recommended.length >= 3) break;
+    if (!recommended.includes(pkg)) {
+      recommended.push(pkg);
+    }
+  }
+
+  // Step 4: Prioritize by dietary needs
   if (dietaryNeeds.includes('vegetarian') || dietaryNeeds.includes('vegan')) {
     const plantBased = recommended.filter(isPlantBasedPackage);
     const others = recommended.filter(pkg => !isPlantBasedPackage(pkg));
     recommended = [...plantBased, ...others];
   }
 
-  // Step 3: Sort by event type
+  // Step 5: Sort by event type preferences
   if (eventType === 'corporate') {
     // Higher tiers for corporate events
     recommended.sort((a, b) => {
@@ -138,26 +169,42 @@ function getPackageRecommendations(allPackages, eventDetails) {
     });
   }
 
-  // Step 4: Return top 3 with reasoning
-  return recommended.slice(0, 3).map((pkg, index) => ({
-    ...pkg,
-    isBestMatch: index === 0,
-    reasoning: generateReasoning(pkg, eventDetails, index === 0)
-  }));
+  // Step 6: Return top 3 with enhanced reasoning
+  return recommended.slice(0, 3).map((pkg, index) => {
+    const isBestMatch = index === 0;
+    const isExactFit = perfectFits.includes(pkg);
+
+    return {
+      ...pkg,
+      isBestMatch,
+      isExactFit, // Track whether it's a perfect fit or alternative
+      reasoning: generateReasoning(pkg, eventDetails, isBestMatch, isExactFit, guestCount)
+    };
+  });
 }
 
 // ========================================
 // Reasoning Generator
 // ========================================
 
-function generateReasoning(pkg, eventDetails, isBestMatch) {
+function generateReasoning(pkg, eventDetails, isBestMatch, isExactFit, guestCount) {
   const reasons = [];
-  const { guestCount, eventType, dietaryNeeds = [] } = eventDetails;
+  const { eventType, dietaryNeeds = [] } = eventDetails;
 
-  // Size match (always included if in range)
-  if (guestCount >= pkg.servesMin && guestCount <= pkg.servesMax) {
+  // Size match with fit quality messaging
+  if (isExactFit) {
+    // Perfect fit - guest count within package range
     const servesRange = `${pkg.servesMin}-${pkg.servesMax}`;
-    reasons.push(`Perfect for ${servesRange} guests`);
+    reasons.push(`✅ Perfect for ${servesRange} guests`);
+  } else {
+    // Not exact fit - show trade-offs
+    if (guestCount < pkg.servesMin) {
+      const under = pkg.servesMin - guestCount;
+      reasons.push(`${pkg.servesMin}-${pkg.servesMax} guests (${under} fewer than minimum - expect leftovers)`);
+    } else if (guestCount > pkg.servesMax) {
+      const over = guestCount - pkg.servesMax;
+      reasons.push(`${pkg.servesMin}-${pkg.servesMax} guests (${over} more than maximum - portions will be lighter)`);
+    }
   }
 
   // Event type match
@@ -410,8 +457,8 @@ function renderRecommendationCard(pkg, index) {
 
 function renderLoadingState() {
   return `
-    <div class="recommendations-loading">
-      <div class="loading-spinner"></div>
+    <div class="recommendations-loading" role="status" aria-live="polite">
+      <div class="aural-spinner" aria-hidden="true"></div>
       <p class="loading-text">Finding the perfect packages for your event...</p>
     </div>
   `;
@@ -578,24 +625,21 @@ function navigateToCustomization() {
 }
 
 function navigateToPackageGallery() {
-  // Hide recommendations
+  // Clear event details to show ALL packages
+  updateState('eventDetails', {
+    guestCount: null,
+    eventType: '',
+    dietaryNeeds: []
+  });
+  updateState('flowType', 'quick-browse');
+
+  // Re-render recommendations (will show all packages)
+  loadAndRenderRecommendations();
+
+  // Scroll to top of recommendations
   const recommendationsContainer = document.getElementById('package-recommendations-container');
   if (recommendationsContainer) {
-    recommendationsContainer.style.display = 'none';
-  }
-
-  // Show package gallery (SP-002)
-  const galleryContainer = document.getElementById('package-gallery-container');
-  if (galleryContainer) {
-    galleryContainer.style.display = 'block';
-    galleryContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    // Re-initialize gallery if function exists
-    if (typeof window.initPackageGallery === 'function') {
-      window.initPackageGallery();
-    }
-  } else {
-    console.warn('Package gallery (SP-002) not found');
+    recommendationsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 

@@ -21,7 +21,18 @@ import { ref, getDownloadURL } from 'firebase/storage';
 import { updateState, setPackage } from '../../services/shared-platter-state-service.js';
 
 function isPlantBasedPackage(pkg) {
-  return Boolean(pkg?.isPlantBased || (pkg?.id && pkg.id.includes('plant-based')));
+  if (!pkg) return false;
+  if (pkg.isPlantBased === true) return true;
+  if (pkg.isPlantBased === false) return false;
+
+  if (Array.isArray(pkg.dietaryTags)) {
+    const normalizedTags = pkg.dietaryTags.map(tag => tag.toLowerCase());
+    if (normalizedTags.some(tag => tag === 'plant-based' || tag === 'vegan')) {
+      return true;
+    }
+  }
+
+  return Boolean(pkg.id && pkg.id.includes('plant-based'));
 }
 
 // ===== COMPONENT STATE =====
@@ -96,10 +107,15 @@ async function getPackageImageUrl(imageUrl) {
 function filterPackages(packages, filters) {
   return packages.filter(pkg => {
     // Guest count filter
-    if (filters.guestCount) {
-      const serves = pkg.servingSize || {};
-      if (filters.guestCount < serves.min || filters.guestCount > serves.max) {
-        return false;
+    if (filters.guestCount != null) {
+      const guestCount = Number(filters.guestCount);
+      if (!Number.isNaN(guestCount) && guestCount > 0) {
+        const serves = pkg.servingSize || {};
+        const min = typeof serves.min === 'number' ? serves.min : (typeof pkg.servesMin === 'number' ? pkg.servesMin : null);
+        const max = typeof serves.max === 'number' ? serves.max : (typeof pkg.servesMax === 'number' ? pkg.servesMax : null);
+
+        if (min !== null && guestCount < min) return false;
+        if (max !== null && guestCount > max) return false;
       }
     }
 

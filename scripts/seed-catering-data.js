@@ -316,11 +316,13 @@ const PLANT_BASED_PACKAGE_IDS = new Set([
 ]);
 
 cateringPackages.forEach(pkg => {
-  if (PLANT_BASED_PACKAGE_IDS.has(pkg.id)) {
-    pkg.isPlantBased = true;
-  } else if (pkg.isPlantBased === undefined) {
-    pkg.isPlantBased = false;
+  const shouldBePlantBased = PLANT_BASED_PACKAGE_IDS.has(pkg.id);
+
+  if (pkg.isPlantBased === true && !shouldBePlantBased) {
+    console.warn(`⚠️  Package ${pkg.id} flagged as plant-based but not in PLANT_BASED_PACKAGE_IDS. Overriding to false.`);
   }
+
+  pkg.isPlantBased = shouldBePlantBased;
 });
 
 /**

@@ -1152,6 +1152,12 @@ function generateProductConfiguratorJS(menuData = {}) {
           // Skip if already has listener attached (prevent duplicates)
           if (button.dataset.listenerAttached === 'true') return;
 
+          const inlineHandler = button.getAttribute('onclick');
+          if (inlineHandler && inlineHandler.trim().length > 0) {
+            button.dataset.listenerAttached = 'inline';
+            return;
+          }
+
           button.addEventListener('click', function(event) {
             try {
               const productId = this.getAttribute('data-product-id');

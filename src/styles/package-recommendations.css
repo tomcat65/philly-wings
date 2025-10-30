@@ -451,18 +451,10 @@
   padding: var(--space-8) var(--space-4);
 }
 
-.loading-spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid var(--gray-200);
-  border-top-color: var(--philly-red);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.recommendations-loading .aural-spinner {
+  --aural-spinner-size: 64px;
+  --aural-ring-width: 9px;
   margin: 0 auto var(--space-4);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .loading-text {
@@ -615,7 +607,15 @@
     transform: none;
   }
 
-  .loading-spinner {
-    animation: none;
+  .recommendations-loading .aural-spinner {
+    --aural-spinner-size: 52px;
+  }
+
+  .recommendations-loading .aural-spinner::before {
+    animation-duration: 6s, 3.4s;
+  }
+
+  .recommendations-loading .aural-spinner::after {
+    animation-duration: 4s;
   }
 }

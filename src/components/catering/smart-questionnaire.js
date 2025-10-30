@@ -285,6 +285,8 @@ window.selectPeopleCount = function(count, button) {
  * Select dietary restriction
  */
 window.selectDietary = function(value, button) {
+  let shouldAdvance = false;
+
   if (value === 'none') {
     // Clear all other selections
     currentFilters.dietaryRestrictions = [];
@@ -292,6 +294,7 @@ window.selectDietary = function(value, button) {
       btn.classList.remove('selected');
     });
     button.classList.add('selected');
+    shouldAdvance = true;
   } else {
     // Toggle selection
     const isSelected = button.classList.contains('selected');
@@ -299,6 +302,7 @@ window.selectDietary = function(value, button) {
     if (isSelected) {
       button.classList.remove('selected');
       currentFilters.dietaryRestrictions = currentFilters.dietaryRestrictions.filter(v => v !== value);
+      shouldAdvance = false;
     } else {
       // Remove 'none' if selecting specific restriction
       const noneBtn = document.querySelector('#step-dietary .option-none');
@@ -308,11 +312,13 @@ window.selectDietary = function(value, button) {
       if (!currentFilters.dietaryRestrictions.includes(value)) {
         currentFilters.dietaryRestrictions.push(value);
       }
+      shouldAdvance = true;
     }
   }
 
-  // Auto-advance after short delay
-  setTimeout(() => goToNextStep(2), 300);
+  if (shouldAdvance) {
+    setTimeout(() => goToNextStep(2), 300);
+  }
 };
 
 /**
