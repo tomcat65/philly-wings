@@ -104,9 +104,6 @@ export function renderConversationalWingDistribution() {
           <p class="adjustment-subtitle">Fine-tune the percentage to match your group's preferences</p>
         </div>
 
-        <!-- Visual Wing Distribution Preview -->
-        <div class="wing-distribution-preview"></div>
-
         <!-- Package Context Cards -->
         <div class="package-context-cards"></div>
 
@@ -306,50 +303,6 @@ export function validateWingDistribution(distribution) {
 }
 
 /**
- * Renders visual wing distribution preview with icons
- */
-function renderWingDistributionPreview(traditional, plantBased, totalWings = 120) {
-  const traditionalWings = Math.round(totalWings * traditional / 100);
-  const plantBasedWings = Math.round(totalWings * plantBased / 100);
-
-  // Calculate boneless vs bone-in split (60/40 for traditional)
-  const boneless = Math.round(traditionalWings * 0.6);
-  const boneIn = traditionalWings - boneless;
-
-  return `
-    <div class="wing-preview-content">
-      <h5>Your ${totalWings} Wings Look Like This:</h5>
-
-      ${traditional > 0 ? `
-        <div class="wing-type-row traditional">
-          <div class="wing-type-label">
-            <span class="wing-icon">🍗</span>
-            <strong>Traditional (${traditionalWings} wings)</strong>
-          </div>
-          <div class="wing-breakdown">
-            <span class="breakdown-item">🍗 Boneless (${boneless})</span>
-            <span class="breakdown-divider">•</span>
-            <span class="breakdown-item">🦴 Bone-in (${boneIn})</span>
-          </div>
-        </div>
-      ` : ''}
-
-      ${plantBased > 0 ? `
-        <div class="wing-type-row plant-based">
-          <div class="wing-type-label">
-            <span class="wing-icon">🥦</span>
-            <strong>Plant-Based (${plantBasedWings} wings)</strong>
-          </div>
-          <div class="wing-breakdown">
-            <span class="breakdown-item">🥦 Cauliflower (${plantBasedWings})</span>
-          </div>
-        </div>
-      ` : ''}
-    </div>
-  `;
-}
-
-/**
  * Gets contextual recommendation based on percentages and guest count
  */
 function getContextualRecommendation(traditional, plantBased, guestCount, dietaryNeeds = []) {
@@ -383,11 +336,11 @@ function getContextualRecommendation(traditional, plantBased, guestCount, dietar
 }
 
 /**
- * Debounce utility function
+ * Debounce utility function with cancel support
  */
 function debounce(func, wait) {
   let timeout;
-  return function executedFunction(...args) {
+  const executedFunction = function(...args) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);
@@ -395,6 +348,12 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
+
+  executedFunction.cancel = function() {
+    clearTimeout(timeout);
+  };
+
+  return executedFunction;
 }
 
 /**
@@ -503,7 +462,6 @@ export function initConversationalWingDistribution() {
     const traditionalPercentage = container.querySelector('#traditional-percentage');
     const plantBasedPercentage = container.querySelector('#plant-based-percentage');
     const guestPreview = container.querySelector('#guest-preview');
-    const wingPreview = container.querySelector('.wing-distribution-preview');
     const recommendationBox = container.querySelector('#recommendation-box');
     const resetButton = container.querySelector('#reset-to-preset');
     const ctaButton = container.querySelector('.wing-distribution-cta');
@@ -615,11 +573,6 @@ export function initConversationalWingDistribution() {
         <span class="preview-divider">•</span>
         <span class="preview-plant-based">~${plantGuests} plant-based guests</span>
       `;
-
-      // Update wing preview (debounced)
-      if (!isDragging) {
-        wingPreview.innerHTML = renderWingDistributionPreview(traditional, plantBased);
-      }
 
       // Update recommendation box
       const recommendation = getContextualRecommendation(traditional, plantBased, guestCount, dietaryNeeds);

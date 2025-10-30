@@ -12,6 +12,7 @@
 .event-details-form {
   max-width: 800px;
   margin: 0 auto;
+  margin-top: 6rem; /* Add spacing when sticky header is present */
   padding: 1.5rem 1rem;
   background: #f5f5f5; /* Light grey background for contrast */
   border-radius: 20px;

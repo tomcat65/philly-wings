@@ -630,6 +630,140 @@ export function recalculatePricing() {
 }
 
 /**
+ * Calculate sauce distribution across mixed wing types
+ * Uses Approach 3: Hybrid with smart preset + optional override
+ *
+ * @param {Array} selectedSauces - Array of sauce objects with {id, name, heatLevel, etc.}
+ * @param {Object} wingDistribution - Current wing distribution {boneless, boneIn, cauliflower}
+ * @returns {Array} Sauce distribution with even split across wing types
+ *
+ * Algorithm:
+ * 1. Calculate total wings
+ * 2. Divide wings evenly among sauces (with remainder distribution)
+ * 3. For each sauce, split proportionally across wing types (traditional vs plant-based)
+ * 4. Within traditional, split by boneless/bone-in ratio
+ *
+ * Example: 250 wings (150 boneless, 50 bone-in, 50 cauliflower), 5 sauces
+ * - Each sauce gets 50 wings
+ * - Traditional ratio: 200/250 = 80%, Plant-based: 50/250 = 20%
+ * - Per sauce: 40 traditional (30 boneless, 10 bone-in) + 10 cauliflower
+ */
+export function calculateSauceDistribution(selectedSauces, wingDistribution) {
+  // Calculate totals
+  const totalWings = wingDistribution.boneless +
+                     wingDistribution.boneIn +
+                     wingDistribution.cauliflower;
+
+  const sauceCount = selectedSauces.length;
+
+  if (sauceCount === 0 || totalWings === 0) {
+    return [];
+  }
+
+  // Base wings per sauce and remainder
+  const wingsPerSauce = Math.floor(totalWings / sauceCount);
+  const remainder = totalWings % sauceCount;
+
+  // Calculate ratios for proportional distribution
+  const traditionalTotal = wingDistribution.boneless + wingDistribution.boneIn;
+  const traditionalRatio = traditionalTotal > 0 ? traditionalTotal / totalWings : 0;
+  const plantBasedRatio = wingDistribution.cauliflower / totalWings;
+
+  const bonelessRatio = traditionalTotal > 0
+    ? wingDistribution.boneless / traditionalTotal
+    : 0;
+  const boneInRatio = traditionalTotal > 0
+    ? wingDistribution.boneIn / traditionalTotal
+    : 0;
+
+  // Distribute wings to each sauce
+  return selectedSauces.map((sauce, index) => {
+    // First sauces get extra wings from remainder
+    const assignedWings = wingsPerSauce + (index < remainder ? 1 : 0);
+
+    // Split by traditional vs plant-based
+    const traditionalWings = Math.round(assignedWings * traditionalRatio);
+    const plantBasedWings = assignedWings - traditionalWings;
+
+    // Split traditional by boneless vs bone-in
+    const bonelessWings = Math.round(traditionalWings * bonelessRatio);
+    const boneInWings = traditionalWings - bonelessWings;
+
+    return {
+      id: sauce.id,
+      name: sauce.name,
+      heatLevel: sauce.heatLevel,
+      imageUrl: sauce.imageUrl,
+      wingCount: assignedWings,
+      distribution: {
+        boneless: bonelessWings,
+        boneIn: boneInWings,
+        cauliflower: plantBasedWings
+      }
+    };
+  });
+}
+
+/**
+ * Set sauce selection and calculate smart distribution
+ * @param {Array} selectedSauces - Array of sauce objects
+ */
+export function setSauces(selectedSauces) {
+  const distribution = calculateSauceDistribution(
+    selectedSauces,
+    currentState.currentConfig.wingDistribution
+  );
+
+  updateState('currentConfig.sauces', distribution);
+  markSectionComplete('sauces');
+}
+
+/**
+ * Update custom sauce distribution (user override)
+ * @param {string} sauceId - Sauce ID to update
+ * @param {Object} newDistribution - New distribution {boneless, boneIn, cauliflower}
+ */
+export function updateSauceDistribution(sauceId, newDistribution) {
+  const sauces = [...currentState.currentConfig.sauces];
+  const sauceIndex = sauces.findIndex(s => s.id === sauceId);
+
+  if (sauceIndex === -1) {
+    console.error('Sauce not found:', sauceId);
+    return;
+  }
+
+  // Update distribution
+  sauces[sauceIndex].distribution = newDistribution;
+  sauces[sauceIndex].wingCount = newDistribution.boneless +
+                                  newDistribution.boneIn +
+                                  newDistribution.cauliflower;
+
+  updateState('currentConfig.sauces', sauces);
+}
+
+/**
+ * Validate sauce distribution totals
+ * Ensures all sauces combined equal total wing count
+ * @returns {Object} {valid: boolean, totalAssigned: number, expected: number}
+ */
+export function validateSauceDistribution() {
+  const sauces = currentState.currentConfig.sauces;
+  const wingDistribution = currentState.currentConfig.wingDistribution;
+
+  const totalAssigned = sauces.reduce((sum, sauce) => sum + sauce.wingCount, 0);
+  const expected = wingDistribution.boneless +
+                   wingDistribution.boneIn +
+                   wingDistribution.cauliflower;
+
+  return {
+    valid: totalAssigned === expected,
+    totalAssigned,
+    expected,
+    difference: expected - totalAssigned
+  };
+}
+
+/**
  * Mark a progress section as complete
  * @param {string} section - Section name (e.g., 'wings', 'sauces')
  */

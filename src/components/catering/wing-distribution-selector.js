@@ -91,14 +91,32 @@ export function renderWingDistributionSelector(packageData) {
       <div class="wing-distribution-selector wing-distribution-two-section">
         <!-- Overall Header -->
         <div class="section-header">
-          <h3 class="section-title">🍗 Customize Your Wings</h3>
+          <h3 class="section-title">🍗 Your Wing Selection</h3>
           <p class="section-subtitle">
-            Your ${totalWings} wings are split based on your dietary needs
+            Your ${totalWings} wings based on your event details
           </p>
         </div>
 
-        <!-- Live Wing Counter (shows all three types) -->
-        ${renderWingCounter(distribution, totalWings)}
+        <!-- Simplified Summary View (Initial) -->
+        <div class="wing-summary-view" data-view="summary">
+          ${renderWingSummary(distribution, totalWings, traditionalCount, plantBasedCount)}
+
+          <div class="summary-actions">
+            <button class="btn-accept-distribution" data-action="accept">
+              <span class="btn-icon">✓</span>
+              <span class="btn-text">Accept This Distribution</span>
+            </button>
+            <button class="btn-customize-distribution" data-action="customize">
+              <span class="btn-icon">🔧</span>
+              <span class="btn-text">Customize Wing Types Instead</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Detailed Controls View (Hidden initially) -->
+        <div class="wing-detailed-view" data-view="detailed" style="display: none;">
+          <!-- Live Wing Counter (shows all three types) -->
+          ${renderWingCounter(distribution, totalWings)}
 
         <!-- SECTION 1: Traditional Wings (adjustable) -->
         <div class="wing-section wing-section-traditional">
@@ -131,6 +149,7 @@ export function renderWingDistributionSelector(packageData) {
             </p>
           </div>
         </div>
+        </div><!-- End detailed-view -->
       </div>
     `;
   }
@@ -202,6 +221,48 @@ function renderWingCounter(distribution, totalWings) {
         <span class="total-label">Total:</span>
         <span class="total-value">${boneless + boneIn + plantBased} / ${totalWings}</span>
         ${allSet ? '<span class="total-check">✓</span>' : ''}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render simplified wing summary (Option B format)
+ */
+function renderWingSummary(distribution, totalWings, traditionalCount, plantBasedCount) {
+  const { boneless, boneIn } = distribution;
+  const boneInStyle = distribution.boneInStyle || 'mixed';
+
+  // Format bone-in style label
+  const boneInStyleLabel = boneInStyle === 'mixed' ? 'Mixed' :
+                          boneInStyle === 'drums' ? 'Drums Only' :
+                          'Flats Only';
+
+  return `
+    <div class="wing-summary">
+      <div class="summary-section">
+        <div class="summary-icon">🍗</div>
+        <div class="summary-content">
+          <h4 class="summary-title">${traditionalCount} Traditional Wings</h4>
+          <p class="summary-details">
+            ${boneless} Boneless${boneIn > 0 ? `, ${boneIn} Bone-In ${boneInStyleLabel}` : ''}
+          </p>
+        </div>
+      </div>
+
+      ${plantBasedCount > 0 ? `
+        <div class="summary-section">
+          <div class="summary-icon">🥦</div>
+          <div class="summary-content">
+            <h4 class="summary-title">${plantBasedCount} Plant-Based Wings</h4>
+            <p class="summary-details">Cauliflower</p>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="summary-total">
+        <span class="summary-total-label">Total Wings:</span>
+        <span class="summary-total-value">${totalWings}</span>
       </div>
     </div>
   `;
@@ -524,10 +585,83 @@ function renderNoPackageState() {
 }
 
 /**
+ * Initialize Accept/Customize button interactions
+ */
+function initAcceptCustomizeButtons() {
+  const acceptBtn = document.querySelector('.btn-accept-distribution');
+  const customizeBtn = document.querySelector('.btn-customize-distribution');
+  const summaryView = document.querySelector('[data-view="summary"]');
+  const detailedView = document.querySelector('[data-view="detailed"]');
+
+  if (!acceptBtn || !customizeBtn || !summaryView || !detailedView) {
+    console.log('⚠️ Accept/Customize buttons not found (single-section layout or not rendered yet)');
+    return;
+  }
+
+  console.log('✅ Initializing Accept/Customize buttons');
+
+  // Accept Distribution Button
+  acceptBtn.addEventListener('click', () => {
+    console.log('✅ User accepted wing distribution');
+
+    // Mark wings as accepted and complete
+    const state = getState();
+    updateState('currentConfig', {
+      ...state.currentConfig,
+      wingsAccepted: true,
+      wingsCustomized: false
+    });
+
+    // Dispatch event to notify customization screen
+    window.dispatchEvent(new CustomEvent('wing-distribution-accepted', {
+      detail: {
+        distribution: state.currentConfig.wingDistribution,
+        timestamp: new Date().toISOString()
+      }
+    }));
+
+    // Scroll to sauces section
+    const saucesSection = document.querySelector('[data-section="sauces"]');
+    if (saucesSection) {
+      saucesSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  });
+
+  // Customize Distribution Button
+  customizeBtn.addEventListener('click', () => {
+    console.log('🔧 User wants to customize wing distribution');
+
+    // Hide summary, show detailed controls
+    summaryView.style.display = 'none';
+    detailedView.style.display = 'block';
+
+    // Mark as customized
+    const state = getState();
+    updateState('currentConfig', {
+      ...state.currentConfig,
+      wingsAccepted: false,
+      wingsCustomized: true
+    });
+
+    // Smooth scroll to detailed view
+    detailedView.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  });
+}
+
+/**
  * Initialize wing distribution selector
  */
 export function initWingDistributionSelector() {
   console.log('🍗 Initializing wing distribution selector...');
+
+  // Initialize Accept/Customize workflow
+  initAcceptCustomizeButtons();
 
   // Initialize preset cards
   initPresetCards();

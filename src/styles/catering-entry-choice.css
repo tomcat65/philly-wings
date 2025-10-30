@@ -14,7 +14,7 @@
 .catering-entry-choice.is-sticky {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 5; /* Lowered from 10 to prevent blocking wizard interactions */
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin: 0;

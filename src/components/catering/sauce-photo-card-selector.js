@@ -17,6 +17,7 @@
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
+import { renderSauceDistributionReview, initSauceDistributionReview } from './sauce-distribution-review.js';
 
 /**
  * Render enhanced sauce photo card selector
@@ -105,6 +106,22 @@ export async function renderSaucePhotoCardSelector(options = {}) {
       <!-- Sauce Cards Grid -->
       <div class="sauce-cards-grid" id="sauce-cards-grid">
         ${sauces.map(sauce => renderSaucePhotoCard(sauce, preSelectedIds.includes(sauce.id))).join('')}
+      </div>
+
+      <!-- Continue Button (appears when selections made) -->
+      <div class="sauce-selector-actions" id="sauce-selector-actions" style="${preSelectedIds.length > 0 ? '' : 'display: none;'}">
+        <button
+          type="button"
+          class="btn-continue-sauces"
+          id="btn-continue-sauces"
+          aria-label="Continue to sauce distribution">
+          Continue to Distribution →
+        </button>
+      </div>
+
+      <!-- Distribution Review Container (hidden initially) -->
+      <div class="sauce-distribution-container" id="sauce-distribution-container" style="display: none;">
+        <!-- Will be populated with renderSauceDistributionReview -->
       </div>
     </div>
   `;
@@ -233,6 +250,46 @@ export function initSaucePhotoCardSelector(maxSelections, onSelectionChange) {
       }
     }
   });
+
+  // Continue to distribution button
+  const continueBtn = document.getElementById('btn-continue-sauces');
+  if (continueBtn) {
+    continueBtn.addEventListener('click', async () => {
+      await showSauceDistribution(selectedSauceIds);
+    });
+  }
+}
+
+/**
+ * Show sauce distribution review screen
+ */
+async function showSauceDistribution(selectedSauceIds) {
+  // Hide sauce selector
+  const selectorGrid = document.getElementById('sauce-cards-grid');
+  const selectorActions = document.getElementById('sauce-selector-actions');
+  const selectorCart = document.querySelector('.sauce-selection-cart');
+  const selectorFilter = document.querySelector('.sauce-heat-filter');
+
+  if (selectorGrid) selectorGrid.style.display = 'none';
+  if (selectorActions) selectorActions.style.display = 'none';
+  if (selectorCart) selectorCart.style.display = 'none';
+  if (selectorFilter) selectorFilter.style.display = 'none';
+
+  // Get selected sauce objects
+  const sauces = await fetchSauces();
+  const selectedSauces = sauces.filter(s => selectedSauceIds.includes(s.id));
+
+  // Render distribution review
+  const distributionContainer = document.getElementById('sauce-distribution-container');
+  if (distributionContainer) {
+    distributionContainer.innerHTML = renderSauceDistributionReview(selectedSauces);
+    distributionContainer.style.display = 'block';
+
+    // Initialize distribution review interactions
+    initSauceDistributionReview(selectedSauces);
+  }
+
+  console.log('🌶️ Showing sauce distribution review for', selectedSauces.length, 'sauces');
 }
 
 /**
@@ -273,6 +330,12 @@ async function handleSauceCardClick(card, maxSelections, selectedSauceIds, onSel
 
   // Update counter
   updateSelectionCounter(selectedSauceIds.length, maxSelections);
+
+  // Show/hide continue button
+  const selectorActions = document.getElementById('sauce-selector-actions');
+  if (selectorActions) {
+    selectorActions.style.display = selectedSauceIds.length > 0 ? 'block' : 'none';
+  }
 
   // Callback
   if (onSelectionChange) {
