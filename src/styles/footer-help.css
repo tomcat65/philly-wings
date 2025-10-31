@@ -6,9 +6,12 @@
 .catering-footer-help {
   background: linear-gradient(135deg, #f8f9fa 0%, #e8f5f7 100%);
   padding: 4rem 1rem;
-  margin-top: 4rem;
+  margin-top: 10rem; /* Increased to prevent overlap with wings customization */
   border-top: 1px solid #e0e0e0;
   text-align: center;
+  clear: both;
+  position: relative;
+  z-index: 1;
 }
 
 .footer-help-content {

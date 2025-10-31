@@ -12,6 +12,7 @@
 import { getState, updateState, onStateChange } from '../../services/shared-platter-state-service.js';
 import { renderWingDistributionSelector, initWingDistributionSelector } from './wing-distribution-selector.js';
 import { renderSaucePhotoCardSelector, initSaucePhotoCardSelector } from './sauce-photo-card-selector.js';
+import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
 
 /**
  * Initialize customization screen
@@ -102,9 +103,11 @@ function renderPanelHeader(pkg) {
     <div class="panel-header">
       <div class="header-content">
         <h2 class="panel-title">Customize Your ${pkg.name}</h2>
-        <p class="panel-subtitle">Tier ${pkg.tier} Package • Serves ${pkg.servesMin}-${pkg.servesMax}</p>
+        <!-- Hidden: Internal package info -->
+        <p class="panel-subtitle" style="display: none;">Tier ${pkg.tier} Package • Serves ${pkg.servesMin}-${pkg.servesMax}</p>
       </div>
-      <div class="progress-indicator" id="progress-indicator">
+      <!-- Hidden: Progress indicator - space reserved for section tabs -->
+      <div class="progress-indicator" id="progress-indicator" style="display: none;">
         <span class="progress-text">0 of 6 sections complete</span>
         <div class="progress-bar">
           <div class="progress-fill" style="width: 0%"></div>
@@ -360,6 +363,14 @@ async function renderSectionContent(sectionId) {
       });
 
     case 'dips':
+      const preSelectedDips = currentConfig.dips || [];
+      const maxDipSelections = packageData.dipSelections?.max || packageData.dipSelections || 3;
+      return await renderDipPhotoCardSelector({
+        maxSelections: maxDipSelections,
+        preSelectedIds: preSelectedDips,
+        onSelectionChange: handleDipSelectionChange
+      });
+
     case 'sides':
     case 'desserts':
     case 'beverages':
@@ -388,8 +399,13 @@ function initializeSectionInteractions(sectionId) {
       console.log('🌶️ Sauce selector initialized');
       break;
 
-    // Other sections will be initialized here as they're built
     case 'dips':
+      const maxDipSelections = packageData.dipSelections?.max || packageData.dipSelections || 3;
+      initDipPhotoCardSelector(maxDipSelections, handleDipSelectionChange);
+      console.log('🥣 Dip selector initialized');
+      break;
+
+    // Other sections will be initialized here as they're built
     case 'sides':
     case 'desserts':
     case 'beverages':
@@ -680,6 +696,24 @@ function handleSauceSelectionChange(selectedSauceIds) {
   });
 
   console.log(`🌶️ Sauce selection updated: ${selectedSauceIds.length} sauces selected`);
+
+  // Pricing will update automatically via onStateChange listener
+}
+
+/**
+ * Handle dip selection change
+ */
+function handleDipSelectionChange(selectedDipIds) {
+  const state = getState();
+
+  // Update state with selected dips
+  updateState('currentConfig', {
+    ...state.currentConfig,
+    dips: selectedDipIds,
+    dipsSource: 'manual'
+  });
+
+  console.log(`🥣 Dip selection updated: ${selectedDipIds.length} dips selected`);
 
   // Pricing will update automatically via onStateChange listener
 }

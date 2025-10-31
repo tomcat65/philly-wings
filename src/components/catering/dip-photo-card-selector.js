@@ -1,47 +1,44 @@
 /**
- * Sauce Photo Card Selector - SP-008 Enhanced
- * Netflix-style interactive multi-select sauce selector for catering customization
+ * Dip Photo Card Selector - SP-009
+ * Interactive multi-select dip selector for catering customization
  *
  * Features:
- * - Photo-based browsing with visual sauce cup images
+ * - Photo-based browsing with visual dip container images
  * - Multi-select with max selections enforcement
- * - Heat level filtering (All, Mild, Medium, Hot, Insane)
- * - Social proof badges (Popular, Hot Pick)
  * - Smart defaults pre-selected
- * - Selection cart at top showing chosen sauces
+ * - Selection cart at top showing chosen dips
  * - Live pricing integration
  *
- * Created: 2025-10-27 (SP-008)
+ * Created: 2025-10-30 (Dips separation from sauces)
  */
 
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
-import { renderSauceDistributionReview, initSauceDistributionReview } from './sauce-distribution-review.js';
 
 /**
- * Render enhanced sauce photo card selector
+ * Render enhanced dip photo card selector
  * @param {Object} options - Configuration options
- * @param {number} options.maxSelections - Maximum sauces allowed
- * @param {Array} options.preSelectedIds - Smart defaults (sauce IDs)
+ * @param {number} options.maxSelections - Maximum dips allowed
+ * @param {Array} options.preSelectedIds - Smart defaults (dip IDs)
  * @param {Function} options.onSelectionChange - Callback when selection changes
  * @returns {Promise<string>} HTML markup
  */
-export async function renderSaucePhotoCardSelector(options = {}) {
+export async function renderDipPhotoCardSelector(options = {}) {
   const {
     maxSelections = 3,
     preSelectedIds = [],
     onSelectionChange = null
   } = options;
 
-  const sauces = await fetchSauces();
+  const dips = await fetchDips();
 
   return `
     <div class="sauce-photo-selector">
       <!-- Selection Cart at Top -->
       <div class="sauce-selection-cart">
         <div class="cart-header">
-          <h4 class="cart-title">🌶️ Your Sauce Selection</h4>
+          <h4 class="cart-title">🥣 Your Dip Selection</h4>
           <div class="cart-counter">
             <span class="counter-current" id="sauce-counter-current">${preSelectedIds.length}</span>
             <span class="counter-separator">/</span>
@@ -51,61 +48,22 @@ export async function renderSaucePhotoCardSelector(options = {}) {
 
         <div class="cart-items" id="sauce-cart-items">
           ${preSelectedIds.length > 0
-            ? renderCartItems(sauces.filter(s => preSelectedIds.includes(s.id)))
-            : '<p class="cart-empty">Select up to ${maxSelections} sauces from below</p>'
+            ? renderCartItems(dips.filter(d => preSelectedIds.includes(d.id)))
+            : '<p class="cart-empty">Select up to ${maxSelections} dips from below</p>'
           }
         </div>
 
         <div class="cart-tips">
           <p class="tip-text">
             <span class="tip-icon">💡</span>
-            <span>Pro Tip: Mix heat levels (mild, medium, hot) to satisfy everyone</span>
+            <span>Pro Tip: Ranch and Blue Cheese are crowd favorites!</span>
           </p>
         </div>
       </div>
 
-      <!-- Heat Level Filter -->
-      <div class="sauce-heat-filter">
-        <button
-          type="button"
-          class="heat-filter-btn active"
-          data-heat-filter="all"
-          aria-pressed="true">
-          All Sauces
-        </button>
-        <button
-          type="button"
-          class="heat-filter-btn"
-          data-heat-filter="mild"
-          aria-pressed="false">
-          No Heat / Mild
-        </button>
-        <button
-          type="button"
-          class="heat-filter-btn"
-          data-heat-filter="medium"
-          aria-pressed="false">
-          🌶️🌶️ Medium
-        </button>
-        <button
-          type="button"
-          class="heat-filter-btn"
-          data-heat-filter="hot"
-          aria-pressed="false">
-          🌶️🌶️🌶️🌶️ Hot
-        </button>
-        <button
-          type="button"
-          class="heat-filter-btn"
-          data-heat-filter="insane"
-          aria-pressed="false">
-          🌶️🌶️🌶️🌶️🌶️ Insane
-        </button>
-      </div>
-
-      <!-- Sauce Cards Grid -->
+      <!-- Dip Cards Grid (no heat filter needed for dips) -->
       <div class="sauce-cards-grid" id="sauce-cards-grid">
-        ${sauces.map(sauce => renderSaucePhotoCard(sauce, preSelectedIds.includes(sauce.id))).join('')}
+        ${dips.map(dip => renderDipPhotoCard(dip, preSelectedIds.includes(dip.id))).join('')}
       </div>
 
       <!-- Continue Button (appears when selections made) -->
@@ -128,26 +86,23 @@ export async function renderSaucePhotoCardSelector(options = {}) {
 }
 
 /**
- * Render individual sauce photo card
+ * Render individual dip photo card
  */
-function renderSaucePhotoCard(sauce, isSelected) {
-  const heatLevel = getHeatLevel(sauce.heatLevel);
-  const socialProof = getSocialProofBadge(sauce);
+function renderDipPhotoCard(dip, isSelected) {
+  const socialProof = getSocialProofBadge(dip);
 
   return `
     <div
       class="sauce-photo-card ${isSelected ? 'card-selected' : ''}"
-      data-sauce-id="${sauce.id}"
-      data-heat-level="${sauce.heatLevel}"
-      data-heat-category="${heatLevel.category}"
+      data-sauce-id="${dip.id}"
       role="checkbox"
       aria-checked="${isSelected}"
       tabindex="0">
 
       <div class="sauce-card-image">
         <img
-          src="${sauce.imageUrl || getPlaceholderImage(sauce)}"
-          alt="${sauce.name}"
+          src="${dip.imageUrl || getPlaceholderImage(dip)}"
+          alt="${dip.name}"
           loading="lazy"
           class="sauce-img">
 
@@ -158,18 +113,15 @@ function renderSaucePhotoCard(sauce, isSelected) {
         ${socialProof ? `
           <span class="sauce-social-badge">${socialProof}</span>
         ` : ''}
-
-        <span class="sauce-heat-badge">
-          ${heatLevel.display}
-        </span>
       </div>
 
       <div class="sauce-card-content">
-        <h5 class="sauce-card-name">${sauce.name}</h5>
-        <p class="sauce-card-description">${sauce.description || ''}</p>
+        <h5 class="sauce-card-name">${dip.name}</h5>
+        <p class="sauce-card-description">${dip.description || ''}</p>
+        <p class="sauce-card-description"><strong>1.5oz serving</strong></p>
 
-        ${sauce.story ? `
-          <p class="sauce-card-story">${truncateStory(sauce.story)}</p>
+        ${dip.story ? `
+          <p class="sauce-card-story">${truncateStory(dip.story)}</p>
         ` : ''}
       </div>
     </div>
@@ -177,23 +129,21 @@ function renderSaucePhotoCard(sauce, isSelected) {
 }
 
 /**
- * Render cart items (selected sauces)
+ * Render cart items (selected dips)
  */
-function renderCartItems(selectedSauces) {
+function renderCartItems(selectedDips) {
   return `
     <div class="cart-items-list">
-      ${selectedSauces.map(sauce => {
-        const heatLevel = getHeatLevel(sauce.heatLevel);
-        const heatDisplay = heatLevel.chilis || '✓'; // Use checkmark for no-heat sauces
+      ${selectedDips.map(dip => {
         return `
-          <div class="cart-item" data-sauce-id="${sauce.id}">
-            <span class="cart-item-icon">${heatDisplay}</span>
-            <span class="cart-item-name">${sauce.name}</span>
+          <div class="cart-item" data-sauce-id="${dip.id}">
+            <span class="cart-item-icon">🥣</span>
+            <span class="cart-item-name">${dip.name}</span>
             <button
               type="button"
               class="cart-item-remove"
-              data-sauce-id="${sauce.id}"
-              aria-label="Remove ${sauce.name}">
+              data-sauce-id="${dip.id}"
+              aria-label="Remove ${dip.name}">
               ×
             </button>
           </div>
@@ -204,9 +154,9 @@ function renderCartItems(selectedSauces) {
 }
 
 /**
- * Initialize sauce photo card selector interactions
+ * Initialize dip photo card selector interactions
  */
-export function initSaucePhotoCardSelector(maxSelections, onSelectionChange) {
+export function initDipPhotoCardSelector(maxSelections, onSelectionChange) {
   const grid = document.getElementById('sauce-cards-grid');
   if (!grid) return;
 
@@ -233,12 +183,7 @@ export function initSaucePhotoCardSelector(maxSelections, onSelectionChange) {
     });
   });
 
-  // Heat filter handlers
-  document.querySelectorAll('.heat-filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      handleHeatFilter(btn);
-    });
-  });
+  // No heat filter for dips - removed
 
   // Cart remove button handlers (delegated)
   document.addEventListener('click', (e) => {
@@ -415,97 +360,17 @@ function showMaxSelectionMessage(maxSelections) {
   setTimeout(() => validationEl.remove(), 3000);
 }
 
-/**
- * Handle heat level filter
- */
-function handleHeatFilter(clickedBtn) {
-  const filterValue = clickedBtn.dataset.heatFilter;
-
-  // Update button states
-  document.querySelectorAll('.heat-filter-btn').forEach(btn => {
-    const isActive = btn === clickedBtn;
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-pressed', isActive);
-  });
-
-  // Filter cards
-  const cards = document.querySelectorAll('.sauce-photo-card');
-
-  cards.forEach(card => {
-    const heatCategory = card.dataset.heatCategory;
-
-    if (filterValue === 'all') {
-      card.style.display = 'block';
-    } else {
-      card.style.display = heatCategory === filterValue ? 'block' : 'none';
-    }
-  });
-}
-
-/**
- * Get heat level metadata using chili pepper system (consistent with boxed meals)
- */
-function getHeatLevel(level) {
-  const chilis = '🌶️'.repeat(Math.min(level, 5));
-
-  const levels = {
-    0: {
-      label: 'No Heat',
-      display: 'No Heat',
-      chilis: '',
-      category: 'mild'
-    },
-    1: {
-      label: 'Mild',
-      display: '🌶️ Mild',
-      chilis: '🌶️',
-      category: 'mild'
-    },
-    2: {
-      label: 'Medium',
-      display: '🌶️🌶️ Medium',
-      chilis: '🌶️🌶️',
-      category: 'medium'
-    },
-    3: {
-      label: 'Medium Hot',
-      display: '🌶️🌶️🌶️ Medium Hot',
-      chilis: '🌶️🌶️🌶️',
-      category: 'medium'
-    },
-    4: {
-      label: 'Hot',
-      display: '🌶️🌶️🌶️🌶️ Hot',
-      chilis: '🌶️🌶️🌶️🌶️',
-      category: 'hot'
-    },
-    5: {
-      label: 'Insane',
-      display: '🌶️🌶️🌶️🌶️🌶️ Insane',
-      chilis: '🌶️🌶️🌶️🌶️🌶️',
-      category: 'insane'
-    }
-  };
-
-  return levels[level] || levels[0];
-}
+// Heat level functions removed - not applicable to dips
 
 /**
  * Get social proof badge if applicable
  */
-function getSocialProofBadge(sauce) {
+function getSocialProofBadge(dip) {
   // These would come from analytics/popularity data
-  const popularSauces = ['honey-bbq', 'philly-medium', 'lemon-pepper'];
-  const hotPicks = ['south-street-hot', 'asian-zing'];
+  const popularDips = ['ranch', 'blue-cheese', 'honey-mustard'];
 
-  if (popularSauces.includes(sauce.id)) {
+  if (popularDips.includes(dip.id)) {
     return '⭐ Popular';
-  }
-  if (hotPicks.includes(sauce.id)) {
-    return '🔥 Hot Pick';
-  }
-  if (sauce.category === 'philly-signature') {
-    return '🦅 Philly';
   }
 
   return null;
@@ -520,33 +385,28 @@ function truncateStory(story, maxLength = 60) {
 }
 
 /**
- * Get placeholder image for sauce
+ * Get placeholder image for dip
  */
-function getPlaceholderImage(sauce) {
-  // Use heat level color for placeholder
-  const heatLevel = getHeatLevel(sauce.heatLevel);
-  const colorCode = heatLevel.color.replace('#', '');
-
-  return `https://placehold.co/300x200/${colorCode}/white?text=${encodeURIComponent(sauce.name)}`;
+function getPlaceholderImage(dip) {
+  // Use neutral color for dip placeholder
+  return `https://placehold.co/300x200/e3f2fd/1976d2?text=${encodeURIComponent(dip.name)}`;
 }
 
 /**
  * Fetch active sauces from Firebase
  */
-async function fetchSauces() {
+async function fetchDips() {
   try {
     const q = query(
       collection(db, 'sauces'),
       where('active', '==', true),
+      where('category', '==', 'dipping-sauce'),
       orderBy('sortOrder', 'asc')
     );
     const snapshot = await getDocs(q);
-    const allSauces = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Filter out dipping sauces - they belong in the dips section
-    return allSauces.filter(sauce => sauce.category !== 'dipping-sauce');
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error('Error fetching sauces from Firebase:', error);
+    console.error('Error fetching dips from Firebase:', error);
     return [];
   }
 }
