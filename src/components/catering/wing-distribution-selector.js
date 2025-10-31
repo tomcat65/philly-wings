@@ -423,7 +423,7 @@ function renderDistributionSlider(distribution, totalWings) {
           <span class="slider-label-end">All Bone-In</span>
         </div>
 
-        <div class="slider-track">
+        <div class="slider-track-traditional">
           <input
             type="range"
             id="boneless-slider"
