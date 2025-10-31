@@ -83,7 +83,7 @@
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 4rem);
+  /* Removed max-height to prevent footer from being cut off */
   margin-bottom: 4rem; /* Add spacing before footer */
 }
 
