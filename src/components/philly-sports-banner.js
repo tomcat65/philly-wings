@@ -86,8 +86,9 @@ export class PhillySportsBanner {
 
   showLoadingState() {
     this.container.innerHTML = `
-      <div class="banner-loading">
-        Loading Philadelphia sports schedule...
+      <div class="banner-loading" role="status" aria-live="polite">
+        <div class="aural-spinner" aria-hidden="true"></div>
+        <span>Loading Philadelphia sports schedule...</span>
       </div>
     `;
     this.container.style.display = 'block';

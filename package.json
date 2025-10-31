@@ -18,7 +18,11 @@
     "docker:down": "docker-compose down",
     "docker:simple": "docker build -f Dockerfile.simple -t philly-wings-simple . && docker run -p 8080:80 philly-wings-simple",
     "docker:test": "docker run -p 8080:80 -v $(pwd):/usr/share/nginx/html nginx:alpine",
-    "test": "node scripts/run-tests.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:catering": "vitest run test/catering",
     "test:menu": "node test/admin-menu.test.js",
     "migrate:menu": "node scripts/fix-production-data.js",
     "migrate:menu-old": "node scripts/fix-menu-data.js",
@@ -38,9 +42,14 @@
   "author": "Philly Wings Express",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@testing-library/react": "^16.3.0",
     "@vitejs/plugin-legacy": "^5.0.0",
+    "@vitest/ui": "^4.0.2",
     "firebase-tools": "^14.16.0",
-    "vite": "^5.0.0"
+    "happy-dom": "^20.0.8",
+    "jsdom": "^27.0.1",
+    "vite": "^5.0.0",
+    "vitest": "^4.0.2"
   },
   "dependencies": {
     "express": "^5.1.0",

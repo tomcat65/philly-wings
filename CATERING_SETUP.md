@@ -79,7 +79,7 @@ curl -X POST http://localhost:5002/philly-wings/us-central1/ezCaterOrderWebhook 
       "company_name": "Test Company",
       "contact_name": "John Doe",
       "email": "john@test.com",
-      "phone": "555-1234"
+      "phone": "267-376-3113"
     },
     "items": [{
       "name": "The Lunch Box Special",
@@ -157,6 +157,8 @@ firebase functions:config:get
 # Seed to production Firestore (NO --emulator flag)
 node scripts/seed-catering-data.js
 ```
+
+> ℹ️ **Service account required:** Set `GOOGLE_APPLICATION_CREDENTIALS` to your Firebase service account JSON before running the production seed command, or place `serviceAccountKey.json` in the project root. The seed script reads this path automatically.
 
 ### Step 4: Deploy Functions
 

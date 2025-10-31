@@ -27,11 +27,12 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <!-- Stylesheets (bundled by Vite during build) -->
+  <link rel="stylesheet" href="/src/styles/aural-spinner.css">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 
   <!-- Structured Data for Rich Snippets -->
   <script type="application/ld+json">
@@ -41,7 +42,7 @@
     "name": "Philly Wings Express",
     "description": "Philadelphia wing catering with 14 signature sauces",
     "servesCuisine": "American, Wings",
-    "telephone": "+1-215-555-1234",
+  "telephone": "+1-267-376-3113",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Oxford Circle",
@@ -73,7 +74,7 @@
         <li><a href="/catering" class="active">Catering</a></li>
         <li><a href="#catering-packages" class="nav-scroll">Choose Package</a></li>
         <li><a href="/#menu">Menu</a></li>
-        <li><a href="/#about">About</a></li>
+        <li><a href="/about">About Us</a></li>
         <li><a href="https://www.ezcater.com/brand/pvt/philly-wings-express" class="btn-nav-cta" target="_blank" rel="noopener noreferrer">🔥 Order Now</a></li>
       </ul>
       <button class="nav-toggle" aria-label="Toggle navigation">
@@ -87,7 +88,8 @@
   <!-- Main Content -->
   <main id="catering-content">
     <!-- Content will be loaded here by JavaScript -->
-    <div class="loading-spinner">
+    <div class="loading-spinner" role="status" aria-live="polite">
+      <div class="aural-spinner" aria-hidden="true"></div>
       <p>Loading catering options...</p>
     </div>
   </main>
@@ -102,7 +104,7 @@
 
       <div class="footer-section">
         <h4>Contact</h4>
-        <p>Phone: <a href="tel:+12155551234">(215) 555-1234</a></p>
+        <p>Phone: <a href="tel:+12673763113">(267) 376-3113</a></p>
         <p>Email: <a href="mailto:catering@phillywingsexpress.com">catering@phillywingsexpress.com</a></p>
       </div>
 
@@ -112,7 +114,7 @@
           <li><a href="/">Home</a></li>
           <li><a href="/catering">Catering</a></li>
           <li><a href="/#menu">Menu</a></li>
-          <li><a href="/#about">About</a></li>
+          <li><a href="/about">About Us</a></li>
         </ul>
       </div>
 
@@ -154,7 +156,7 @@
         contentContainer.innerHTML = `
           <div class="error-message">
             <h2>Oops! Something went wrong</h2>
-            <p>We're having trouble loading our catering packages. Please try again or call us at (215) 555-1234.</p>
+            <p>We're having trouble loading our catering packages. Please try again or call us at (267) 376-3113.</p>
             <a href="https://www.ezcater.com/brand/pvt/philly-wings-express"
                class="btn-primary"
                target="_blank"

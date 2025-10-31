@@ -1,0 +1,644 @@
+/**
+ * Sauce Photo Card Selector Styles - SP-008 Enhanced
+ * Netflix-style sauce browsing with selection cart and heat filtering
+ *
+ * Design Principles:
+ * - Selection cart at top for visual feedback
+ * - Photo-based browsing (appetite appeal)
+ * - Heat level color coding
+ * - Social proof badges
+ * - Mobile-first responsive
+ *
+ * Created: 2025-10-27
+ */
+
+:root {
+  --sauce-primary: #ff6b35;
+  --sauce-success: #10b981;
+  --sauce-warning: #f59e0b;
+  --sauce-error: #ef4444;
+
+  --heat-mild: #10b981;
+  --heat-medium: #f59e0b;
+  --heat-hot: #ef4444;
+  --heat-insane: #7c3aed;
+
+  --gray-900: #111827;
+  --gray-800: #1f2937;
+  --gray-700: #374151;
+  --gray-600: #4b5563;
+  --gray-500: #6b7280;
+  --gray-300: #d1d5db;
+  --gray-200: #e5e7eb;
+  --gray-100: #f3f4f6;
+  --gray-50: #f9fafb;
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   Main Container
+   ======================================== */
+
+.sauce-photo-selector {
+  margin-bottom: var(--spacing-xl);
+}
+
+/* ========================================
+   Selection Cart at Top
+   ======================================== */
+
+.sauce-selection-cart {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 2px solid #fed7aa;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  transition: all var(--transition-base);
+}
+
+.sauce-selection-cart.cart-complete {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #6ee7b7;
+}
+
+.sauce-selection-cart.cart-over-limit {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: #fca5a5;
+}
+
+.sauce-selection-cart.cart-shake {
+  animation: cartShake 0.5s ease;
+}
+
+@keyframes cartShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-md);
+}
+
+.cart-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.cart-counter {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+  font-weight: 700;
+}
+
+.counter-current {
+  font-size: 1.5rem;
+  color: var(--sauce-primary);
+}
+
+.counter-separator {
+  font-size: 1rem;
+  color: var(--gray-500);
+}
+
+.counter-max {
+  font-size: 1rem;
+  color: var(--gray-600);
+}
+
+.cart-complete .counter-current {
+  color: var(--sauce-success);
+}
+
+/* Cart Items */
+.cart-items {
+  min-height: 60px;
+  margin-bottom: var(--spacing-md);
+}
+
+.cart-empty {
+  text-align: center;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: var(--spacing-md) 0;
+}
+
+.cart-items-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.cart-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: white;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  transition: all var(--transition-fast);
+  animation: itemSlideIn 0.2s ease-out;
+}
+
+@keyframes itemSlideIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cart-item-icon {
+  font-size: 1rem;
+}
+
+.cart-item-name {
+  flex: 1;
+}
+
+.cart-item-remove {
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.cart-item-remove:hover {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+/* Cart Tips */
+.cart-tips {
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.tip-text {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--gray-700);
+  margin: 0;
+}
+
+.tip-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Cart Validation Message */
+.cart-validation {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
+  color: var(--sauce-error);
+  font-size: 0.875rem;
+  font-weight: 600;
+  animation: validationSlideDown 0.3s ease-out;
+}
+
+@keyframes validationSlideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.validation-icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   Heat Level Filter
+   ======================================== */
+
+.sauce-heat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-md);
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+}
+
+.heat-filter-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.heat-filter-btn:hover {
+  border-color: var(--gray-300);
+  background: var(--gray-50);
+}
+
+.heat-filter-btn.active {
+  background: var(--sauce-primary);
+  border-color: var(--sauce-primary);
+  color: white;
+}
+
+.heat-filter-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+
+/* ========================================
+   Sauce Cards Grid
+   ======================================== */
+
+.sauce-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 640px) {
+  .sauce-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .sauce-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .sauce-cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ========================================
+   Sauce Photo Card
+   ======================================== */
+
+.sauce-photo-card {
+  background: white;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 44px; /* Touch target */
+  display: flex;
+  flex-direction: column;
+}
+
+.sauce-photo-card:hover {
+  border-color: var(--sauce-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.sauce-photo-card:focus {
+  outline: none;
+  border-color: var(--sauce-primary);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+
+.sauce-photo-card.card-selected {
+  border-color: var(--sauce-primary);
+  border-width: 3px;
+  background: #fff7ed;
+}
+
+.sauce-photo-card.card-clicked {
+  animation: cardPulse 300ms ease-out;
+}
+
+@keyframes cardPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+}
+
+/* ========================================
+   Sauce Card Image
+   ======================================== */
+
+.sauce-card-image {
+  position: relative;
+  height: 180px;
+  background: var(--gray-100);
+  overflow: hidden;
+}
+
+.sauce-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.sauce-photo-card:hover .sauce-img {
+  transform: scale(1.05);
+}
+
+/* Selected Overlay */
+.sauce-selected-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 107, 53, 0.9);
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: center;
+}
+
+.sauce-photo-card.card-selected .sauce-selected-overlay {
+  display: flex;
+}
+
+.selected-check {
+  font-size: 3rem;
+  color: white;
+  animation: checkPop 200ms ease-out;
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Social Proof Badge */
+.sauce-social-badge {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--gray-900);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  z-index: 2;
+}
+
+/* Heat Level Badge */
+.sauce-heat-badge {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  left: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ========================================
+   Sauce Card Content
+   ======================================== */
+
+.sauce-card-content {
+  padding: var(--spacing-md);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sauce-card-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.3;
+}
+
+.sauce-card-description {
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+  line-height: 1.4;
+  margin: 0 0 var(--spacing-sm) 0;
+  flex: 1;
+}
+
+.sauce-card-story {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  line-height: 1.4;
+  margin: 0;
+  font-style: italic;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--gray-100);
+}
+
+/* ========================================
+   Mobile Optimizations
+   ======================================== */
+
+@media (max-width: 640px) {
+  .sauce-selection-cart {
+    padding: var(--spacing-md);
+  }
+
+  .cart-title {
+    font-size: 1rem;
+  }
+
+  .counter-current {
+    font-size: 1.25rem;
+  }
+
+  .cart-items-list {
+    flex-direction: column;
+  }
+
+  .cart-item {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sauce-heat-filter {
+    flex-direction: column;
+  }
+
+  .heat-filter-btn {
+    width: 100%;
+  }
+
+  .sauce-card-image {
+    height: 150px;
+  }
+
+  .sauce-card-name {
+    font-size: 0.875rem;
+  }
+
+  .sauce-card-description {
+    font-size: 0.75rem;
+  }
+}
+
+/* ========================================
+   Continue Button Actions
+   ======================================== */
+
+.sauce-selector-actions {
+  margin: var(--spacing-xl) 0;
+  text-align: center;
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-continue-sauces {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--sauce-primary) 0%, #e74c3c 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-lg);
+  min-width: 250px;
+  min-height: 48px; /* Mobile touch target */
+}
+
+.btn-continue-sauces:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.btn-continue-sauces:active {
+  transform: translateY(0);
+}
+
+.btn-continue-sauces:focus {
+  outline: 3px solid var(--sauce-primary);
+  outline-offset: 2px;
+}
+
+/* Distribution container */
+.sauce-distribution-container {
+  margin-top: var(--spacing-xl);
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .sauce-photo-card,
+  .sauce-img,
+  .cart-item,
+  .heat-filter-btn,
+  .btn-continue-sauces {
+    transition: none;
+  }
+
+  .sauce-photo-card:hover,
+  .btn-continue-sauces:hover {
+    transform: none;
+  }
+
+  .sauce-photo-card:hover .sauce-img {
+    transform: none;
+  }
+
+  .sauce-photo-card.card-clicked,
+  .selected-check,
+  .cart-item,
+  .cart-validation,
+  .sauce-selection-cart.cart-shake,
+  .sauce-selector-actions,
+  .sauce-distribution-container {
+    animation: none;
+  }
+}

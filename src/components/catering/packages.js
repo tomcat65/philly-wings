@@ -26,7 +26,7 @@ export async function renderCateringPackages() {
       tierAddOnsMap[tier] = await getAddOnsSplitByCategory(tier);
     } catch (error) {
       console.warn(`Unable to load add-ons for tier ${tier}:`, error);
-      tierAddOnsMap[tier] = { vegetarian: [], desserts: [] };
+      tierAddOnsMap[tier] = { vegetarian: [], desserts: [], hotBeverages: [] };
     }
   }
 
@@ -68,7 +68,7 @@ export async function renderCateringPackages() {
   `;
 }
 
-function renderTier(tierTitle, tierDescription, packages, tierAddOns = { vegetarian: [], desserts: [] }) {
+function renderTier(tierTitle, tierDescription, packages, tierAddOns = { vegetarian: [], desserts: [], hotBeverages: [] }) {
   if (packages.length === 0) return '';
 
   return `
@@ -85,7 +85,7 @@ function renderTier(tierTitle, tierDescription, packages, tierAddOns = { vegetar
   `;
 }
 
-function renderPackageCard(pkg, tierAddOns = { vegetarian: [], desserts: [] }) {
+function renderPackageCard(pkg, tierAddOns = { vegetarian: [], desserts: [], hotBeverages: [] }) {
   // If package has wingOptions (new schema), render configurator
   if (pkg.wingOptions && pkg.sauceSelections && pkg.dipsIncluded) {
     return renderPackageConfigurator(pkg, tierAddOns);

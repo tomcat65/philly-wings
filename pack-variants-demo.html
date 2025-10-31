@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pack Variants UI Demo - Philly Wings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .option-wrapper {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .option-header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .option-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .option-desc {
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    /* Card Base Styles */
+    .card {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: #ff6b35;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    .card-image {
+      height: 140px;
+      background: linear-gradient(135deg, #ff6b35 0%, #f05545 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .card-name {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-desc {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .heat-level {
+      display: inline-block;
+      margin-left: 0.5rem;
+    }
+
+    /* Quantity Controls */
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #e5e7eb;
+      background: white;
+      color: #374151;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .qty-btn:hover {
+      background: #ff6b35;
+      color: white;
+      border-color: #ff6b35;
+    }
+
+    .qty-display {
+      min-width: 32px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: #1a1a1a;
+    }
+
+    /* Option A: Tabs */
+    .tabs-container {
+      margin-top: 1rem;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 1rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.2s;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab.active {
+      color: #ff6b35;
+      border-bottom-color: #ff6b35;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 1rem 0;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-price {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ff6b35;
+      margin-bottom: 0.5rem;
+    }
+
+    .tab-detail {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    /* Option B & C: Stacked Rows */
+    .variant-rows {
+      margin-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 1rem;
+    }
+
+    .variant-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+    }
+
+    .variant-row + .variant-row {
+      border-top: 1px dashed #e5e7eb;
+    }
+
+    .variant-row.spacious {
+      padding: 1rem 0;
+    }
+
+    .variant-label {
+      flex: 1;
+    }
+
+    .variant-name {
+      font-weight: 600;
+      color: #1a1a1a;
+      display: block;
+    }
+
+    .variant-price {
+      font-weight: 700;
+      color: #ff6b35;
+      margin-left: 0.5rem;
+    }
+
+    .variant-detail {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+    .variant-icon {
+      margin-right: 0.5rem;
+      font-size: 1.25rem;
+    }
+
+    /* Option D: Side-by-Side */
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 1rem;
+    }
+
+    .column {
+      text-align: center;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+
+    .column-title {
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .column-price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ff6b35;
+      margin-bottom: 1rem;
+    }
+
+    /* Option E: Dropdown */
+    .select-wrapper {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .select-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+
+    .price-info {
+      font-size: 1.125rem;
+      color: #666;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .price-amount {
+      font-weight: 700;
+      color: #ff6b35;
+    }
+
+    /* Option F: Radio */
+    .radio-group {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .radio-label {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .radio-option:hover {
+      border-color: #ff6b35;
+      background: #fff7ed;
+    }
+
+    .radio-option.selected {
+      border-color: #ff6b35;
+      background: #fff7ed;
+    }
+
+    .radio-option input {
+      margin-right: 0.75rem;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .radio-text {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .savings-badge {
+      background: #10b981;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .qty-section {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .qty-section-label {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <h1>🍗 Pack Variants UI Demo</h1>
+    <p class="subtitle">Click the +/− buttons to test each option • Choose your favorite!</p>
+
+    <div class="options-grid">
+      <!-- Option A: Tabs -->
+      <div class="option-wrapper">
+        <div class="option-header">
+          <div class="option-title">Option A: Horizontal Tabs</div>
+          <div class="option-desc">Switch between sizes</div>
+        </div>
+
+        <div class="card">
+          <div class="card-image">🌶️</div>
+          <div class="card-content">
+            <div class="card-name">Buffalo Sauce <span class="heat-level">🌶️🌶️</span></div>
+            <div class="card-desc">Tangy, classic hot sauce</div>
+
+            <div class="tabs-container">
+              <div class="tabs">
+                <button class="tab active" onclick="switchTab('a', 'individual')">
+                  Individual
+                </button>
+                <button class="tab" onclick="switchTab('a', 'pack')">
+                  5-Pack
+                </button>
+              </div>
+
+              <div id="tab-a-individual" class="tab-content active">
+                <span class="tab-price">$0.85</span>
+                <div class="tab-detail">1.5oz cup</div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('a-ind', -1)">−</button>
+                  <span class="qty-display" id="qty-a-ind">0</span>
+                  <button class="qty-btn" onclick="changeQty('a-ind', 1)">+</button>
+                </div>
+              </div>
+
+              <div id="tab-a-pack" class="tab-content">
+                <span class="tab-price">$4.25</span>
+                <div class="tab-detail">Five 1.5oz cups</div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('a-pack', -1)">−</button>
+                  <span class="qty-display" id="qty-a-pack">0</span>
+                  <button class="qty-btn" onclick="changeQty('a-pack', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option B: Compact Rows -->
+      <div class="option-wrapper">
+        <div class="option-header">
+          <div class="option-title">Option B: Compact Rows</div>
+          <div class="option-desc">Both options visible, minimal space</div>
+        </div>
+
+        <div class="card">
+          <div class="card-image">🌶️</div>
+          <div class="card-content">
+            <div class="card-name">Buffalo Sauce <span class="heat-level">🌶️🌶️</span></div>
+            <div class="card-desc">Tangy, classic hot sauce</div>
+
+            <div class="variant-rows">
+              <div class="variant-row">
+                <div class="variant-label">
+                  <span class="variant-name">Individual <span class="variant-price">$0.85</span></span>
+                </div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('b-ind', -1)">−</button>
+                  <span class="qty-display" id="qty-b-ind">0</span>
+                  <button class="qty-btn" onclick="changeQty('b-ind', 1)">+</button>
+                </div>
+              </div>
+
+              <div class="variant-row">
+                <div class="variant-label">
+                  <span class="variant-name">5-Pack <span class="variant-price">$4.25</span></span>
+                </div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('b-pack', -1)">−</button>
+                  <span class="qty-display" id="qty-b-pack">0</span>
+                  <button class="qty-btn" onclick="changeQty('b-pack', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option C: Spacious Rows -->
+      <div class="option-wrapper">
+        <div class="option-header">
+          <div class="option-title">Option C: Spacious Rows</div>
+          <div class="option-desc">Icons and generous spacing</div>
+        </div>
+
+        <div class="card">
+          <div class="card-image">🌶️</div>
+          <div class="card-content">
+            <div class="card-name">Buffalo Sauce <span class="heat-level">🌶️🌶️</span></div>
+            <div class="card-desc">Tangy, classic hot sauce</div>
+
+            <div class="variant-rows">
+              <div class="variant-row spacious">
+                <div class="variant-label">
+                  <span class="variant-icon">🥤</span>
+                  <span class="variant-name">Individual <span class="variant-price">$0.85</span></span>
+                  <div class="variant-detail">1.5oz cup</div>
+                </div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('c-ind', -1)">−</button>
+                  <span class="qty-display" id="qty-c-ind">0</span>
+                  <button class="qty-btn" onclick="changeQty('c-ind', 1)">+</button>
+                </div>
+              </div>
+
+              <div class="variant-row spacious">
+                <div class="variant-label">
+                  <span class="variant-icon">📦</span>
+                  <span class="variant-name">5-Pack <span class="variant-price">$4.25</span></span>
+                  <div class="variant-detail">Five 1.5oz cups</div>
+                </div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('c-pack', -1)">−</button>
+                  <span class="qty-display" id="qty-c-pack">0</span>
+                  <button class="qty-btn" onclick="changeQty('c-pack', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option D: Side-by-Side -->
+      <div class="option-wrapper">
+        <div class="option-header">
+          <div class="option-title">Option D: Side-by-Side</div>
+          <div class="option-desc">Compare options in columns</div>
+        </div>
+
+        <div class="card">
+          <div class="card-image">🌶️</div>
+          <div class="card-content">
+            <div class="card-name">Buffalo Sauce <span class="heat-level">🌶️🌶️</span></div>
+            <div class="card-desc">Tangy, classic hot sauce</div>
+
+            <div class="columns">
+              <div class="column">
+                <div class="column-title">Individual</div>
+                <div class="column-price">$0.85</div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('d-ind', -1)">−</button>
+                  <span class="qty-display" id="qty-d-ind">0</span>
+                  <button class="qty-btn" onclick="changeQty('d-ind', 1)">+</button>
+                </div>
+              </div>
+
+              <div class="column">
+                <div class="column-title">5-Pack</div>
+                <div class="column-price">$4.25</div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('d-pack', -1)">−</button>
+                  <span class="qty-display" id="qty-d-pack">0</span>
+                  <button class="qty-btn" onclick="changeQty('d-pack', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option E: Dropdown -->
+      <div class="option-wrapper">
+        <div class="option-header">
+          <div class="option-title">Option E: Dropdown Select</div>
+          <div class="option-desc">Traditional e-commerce style</div>
+        </div>
+
+        <div class="card">
+          <div class="card-image">🌶️</div>
+          <div class="card-content">
+            <div class="card-name">Buffalo Sauce <span class="heat-level">🌶️🌶️</span></div>
+            <div class="card-desc">Tangy, classic hot sauce</div>
+
+            <div class="select-wrapper">
+              <label class="select-label">Pack Size:</label>
+              <select id="select-e" onchange="updateSelectPrice('e')">
+                <option value="ind">Individual - $0.85</option>
+                <option value="pack">5-Pack - $4.25</option>
+              </select>
+
+              <div class="price-info">
+                <span id="price-e" class="price-amount">$0.85</span> • 1.5oz cup
+              </div>
+
+              <div class="qty-controls">
+                <button class="qty-btn" onclick="changeQty('e', -1)">−</button>
+                <span class="qty-display" id="qty-e">0</span>
+                <button class="qty-btn" onclick="changeQty('e', 1)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option F: Radio -->
+      <div class="option-wrapper">
+        <div class="option-header">
+          <div class="option-title">Option F: Radio Selection</div>
+          <div class="option-desc">Choose size then quantity</div>
+        </div>
+
+        <div class="card">
+          <div class="card-image">🌶️</div>
+          <div class="card-content">
+            <div class="card-name">Buffalo Sauce <span class="heat-level">🌶️🌶️</span></div>
+            <div class="card-desc">Tangy, classic hot sauce</div>
+
+            <div class="radio-group">
+              <label class="radio-label">Choose size:</label>
+
+              <label class="radio-option" id="radio-f-ind">
+                <input type="radio" name="size-f" value="ind" checked onchange="selectRadio('f', 'ind')">
+                <span class="radio-text">Individual - $0.85</span>
+              </label>
+
+              <label class="radio-option selected" id="radio-f-pack">
+                <input type="radio" name="size-f" value="pack" onchange="selectRadio('f', 'pack')">
+                <span class="radio-text">5-Pack - $4.25</span>
+                <span class="savings-badge">💰 Save $0.50</span>
+              </label>
+
+              <div class="qty-section">
+                <label class="qty-section-label">Quantity:</label>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="changeQty('f', -1)">−</button>
+                  <span class="qty-display" id="qty-f">0</span>
+                  <button class="qty-btn" onclick="changeQty('f', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    function switchTab(option, variant) {
+      const tabs = document.querySelectorAll(`#tab-${option}-individual, #tab-${option}-pack`);
+      tabs.forEach(tab => tab.classList.remove('active'));
+
+      const buttons = document.querySelectorAll(`.option-wrapper:nth-child(1) .tab`);
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById(`tab-${option}-${variant}`).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Quantity controls
+    function changeQty(id, delta) {
+      const display = document.getElementById(`qty-${id}`);
+      let current = parseInt(display.textContent);
+      current = Math.max(0, Math.min(99, current + delta));
+      display.textContent = current;
+    }
+
+    // Dropdown price update
+    function updateSelectPrice(option) {
+      const select = document.getElementById(`select-${option}`);
+      const priceEl = document.getElementById(`price-${option}`);
+
+      if (select.value === 'ind') {
+        priceEl.textContent = '$0.85';
+      } else {
+        priceEl.textContent = '$4.25';
+      }
+    }
+
+    // Radio selection
+    function selectRadio(option, variant) {
+      const options = document.querySelectorAll(`#radio-${option}-ind, #radio-${option}-pack`);
+      options.forEach(opt => opt.classList.remove('selected'));
+      document.getElementById(`radio-${option}-${variant}`).classList.add('selected');
+    }
+  </script>
+</body>
+</html>

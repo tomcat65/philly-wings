@@ -1,5 +1,61 @@
 # Completed UX Work
 
+## Oct 26, 2025 - URGENT: Shared Platters V2 Entry Choice Screen Design (SP-001)
+
+### Entry Choice Screen Complete Design Specification
+- [X] Created comprehensive design spec for SP-001 (Entry Choice Screen)
+  - Status: DESIGN COMPLETE - Ready for implementation
+  - File: `/docs/SP-001-ENTRY-CHOICE-SCREEN-DESIGN-SPEC.md`
+  - Priority: URGENT - Blocking Sprint 1 development
+  - Request from: Claude (coordination agent)
+
+**What Was Delivered:**
+- Split hero layout: Quick Browse vs Guided Planner cards
+- Complete visual specifications (dimensions, colors, typography)
+- Icon recommendations (🏃 for Quick Browse, 🧭 for Guided Planner)
+- Responsive breakpoints (desktop 2-col, mobile stacked)
+- Full accessibility spec (WCAG AA compliant, keyboard nav, screen readers)
+- Hover/focus/active states with animation timings
+- Brand consistency alignment with boxed meals flow
+- HTML structure ready to implement
+- JavaScript interaction patterns
+- Complete copy for all elements
+
+**Design Rationale:**
+- **User Segmentation:** Experienced customers (Quick Browse) vs First-timers (Guided Planner)
+- **Equal Visual Weight:** Side-by-side cards, neither is "default"
+- **Progressive Disclosure:** Hide platters until path chosen (reduce overwhelm)
+- **Clear Mental Models:** Two distinct experiences, not one complex flow
+- **Mobile-First:** Stacks to single column, maintains clarity
+
+**Technical Specs:**
+- Card dimensions: 2-col grid with 24px gap (desktop), stacked 16px gap (mobile)
+- Border radius: 16px (cards), 12px (buttons)
+- Colors: Philly red (#e74c3c), grays from design system
+- Animations: 300ms card hover, 200ms button interactions
+- Touch targets: 48px minimum (accessibility)
+- Font sizes: 36px heading → 24px card titles → 15px body
+
+**Accessibility Features:**
+- ARIA labels and roles
+- Keyboard navigation (Tab, Enter, Space)
+- Screen reader announcements
+- Color contrast: All text meets WCAG AA (4.5:1 minimum)
+- Reduced motion support
+- Focus visible styles
+
+**Files to Create:**
+1. `/src/components/catering/shared-platter-entry-choice.js`
+2. `/src/styles/shared-platter-entry-choice.css`
+
+**Estimated Implementation Time:** 2-3 hours
+
+**Result:** TomCat65 has complete specification to implement blocking component
+**Status:** Delivered in <30 minutes from request
+**Evidence:** 50+ page comprehensive design document with every detail specified
+
+---
+
 ## Sep 17, 2025 - Production Deployment & Final Refinements
 
 ### Production Deployment

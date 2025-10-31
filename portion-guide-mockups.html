@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portion Guide Button Mockups</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      padding: 2rem 1rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      font-size: 1.75rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 3rem;
+      font-size: 1rem;
+    }
+
+    .mockup-section {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .mockup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .mockup-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .mockup-badge {
+      display: inline-block;
+      padding: 0.375rem 0.875rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-subtle { background: #e3f2fd; color: #1976d2; }
+    .badge-modern { background: #f3e5f5; color: #7b1fa2; }
+    .badge-bold { background: #fff3e0; color: #e65100; }
+
+    .mockup-description {
+      color: #666;
+      margin-bottom: 1.5rem;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .mockup-demo {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 120px;
+    }
+
+    /* ==========================================
+       OPTION 1: SUBTLE INLINE LINK
+       ========================================== */
+    .portion-guide-option1 {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .btn-portion-guide-1 {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+      background: transparent;
+      color: #3498db;
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border-bottom: 1px dashed #3498db;
+    }
+
+    .btn-portion-guide-1:hover {
+      color: #2980b9;
+      border-bottom-color: #2980b9;
+      gap: 0.625rem;
+    }
+
+    .btn-portion-guide-1:active {
+      transform: translateY(1px);
+    }
+
+    .btn-portion-guide-1 .guide-icon-1 {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-portion-guide-1:hover .guide-icon-1 {
+      transform: scale(1.1);
+    }
+
+    /* ==========================================
+       OPTION 2: MODERN CARD BUTTON
+       ========================================== */
+    .portion-guide-option2 {
+      margin-top: 1.5rem;
+    }
+
+    .btn-portion-guide-2 {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-portion-guide-2::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-portion-guide-2:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+    }
+
+    .btn-portion-guide-2:hover::before {
+      left: 100%;
+    }
+
+    .btn-portion-guide-2:active {
+      transform: translateY(0);
+    }
+
+    .btn-portion-guide-2 .guide-icon-2 {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .btn-portion-guide-2 .guide-content-2 {
+      flex: 1;
+      text-align: left;
+    }
+
+    .btn-portion-guide-2 .guide-title-2 {
+      font-weight: 700;
+      margin-bottom: 0.125rem;
+      font-size: 0.9375rem;
+    }
+
+    .btn-portion-guide-2 .guide-subtitle-2 {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+
+    .btn-portion-guide-2 .guide-arrow-2 {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-portion-guide-2:hover .guide-arrow-2 {
+      transform: translateX(4px);
+    }
+
+    /* ==========================================
+       OPTION 3: BOLD INFO BANNER
+       ========================================== */
+    .portion-guide-option3 {
+      margin-top: 1.5rem;
+    }
+
+    .btn-portion-guide-3 {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      background: #fff7ed;
+      color: #1a1a1a;
+      border: 2px solid #fed7aa;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .btn-portion-guide-3:hover {
+      background: #ffedd5;
+      border-color: #fdba74;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+    }
+
+    .btn-portion-guide-3:active {
+      transform: translateY(0);
+    }
+
+    .btn-portion-guide-3 .guide-icon-wrapper-3 {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+    }
+
+    .btn-portion-guide-3 .guide-icon-3 {
+      width: 24px;
+      height: 24px;
+      color: white;
+    }
+
+    .btn-portion-guide-3 .guide-content-3 {
+      flex: 1;
+    }
+
+    .btn-portion-guide-3 .guide-label-3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #ea580c;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+
+    .btn-portion-guide-3 .guide-title-3 {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.125rem;
+    }
+
+    .btn-portion-guide-3 .guide-subtitle-3 {
+      font-size: 0.8125rem;
+      color: #666;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem 0.75rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .mockup-section {
+        padding: 1.25rem;
+      }
+
+      .mockup-demo {
+        padding: 1.5rem 1rem;
+      }
+
+      .btn-portion-guide-2 {
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      .btn-portion-guide-3 {
+        padding: 1rem 1.25rem;
+      }
+
+      .btn-portion-guide-3 .guide-icon-wrapper-3 {
+        width: 40px;
+        height: 40px;
+      }
+
+      .btn-portion-guide-3 .guide-icon-3 {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Portion Guide Button Mockups</h1>
+    <p class="subtitle">Choose your favorite design for the SP-003 Event Details Form</p>
+
+    <!-- OPTION 1: Subtle Inline Link -->
+    <div class="mockup-section">
+      <div class="mockup-header">
+        <h2 class="mockup-title">Option 1: Subtle Inline Link</h2>
+        <span class="mockup-badge badge-subtle">Minimalist</span>
+      </div>
+      <p class="mockup-description">
+        <strong>Style:</strong> Clean, non-intrusive text link with dashed underline<br>
+        <strong>Best for:</strong> Users who prefer minimal UI, desktop-heavy audiences<br>
+        <strong>Pros:</strong> Doesn't take up much space, feels natural, professional<br>
+        <strong>Cons:</strong> Might be missed on mobile, less prominent
+      </p>
+      <div class="mockup-demo">
+        <div class="portion-guide-option1">
+          <button type="button" class="btn-portion-guide-1">
+            <svg class="guide-icon-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span class="guide-text-1">Need help calculating portions?</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTION 2: Modern Card Button -->
+    <div class="mockup-section">
+      <div class="mockup-header">
+        <h2 class="mockup-title">Option 2: Modern Card Button</h2>
+        <span class="mockup-badge badge-modern">Premium</span>
+      </div>
+      <p class="mockup-description">
+        <strong>Style:</strong> Full-width gradient button with title + subtitle layout<br>
+        <strong>Best for:</strong> Mobile users, maximum visibility and engagement<br>
+        <strong>Pros:</strong> Eye-catching, clear call-to-action, premium feel, great on mobile<br>
+        <strong>Cons:</strong> Takes more vertical space, might feel too prominent
+      </p>
+      <div class="mockup-demo">
+        <div class="portion-guide-option2">
+          <button type="button" class="btn-portion-guide-2">
+            <svg class="guide-icon-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <div class="guide-content-2">
+              <div class="guide-title-2">Portion Size Calculator</div>
+              <div class="guide-subtitle-2">Find out exactly how many wings you need</div>
+            </div>
+            <svg class="guide-arrow-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTION 3: Bold Info Banner -->
+    <div class="mockup-section">
+      <div class="mockup-header">
+        <h2 class="mockup-title">Option 3: Bold Info Banner</h2>
+        <span class="mockup-badge badge-bold">Engaging</span>
+      </div>
+      <p class="mockup-description">
+        <strong>Style:</strong> Warm orange info banner with icon badge and multi-line content<br>
+        <strong>Best for:</strong> Drawing attention without being too aggressive, balanced approach<br>
+        <strong>Pros:</strong> Informative, friendly, works well on mobile and desktop, matches food theme<br>
+        <strong>Cons:</strong> Color might not match all brand themes
+      </p>
+      <div class="mockup-demo">
+        <div class="portion-guide-option3">
+          <button type="button" class="btn-portion-guide-3">
+            <div class="guide-icon-wrapper-3">
+              <svg class="guide-icon-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div class="guide-content-3">
+              <div class="guide-label-3">🍗 Helpful Tool</div>
+              <div class="guide-title-3">Not sure how many wings to order?</div>
+              <div class="guide-subtitle-3">Use our portion calculator to get the perfect amount</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 2rem 1rem; color: #666;">
+      <p style="margin-bottom: 0.5rem;">📱 Try resizing your browser to see mobile responsiveness</p>
+      <p style="font-size: 0.875rem;">All options are fully mobile-optimized and accessible</p>
+    </div>
+  </div>
+</body>
+</html>

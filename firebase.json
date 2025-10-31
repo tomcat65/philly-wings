@@ -22,6 +22,10 @@
           "destination": "/catering.html"
         },
         {
+          "source": "/about",
+          "destination": "/about.html"
+        },
+        {
           "source": "/api/sports",
           "function": "getSportsData"
         },

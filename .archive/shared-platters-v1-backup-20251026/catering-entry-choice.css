@@ -1,0 +1,289 @@
+/**
+ * Catering Entry Choice Styles
+ * Slab-style toggle with persistent scroll and mobile sticky tabs
+ */
+
+.catering-entry-choice {
+  max-width: 1200px;
+  margin: 3rem auto 4rem;
+  padding: 0 1rem;
+  transition: all 0.3s ease;
+}
+
+/* Sticky behavior after scroll */
+.catering-entry-choice.is-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  padding: 1rem;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.catering-entry-choice.is-sticky .entry-choice-header {
+  display: none;
+}
+
+.catering-entry-choice.is-sticky .entry-choice-toggle {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header */
+.entry-choice-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.entry-choice-header h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.entry-choice-subtitle {
+  font-size: 1.125rem;
+  color: #7f8c8d;
+}
+
+/* Toggle Container */
+.entry-choice-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Choice Option (Slab-style button) */
+.entry-choice-option {
+  background: white;
+  border: 3px solid #ecf0f1;
+  border-radius: 16px;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.entry-choice-option::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.entry-choice-option:hover {
+  border-color: #e74c3c;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(231, 76, 60, 0.15);
+}
+
+.entry-choice-option.active {
+  border-color: #e74c3c;
+  background: #fff5f4;
+  box-shadow: 0 8px 24px rgba(231, 76, 60, 0.2);
+}
+
+.entry-choice-option.active::before {
+  background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+}
+
+/* Choice Icon */
+.choice-icon {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+/* Choice Content */
+.choice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choice-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.choice-description {
+  font-size: 1rem;
+  color: #e74c3c;
+  font-weight: 600;
+  margin: 0;
+}
+
+.choice-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choice-bullets li {
+  font-size: 0.9375rem;
+  color: #7f8c8d;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.choice-bullets li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #27ae60;
+  font-weight: 700;
+}
+
+.entry-choice-option.active .choice-bullets li {
+  color: #2c3e50;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Tablet: Reduce padding, maintain grid */
+@media (max-width: 1024px) {
+  .entry-choice-toggle {
+    gap: 1rem;
+  }
+
+  .entry-choice-option {
+    padding: 1.5rem;
+  }
+
+  .choice-icon {
+    font-size: 2.5rem;
+  }
+
+  .choice-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Mobile: Convert to sticky tabs */
+@media (max-width: 768px) {
+  .catering-entry-choice {
+    margin: 2rem auto 3rem;
+  }
+
+  .entry-choice-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .entry-choice-subtitle {
+    font-size: 1rem;
+  }
+
+  .entry-choice-toggle {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: none;
+  }
+
+  .entry-choice-option {
+    padding: 1.25rem;
+  }
+
+  .choice-bullets {
+    font-size: 0.875rem;
+  }
+
+  /* Sticky tabs behavior on mobile */
+  .catering-entry-choice.is-sticky .entry-choice-toggle {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .catering-entry-choice.is-sticky .entry-choice-option {
+    padding: 0.75rem;
+    border-radius: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .catering-entry-choice.is-sticky .choice-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .catering-entry-choice.is-sticky .choice-content {
+    gap: 0.25rem;
+  }
+
+  .catering-entry-choice.is-sticky .choice-title {
+    font-size: 0.875rem;
+  }
+
+  .catering-entry-choice.is-sticky .choice-description,
+  .catering-entry-choice.is-sticky .choice-bullets {
+    display: none;
+  }
+}
+
+/* Small mobile: Further compact */
+@media (max-width: 480px) {
+  .entry-choice-option {
+    padding: 1rem;
+  }
+
+  .choice-icon {
+    font-size: 2rem;
+  }
+
+  .choice-title {
+    font-size: 1.125rem;
+  }
+
+  .choice-bullets li {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Accessibility: Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .entry-choice-option,
+  .entry-choice-option::before,
+  .catering-entry-choice {
+    transition: none;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.entry-choice-option:focus {
+  outline: 3px solid #e74c3c;
+  outline-offset: 4px;
+}
+
+.entry-choice-option:focus:not(:focus-visible) {
+  outline: none;
+}

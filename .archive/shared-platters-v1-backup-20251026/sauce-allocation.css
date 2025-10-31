@@ -1,0 +1,261 @@
+/* ================================
+   SAUCE ALLOCATION UI
+   ================================ */
+
+.allocation-summary {
+  display: flex;
+  gap: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.allocation-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.allocation-stat .stat-label {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.allocation-stat strong {
+  font-size: 24px;
+  color: #333;
+}
+
+.allocation-stat.remaining strong {
+  color: #ff6b35;
+}
+
+.allocation-stat.remaining.complete strong {
+  color: #28a745;
+}
+
+.allocation-stat.remaining.over-allocated strong {
+  color: #dc3545;
+}
+
+.skip-sauces-option {
+  margin-bottom: 24px;
+}
+
+.skip-sauces-option .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skip-sauces-option .checkbox-label:hover {
+  background: #e9ecef;
+}
+
+.skip-sauces-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+#sauce-allocation-container {
+  transition: opacity 0.2s;
+}
+
+#sauce-allocation-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sauce-allocation-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.sauce-allocation-row:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.1);
+}
+
+.row-number {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.row-controls {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.sauce-select-wrapper {
+  flex: 2;
+}
+
+.sauce-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sauce-select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.wing-count-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wing-count-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.wing-count-input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.input-label {
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.btn-remove-row {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-remove-row:hover {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.btn-remove-row .btn-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.btn-add-sauce-row {
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  color: #ff6b35;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-add-sauce-row:hover {
+  background: #fff5f2;
+  border-color: #ff6b35;
+  border-style: solid;
+}
+
+.btn-add-sauce-row .btn-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.allocation-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #fff5f2;
+  border-left: 4px solid #ff6b35;
+  border-radius: 6px;
+  margin-top: 20px;
+}
+
+.allocation-hint .hint-icon {
+  font-size: 20px;
+}
+
+.allocation-hint span:last-child {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .allocation-summary {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sauce-allocation-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row-controls {
+    flex-direction: column;
+  }
+
+  .sauce-select-wrapper,
+  .wing-count-wrapper {
+    flex: 1;
+  }
+}

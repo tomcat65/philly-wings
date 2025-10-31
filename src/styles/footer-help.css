@@ -1,0 +1,123 @@
+/**
+ * Footer Help Section Styles
+ * Link to FAQ page at bottom of catering flow
+ */
+
+.catering-footer-help {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e8f5f7 100%);
+  padding: 4rem 1rem;
+  margin-top: 10rem; /* Increased to prevent overlap with wings customization */
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+  clear: both;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-help-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.footer-help-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.help-subtitle {
+  font-size: 1.125rem;
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+}
+
+.help-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-help-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 2rem;
+  background: white;
+  border: 2px solid #004c54;
+  border-radius: 12px;
+  color: #004c54;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 76, 84, 0.1);
+  min-height: 60px;
+}
+
+.btn-help-link:hover {
+  background: #004c54;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 76, 84, 0.2);
+}
+
+.btn-help-link:active {
+  transform: translateY(0);
+}
+
+.help-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.help-text {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .catering-footer-help {
+    padding: 3rem 1rem;
+    margin-top: 3rem;
+  }
+
+  .footer-help-content h3 {
+    font-size: 1.75rem;
+  }
+
+  .help-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .help-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .btn-help-link {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .help-icon {
+    font-size: 1.25rem;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .help-actions {
+    gap: 1.25rem;
+  }
+
+  .btn-help-link {
+    flex: 1;
+    max-width: 300px;
+  }
+}

@@ -1,0 +1,113 @@
+/* Aural Spinner – luminous aura-inspired loader */
+
+.aural-spinner {
+  --aural-spinner-size: 68px;
+  --aural-ring-width: 10px;
+  position: relative;
+  width: var(--aural-spinner-size);
+  height: var(--aural-spinner-size);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  box-shadow:
+    0 0 18px rgba(168, 85, 247, 0.28),
+    0 0 32px rgba(45, 212, 191, 0.18),
+    inset 0 0 22px rgba(56, 189, 248, 0.12);
+}
+
+.aural-spinner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 10deg,
+    rgba(168, 85, 247, 0.18) 0deg,
+    rgba(59, 130, 246, 0.42) 75deg,
+    rgba(16, 185, 129, 0.38) 150deg,
+    rgba(56, 189, 248, 0.5) 210deg,
+    rgba(236, 72, 153, 0.48) 285deg,
+    rgba(168, 85, 247, 0.18) 360deg
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(50% - var(--aural-ring-width)),
+    rgba(0, 0, 0, 0.95) calc(50% - var(--aural-ring-width) + 2px),
+    rgba(0, 0, 0, 0.95) 100%
+  );
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(50% - var(--aural-ring-width)),
+    rgba(0, 0, 0, 0.95) calc(50% - var(--aural-ring-width) + 2px),
+    rgba(0, 0, 0, 0.95) 100%
+  );
+  filter: blur(0.6px);
+  animation: aura-spin 5.2s linear infinite, aura-pulse 2.6s ease-in-out infinite;
+}
+
+.aural-spinner::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--aural-ring-width) + 4px);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.42), transparent 58%),
+    radial-gradient(circle at 72% 65%, rgba(236, 72, 153, 0.35), transparent 60%),
+    radial-gradient(circle at center, rgba(15, 23, 42, 0.94) 30%, rgba(15, 23, 42, 0.55) 68%, rgba(15, 23, 42, 0.08) 100%);
+  box-shadow:
+    inset 0 0 12px rgba(15, 23, 42, 0.75),
+    0 0 18px rgba(147, 51, 234, 0.22);
+  animation: aura-core 3.4s ease-in-out infinite;
+}
+
+@keyframes aura-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes aura-pulse {
+  0%, 100% {
+    opacity: 0.75;
+    filter: saturate(1) brightness(0.95);
+  }
+  50% {
+    opacity: 1;
+    filter: saturate(1.35) brightness(1.25);
+  }
+}
+
+@keyframes aura-core {
+  0%, 100% {
+    transform: scale(0.96);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.92;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aural-spinner,
+  .aural-spinner::before,
+  .aural-spinner::after {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+/* Contextual sizing helpers */
+.banner-loading .aural-spinner {
+  --aural-spinner-size: 36px;
+  --aural-ring-width: 6px;
+  margin-bottom: 8px;
+}
+
+.recommendations-loading .aural-spinner,
+.nutrition-loading .aural-spinner {
+  margin-bottom: 1rem;
+}

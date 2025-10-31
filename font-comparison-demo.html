@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Comparison - Philly Wings Express</title>
+
+    <!-- Load ALL fonts for comparison -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;700;900&family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@400;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f5f5;
+            padding: 2rem;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .intro {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .intro h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .intro p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .font-sample {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .font-sample:hover {
+            border-color: #004C54;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,76,84,0.2);
+        }
+
+        .font-sample.current {
+            border-color: #ff6b35;
+            background: linear-gradient(135deg, #fff 0%, #fff9f5 100%);
+        }
+
+        .font-sample.recommended {
+            border-color: #00FF00;
+            background: linear-gradient(135deg, #fff 0%, #f0fff0 100%);
+        }
+
+        .label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+        }
+
+        .label.current {
+            background: #ff6b35;
+            color: white;
+        }
+
+        .label.option-a {
+            background: #00FF00;
+            color: #1a1a1a;
+        }
+
+        .label.option-b {
+            background: #004C54;
+            color: white;
+        }
+
+        .label.option-c {
+            background: #555;
+            color: white;
+        }
+
+        /* Font stack definitions */
+        .inter-bebas .body-text {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .inter-bebas .heading {
+            font-family: 'Bebas Neue', sans-serif;
+        }
+
+        .roboto-condensed .body-text {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .roboto-condensed .heading {
+            font-family: 'Roboto Condensed', 'Roboto', sans-serif;
+        }
+
+        .roboto-slab .body-text {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .roboto-slab .heading {
+            font-family: 'Roboto Slab', serif;
+        }
+
+        .roboto-mono .body-text {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .roboto-mono .heading {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        /* Typography samples */
+        .heading {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        .subheading {
+            font-size: 1.5rem;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: #2d2d2d;
+            font-weight: 700;
+        }
+
+        .body-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .body-text.large {
+            font-size: 1.125rem;
+        }
+
+        .body-text.small {
+            font-size: 0.875rem;
+        }
+
+        .button-sample {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #ff6b35;
+            color: white;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .button-sample:hover {
+            background: #ff5722;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #004C54;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .font-info {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #eee;
+            font-size: 0.875rem;
+            color: #777;
+        }
+
+        .pros-cons {
+            margin-top: 1rem;
+        }
+
+        .pros-cons h4 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .pros-cons ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .pros-cons li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .pros-cons li::before {
+            position: absolute;
+            left: 0;
+        }
+
+        .pros-cons.pros li::before {
+            content: '✓';
+            color: #00aa00;
+            font-weight: 900;
+        }
+
+        .pros-cons.cons li::before {
+            content: '✗';
+            color: #cc0000;
+            font-weight: 900;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .heading {
+                font-size: 2rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="intro">
+            <h1 style="font-family: 'Roboto', sans-serif;">🔤 Font Comparison Demo</h1>
+            <p><strong>Instructions:</strong> Review each font combination below with real content from Philly Wings Express. Hover over each card to highlight it. The content is identical across all options - only the fonts change.</p>
+            <p style="margin-top: 1rem;"><strong>Note:</strong> Look for readability, visual hierarchy, and overall brand feel. Consider how it looks on both desktop and mobile.</p>
+        </div>
+
+        <div class="comparison-grid">
+            <!-- CURRENT: Inter + Bebas Neue -->
+            <div class="font-sample current inter-bebas">
+                <span class="label current">CURRENT</span>
+
+                <h1 class="heading">PHILLY WINGS<br>DONE RIGHT</h1>
+                <h2 class="subheading">Feed Your Team the Philly Way</h2>
+
+                <div class="body-text large">
+                    Real Wings for Real Ones. Made in Philly • No BS • Just Fire Wings
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number heading">14</span>
+                        <span class="stat-label body-text small">Sauces</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">4.8★</span>
+                        <span class="stat-label body-text small">Rating</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">500+</span>
+                        <span class="stat-label body-text small">Orders</span>
+                    </div>
+                </div>
+
+                <div class="body-text">
+                    Born in Oxford Circle, perfected in every kitchen. We're not your average wing spot - we're Philadelphia through and through. Double-fried for ultimate crispiness, hand-tossed in 14 signature sauces from mild to insane heat.
+                </div>
+
+                <a href="#" class="button-sample body-text">Order Now →</a>
+
+                <div class="font-info">
+                    <strong>Font Stack:</strong><br>
+                    Body: Inter (400, 500, 700, 900)<br>
+                    Headings: Bebas Neue (all caps display)
+
+                    <div class="pros-cons pros">
+                        <h4>Pros:</h4>
+                        <ul>
+                            <li>Familiar current look</li>
+                            <li>Bebas Neue very bold/impactful</li>
+                            <li>Inter is modern, clean</li>
+                        </ul>
+                    </div>
+
+                    <div class="pros-cons cons">
+                        <h4>Cons:</h4>
+                        <ul>
+                            <li>Bebas Neue limited to all caps</li>
+                            <li>Can feel "shouty" at times</li>
+                            <li>Inter less readable at small sizes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPTION A: Roboto + Roboto Condensed -->
+            <div class="font-sample recommended roboto-condensed">
+                <span class="label option-a">OPTION A - RECOMMENDED</span>
+
+                <h1 class="heading">PHILLY WINGS<br>DONE RIGHT</h1>
+                <h2 class="subheading">Feed Your Team the Philly Way</h2>
+
+                <div class="body-text large">
+                    Real Wings for Real Ones. Made in Philly • No BS • Just Fire Wings
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number heading">14</span>
+                        <span class="stat-label body-text small">Sauces</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">4.8★</span>
+                        <span class="stat-label body-text small">Rating</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">500+</span>
+                        <span class="stat-label body-text small">Orders</span>
+                    </div>
+                </div>
+
+                <div class="body-text">
+                    Born in Oxford Circle, perfected in every kitchen. We're not your average wing spot - we're Philadelphia through and through. Double-fried for ultimate crispiness, hand-tossed in 14 signature sauces from mild to insane heat.
+                </div>
+
+                <a href="#" class="button-sample body-text">Order Now →</a>
+
+                <div class="font-info">
+                    <strong>Font Stack:</strong><br>
+                    Body: Roboto (300, 400, 500, 700, 900)<br>
+                    Headings: Roboto Condensed (400, 700)
+
+                    <div class="pros-cons pros">
+                        <h4>Pros:</h4>
+                        <ul>
+                            <li>Single font family = harmony</li>
+                            <li>Better readability than Inter</li>
+                            <li>Condensed maintains bold impact</li>
+                            <li>Professional, modern look</li>
+                            <li>Works in mixed case</li>
+                        </ul>
+                    </div>
+
+                    <div class="pros-cons cons">
+                        <h4>Cons:</h4>
+                        <ul>
+                            <li>Less "shouty" than Bebas (pro?)</li>
+                            <li>Slightly less unique</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPTION B: Roboto + Roboto Slab -->
+            <div class="font-sample roboto-slab">
+                <span class="label option-b">OPTION B</span>
+
+                <h1 class="heading">PHILLY WINGS<br>DONE RIGHT</h1>
+                <h2 class="subheading">Feed Your Team the Philly Way</h2>
+
+                <div class="body-text large">
+                    Real Wings for Real Ones. Made in Philly • No BS • Just Fire Wings
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number heading">14</span>
+                        <span class="stat-label body-text small">Sauces</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">4.8★</span>
+                        <span class="stat-label body-text small">Rating</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">500+</span>
+                        <span class="stat-label body-text small">Orders</span>
+                    </div>
+                </div>
+
+                <div class="body-text">
+                    Born in Oxford Circle, perfected in every kitchen. We're not your average wing spot - we're Philadelphia through and through. Double-fried for ultimate crispiness, hand-tossed in 14 signature sauces from mild to insane heat.
+                </div>
+
+                <a href="#" class="button-sample body-text">Order Now →</a>
+
+                <div class="font-info">
+                    <strong>Font Stack:</strong><br>
+                    Body: Roboto (400, 500, 700)<br>
+                    Headings: Roboto Slab (400, 700) - serif
+
+                    <div class="pros-cons pros">
+                        <h4>Pros:</h4>
+                        <ul>
+                            <li>More personality than Condensed</li>
+                            <li>Serif adds character/warmth</li>
+                            <li>Clear hierarchy (serif vs sans)</li>
+                            <li>Unique, memorable look</li>
+                        </ul>
+                    </div>
+
+                    <div class="pros-cons cons">
+                        <h4>Cons:</h4>
+                        <ul>
+                            <li>Serif may feel too formal</li>
+                            <li>Less bold than other options</li>
+                            <li>Different vibe from current</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPTION C: Roboto + Roboto Mono -->
+            <div class="font-sample roboto-mono">
+                <span class="label option-c">OPTION C</span>
+
+                <h1 class="heading">PHILLY WINGS<br>DONE RIGHT</h1>
+                <h2 class="subheading">Feed Your Team the Philly Way</h2>
+
+                <div class="body-text large">
+                    Real Wings for Real Ones. Made in Philly • No BS • Just Fire Wings
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number heading">14</span>
+                        <span class="stat-label body-text small">Sauces</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">4.8★</span>
+                        <span class="stat-label body-text small">Rating</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number heading">500+</span>
+                        <span class="stat-label body-text small">Orders</span>
+                    </div>
+                </div>
+
+                <div class="body-text">
+                    Born in Oxford Circle, perfected in every kitchen. We're not your average wing spot - we're Philadelphia through and through. Double-fried for ultimate crispiness, hand-tossed in 14 signature sauces from mild to insane heat.
+                </div>
+
+                <a href="#" class="button-sample body-text">Order Now →</a>
+
+                <div class="font-info">
+                    <strong>Font Stack:</strong><br>
+                    Body: Roboto (400, 500, 700)<br>
+                    Headings: Roboto Mono (400, 700) - monospace
+
+                    <div class="pros-cons pros">
+                        <h4>Pros:</h4>
+                        <ul>
+                            <li>Very unique, tech-inspired</li>
+                            <li>Modern, edgy aesthetic</li>
+                            <li>Clear monospace distinction</li>
+                            <li>Stands out from competitors</li>
+                        </ul>
+                    </div>
+
+                    <div class="pros-cons cons">
+                        <h4>Cons:</h4>
+                        <ul>
+                            <li>May be too quirky for food</li>
+                            <li>Monospace less readable at large sizes</li>
+                            <li>Might not suit all audiences</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intro">
+            <h2 style="font-family: 'Roboto', sans-serif; font-size: 1.75rem;">📊 Comparison Summary</h2>
+            <table style="width: 100%; margin-top: 1rem; border-collapse: collapse;">
+                <tr style="border-bottom: 2px solid #004C54;">
+                    <th style="text-align: left; padding: 1rem; font-family: 'Roboto', sans-serif;">Criteria</th>
+                    <th style="text-align: center; padding: 1rem; font-family: 'Roboto', sans-serif;">Current</th>
+                    <th style="text-align: center; padding: 1rem; font-family: 'Roboto', sans-serif; background: #f0fff0;">Option A</th>
+                    <th style="text-align: center; padding: 1rem; font-family: 'Roboto', sans-serif;">Option B</th>
+                    <th style="text-align: center; padding: 1rem; font-family: 'Roboto', sans-serif;">Option C</th>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border-bottom: 1px solid #eee;">Readability</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee; background: #f0fff0;">⭐⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border-bottom: 1px solid #eee;">Visual Impact</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee; background: #f0fff0;">⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border-bottom: 1px solid #eee;">Professionalism</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee; background: #f0fff0;">⭐⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border-bottom: 1px solid #eee;">Uniqueness</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee; background: #f0fff0;">⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #eee;">⭐⭐⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem;">Mobile Rendering</td>
+                    <td style="text-align: center; padding: 1rem;">⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem; background: #f0fff0;">⭐⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem;">⭐⭐⭐⭐⭐</td>
+                    <td style="text-align: center; padding: 1rem;">⭐⭐⭐⭐</td>
+                </tr>
+            </table>
+
+            <p style="margin-top: 1.5rem; padding: 1rem; background: #f0fff0; border-left: 4px solid #00aa00; border-radius: 4px;">
+                <strong>💡 Recommendation:</strong> Option A (Roboto + Roboto Condensed) offers the best balance of readability, professionalism, and visual impact. It maintains bold headings while dramatically improving body text legibility, especially on mobile devices.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

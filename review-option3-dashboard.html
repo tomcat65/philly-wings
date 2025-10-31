@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Option 3: Dashboard Split-View</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      height: 100vh;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar {
+      background: linear-gradient(135deg, #d94b1e 0%, #b83d18 100%);
+      color: white;
+      padding: 30px 24px;
+      overflow-y: auto;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+    }
+
+    .sidebar h2 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      opacity: 0.9;
+    }
+
+    .total-display {
+      background: rgba(255,255,255,0.15);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+    }
+    .total-amount {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .total-label {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .summary-breakdown {
+      margin: 24px 0;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .summary-item .label {
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .summary-item .amount {
+      font-weight: 600;
+    }
+
+    .event-info {
+      margin-top: 30px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    .event-info p {
+      padding: 8px 0;
+      opacity: 0.95;
+      font-size: 14px;
+    }
+    .event-info .icon { margin-right: 8px; }
+
+    .sidebar-actions {
+      margin-top: 30px;
+    }
+    .sidebar-btn {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sidebar-btn:hover {
+      background: white;
+      color: #d94b1e;
+    }
+
+    /* RIGHT PANEL */
+    .details-panel {
+      background: white;
+      overflow-y: auto;
+      padding: 40px 48px;
+    }
+
+    .panel-header {
+      margin-bottom: 32px;
+    }
+    .panel-header h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .panel-header p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .detail-section {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border-left: 4px solid #d94b1e;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+    .edit-btn {
+      background: #d94b1e;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .edit-btn:hover {
+      background: #b83d18;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(217, 75, 30, 0.2);
+    }
+
+    .config-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .config-box h4 {
+      color: #333;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    .config-box ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .config-box li {
+      padding: 6px 0;
+      color: #666;
+      display: flex;
+      align-items: center;
+    }
+    .config-box li:before {
+      content: "✓";
+      color: #4caf50;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+
+    .price-summary {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      border: 2px solid #d94b1e;
+    }
+    .price-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .extras-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .category-group {
+      margin-bottom: 20px;
+    }
+    .category-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      color: #999;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .extra-item {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .extra-item .item-info {
+      flex: 1;
+    }
+    .extra-item .item-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .extra-item .item-calc {
+      color: #999;
+      font-size: 14px;
+    }
+    .extra-item .item-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #d94b1e;
+    }
+
+    .extras-subtotal {
+      text-align: right;
+      padding: 16px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      border-top: 2px solid #e0e0e0;
+      margin-top: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .dashboard-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+      <h2>Order Summary</h2>
+
+      <div class="total-display">
+        <div class="total-amount">$1,040.60</div>
+        <div class="total-label">Estimated Total</div>
+      </div>
+
+      <div class="summary-breakdown">
+        <div class="summary-item">
+          <div class="label"><span>📦</span> Meals</div>
+          <div class="amount">$800.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="label"><span>🥤</span> Beverages</div>
+          <div class="amount">$118.52</div>
+        </div>
+        <div class="summary-item">
+          <div class="label"><span>🍰</span> Desserts</div>
+          <div class="amount">$45.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="label"><span>💵</span> Tax (8%)</div>
+          <div class="amount">$77.08</div>
+        </div>
+      </div>
+
+      <div class="event-info">
+        <p><span class="icon">📅</span> Oct 25, 2025</p>
+        <p><span class="icon">🕐</span> 12:00 PM</p>
+        <p><span class="icon">👥</span> 50 Guests</p>
+        <p><span class="icon">📍</span> 123 Main St<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Philadelphia PA</p>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="sidebar-btn">Edit Cart</button>
+        <button class="sidebar-btn">Start Over</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="details-panel">
+      <div class="panel-header">
+        <h1>📦 Order Details</h1>
+        <p>Review your complete order before submitting</p>
+      </div>
+
+      <!-- BOXED MEALS SECTION -->
+      <div class="detail-section">
+        <div class="section-header">
+          <div class="section-title">Boxed Meals</div>
+          <button class="edit-btn">✏️ Edit</button>
+        </div>
+
+        <div class="config-box">
+          <h4>50 Individual Boxes</h4>
+          <p style="color: #999; margin-bottom: 12px;">Each box contains:</p>
+          <ul>
+            <li>10pc Boneless Wings</li>
+            <li>Classic Fries</li>
+            <li>2 Sauces (Buffalo, Ranch)</li>
+            <li>Included Beverage</li>
+          </ul>
+        </div>
+
+        <div class="price-summary">
+          <div class="price-line">
+            <span>Unit: $16.00</span>
+            <span>Total: $800.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRAS SECTION -->
+      <div class="detail-section">
+        <div class="section-header">
+          <div class="section-title">Extras & Add-Ons</div>
+          <button class="edit-btn">✏️ Edit</button>
+        </div>
+
+        <div class="extras-grid">
+          <div class="category-group">
+            <div class="category-title">Cold Beverages</div>
+
+            <div class="extra-item">
+              <div class="item-info">
+                <div class="item-name">✓ Boxed Iced Tea (3 Gallon)</div>
+                <div class="item-calc">2 × $54.26</div>
+              </div>
+              <div class="item-price">$108.52</div>
+            </div>
+
+            <div class="extra-item">
+              <div class="item-info">
+                <div class="item-name">✓ Dasani Water (5-Pack)</div>
+                <div class="item-calc">1 × $10.00</div>
+              </div>
+              <div class="item-price">$10.00</div>
+            </div>
+          </div>
+
+          <div class="category-group">
+            <div class="category-title">Desserts</div>
+
+            <div class="extra-item">
+              <div class="item-info">
+                <div class="item-name">✓ Chocolate Chip Cookies</div>
+                <div class="item-calc">3 × $15.00</div>
+              </div>
+              <div class="item-price">$45.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="extras-subtotal">
+          Extras Total: $163.52
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display: flex; gap: 16px; margin-top: 40px;">
+        <button style="flex: 1; padding: 18px; background: #f0f0f0; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+          ← Back to Extras
+        </button>
+        <button style="flex: 2; padding: 18px; background: #d94b1e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#b83d18'" onmouseout="this.style.background='#d94b1e'">
+          Submit Quote Request →
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
