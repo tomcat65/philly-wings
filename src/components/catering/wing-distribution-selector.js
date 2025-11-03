@@ -58,6 +58,13 @@ export function renderWingDistributionSelector(packageData) {
       // Draft is STALE or has invalid split - recalculate from wizard percentages
       console.log('  ⚠️ STALE/INVALID DRAFT DETECTED - recalculating from wizard percentages');
       distribution = calculateSmartWingDefaults(totalWings, state.eventDetails);
+
+      // PRESERVE boneInStyle from old draft if it exists (Bug #2 fix)
+      if (config.wingDistribution?.boneInStyle) {
+        distribution.boneInStyle = config.wingDistribution.boneInStyle;
+        console.log('  ✅ Preserved boneInStyle:', distribution.boneInStyle);
+      }
+
       // Save the recalculated distribution to state
       updateState('currentConfig.wingDistribution', distribution);
       console.log('  💾 Saved recalculated distribution to state:', distribution);
@@ -779,6 +786,10 @@ function initAcceptCustomizeButtons() {
   customizeBtn.addEventListener('click', () => {
     console.log('🔧 User wants to customize wing distribution');
 
+    // DEBUG: Check wingDistribution BEFORE state updates
+    const stateBefore = getState();
+    console.log('🐛 [DEBUG] wingDistribution BEFORE state updates:', stateBefore.currentConfig?.wingDistribution);
+
     // Hide summary, show detailed controls
     summaryView.style.display = 'none';
     detailedView.style.display = 'block';
@@ -787,6 +798,10 @@ function initAcceptCustomizeButtons() {
     // Update only the specific flags to avoid losing wingDistribution
     updateState('currentConfig.wingsAccepted', false);
     updateState('currentConfig.wingsCustomized', true);
+
+    // DEBUG: Check wingDistribution AFTER state updates
+    const stateAfter = getState();
+    console.log('🐛 [DEBUG] wingDistribution AFTER state updates:', stateAfter.currentConfig?.wingDistribution);
 
     // Smooth scroll to detailed view
     detailedView.scrollIntoView({
@@ -1320,6 +1335,15 @@ function initBoneInStyleSelector() {
  */
 function selectBoneInStyle(styleId) {
   updateState('currentConfig.boneInStyle', styleId);
+
+  // ALSO update wingDistribution object (Bug #2 fix - pricing calculator reads from here)
+  const state = getState();
+  if (state.currentConfig?.wingDistribution) {
+    updateState('currentConfig.wingDistribution', {
+      ...state.currentConfig.wingDistribution,
+      boneInStyle: styleId
+    });
+  }
 
   // Update UI without re-rendering
   updateBoneInStyleSelection(styleId);

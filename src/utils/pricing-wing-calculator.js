@@ -230,14 +230,21 @@ export function calculateWingPricing(wingDistribution, packageConfig) {
       });
 
       // Apply upcharge for flats or drums only
-      if (boneInStyle === 'flats' || boneInStyle === 'drums') {
-        const upcharge = boneIn * WING_PRICING.UPCHARGES[`${boneInStyle}Only`];
+      const needsStyleUpcharge =
+        boneInStyle === 'flats' || boneInStyle === 'all-flats' ||
+        boneInStyle === 'drums' || boneInStyle === 'all-drums';
+
+      if (needsStyleUpcharge) {
+        const styleType = (boneInStyle.includes('flats') || boneInStyle === 'flats') ? 'flatsOnly' : 'drumsOnly';
+        const styleLabel = boneInStyle.includes('flats') ? 'Flats' : 'Drums';
+        const upcharge = boneIn * WING_PRICING.UPCHARGES[styleType];
+
         addModifier(
           structure,
           'wings-bone-in',
           'upcharge',
           upcharge,
-          `${boneInStyle.charAt(0).toUpperCase() + boneInStyle.slice(1)} only (+$${WING_PRICING.UPCHARGES[`${boneInStyle}Only`]}/wing)`
+          `${styleLabel} only (+$${WING_PRICING.UPCHARGES[styleType]}/wing)`
         );
 
         pricingLogger.info('Applied bone-in style upcharge', {
@@ -248,7 +255,7 @@ export function calculateWingPricing(wingDistribution, packageConfig) {
       }
     }
 
-    // Add cauliflower wings with upcharge
+    // Add cauliflower wings (upcharge included in distribution differential)
     if (cauliflower > 0) {
       addItem(structure, 'wings-cauliflower', 'wing', {
         quantity: cauliflower,
@@ -257,18 +264,9 @@ export function calculateWingPricing(wingDistribution, packageConfig) {
         dietary: ['vegan', 'vegetarian']
       });
 
-      const upcharge = cauliflower * WING_PRICING.UPCHARGES.cauliflower;
-      addModifier(
-        structure,
-        'wings-cauliflower',
-        'upcharge',
-        upcharge,
-        `Cauliflower wings (+$${WING_PRICING.UPCHARGES.cauliflower}/wing)`
-      );
-
-      pricingLogger.info('Applied cauliflower upcharge', {
+      pricingLogger.debug('Added cauliflower wings', {
         quantity: cauliflower,
-        upcharge: `$${upcharge.toFixed(2)}`
+        note: 'Upcharge included in distribution differential (perWingCosts.cauliflower = $1.30)'
       });
     }
 

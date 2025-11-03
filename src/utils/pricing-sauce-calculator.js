@@ -81,6 +81,14 @@ export function calculateSaucePricing(sauces, packageConfig) {
       allowedTypes
     });
 
+    // Early return if no sauces selected yet (customer hasn't reached sauce selection step)
+    if (sauceCount === 0) {
+      pricingLogger.debug('No sauces selected - skipping sauce pricing');
+      structure.meta.completionStatus.sauces = false; // Mark as incomplete
+      pricingLogger.endTimer('Sauce Pricing Calculation');
+      return structure;
+    }
+
     // Validate sauce selections
     const validation = validateSauceSelections(selectedSauces, packageConfig);
     if (!validation.valid) {

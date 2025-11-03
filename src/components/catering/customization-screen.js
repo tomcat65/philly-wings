@@ -300,12 +300,14 @@ async function renderSectionContent(sectionId) {
 
     case 'sauces':
       // Get smart defaults or current selection
-      const preSelectedSauces = currentConfig.sauces || [];
+      // Convert sauce objects to IDs (if they exist)
+      const sauceObjects = currentConfig.sauces || [];
+      const preSelectedSauceIds = sauceObjects.map(s => s.id || s).filter(Boolean);
       const maxSauceSelections = packageData.sauceSelections?.max || packageData.sauceSelections || 3;
 
       return await renderSaucePhotoCardSelector({
         maxSelections: maxSauceSelections,
-        preSelectedIds: preSelectedSauces,
+        preSelectedIds: preSelectedSauceIds,
         onSelectionChange: handleSauceSelectionChange
       });
 

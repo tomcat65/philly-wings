@@ -342,10 +342,14 @@ async function handleSauceCardClick(card, maxSelections, selectedSauceIds, onSel
     onSelectionChange(selectedSauceIds);
   }
 
-  // Update state
+  // Fetch full sauce objects for state (pricing needs name, type, etc.)
+  const sauces = await fetchSauces();
+  const selectedSauceObjects = sauces.filter(s => selectedSauceIds.includes(s.id));
+
+  // Update state with full sauce objects (not just IDs)
   updateState('currentConfig', {
     ...getState().currentConfig,
-    sauces: selectedSauceIds,
+    sauces: selectedSauceObjects,
     saucesSource: 'manual'
   });
 }
@@ -523,11 +527,19 @@ function truncateStory(story, maxLength = 60) {
  * Get placeholder image for sauce
  */
 function getPlaceholderImage(sauce) {
-  // Use heat level color for placeholder
+  // Use heat level category for placeholder color
   const heatLevel = getHeatLevel(sauce.heatLevel);
-  const colorCode = heatLevel.color.replace('#', '');
 
-  return `https://placehold.co/300x200/${colorCode}/white?text=${encodeURIComponent(sauce.name)}`;
+  const colorMap = {
+    'mild': 'green',
+    'medium': 'orange',
+    'hot': 'red',
+    'insane': 'purple'
+  };
+
+  const color = colorMap[heatLevel.category] || 'gray';
+
+  return `https://placehold.co/300x200/${color}/white?text=${encodeURIComponent(sauce.name)}`;
 }
 
 /**

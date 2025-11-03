@@ -417,11 +417,16 @@ export function initConversationalWingDistribution() {
         }
       });
 
-      // Clear any stale wingDistribution from draft - will be recalculated by setPackage()
-      updateState('currentConfig', {
-        ...state.currentConfig,
-        wingDistribution: null
-      });
+      // DON'T clear wingDistribution here! (Bug #4 fix)
+      // The wing-distribution-selector will detect when percentages don't match
+      // the draft and recalculate automatically. Clearing it here causes the
+      // customization screen to lose the distribution when loading from draft.
+      //
+      // Previous buggy code (removed):
+      // updateState('currentConfig', {
+      //   ...state.currentConfig,
+      //   wingDistribution: null
+      // });
 
       // Show adjustment panel after selection
       const adjustmentPanel = container.querySelector('.distribution-adjustment-panel');

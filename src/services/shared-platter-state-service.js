@@ -175,6 +175,23 @@ export function updateState(path, value, silent = false) {
   const pathParts = path.split('.');
   let target = currentState;
 
+  // DEBUG: Track wingDistribution changes
+  const isWingDistributionChange = path === 'currentConfig.wingDistribution';
+  const isCurrentConfigChange = path.startsWith('currentConfig.');
+
+  // CRITICAL: Track WHO is setting wingDistribution to null
+  if (path === 'currentConfig.wingDistribution' && value === null) {
+    console.error('🚨 [BUG] Something is setting wingDistribution to NULL!');
+    console.trace(); // Show full stack trace
+  }
+
+  if (isCurrentConfigChange) {
+    console.log(`🐛 [STATE DEBUG] updateState called: path="${path}"`, {
+      wingDistributionBefore: currentState.currentConfig?.wingDistribution,
+      newValue: path === 'currentConfig.wingDistribution' ? value : `<${path} update>`
+    });
+  }
+
   // Navigate to parent object
   for (let i = 0; i < pathParts.length - 1; i++) {
     if (!target[pathParts[i]]) {
@@ -186,6 +203,14 @@ export function updateState(path, value, silent = false) {
   // Set value
   const key = pathParts[pathParts.length - 1];
   target[key] = value;
+
+  // DEBUG: Verify wingDistribution wasn't cleared
+  if (isCurrentConfigChange && !isWingDistributionChange) {
+    console.log('🐛 [STATE DEBUG] After setting key:', {
+      path,
+      wingDistributionAfter: currentState.currentConfig?.wingDistribution
+    });
+  }
 
   // Update lastUpdated timestamp
   currentState.lastUpdated = new Date().toISOString();
@@ -389,6 +414,10 @@ export function saveDraft() {
         savedAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + DRAFT_EXPIRY_HOURS * 60 * 60 * 1000).toISOString()
       };
+
+      // DEBUG: Log what wingDistribution is being saved
+      console.log('🐛 [SAVE DEBUG] Saving draft with wingDistribution:', currentState.currentConfig?.wingDistribution);
+
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     } catch (error) {
       console.error('Failed to save draft:', error);
@@ -482,6 +511,35 @@ export function loadDraft() {
     // This ensures any new schema keys are present
     const baseState = cloneInitialState();
     currentState = deepMerge(baseState, draft.state);
+
+    // DEBUG: Check what wingDistribution the draft had
+    console.log('🐛 [DRAFT DEBUG] Draft loaded with wingDistribution:', currentState.currentConfig?.wingDistribution);
+
+    // MIGRATION: Clear NULL wingDistribution from draft (Bug #4 fix)
+    // Draft may have been saved BEFORE wingDistribution was calculated
+    // Null wingDistribution means it needs to be recalculated from wizard/package defaults
+    if (currentState.currentConfig && currentState.currentConfig.wingDistribution === null) {
+      console.warn('⚠️ Clearing null wingDistribution from draft - will recalculate from wizard/defaults');
+      delete currentState.currentConfig.wingDistribution;
+    }
+
+    // MIGRATION: ALWAYS clear sauces from draft
+    // Sauces should ONLY appear after customer actively selects them in current session
+    // Draft sauces are stale and may be from different package or old schema
+    if (currentState.currentConfig?.sauces?.length > 0) {
+      console.warn('⚠️ Clearing sauces from draft - customer will re-select during customization');
+      currentState.currentConfig.sauces = [];
+      currentState.currentConfig.saucesSource = null;
+    }
+
+    // MIGRATION: Copy boneInStyle to wingDistribution if missing (Bug #2 fix)
+    // Old drafts stored boneInStyle separately, pricing calculator needs it in wingDistribution
+    if (currentState.currentConfig?.boneInStyle && currentState.currentConfig?.wingDistribution) {
+      if (!currentState.currentConfig.wingDistribution.boneInStyle) {
+        console.warn('⚠️ Migrating boneInStyle to wingDistribution object');
+        currentState.currentConfig.wingDistribution.boneInStyle = currentState.currentConfig.boneInStyle;
+      }
+    }
 
     // CRITICAL FIX (SP-OS-S1): Refresh package data from Firestore
     // Draft may have stale package schema missing pricing fields (defaultDistribution, perWingCosts)
