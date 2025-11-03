@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sauce Distribution Flow - Philly Wings</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin: 0 0 10px 0; color: #ff6b35; }
+    .subtitle { color: #666; font-size: 16px; }
+
+    .mockup-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .wing-section {
+      margin-bottom: 32px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      background: #fafafa;
+    }
+
+    .wing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .wing-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .wing-count {
+      background: #ff6b35;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .instruction {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #e8f4f8;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+    }
+
+    /* Step 1: Sauce Selection */
+    .sauce-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .sauce-card {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      text-align: center;
+      position: relative;
+    }
+
+    .sauce-card:hover {
+      border-color: #ff6b35;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255,107,53,0.2);
+    }
+
+    .sauce-card.selected {
+      border-color: #ff6b35;
+      background: #fff7f0;
+      border-width: 3px;
+    }
+
+    .sauce-card .badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff6b35;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .sauce-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #2c3e50;
+      margin-bottom: 4px;
+    }
+
+    .sauce-heat {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .sauce-type-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .dry-rub-tag {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    /* Step 2: Distribution Table */
+    .distribution-section {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .distribution-section.active {
+      display: block;
+    }
+
+    .distribution-header {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .distribution-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+
+    .distribution-row {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .distribution-row td {
+      padding: 16px;
+      border-top: 2px solid #e0e0e0;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .distribution-row td:first-child {
+      border-left: 2px solid #e0e0e0;
+      border-radius: 8px 0 0 8px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .distribution-row td:last-child {
+      border-right: 2px solid #e0e0e0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .application-select {
+      padding: 8px 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      width: 100%;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .application-select:focus {
+      outline: none;
+      border-color: #ff6b35;
+    }
+
+    .quantity-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quantity-input button {
+      background: #ff6b35;
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quantity-input button:hover {
+      background: #e55a2b;
+    }
+
+    .quantity-input button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .quantity-input input {
+      width: 70px;
+      padding: 8px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .remaining-counter {
+      background: #e8f4f8;
+      border: 2px solid #2196F3;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .remaining-counter.complete {
+      background: #e8f5e9;
+      border-color: #4caf50;
+    }
+
+    .remaining-counter.over {
+      background: #ffebee;
+      border-color: #f44336;
+    }
+
+    .remaining-label {
+      font-weight: 600;
+      color: #1976D2;
+    }
+
+    .remaining-counter.complete .remaining-label {
+      color: #2e7d32;
+    }
+
+    .remaining-counter.over .remaining-label {
+      color: #c62828;
+    }
+
+    .remaining-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1976D2;
+    }
+
+    .remaining-counter.complete .remaining-value {
+      color: #2e7d32;
+    }
+
+    .remaining-counter.over .remaining-value {
+      color: #c62828;
+    }
+
+    .action-buttons {
+      margin-top: 32px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #ff6b35;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #e55a2b;
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .remove-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .remove-btn:hover {
+      background: #d32f2f;
+    }
+
+    .visual-preview {
+      margin-top: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border: 2px solid #fed7aa;
+      border-radius: 12px;
+    }
+
+    .preview-title {
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preview-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preview-item {
+      background: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      border: 2px solid #fed7aa;
+    }
+
+    .preview-item strong {
+      color: #ff6b35;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍗 Sauce Distribution Flow</h1>
+    <p class="subtitle">Step-by-step sauce selection with quantity distribution</p>
+  </div>
+
+  <div class="mockup-container">
+    <div class="wing-section">
+      <div class="wing-header">
+        <div class="wing-title">Boneless Wings</div>
+        <div class="wing-count" id="totalWings">90 wings</div>
+      </div>
+
+      <div class="instruction">
+        <strong>Step 1:</strong> Select up to 3 sauces for your boneless wings (click to add/remove)
+      </div>
+
+      <div class="sauce-grid" id="sauceGrid">
+        <!-- Sauces will be loaded here -->
+      </div>
+
+      <div class="distribution-section" id="distributionSection">
+        <div class="distribution-header">
+          <span>📊 Step 2:</span> Distribute your 90 wings across selected sauces
+        </div>
+
+        <table class="distribution-table">
+          <tbody id="distributionRows">
+            <!-- Distribution rows will be added here -->
+          </tbody>
+        </table>
+
+        <div class="remaining-counter" id="remainingCounter">
+          <div class="remaining-label">Wings remaining to assign:</div>
+          <div class="remaining-value" id="remainingValue">90</div>
+        </div>
+
+        <div class="visual-preview">
+          <div class="preview-title">
+            <span>👁️</span> Order Summary
+          </div>
+          <div class="preview-items" id="previewItems">
+            <em style="color: #92400e;">Assign wings to see summary...</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-secondary">← Back to Wings</button>
+        <button class="btn btn-primary" id="continueBtn" disabled>Continue to Next Wing Type →</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getFirestore, connectFirestoreEmulator, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+    const app = initializeApp({
+      apiKey: "demo-key",
+      projectId: "philly-wings"
+    });
+
+    const db = getFirestore(app);
+    connectFirestoreEmulator(db, '127.0.0.1', 8081);
+
+    let sauces = [];
+    let selectedSauces = [];
+    let distribution = {};
+    const TOTAL_WINGS = 90;
+    const MAX_SELECTIONS = 3;
+
+    async function fetchSauces() {
+      try {
+        const q = query(collection(db, 'sauces'), where('active', '==', true));
+        const snapshot = await getDocs(q);
+        sauces = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(sauce => sauce.category !== 'dipping-sauce')
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+
+        renderSauceGrid();
+      } catch (error) {
+        console.error('Error fetching sauces:', error);
+      }
+    }
+
+    function getHeatDisplay(level) {
+      const peppers = '🌶️'.repeat(Math.min(level, 5));
+      return peppers || 'No Heat';
+    }
+
+    function renderSauceGrid() {
+      const grid = document.getElementById('sauceGrid');
+      grid.innerHTML = sauces.map(sauce => {
+        const isSelected = selectedSauces.includes(sauce.id);
+        const index = selectedSauces.indexOf(sauce.id);
+        return `
+          <div class="sauce-card ${isSelected ? 'selected' : ''}" data-sauce-id="${sauce.id}">
+            ${isSelected ? `<div class="badge">${index + 1}</div>` : ''}
+            <div class="sauce-name">${sauce.name}</div>
+            <div class="sauce-heat">${getHeatDisplay(sauce.heatLevel)}</div>
+            ${sauce.isDryRub ? '<div class="sauce-type-tag dry-rub-tag">DRY RUB</div>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      attachSauceCardListeners();
+    }
+
+    function attachSauceCardListeners() {
+      document.querySelectorAll('.sauce-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const sauceId = card.dataset.sauceId;
+          toggleSauceSelection(sauceId);
+        });
+      });
+    }
+
+    function toggleSauceSelection(sauceId) {
+      const index = selectedSauces.indexOf(sauceId);
+
+      if (index > -1) {
+        selectedSauces.splice(index, 1);
+        delete distribution[sauceId];
+      } else {
+        if (selectedSauces.length < MAX_SELECTIONS) {
+          selectedSauces.push(sauceId);
+          distribution[sauceId] = {
+            quantity: 0,
+            application: 'tossed'
+          };
+        } else {
+          return;
+        }
+      }
+
+      renderSauceGrid();
+      renderDistributionTable();
+      updateDistributionVisibility();
+    }
+
+    function updateDistributionVisibility() {
+      const section = document.getElementById('distributionSection');
+      if (selectedSauces.length > 0) {
+        section.classList.add('active');
+      } else {
+        section.classList.remove('active');
+      }
+    }
+
+    function renderDistributionTable() {
+      const tbody = document.getElementById('distributionRows');
+
+      tbody.innerHTML = selectedSauces.map((sauceId, index) => {
+        const sauce = sauces.find(s => s.id === sauceId);
+        const dist = distribution[sauceId];
+
+        return `
+          <tr class="distribution-row">
+            <td style="width: 30%;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="background: #ff6b35; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${index + 1}</span>
+                ${sauce.name}
+              </div>
+            </td>
+            <td style="width: 35%;">
+              <select class="application-select" data-sauce-id="${sauceId}">
+                <option value="tossed" ${dist.application === 'tossed' ? 'selected' : ''}>
+                  ${sauce.isDryRub ? '🧂 Dry Rub' : '🌊 Tossed in Sauce'}
+                </option>
+                ${!sauce.isDryRub ? `<option value="side" ${dist.application === 'side' ? 'selected' : ''}>📦 On the Side</option>` : ''}
+              </select>
+            </td>
+            <td style="width: 35%;">
+              <div class="quantity-input">
+                <button data-sauce-id="${sauceId}" data-action="decrease">−</button>
+                <input type="number"
+                       min="0"
+                       max="${TOTAL_WINGS}"
+                       value="${dist.quantity}"
+                       data-sauce-id="${sauceId}"
+                       readonly>
+                <button data-sauce-id="${sauceId}" data-action="increase">+</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      attachDistributionListeners();
+      updateRemainingCounter();
+      updatePreview();
+    }
+
+    function attachDistributionListeners() {
+      document.querySelectorAll('.application-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+          const sauceId = e.target.dataset.sauceId;
+          distribution[sauceId].application = e.target.value;
+          updatePreview();
+        });
+      });
+
+      document.querySelectorAll('.quantity-input button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const sauceId = e.target.dataset.sauceId;
+          const action = e.target.dataset.action;
+
+          if (action === 'increase') {
+            const remaining = getRemainingWings();
+            if (remaining > 0) {
+              distribution[sauceId].quantity += 10;
+            }
+          } else if (action === 'decrease') {
+            if (distribution[sauceId].quantity >= 10) {
+              distribution[sauceId].quantity -= 10;
+            }
+          }
+
+          renderDistributionTable();
+        });
+      });
+    }
+
+    function getRemainingWings() {
+      const assigned = Object.values(distribution).reduce((sum, d) => sum + d.quantity, 0);
+      return TOTAL_WINGS - assigned;
+    }
+
+    function updateRemainingCounter() {
+      const remaining = getRemainingWings();
+      const counter = document.getElementById('remainingCounter');
+      const value = document.getElementById('remainingValue');
+      const continueBtn = document.getElementById('continueBtn');
+
+      value.textContent = remaining;
+
+      counter.classList.remove('complete', 'over');
+      if (remaining === 0) {
+        counter.classList.add('complete');
+        continueBtn.disabled = false;
+      } else if (remaining < 0) {
+        counter.classList.add('over');
+        continueBtn.disabled = true;
+      } else {
+        continueBtn.disabled = true;
+      }
+    }
+
+    function updatePreview() {
+      const container = document.getElementById('previewItems');
+      const items = selectedSauces.map(sauceId => {
+        const sauce = sauces.find(s => s.id === sauceId);
+        const dist = distribution[sauceId];
+
+        if (dist.quantity === 0) return '';
+
+        const applicationText = dist.application === 'side' ? 'on the side' :
+                                sauce.isDryRub ? 'with dry rub' : 'tossed';
+
+        return `
+          <div class="preview-item">
+            <strong>${dist.quantity}</strong> wings ${applicationText} in <strong>${sauce.name}</strong>
+          </div>
+        `;
+      }).filter(Boolean).join('');
+
+      container.innerHTML = items || '<em style="color: #92400e;">Assign wings to see summary...</em>';
+    }
+
+    // Initialize
+    fetchSauces();
+  </script>
+</body>
+</html>

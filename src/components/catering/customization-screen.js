@@ -11,10 +11,11 @@
 
 import { getState, updateState, onStateChange } from '../../services/shared-platter-state-service.js';
 import { renderWingDistributionSelector, initWingDistributionSelector } from './wing-distribution-selector.js';
-import { renderSaucePhotoCardSelector, initSaucePhotoCardSelector } from './sauce-photo-card-selector.js';
+import { renderIntegratedSauceDistribution, initIntegratedSauceDistribution } from './sauce-distribution-integrated.js';
 import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
 import { initPricingSummary } from './pricing-summary-master.js';
 import { recalculatePricing } from '../../utils/pricing-aggregator.js';
+import '../../styles/sauce-distribution-integrated.css';
 
 /**
  * Initialize customization screen
@@ -130,7 +131,7 @@ function renderPanelHeader(pkg) {
 function renderSectionNavigation() {
   const sections = [
     { id: 'wings', label: 'Wings', icon: '🍗' },
-    { id: 'sauces', label: 'Sauces', icon: '🌶️' },
+    { id: 'sauces', label: 'Sauces & Distribution', icon: '🌶️' },
     { id: 'dips', label: 'Dips', icon: '🥣' },
     { id: 'sides', label: 'Sides', icon: '🍟' },
     { id: 'desserts', label: 'Desserts', icon: '🍰' },
@@ -299,17 +300,39 @@ async function renderSectionContent(sectionId) {
       return renderWingDistributionSelector(packageData);
 
     case 'sauces':
-      // Get smart defaults or current selection
-      // Convert sauce objects to IDs (if they exist)
-      const sauceObjects = currentConfig.sauces || [];
-      const preSelectedSauceIds = sauceObjects.map(s => s.id || s).filter(Boolean);
-      const maxSauceSelections = packageData.sauceSelections?.max || packageData.sauceSelections || 3;
+      // Get wing distribution from state
+      const wingDistribution = currentConfig.wingDistribution || {};
+      const sauceDistributions = currentConfig.sauceDistributions || {};
 
-      return await renderSaucePhotoCardSelector({
-        maxSelections: maxSauceSelections,
-        preSelectedIds: preSelectedSauceIds,
-        onSelectionChange: handleSauceSelectionChange
-      });
+      // Render integrated sauce distribution for each wing type
+      const wingTypes = Object.keys(wingDistribution).filter(type => wingDistribution[type] > 0);
+
+      if (wingTypes.length === 0) {
+        return `
+          <div class="section-message">
+            <div class="message-icon">🍗</div>
+            <h3>Select Wings First</h3>
+            <p>Please configure your wing distribution in the Wings section before selecting sauces.</p>
+          </div>
+        `;
+      }
+
+      const sauceHtml = [];
+      for (const wingType of wingTypes) {
+        const wingCount = wingDistribution[wingType];
+        const preSelectedData = sauceDistributions[wingType] || [];
+
+        const html = await renderIntegratedSauceDistribution({
+          wingType,
+          wingCount,
+          preSelectedData,
+          onDistributionChange: (distributionData) => handleSauceDistributionChange(wingType, distributionData)
+        });
+
+        sauceHtml.push(html);
+      }
+
+      return sauceHtml.join('');
 
     case 'dips':
       const preSelectedDips = currentConfig.dips || [];
@@ -343,9 +366,21 @@ function initializeSectionInteractions(sectionId) {
       break;
 
     case 'sauces':
-      const maxSauceSelections = packageData.sauceSelections?.max || packageData.sauceSelections || 3;
-      initSaucePhotoCardSelector(maxSauceSelections, handleSauceSelectionChange);
-      console.log('🌶️ Sauce selector initialized');
+      // Initialize integrated sauce distribution for each wing type
+      const currentConfig = state.currentConfig || {};
+      const wingDistribution = currentConfig.wingDistribution || {};
+      const wingTypes = Object.keys(wingDistribution).filter(type => wingDistribution[type] > 0);
+
+      wingTypes.forEach(wingType => {
+        const wingCount = wingDistribution[wingType];
+        initIntegratedSauceDistribution(
+          wingType,
+          wingCount,
+          (distributionData) => handleSauceDistributionChange(wingType, distributionData)
+        );
+      });
+
+      console.log('🌶️ Integrated sauce distribution initialized for', wingTypes.length, 'wing types');
       break;
 
     case 'dips':
@@ -535,6 +570,14 @@ function isSectionComplete(section, config) {
              (config.wingDistribution.boneless > 0 || config.wingDistribution.boneIn > 0);
     case 'sauces':
       return config.sauces && config.sauces.length > 0;
+    case 'sauce-assignments':
+      // Check if preset is applied and all assignments are valid
+      const sauceAssignments = config.sauceAssignments;
+      if (!sauceAssignments || !sauceAssignments.appliedPreset) {
+        return false;
+      }
+      // Check overall validation
+      return sauceAssignments.summary?.validations?.overall?.valid || false;
     case 'dips':
       return config.noDips || (config.dips && config.dips.length > 0);
     case 'sides':
@@ -680,17 +723,64 @@ function updatePricingSummary() {
 /**
  * Handle sauce selection change
  */
-function handleSauceSelectionChange(selectedSauceIds) {
+async function handleSauceSelectionChange(selectedSauceIds) {
   const state = getState();
 
-  // Update state with selected sauces
+  // Fetch full sauce objects from Firestore
+  const { getSaucesByIds } = await import('./sauce-photo-card-selector.js');
+  const selectedSauceObjects = await getSaucesByIds(selectedSauceIds);
+
+  // Update state with selected sauces (legacy format)
   updateState('currentConfig', {
     ...state.currentConfig,
     sauces: selectedSauceIds,
     saucesSource: 'manual'
   });
 
+  // Initialize sauce assignments with selected sauces
+  updateState('currentConfig.sauceAssignments', {
+    selectedSauces: selectedSauceObjects,
+    appliedPreset: null,
+    assignments: {
+      boneless: [],
+      boneIn: [],
+      cauliflower: []
+    },
+    summary: {
+      totalWingsAssigned: 0,
+      byApplicationMethod: { tossed: 0, onTheSide: 0 },
+      containersNeeded: 0,
+      validations: {
+        boneless: { valid: true, errors: [] },
+        boneIn: { valid: true, errors: [] },
+        cauliflower: { valid: true, errors: [] },
+        overall: { valid: true, errors: [] }
+      }
+    }
+  });
+
   console.log(`🌶️ Sauce selection updated: ${selectedSauceIds.length} sauces selected`);
+
+  // Pricing will update automatically via onStateChange listener
+}
+
+/**
+ * Handle sauce distribution change for a wing type
+ */
+function handleSauceDistributionChange(wingType, distributionData) {
+  const state = getState();
+  const currentConfig = state.currentConfig || {};
+  const sauceDistributions = currentConfig.sauceDistributions || {};
+
+  // Update distribution for this wing type
+  sauceDistributions[wingType] = distributionData;
+
+  updateState('currentConfig', {
+    ...currentConfig,
+    sauceDistributions
+  });
+
+  console.log(`🌶️ Sauce distribution updated for ${wingType}:`, distributionData);
 
   // Pricing will update automatically via onStateChange listener
 }
@@ -738,4 +828,44 @@ function showNotification(message, type = 'info') {
       notification.remove();
     }, 300);
   }, 3000);
+}
+
+/**
+ * Handle preset applied from sauce preset selector
+ * Transitions from preset selector to assignment summary
+ */
+function handlePresetApplied(presetType, assignments) {
+  console.log(`🎯 Preset applied: ${presetType}`);
+
+  // Re-render the sauce-assignments section to show summary
+  activateSection('sauce-assignments');
+
+  console.log('✅ Transitioned to assignment summary');
+}
+
+/**
+ * Handle edit wing type from assignment summary
+ * Opens the wing type editor modal
+ */
+function handleEditWingType(wingType) {
+  console.log(`✏️ Opening editor for: ${wingType}`);
+
+  // Open editor modal
+  openWingTypeEditor(wingType, (editedWingType, updatedAssignments) => {
+    console.log(`✅ Wing type edited: ${editedWingType}`);
+
+    // Re-render the sauce-assignments section to show updated summary
+    activateSection('sauce-assignments');
+  });
+}
+
+/**
+ * Handle continue from assignment summary
+ * Validates all assignments and proceeds to next section
+ */
+function handleContinueToAddons() {
+  console.log('📋 Continue from sauce assignments');
+
+  // Activate next section (dips)
+  activateSection('dips');
 }

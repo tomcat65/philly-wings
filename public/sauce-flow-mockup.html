@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sauce Assignment Flow Mockups - Philly Wings</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin: 0 0 10px 0; color: #ff6b35; }
+    .subtitle { color: #666; font-size: 16px; }
+
+    .approach-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .approach-btn {
+      padding: 12px 24px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .approach-btn:hover {
+      border-color: #ff6b35;
+      transform: translateY(-2px);
+    }
+    .approach-btn.active {
+      background: #ff6b35;
+      color: white;
+      border-color: #ff6b35;
+    }
+
+    .mockup-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      min-height: 600px;
+    }
+
+    .approach {
+      display: none;
+    }
+    .approach.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .wing-section {
+      margin-bottom: 32px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      background: #fafafa;
+    }
+
+    .wing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .wing-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .wing-count {
+      background: #ff6b35;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .sauce-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .sauce-card {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      text-align: center;
+    }
+
+    .sauce-card:hover {
+      border-color: #ff6b35;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255,107,53,0.2);
+    }
+
+    .sauce-card.selected {
+      border-color: #ff6b35;
+      background: #fff7f0;
+      border-width: 3px;
+    }
+
+    .sauce-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: #2c3e50;
+      margin-bottom: 4px;
+    }
+
+    .sauce-heat {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .selection-counter {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+      font-style: italic;
+    }
+
+    .action-buttons {
+      margin-top: 32px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #ff6b35;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #e55a2b;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .approach-description {
+      background: #e8f4f8;
+      border-left: 4px solid #2196F3;
+      padding: 16px;
+      margin-bottom: 24px;
+      border-radius: 4px;
+    }
+
+    .approach-description h3 {
+      margin: 0 0 8px 0;
+      color: #1976D2;
+    }
+
+    .approach-description p {
+      margin: 0;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    /* Approach 2 specific styles */
+    .columns-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .column {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .column-header {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+
+    .assigned-sauces {
+      min-height: 60px;
+      background: white;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .assigned-sauce-tag {
+      display: inline-block;
+      background: #ff6b35;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin: 4px;
+      font-size: 12px;
+    }
+
+    /* Approach 3 specific styles */
+    .summary-box {
+      background: #f0f7ff;
+      border: 2px solid #2196F3;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .summary-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #1976D2;
+    }
+
+    .assignment-row {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .assignment-label {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-right: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍗 Sauce Assignment Flow Mockups</h1>
+    <p class="subtitle">Compare different UX approaches with live data from emulator</p>
+  </div>
+
+  <div class="approach-selector">
+    <button class="approach-btn active" data-approach="1">
+      Approach 1: Inline Per Wing Type
+    </button>
+    <button class="approach-btn" data-approach="2">
+      Approach 2: Side-by-Side Columns
+    </button>
+    <button class="approach-btn" data-approach="3">
+      Approach 3: Smart Defaults
+    </button>
+  </div>
+
+  <div class="mockup-container" id="mockup">
+    <div class="loading">Loading sauce data from emulator...</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getFirestore, connectFirestoreEmulator, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+    // Initialize Firebase
+    const app = initializeApp({
+      apiKey: "demo-key",
+      projectId: "philly-wings"
+    });
+
+    const db = getFirestore(app);
+    connectFirestoreEmulator(db, '127.0.0.1', 8081);
+
+    // Mock wing distribution data
+    const wingDistribution = {
+      boneless: 90,
+      boneIn: 60,
+      cauliflower: 50
+    };
+
+    let sauces = [];
+    let selections = {
+      boneless: [],
+      boneIn: [],
+      cauliflower: []
+    };
+
+    // Fetch sauces
+    async function fetchSauces() {
+      try {
+        const q = query(collection(db, 'sauces'), where('active', '==', true));
+        const snapshot = await getDocs(q);
+        sauces = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(sauce => sauce.category !== 'dipping-sauce')
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+
+        console.log('✅ Loaded', sauces.length, 'sauces');
+        renderApproach(1);
+      } catch (error) {
+        console.error('Error fetching sauces:', error);
+        document.getElementById('mockup').innerHTML = '<div class="loading">Error loading sauces. Check console.</div>';
+      }
+    }
+
+    function getHeatDisplay(level) {
+      const peppers = '🌶️'.repeat(Math.min(level, 5));
+      return peppers || 'No Heat';
+    }
+
+    function renderApproach(num) {
+      const container = document.getElementById('mockup');
+
+      if (num === 1) {
+        container.innerHTML = renderApproach1();
+      } else if (num === 2) {
+        container.innerHTML = renderApproach2();
+      } else if (num === 3) {
+        container.innerHTML = renderApproach3();
+      }
+
+      attachEventListeners();
+    }
+
+    function renderApproach1() {
+      return `
+        <div class="approach active" id="approach1">
+          <div class="approach-description">
+            <h3>Approach 1: Inline Per Wing Type</h3>
+            <p>Each wing type gets its own section with sauce selection. Clear, direct, and easy to understand.</p>
+          </div>
+
+          ${Object.entries(wingDistribution)
+            .filter(([type, count]) => count > 0)
+            .map(([type, count]) => {
+              const displayName = type === 'boneIn' ? 'Bone-In Wings' :
+                                  type === 'cauliflower' ? 'Cauliflower Wings' : 'Boneless Wings';
+              return `
+                <div class="wing-section">
+                  <div class="wing-header">
+                    <div class="wing-title">${displayName}</div>
+                    <div class="wing-count">${count} wings</div>
+                  </div>
+                  <div style="color: #666; font-size: 14px; margin-bottom: 12px;">
+                    Select 1-3 sauces for ${displayName.toLowerCase()}
+                  </div>
+                  <div class="sauce-grid">
+                    ${sauces.map(sauce => `
+                      <div class="sauce-card ${selections[type].includes(sauce.id) ? 'selected' : ''}"
+                           data-wing-type="${type}" data-sauce-id="${sauce.id}">
+                        <div class="sauce-name">${sauce.name}</div>
+                        <div class="sauce-heat">${getHeatDisplay(sauce.heatLevel)}</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <div class="selection-counter">
+                    ${selections[type].length} of 3 selected
+                  </div>
+                </div>
+              `;
+            }).join('')}
+
+          <div class="action-buttons">
+            <button class="btn btn-secondary">← Back to Wings</button>
+            <button class="btn btn-primary">Continue to Dips →</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderApproach2() {
+      return `
+        <div class="approach active" id="approach2">
+          <div class="approach-description">
+            <h3>Approach 2: Side-by-Side Columns</h3>
+            <p>All wing types visible at once. Click a sauce below to assign it to specific wing types.</p>
+          </div>
+
+          <div class="columns-layout">
+            ${Object.entries(wingDistribution)
+              .filter(([type, count]) => count > 0)
+              .map(([type, count]) => {
+                const displayName = type === 'boneIn' ? 'Bone-In' :
+                                    type === 'cauliflower' ? 'Cauliflower' : 'Boneless';
+                return `
+                  <div class="column">
+                    <div class="column-header">${displayName} (${count})</div>
+                    <div class="assigned-sauces">
+                      ${selections[type].length > 0
+                        ? selections[type].map(id => {
+                            const sauce = sauces.find(s => s.id === id);
+                            return `<span class="assigned-sauce-tag">${sauce?.name}</span>`;
+                          }).join('')
+                        : '<em>No sauces assigned</em>'
+                      }
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+          </div>
+
+          <div style="margin: 24px 0; font-weight: 600; color: #666;">
+            Click a sauce to assign/unassign:
+          </div>
+
+          <div class="sauce-grid">
+            ${sauces.map(sauce => {
+              const assignedToCount = Object.values(selections).filter(sel => sel.includes(sauce.id)).length;
+              return `
+                <div class="sauce-card ${assignedToCount > 0 ? 'selected' : ''}"
+                     data-sauce-id="${sauce.id}" data-approach="2">
+                  <div class="sauce-name">${sauce.name}</div>
+                  <div class="sauce-heat">${getHeatDisplay(sauce.heatLevel)}</div>
+                  ${assignedToCount > 0 ? `<div style="font-size: 11px; color: #ff6b35; margin-top: 4px;">Used in ${assignedToCount} type${assignedToCount > 1 ? 's' : ''}</div>` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-secondary">← Back to Wings</button>
+            <button class="btn btn-primary">Continue to Dips →</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderApproach3() {
+      // Generate smart defaults
+      const smartDefaults = {};
+      const types = Object.keys(wingDistribution).filter(type => wingDistribution[type] > 0);
+      types.forEach((type, index) => {
+        smartDefaults[type] = sauces.slice(index * 2, index * 2 + 2).map(s => s.id);
+      });
+
+      return `
+        <div class="approach active" id="approach3">
+          <div class="approach-description">
+            <h3>Approach 3: Smart Defaults with Quick Edit</h3>
+            <p>We suggest a sauce distribution. Accept it or customize as needed.</p>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-title">🎯 Suggested Sauce Distribution</div>
+            ${types.map(type => {
+              const displayName = type === 'boneIn' ? 'Bone-In Wings' :
+                                  type === 'cauliflower' ? 'Cauliflower Wings' : 'Boneless Wings';
+              const assignedSauces = smartDefaults[type].map(id => sauces.find(s => s.id === id));
+              return `
+                <div class="assignment-row">
+                  <span class="assignment-label">${displayName} (${wingDistribution[type]})</span>
+                  → ${assignedSauces.map(s => s.name).join(', ')}
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-secondary">✎ Customize Assignments</button>
+            <button class="btn btn-primary">✓ Looks Good, Continue →</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function attachEventListeners() {
+      // Approach 1: Toggle sauce selection per wing type
+      document.querySelectorAll('.sauce-card[data-wing-type]').forEach(card => {
+        card.addEventListener('click', () => {
+          const wingType = card.dataset.wingType;
+          const sauceId = card.dataset.sauceId;
+
+          const index = selections[wingType].indexOf(sauceId);
+          if (index > -1) {
+            selections[wingType].splice(index, 1);
+          } else {
+            if (selections[wingType].length < 3) {
+              selections[wingType].push(sauceId);
+            }
+          }
+
+          renderApproach(1);
+        });
+      });
+
+      // Approach 2: Multi-assign sauce (simplified - just toggle first type for demo)
+      document.querySelectorAll('.sauce-card[data-approach="2"]').forEach(card => {
+        card.addEventListener('click', () => {
+          const sauceId = card.dataset.sauceId;
+          const firstType = Object.keys(wingDistribution).find(t => wingDistribution[t] > 0);
+
+          const index = selections[firstType].indexOf(sauceId);
+          if (index > -1) {
+            // Remove from all types
+            Object.keys(selections).forEach(type => {
+              const idx = selections[type].indexOf(sauceId);
+              if (idx > -1) selections[type].splice(idx, 1);
+            });
+          } else {
+            // Add to first type (in real version, show modal to select types)
+            if (selections[firstType].length < 3) {
+              selections[firstType].push(sauceId);
+            }
+          }
+
+          renderApproach(2);
+        });
+      });
+    }
+
+    // Approach selector buttons
+    document.querySelectorAll('.approach-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.approach-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const approachNum = parseInt(btn.dataset.approach);
+        renderApproach(approachNum);
+      });
+    });
+
+    // Initialize
+    fetchSauces();
+  </script>
+</body>
+</html>

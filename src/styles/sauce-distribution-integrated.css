@@ -1,0 +1,376 @@
+/* ========================================
+   Integrated Sauce Distribution Styles
+   Based on validated mockup
+   ======================================== */
+
+.wing-sauce-section {
+  margin-bottom: 2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  background: #fafafa;
+}
+
+.wing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.wing-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.wing-count {
+  background: #ff6b35;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.instruction {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #e8f4f8;
+  border-left: 4px solid #2196F3;
+  border-radius: 4px;
+}
+
+.instruction strong {
+  color: #1976D2;
+}
+
+.sauce-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff6b35;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+}
+
+/* Distribution Section */
+.distribution-section {
+  margin-top: 24px;
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.distribution-section.active {
+  display: block;
+}
+
+.distribution-header {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.distribution-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  margin-bottom: 16px;
+}
+
+.distribution-row {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+
+.distribution-row:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.distribution-row td {
+  padding: 16px;
+  border-top: 2px solid #e0e0e0;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.distribution-row td:first-child {
+  border-left: 2px solid #e0e0e0;
+  border-radius: 8px 0 0 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.distribution-row td:last-child {
+  border-right: 2px solid #e0e0e0;
+  border-radius: 0 8px 8px 0;
+}
+
+.distribution-badge {
+  background: #ff6b35;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.application-select {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.application-select:focus {
+  outline: none;
+  border-color: #ff6b35;
+}
+
+.application-select:hover {
+  border-color: #ff6b35;
+}
+
+.quantity-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.quantity-btn {
+  background: #ff6b35;
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-btn:hover {
+  background: #e55a2b;
+  transform: scale(1.05);
+}
+
+.quantity-btn:active {
+  transform: scale(0.95);
+}
+
+.quantity-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.quantity-value {
+  width: 70px;
+  padding: 8px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  background: white;
+}
+
+/* Remaining Counter */
+.remaining-counter {
+  background: #e8f4f8;
+  border: 2px solid #2196F3;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.remaining-counter.complete {
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+
+.remaining-counter.over {
+  background: #ffebee;
+  border-color: #f44336;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.remaining-label {
+  font-weight: 600;
+  color: #1976D2;
+}
+
+.remaining-counter.complete .remaining-label {
+  color: #2e7d32;
+}
+
+.remaining-counter.over .remaining-label {
+  color: #c62828;
+}
+
+.remaining-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1976D2;
+}
+
+.remaining-counter.complete .remaining-value {
+  color: #2e7d32;
+}
+
+.remaining-counter.over .remaining-value {
+  color: #c62828;
+}
+
+/* Visual Preview */
+.visual-preview {
+  margin-top: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 2px solid #fed7aa;
+  border-radius: 12px;
+}
+
+.preview-title {
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preview-item {
+  background: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  border: 2px solid #fed7aa;
+}
+
+.preview-item strong {
+  color: #ff6b35;
+}
+
+.preview-items em {
+  color: #92400e;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .wing-sauce-section {
+    padding: 16px;
+  }
+
+  .wing-title {
+    font-size: 20px;
+  }
+
+  .wing-count {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+
+  .distribution-table {
+    font-size: 14px;
+  }
+
+  .distribution-row td {
+    padding: 12px 8px;
+  }
+
+  .application-select {
+    font-size: 13px;
+  }
+
+  .quantity-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .quantity-value {
+    width: 60px;
+    font-size: 14px;
+  }
+
+  .remaining-value {
+    font-size: 20px;
+  }
+
+  .preview-item {
+    font-size: 12px;
+  }
+}
+
+/* Accessibility */
+.quantity-btn:focus,
+.application-select:focus {
+  outline: 3px solid #ff6b35;
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .distribution-section,
+  .quantity-btn,
+  .remaining-counter,
+  .distribution-row {
+    transition: none;
+    animation: none;
+  }
+
+  .quantity-btn:hover,
+  .quantity-btn:active {
+    transform: none;
+  }
+
+  .remaining-counter.over {
+    animation: none;
+  }
+}
