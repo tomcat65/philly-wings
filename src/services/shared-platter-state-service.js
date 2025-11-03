@@ -570,11 +570,7 @@ async function refreshPackageFromFirestore(packageId) {
       return;
     }
 
-    console.log('✅ Fresh package loaded with schema:', {
-      hasDefaultDistribution: !!freshPackage.wingOptions?.defaultDistribution,
-      hasPerWingCosts: !!freshPackage.wingOptions?.perWingCosts,
-      wingOptions: freshPackage.wingOptions
-    });
+    // Package refreshed successfully
 
     // Update state with fresh package data
     currentState.selectedPackage = freshPackage;

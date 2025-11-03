@@ -102,14 +102,9 @@ export function calculatePricing(state) {
       }
     };
 
-    pricingLogger.info('Starting pricing calculations', {
+    pricingLogger.debug('Starting pricing calculations', {
       package: selectedPackage.name,
-      basePrice: selectedPackage.basePrice,
-      hasCurrentConfig: !!currentConfig,
-      hasWingDistribution: !!currentConfig.wingDistribution,
-      hasDefaultDistribution: !!selectedPackage.wingOptions?.defaultDistribution,
-      hasPerWingCosts: !!selectedPackage.wingOptions?.perWingCosts,
-      wingOptionsKeys: selectedPackage.wingOptions ? Object.keys(selectedPackage.wingOptions) : []
+      basePrice: selectedPackage.basePrice
     });
 
     // Calculate wings pricing

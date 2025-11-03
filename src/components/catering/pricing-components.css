@@ -854,6 +854,183 @@
 }
 
 /* ========================================================================
+   Dashboard Totals (Boxed Meals Style) - Enhanced UI
+   ======================================================================== */
+
+.dashboard-totals {
+  padding: 20px;
+  background: var(--neutral-100);
+  border-radius: var(--radius-md);
+}
+
+.savings-badge {
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+  color: var(--neutral-white);
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  box-shadow: var(--shadow-sm);
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.total-row:hover {
+  transform: translateX(4px);
+}
+
+.total-row-divider {
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid var(--neutral-300);
+}
+
+.total-row-grand {
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 2px solid var(--neutral-400);
+}
+
+.total-label-grand {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+.total-value-grand {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--philly-accent);
+  transition: all var(--transition-base);
+}
+
+.total-value-grand[data-value] {
+  animation: priceUpdate 0.5s ease-out;
+}
+
+@keyframes priceUpdate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+    color: var(--philly-primary);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Modifier Icons */
+.modifier-icon {
+  display: inline-block;
+  margin-right: var(--space-xs);
+  opacity: 0.8;
+  font-size: var(--font-size-base);
+}
+
+.modifier-icon-upcharge {
+  color: var(--philly-accent);
+}
+
+.modifier-icon-discount {
+  color: var(--success);
+}
+
+/* Per Person Section (Enhanced) */
+.per-person-section {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-top: 1px solid var(--neutral-300);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  margin-top: var(--space-md);
+}
+
+.per-person-cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.per-person-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #047857;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.per-person-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #059669;
+  transition: all var(--transition-base);
+}
+
+.per-person-value[data-value] {
+  animation: priceUpdate 0.5s ease-out;
+}
+
+.per-person-note {
+  font-size: var(--font-size-xs);
+  color: #047857;
+  margin: 0;
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* Color-coded amounts */
+.upcharge-amount {
+  color: var(--philly-accent);
+  font-weight: 700;
+  transition: all var(--transition-fast);
+}
+
+.discount-amount {
+  color: var(--success);
+  font-weight: 700;
+  transition: all var(--transition-fast);
+}
+
+.upcharge-amount[data-value],
+.discount-amount[data-value] {
+  animation: amountPulse 0.4s ease-out;
+}
+
+@keyframes amountPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ========================================================================
    Responsive Design
    ======================================================================== */
 

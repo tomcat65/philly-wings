@@ -214,7 +214,7 @@ function renderItemsSection(pricing, collapsible) {
 }
 
 /**
- * Render totals summary section
+ * Render totals summary section (Enhanced - matches boxed meals design)
  */
 function renderTotalsSection(pricing, printMode) {
   const {
@@ -234,55 +234,70 @@ function renderTotalsSection(pricing, printMode) {
   const hasTax = tax > 0;
   const hasPerPersonCost = perPersonCost > 0 && guestCount > 0;
 
+  // Calculate net savings (discounts - upcharges)
+  const netSavings = discounts - upcharges;
+  const showSavingsBadge = netSavings > 0 && !printMode;
+
   return `
     <div class="pricing-totals ${printMode ? 'print-mode' : ''}">
-      <div class="totals-header">
-        <h3 class="totals-title">Order Summary</h3>
-      </div>
+      <!-- Dashboard Totals (matching boxed meals style) -->
+      <div class="dashboard-totals">
+        ${showSavingsBadge ? `
+          <div class="savings-badge">
+            💰 You saved $${netSavings.toFixed(2)}!
+          </div>
+        ` : ''}
 
-      <div class="totals-breakdown">
-        <div class="total-line total-items">
-          <span class="total-label">Items Subtotal:</span>
-          <span class="total-amount">$${itemsSubtotal.toFixed(2)}</span>
+        <div class="total-row">
+          <span class="total-label">Package Base</span>
+          <span class="total-value">$${itemsSubtotal.toFixed(2)}</span>
         </div>
 
         ${hasUpcharges ? `
-          <div class="total-line total-upcharges">
-            <span class="total-label">Premium Options:</span>
-            <span class="total-amount upcharge-amount">+$${upcharges.toFixed(2)}</span>
+          <div class="total-row">
+            <span class="total-label">
+              <span class="modifier-icon modifier-icon-upcharge">➕</span>
+              Premium Options
+            </span>
+            <span class="total-value upcharge-amount" data-value="${upcharges}">+$${upcharges.toFixed(2)}</span>
           </div>
         ` : ''}
 
         ${hasDiscounts ? `
-          <div class="total-line total-discounts">
-            <span class="total-label">Discounts:</span>
-            <span class="total-amount discount-amount">-$${discounts.toFixed(2)}</span>
+          <div class="total-row">
+            <span class="total-label">
+              <span class="modifier-icon modifier-icon-discount">➖</span>
+              Discounts
+            </span>
+            <span class="total-value discount-amount" data-value="${discounts}">-$${discounts.toFixed(2)}</span>
           </div>
         ` : ''}
 
-        <div class="total-line total-subtotal">
-          <span class="total-label">Subtotal:</span>
-          <span class="total-amount">$${subtotal.toFixed(2)}</span>
+        <div class="total-row total-row-divider">
+          <span class="total-label">Subtotal</span>
+          <span class="total-value" data-value="${subtotal}">$${subtotal.toFixed(2)}</span>
         </div>
 
         ${hasTax ? `
-          <div class="total-line total-tax">
-            <span class="total-label">Tax (${(taxRate * 100).toFixed(1)}%):</span>
-            <span class="total-amount">$${tax.toFixed(2)}</span>
+          <div class="total-row">
+            <span class="total-label">Tax (${(taxRate * 100).toFixed(1)}%)</span>
+            <span class="total-value" data-value="${tax}">$${tax.toFixed(2)}</span>
           </div>
         ` : ''}
 
-        <div class="total-line total-grand">
-          <span class="total-label">Total:</span>
-          <span class="total-amount grand-total">$${total.toFixed(2)}</span>
+        <div class="total-row total-row-grand">
+          <span class="total-label-grand">Total</span>
+          <span class="total-value-grand" data-value="${total}">$${total.toFixed(2)}</span>
         </div>
       </div>
 
       ${hasPerPersonCost ? `
-        <div class="per-person-cost-box">
-          <div class="per-person-label">Per Person Cost:</div>
-          <div class="per-person-amount">$${perPersonCost.toFixed(2)}</div>
-          <div class="per-person-details">Based on ${guestCount} guests</div>
+        <div class="per-person-section">
+          <div class="per-person-cost-row">
+            <span class="per-person-label">Per Person Cost</span>
+            <span class="per-person-value" data-value="${perPersonCost}">$${perPersonCost.toFixed(2)}</span>
+          </div>
+          <p class="per-person-note">Based on ${guestCount} guest${guestCount !== 1 ? 's' : ''}</p>
         </div>
       ` : ''}
 
@@ -468,20 +483,10 @@ export function initPricingSummary(containerId, getStateFunc, options = {}) {
   // Subscribe to pricing updates (SP-OS-S5)
   // Get FRESH state each time pricing updates - fixes stale state bug
   const unsubscribe = onPricingChange('pricing:updated', (pricing) => {
-    console.log('🔄 Pricing summary listener fired', {
-      containerId,
-      containerExists: !!container,
-      pricingTotals: pricing?.totals
-    });
-
     const currentState = typeof getStateFunc === 'function' ? getStateFunc() : initialState;
     const html = renderPricingSummary(pricing, currentState, { ...options, containerId });
 
-    console.log('📝 Generated HTML length:', html.length, 'Total:', pricing?.totals?.total);
-
     container.innerHTML = html;
-
-    console.log('✅ DOM updated for', containerId);
 
     // Re-initialize collapsible after update
     if (options.collapsible !== false) {
