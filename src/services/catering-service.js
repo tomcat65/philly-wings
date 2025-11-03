@@ -56,12 +56,23 @@ export async function getCateringPackages() {
     );
 
     const snapshot = await getDocs(q);
-    const packages = snapshot.docs.map(doc =>
-      normalizePackageRecord({
+    const packages = snapshot.docs.map(doc => {
+      const data = doc.data();
+
+      // DEBUG: Log raw Firestore data for tailgate-party-pack
+      if (doc.id === 'tailgate-party-pack') {
+        console.log('🔍 Raw Firestore data for tailgate-party-pack:', {
+          wingOptions: data.wingOptions,
+          hasDefaultDist: !!data.wingOptions?.defaultDistribution,
+          hasPerWingCosts: !!data.wingOptions?.perWingCosts
+        });
+      }
+
+      return normalizePackageRecord({
         id: doc.id,
-        ...doc.data()
-      })
-    );
+        ...data
+      });
+    });
 
     // Sort by basePrice in memory after fetching
     return packages.sort((a, b) => {

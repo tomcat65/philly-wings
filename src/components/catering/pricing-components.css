@@ -1,0 +1,987 @@
+/**
+ * Pricing Components CSS
+ *
+ * Comprehensive styling for all pricing components:
+ * - Master summary container
+ * - Wings pricing renderer
+ * - Items pricing renderer (sauces, dips, sides, desserts, beverages)
+ * - Collapsible sections
+ * - Print styles
+ *
+ * @module pricing-components.css
+ * @created 2025-10-31
+ * @epic SP-PRICING-001
+ * @story S9-CSS
+ */
+
+/* ========================================================================
+   CSS Variables - Brand Colors & Design Tokens
+   ======================================================================== */
+
+:root {
+  /* Philly Wings Brand Colors */
+  --philly-primary: #D32F2F;        /* Red - main brand */
+  --philly-primary-dark: #B71C1C;   /* Dark red */
+  --philly-primary-light: #EF5350;  /* Light red */
+  --philly-accent: #FFA000;         /* Amber/Gold */
+  --philly-accent-light: #FFB74D;   /* Light amber */
+
+  /* Neutrals */
+  --neutral-900: #212121;           /* Almost black */
+  --neutral-800: #424242;           /* Dark gray */
+  --neutral-700: #616161;           /* Medium dark gray */
+  --neutral-600: #757575;           /* Medium gray */
+  --neutral-500: #9E9E9E;           /* Gray */
+  --neutral-400: #BDBDBD;           /* Light gray */
+  --neutral-300: #E0E0E0;           /* Very light gray */
+  --neutral-200: #EEEEEE;           /* Off white */
+  --neutral-100: #F5F5F5;           /* Almost white */
+  --neutral-white: #FFFFFF;         /* Pure white */
+
+  /* Semantic Colors */
+  --success: #4CAF50;               /* Green */
+  --success-light: #81C784;         /* Light green */
+  --warning: #FF9800;               /* Orange */
+  --warning-light: #FFB74D;         /* Light orange */
+  --error: #F44336;                 /* Red */
+  --error-light: #E57373;           /* Light red */
+  --info: #2196F3;                  /* Blue */
+  --info-light: #64B5F6;            /* Light blue */
+
+  /* Pricing Specific Colors */
+  --price-base: var(--neutral-900);
+  --price-upcharge: var(--philly-accent);
+  --price-discount: var(--success);
+  --price-included: var(--success);
+  --price-warning: var(--warning);
+
+  /* Spacing Scale */
+  --space-xs: 0.25rem;    /* 4px */
+  --space-sm: 0.5rem;     /* 8px */
+  --space-md: 1rem;       /* 16px */
+  --space-lg: 1.5rem;     /* 24px */
+  --space-xl: 2rem;       /* 32px */
+  --space-2xl: 3rem;      /* 48px */
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+}
+
+/* ========================================================================
+   Master Summary Container
+   ======================================================================== */
+
+.pricing-summary-master {
+  font-family: var(--font-family);
+  background: var(--neutral-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  margin: var(--space-lg) 0;
+}
+
+/* Package Header */
+.pricing-header {
+  background: linear-gradient(135deg, var(--philly-primary) 0%, var(--philly-primary-dark) 100%);
+  color: var(--neutral-white);
+  padding: var(--space-xl);
+  position: relative;
+}
+
+.pricing-header.collapsible {
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.pricing-header.collapsible:hover {
+  background: linear-gradient(135deg, var(--philly-primary-dark) 0%, #8B0000 100%);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.package-info h2.package-name {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-sm) 0;
+  line-height: 1.2;
+}
+
+.package-description {
+  font-size: var(--font-size-base);
+  margin: 0;
+  opacity: 0.9;
+}
+
+.package-stats {
+  display: flex;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+/* Collapse Toggle Button */
+.collapse-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--neutral-white);
+  font-size: var(--font-size-lg);
+  position: absolute;
+  top: var(--space-lg);
+  right: var(--space-lg);
+}
+
+.collapse-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.toggle-icon {
+  display: inline-block;
+  transition: transform var(--transition-base);
+}
+
+.collapsed .toggle-icon {
+  transform: rotate(-90deg);
+}
+
+/* ========================================================================
+   Pricing Sections Container
+   ======================================================================== */
+
+.pricing-sections {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.summary-section {
+  background: var(--neutral-100);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.summary-section.collapsible .section-toggle {
+  padding: var(--space-sm);
+  text-align: right;
+  background: var(--neutral-200);
+  border-bottom: 1px solid var(--neutral-300);
+}
+
+.summary-section.collapsed .section-content {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.section-content {
+  max-height: 5000px;
+  overflow: hidden;
+  transition: max-height var(--transition-slow), padding var(--transition-base);
+}
+
+/* ========================================================================
+   Pricing Section (Wings, Items)
+   ======================================================================== */
+
+.pricing-section {
+  background: var(--neutral-white);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.pricing-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 2px solid var(--neutral-300);
+}
+
+.pricing-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+.pricing-icon {
+  font-size: var(--font-size-3xl);
+}
+
+.pricing-section-summary {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Badges */
+.wing-count-badge,
+.sauce-count-badge,
+.dip-count-badge,
+.side-count-badge,
+.dessert-count-badge,
+.beverage-count-badge {
+  background: var(--neutral-200);
+  color: var(--neutral-800);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.upcharge-badge {
+  background: var(--price-upcharge);
+  color: var(--neutral-white);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.included-badge {
+  background: var(--price-included);
+  color: var(--neutral-white);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+/* ========================================================================
+   Wing Items List
+   ======================================================================== */
+
+.wing-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.wing-item {
+  background: var(--neutral-100);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+.wing-item:hover {
+  background: var(--neutral-200);
+  transform: translateX(4px);
+}
+
+.wing-item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.wing-type-icon {
+  font-size: var(--font-size-2xl);
+}
+
+.wing-type-label {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+
+.wing-item-details {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.wing-quantity {
+  font-size: var(--font-size-base);
+  color: var(--neutral-700);
+  font-weight: 500;
+}
+
+.plant-based-badge {
+  background: var(--success-light);
+  color: var(--neutral-white);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.dietary-badge {
+  background: var(--info-light);
+  color: var(--neutral-white);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+/* ========================================================================
+   Items Lists (Sauces, Dips, Sides, etc.)
+   ======================================================================== */
+
+.items-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-md) 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-md);
+}
+
+.item-entry {
+  background: var(--neutral-100);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  transition: all var(--transition-fast);
+}
+
+.item-entry:hover {
+  background: var(--neutral-200);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.item-entry.item-extra {
+  border-left: 4px solid var(--price-upcharge);
+}
+
+.item-name {
+  font-weight: 600;
+  color: var(--neutral-900);
+  flex-grow: 1;
+}
+
+.item-quantity {
+  color: var(--neutral-600);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.heat-badge {
+  font-size: var(--font-size-lg);
+}
+
+.size-badge,
+.serves-badge {
+  background: var(--neutral-300);
+  color: var(--neutral-800);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+/* ========================================================================
+   Sections Organization
+   ======================================================================== */
+
+.included-items,
+.extra-items {
+  margin: var(--space-lg) 0;
+}
+
+.items-subtitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--neutral-800);
+  margin: var(--space-md) 0;
+}
+
+.beverage-group {
+  margin: var(--space-lg) 0;
+}
+
+/* ========================================================================
+   Modifiers & Warnings
+   ======================================================================== */
+
+.pricing-modifiers,
+.pricing-warnings {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--neutral-100);
+  border-radius: var(--radius-md);
+}
+
+.modifiers-subtitle {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--neutral-800);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.modifiers-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.modifier-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--neutral-white);
+  border-radius: var(--radius-sm);
+  gap: var(--space-md);
+}
+
+.modifier-label {
+  flex-grow: 1;
+  font-size: var(--font-size-sm);
+  color: var(--neutral-800);
+}
+
+.modifier-amount {
+  font-weight: 700;
+  font-size: var(--font-size-base);
+  color: var(--price-upcharge);
+}
+
+.warning-message {
+  background: var(--warning-light);
+  color: var(--neutral-900);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--warning);
+  font-size: var(--font-size-sm);
+  margin: var(--space-sm) 0;
+}
+
+.warning-icon {
+  margin-right: var(--space-sm);
+}
+
+/* ========================================================================
+   Pricing Totals Section
+   ======================================================================== */
+
+.pricing-totals {
+  background: var(--neutral-100);
+  padding: var(--space-xl);
+  border-top: 2px solid var(--neutral-300);
+}
+
+.totals-header {
+  margin-bottom: var(--space-lg);
+}
+
+.totals-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+.totals-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--neutral-white);
+  border-radius: var(--radius-md);
+}
+
+.total-line.total-grand {
+  background: var(--philly-primary);
+  color: var(--neutral-white);
+  padding: var(--space-lg);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-top: var(--space-md);
+}
+
+.total-label {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--neutral-800);
+}
+
+.total-line.total-grand .total-label {
+  color: var(--neutral-white);
+  font-size: var(--font-size-lg);
+}
+
+.total-amount {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--neutral-900);
+}
+
+.total-line.total-grand .total-amount {
+  color: var(--neutral-white);
+  font-size: var(--font-size-2xl);
+}
+
+.upcharge-amount {
+  color: var(--price-upcharge);
+}
+
+.discount-amount {
+  color: var(--price-discount);
+}
+
+.grand-total {
+  color: var(--neutral-white);
+}
+
+/* ========================================================================
+   Removal Credits Section (SP-OS-S4)
+   ======================================================================== */
+
+.removal-credits-box {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  border: 2px solid var(--success);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin: var(--space-lg) 0;
+  box-shadow: var(--shadow-md);
+}
+
+.removal-credits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 2px solid var(--success-light);
+}
+
+.removal-credits-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--success);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.removal-credits-title::before {
+  content: '💰';
+  font-size: var(--font-size-2xl);
+}
+
+.removal-credits-total {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--success);
+}
+
+.removal-credits-breakdown {
+  margin: var(--space-md) 0;
+}
+
+.removal-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.removal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--neutral-white);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  gap: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+.removal-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateX(-4px);
+}
+
+.removal-item-name {
+  flex-grow: 1;
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+
+.removal-item-details {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  font-weight: 500;
+}
+
+.removal-item-credit {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--success);
+}
+
+.removal-credit-warning {
+  background: var(--warning-light);
+  color: var(--neutral-900);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--warning);
+  margin: var(--space-md) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.removal-credits-note {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--success-light);
+  font-size: var(--font-size-sm);
+  color: var(--success);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ========================================================================
+   Per Person Cost Box (SP-OS-S3)
+   ======================================================================== */
+
+.per-person-cost-box {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  border: 2px solid var(--info);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin: var(--space-lg) 0;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.per-person-label {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--info);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-sm);
+}
+
+.per-person-amount {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--info);
+  margin: var(--space-sm) 0;
+}
+
+.per-person-details {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+  font-weight: 500;
+}
+
+/* ========================================================================
+   Pricing Section Footer
+   ======================================================================== */
+
+.pricing-section-footer {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 2px solid var(--neutral-300);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.footer-label {
+  color: var(--neutral-800);
+}
+
+.footer-amount {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.base-amount {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  font-weight: 500;
+}
+
+/* ========================================================================
+   Empty States
+   ======================================================================== */
+
+.pricing-empty,
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--neutral-600);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: var(--space-lg);
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--neutral-800);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.empty-message,
+.empty-hint {
+  font-size: var(--font-size-base);
+  color: var(--neutral-600);
+  margin: var(--space-sm) 0;
+}
+
+/* ========================================================================
+   Print Styles
+   ======================================================================== */
+
+@media print {
+  .pricing-summary-master {
+    box-shadow: none;
+    margin: 0;
+  }
+
+  .pricing-summary-master.print-mode {
+    background: var(--neutral-white);
+  }
+
+  .collapse-toggle,
+  .section-toggle {
+    display: none !important;
+  }
+
+  .pricing-header {
+    background: var(--neutral-900) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .summary-section {
+    page-break-inside: avoid;
+  }
+
+  .pricing-section {
+    page-break-inside: avoid;
+  }
+
+  .total-line.total-grand {
+    background: var(--neutral-900) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ========================================================================
+   Responsive Design
+   ======================================================================== */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .pricing-summary-master {
+    margin: var(--space-md) 0;
+  }
+
+  .pricing-header {
+    padding: var(--space-lg);
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .package-stats {
+    gap: var(--space-md);
+    width: 100%;
+  }
+
+  .stat-item {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .pricing-sections {
+    padding: var(--space-md);
+  }
+
+  .items-list {
+    grid-template-columns: 1fr;
+  }
+
+  .collapse-toggle {
+    position: static;
+    margin-top: var(--space-md);
+    width: 100%;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .pricing-header {
+    padding: var(--space-md);
+  }
+
+  .package-name {
+    font-size: var(--font-size-2xl) !important;
+  }
+
+  .package-stats {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .pricing-section {
+    padding: var(--space-md);
+  }
+
+  .pricing-section-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .pricing-icon {
+    font-size: var(--font-size-2xl);
+  }
+
+  .pricing-sections {
+    padding: var(--space-sm);
+    gap: var(--space-md);
+  }
+
+  .wing-items-list {
+    gap: var(--space-sm);
+  }
+
+  .items-list {
+    gap: var(--space-sm);
+  }
+
+  .pricing-totals {
+    padding: var(--space-md);
+  }
+
+  .total-line {
+    padding: var(--space-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .total-line.total-grand {
+    padding: var(--space-md);
+  }
+}
+
+/* ========================================================================
+   Accessibility Enhancements
+   ======================================================================== */
+
+/* Focus styles */
+.collapse-toggle:focus,
+button:focus {
+  outline: 3px solid var(--philly-accent);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .pricing-section {
+    border: 2px solid var(--neutral-900);
+  }
+
+  .item-entry,
+  .wing-item,
+  .total-line {
+    border: 1px solid var(--neutral-700);
+  }
+}

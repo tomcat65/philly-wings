@@ -13,6 +13,9 @@
  * Story: SP-005 (State Management Setup)
  */
 
+import { getPackageById } from './catering-service.js';
+import { recalculatePricing as aggregatorRecalculatePricing } from '../utils/pricing-aggregator.js';
+
 // ===== INITIAL STATE TEMPLATE =====
 const INITIAL_STATE = {
   // Flow metadata
@@ -480,6 +483,13 @@ export function loadDraft() {
     const baseState = cloneInitialState();
     currentState = deepMerge(baseState, draft.state);
 
+    // CRITICAL FIX (SP-OS-S1): Refresh package data from Firestore
+    // Draft may have stale package schema missing pricing fields (defaultDistribution, perWingCosts)
+    // This async refresh ensures latest package schema is loaded
+    if (currentState.selectedPackage?.id) {
+      refreshPackageFromFirestore(currentState.selectedPackage.id);
+    }
+
     publishStateChange('*', currentState);
 
     console.log('Draft loaded successfully (saved', draft.savedAt, ')');
@@ -542,6 +552,45 @@ export function getValue(path) {
   }
 
   return value;
+}
+
+/**
+ * Refresh package data from Firestore (SP-OS-S1 fix)
+ * Used after loading draft to ensure latest package schema with pricing fields
+ * @param {string} packageId - Package ID to refresh
+ */
+async function refreshPackageFromFirestore(packageId) {
+  try {
+    console.log('🔄 Refreshing package from Firestore:', packageId);
+
+    const freshPackage = await getPackageById(packageId);
+
+    if (!freshPackage) {
+      console.warn('⚠️ Package not found in Firestore:', packageId);
+      return;
+    }
+
+    console.log('✅ Fresh package loaded with schema:', {
+      hasDefaultDistribution: !!freshPackage.wingOptions?.defaultDistribution,
+      hasPerWingCosts: !!freshPackage.wingOptions?.perWingCosts,
+      wingOptions: freshPackage.wingOptions
+    });
+
+    // Update state with fresh package data
+    currentState.selectedPackage = freshPackage;
+
+    // Publish package change
+    publishStateChange('selectedPackage', freshPackage);
+
+    // Trigger pricing recalculation with fresh package data
+    aggregatorRecalculatePricing(currentState, { trigger: 'package-refresh' });
+
+    console.log('✅ Package refreshed and pricing recalculated');
+
+  } catch (error) {
+    console.error('❌ Failed to refresh package from Firestore:', error);
+    // Don't crash - just log error and continue with draft package
+  }
 }
 
 /**

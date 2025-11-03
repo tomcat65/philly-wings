@@ -1,0 +1,314 @@
+/**
+ * Pricing DevTools Panel Styles
+ * @epic SP-PRICING-001
+ * @story S1-Foundation
+ */
+
+.pricing-devtools-panel {
+  position: fixed;
+  z-index: 999999;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: both;
+  min-width: 300px;
+  min-height: 400px;
+}
+
+.pricing-devtools-panel.pinned {
+  resize: none;
+  box-shadow: 0 0 0 2px #f59e0b;
+}
+
+/* Header */
+.devtools-header {
+  background: #2d2d2d;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #3e3e3e;
+}
+
+.devtools-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devtools-icon {
+  font-size: 16px;
+}
+
+.devtools-title h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.devtools-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.devtools-btn {
+  background: none;
+  border: none;
+  color: #d4d4d4;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.devtools-btn:hover {
+  background: #3e3e3e;
+}
+
+/* Tabs */
+.devtools-tabs {
+  display: flex;
+  background: #252526;
+  border-bottom: 1px solid #3e3e3e;
+  padding: 0;
+  margin: 0;
+}
+
+.devtools-tab {
+  background: none;
+  border: none;
+  color: #858585;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.devtools-tab:hover {
+  color: #d4d4d4;
+  background: #2d2d2d;
+}
+
+.devtools-tab.active {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
+  background: #1e1e1e;
+}
+
+/* Content */
+.devtools-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.devtools-tab-content {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.devtools-tab-content.active {
+  display: flex;
+}
+
+/* Toolbar */
+.devtools-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: #252526;
+  border-bottom: 1px solid #3e3e3e;
+}
+
+.devtools-toolbar select {
+  background: #3c3c3c;
+  color: #d4d4d4;
+  border: 1px solid #3e3e3e;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.devtools-btn-sm {
+  background: #0e639c;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: background 0.2s;
+}
+
+.devtools-btn-sm:hover {
+  background: #1177bb;
+}
+
+/* Logs */
+.devtools-logs-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.devtools-log-entry {
+  padding: 8px;
+  margin-bottom: 4px;
+  border-left: 3px solid #3e3e3e;
+  background: #252526;
+  border-radius: 2px;
+}
+
+.devtools-log-entry.log-error {
+  border-left-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.devtools-log-entry.log-warn {
+  border-left-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.devtools-log-entry.log-info {
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.devtools-log-entry.log-debug {
+  border-left-color: #6b7280;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.log-level {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.log-message {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.log-data {
+  margin-top: 4px;
+}
+
+.log-data summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: #858585;
+  user-select: none;
+}
+
+.log-data pre {
+  margin: 4px 0 0;
+  padding: 8px;
+  background: #1e1e1e;
+  border-radius: 2px;
+  overflow-x: auto;
+  font-size: 11px;
+}
+
+/* Performance */
+.devtools-perf-summary {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.devtools-perf-summary h4 {
+  margin: 0 0 16px;
+  color: #f59e0b;
+  font-size: 14px;
+}
+
+.perf-metric {
+  padding: 12px;
+  margin-bottom: 8px;
+  background: #252526;
+  border-radius: 4px;
+  border-left: 3px solid #3b82f6;
+}
+
+.perf-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #d4d4d4;
+}
+
+.perf-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: #858585;
+}
+
+.perf-stats span {
+  display: inline-block;
+}
+
+/* Structure */
+.devtools-structure-view {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.structure-json {
+  background: #252526;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Loading state */
+.devtools-loading {
+  color: #858585;
+  font-style: italic;
+  text-align: center;
+  padding: 32px;
+}
+
+/* Scrollbar styling */
+.devtools-logs-container::-webkit-scrollbar,
+.devtools-perf-summary::-webkit-scrollbar,
+.devtools-structure-view::-webkit-scrollbar {
+  width: 8px;
+}
+
+.devtools-logs-container::-webkit-scrollbar-track,
+.devtools-perf-summary::-webkit-scrollbar-track,
+.devtools-structure-view::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.devtools-logs-container::-webkit-scrollbar-thumb,
+.devtools-perf-summary::-webkit-scrollbar-thumb,
+.devtools-structure-view::-webkit-scrollbar-thumb {
+  background: #3e3e3e;
+  border-radius: 4px;
+}
+
+.devtools-logs-container::-webkit-scrollbar-thumb:hover,
+.devtools-perf-summary::-webkit-scrollbar-thumb:hover,
+.devtools-structure-view::-webkit-scrollbar-thumb:hover {
+  background: #4e4e4e;
+}

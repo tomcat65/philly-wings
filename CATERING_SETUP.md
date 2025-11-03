@@ -38,10 +38,10 @@ node scripts/seed-catering-data.js --emulator
 **Expected Output:**
 ```
 🌱 Seeding catering packages to Firestore...
-✅ Prepared: The Lunch Box Special (Tier 1, serves 10-12)
-✅ Prepared: The Sampler Spread (Tier 1, serves 12-15)
-... (6 packages total)
-🎉 Successfully seeded 6 catering packages!
+✅ Prepared: The Lunch Box Special (Tier 1, serves 10-14)
+✅ Prepared: The Sampler Spread (Tier 1, serves 14-18)
+... (8 packages total)
+🎉 Successfully seeded 8 catering packages!
 
 📅 Initializing catering availability for next 90 days...
 ✅ Initialized: 2025-10-13
@@ -389,7 +389,7 @@ firebase functions:config:get ezcater.webhook_secret
 ```
 philly-wings/
 ├── scripts/
-│   └── seed-catering-data.js          ← Seed 6 packages + availability
+│   └── seed-catering-data.js          ← Seed 8 packages + availability
 ├── functions/
 │   ├── ezcater/
 │   │   ├── menuSync.js                ← Menu API sync logic

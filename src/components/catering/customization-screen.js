@@ -13,6 +13,8 @@ import { getState, updateState, onStateChange } from '../../services/shared-plat
 import { renderWingDistributionSelector, initWingDistributionSelector } from './wing-distribution-selector.js';
 import { renderSaucePhotoCardSelector, initSaucePhotoCardSelector } from './sauce-photo-card-selector.js';
 import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
+import { initPricingSummary } from './pricing-summary-master.js';
+import { recalculatePricing } from '../../utils/pricing-aggregator.js';
 
 /**
  * Initialize customization screen
@@ -40,8 +42,13 @@ export function initCustomizationScreen() {
   // Set up action buttons
   initActionButtons();
 
-  // Subscribe to state changes for live updates
-  onStateChange('currentConfig', updatePricingSummary);
+  // Subscribe to state changes for live updates (SP-OS-S5)
+  // Use wildcard to catch ALL currentConfig changes:
+  // - currentConfig.wingDistribution
+  // - currentConfig.sauces
+  // - currentConfig.removedItems
+  // - etc.
+  onStateChange('currentConfig.*', updatePricingSummary);
 
   // Initial render
   updatePricingSummary();
@@ -173,68 +180,8 @@ function renderPanelFooter() {
  * Render pricing summary panel
  */
 function renderPricingSummary(pkg, config = {}) {
-  const basePrice = pkg.basePrice || 0;
-  const modifications = calculateModifications(config);
-  const subtotal = basePrice + modifications.total;
-  const tax = subtotal * 0.08; // 8% tax
-  const grandTotal = subtotal + tax;
-
-  return `
-    <div class="summary-content">
-      <div class="summary-header">
-        <h3 class="summary-title">Order Summary</h3>
-        <span class="summary-tier">Tier ${pkg.tier}</span>
-      </div>
-
-      <div class="summary-package">
-        <div class="package-name">${pkg.name}</div>
-        <div class="package-serves">Serves ${pkg.servesMin}-${pkg.servesMax}</div>
-      </div>
-
-      <div class="summary-base-price">
-        <span class="price-label">Base Price:</span>
-        <span class="price-value">$${basePrice.toFixed(2)}</span>
-      </div>
-
-      ${modifications.items.length > 0 ? `
-        <div class="summary-modifications">
-          <h4 class="modifications-title">Modifications:</h4>
-          <div class="modifications-list">
-            ${modifications.items.map(mod => `
-              <div class="modification-item ${mod.type}">
-                <span class="mod-label">${mod.label}</span>
-                <span class="mod-amount">${mod.type === 'add' ? '+' : ''}$${mod.amount.toFixed(2)}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-
-      <div class="summary-divider"></div>
-
-      <div class="summary-subtotal">
-        <span class="subtotal-label">Subtotal:</span>
-        <span class="subtotal-value">$${subtotal.toFixed(2)}</span>
-      </div>
-
-      <div class="summary-tax">
-        <span class="tax-label">Tax (8%):</span>
-        <span class="tax-value">$${tax.toFixed(2)}</span>
-      </div>
-
-      <div class="summary-divider thick"></div>
-
-      <div class="summary-grand-total">
-        <span class="total-label">Total:</span>
-        <span class="total-value">$${grandTotal.toFixed(2)}</span>
-      </div>
-
-      <div class="summary-footer">
-        <p class="summary-note">✅ Includes plates, napkins & utensils</p>
-        <p class="summary-note">🚚 Free delivery within 10 miles</p>
-      </div>
-    </div>
-  `;
+  // Create container that will be filled by initPricingSummary
+  return `<div id="pricing-summary-container" class="summary-content"></div>`;
 }
 
 /**
@@ -647,25 +594,71 @@ function calculateModifications(config) {
 }
 
 /**
+ * Debounce helper for performance optimization
+ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/**
  * Update pricing summary (called on state changes)
  */
+let pricingSummaryInitialized = false;
+let pricingSummaryUnsubscribe = null;
+
+// Debounced pricing recalculation (SP-OS-S5)
+// Waits 150ms after last state change before recalculating
+// Prevents excessive calculations during rapid slider movements
+const debouncedRecalculatePricing = debounce((state) => {
+  recalculatePricing(state, { trigger: 'state-change-debounced' });
+}, 150);
+
 function updatePricingSummary() {
   const state = getState();
   const pkg = state.selectedPackage;
-  const config = state.currentConfig;
 
   if (!pkg) return;
 
-  // Update desktop summary
-  const summaryPanel = document.querySelector('.pricing-summary-panel');
-  if (summaryPanel) {
-    summaryPanel.innerHTML = renderPricingSummary(pkg, config);
-  }
+  // Initialize comprehensive pricing summary only once
+  if (!pricingSummaryInitialized) {
+    // Update desktop summary
+    const summaryPanel = document.querySelector('.pricing-summary-panel');
+    if (summaryPanel) {
+      summaryPanel.innerHTML = renderPricingSummary(pkg, {});
 
-  // Update mobile drawer
-  const drawerContent = document.getElementById('mobile-drawer-content');
-  if (drawerContent) {
-    drawerContent.innerHTML = renderPricingSummary(pkg, config);
+      // Initialize the comprehensive pricing summary (SP-OS-S5)
+      // Pass getState FUNCTION (not snapshot) so it gets fresh state on each update
+      // This fixes the bug where totals wouldn't update when sliders moved
+      pricingSummaryUnsubscribe = initPricingSummary('pricing-summary-container', getState, {
+        showPackageHeader: true,
+        showWings: true,
+        showItems: true,
+        showTotals: true,
+        collapsible: true
+      });
+    }
+
+    // Update mobile drawer
+    const drawerContent = document.getElementById('mobile-drawer-content');
+    if (drawerContent) {
+      drawerContent.innerHTML = renderPricingSummary(pkg, {});
+    }
+
+    pricingSummaryInitialized = true;
+
+    // Initial calculation (immediate, no debounce)
+    recalculatePricing(state, { trigger: 'initial' });
+  } else {
+    // Subsequent updates use debounced calculation (SP-OS-S5)
+    debouncedRecalculatePricing(state);
   }
 
   // Update mobile button
