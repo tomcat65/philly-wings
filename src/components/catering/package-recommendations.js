@@ -14,6 +14,7 @@
 
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
 import { getCateringPackages } from '../../services/catering-service.js';
+import { initCustomizationScreen } from './customization-screen.js';
 
 function isPlantBasedPackage(pkg) {
   if (!pkg) return false;
@@ -608,19 +609,18 @@ function navigateToCustomization() {
     recommendationsContainer.style.display = 'none';
   }
 
-  // Show customization screen (SP-006 - not yet implemented)
+  // Show customization screen (SP-006)
   const customizationContainer = document.getElementById('customization-screen-container');
   if (customizationContainer) {
     customizationContainer.style.display = 'block';
     customizationContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Initialize customization screen if function exists
-    if (typeof window.initCustomizationScreen === 'function') {
-      window.initCustomizationScreen();
-    }
+    // Initialize customization screen directly
+    initCustomizationScreen();
+    console.log('✅ Customization screen initialized from navigation');
   } else {
-    console.warn('Customization screen (SP-006) not yet implemented - showing placeholder');
-    showPlaceholder('Customization Screen (SP-006)');
+    console.warn('Customization screen container not found');
+    showPlaceholder('Customization Screen');
   }
 }
 

@@ -5936,3 +5936,334 @@
     width: 100%;
   }
 }
+
+/* ===================================================================
+   SP-009: Dips Counter Selector
+   Counter-based dip selection UI for shared platters
+   =================================================================== */
+
+/* Container */
+.dips-counter-selector {
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+/* Section Header */
+.dips-section-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+}
+
+.included-note {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.containers-note {
+  font-size: 14px;
+  color: #95a5a6;
+}
+
+/* Skip Dips Option */
+.skip-dips-option {
+  background: #f8f9fa;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.skip-dips-option:has(:checked) {
+  background: #fff3e0;
+  border-color: #ff6b35;
+}
+
+.skip-dips-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.skip-dips-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #ff6b35;
+}
+
+.skip-dips-text {
+  flex: 1;
+}
+
+.credit-amount {
+  color: #27ae60;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+.skip-dips-description {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin: 8px 0 0 32px;
+}
+
+/* Dips Grid */
+.dips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Dip Card */
+.dip-card {
+  background: #fff;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dip-card:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Dip Image */
+.dip-card-image {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dip-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dip-social-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ff6b35;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dip Info */
+.dip-card-content {
+  text-align: center;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.dip-card-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 4px 0;
+}
+
+.dip-card-description {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin: 0 0 4px 0;
+}
+
+.dip-card-size {
+  font-size: 12px;
+  color: #95a5a6;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Counter Controls */
+.dip-counter-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 8px 0;
+}
+
+.counter-btn {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #ecf0f1;
+  background: #fff;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.counter-btn:hover:not(:disabled) {
+  border-color: #ff6b35;
+  color: #ff6b35;
+  background: #fff5f2;
+  transform: scale(1.1);
+}
+
+.counter-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.counter-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.counter-btn.btn-clicked {
+  animation: counterPulse 0.2s ease;
+}
+
+@keyframes counterPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.counter-display {
+  min-width: 40px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* Unit Label */
+.dip-unit-label {
+  font-size: 12px;
+  color: #95a5a6;
+  margin: 0;
+  text-align: center;
+}
+
+/* Totals Display */
+.dips-totals {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 12px;
+  color: #fff;
+  text-align: center;
+}
+
+.totals-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.totals-label {
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.totals-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.totals-containers {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-left: 8px;
+}
+
+/* Responsive: Tablet */
+@media (max-width: 1024px) {
+  .dips-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .dip-card-image {
+    height: 120px;
+  }
+}
+
+/* Responsive: Mobile */
+@media (max-width: 640px) {
+  .dips-counter-selector {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  .dips-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .dip-card {
+    padding: 12px;
+  }
+
+  .dip-card-image {
+    height: 100px;
+  }
+
+  .dip-card-name {
+    font-size: 16px;
+  }
+
+  .dip-card-description {
+    font-size: 12px;
+  }
+
+  .counter-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .counter-display {
+    font-size: 20px;
+    min-width: 32px;
+  }
+
+  .totals-value {
+    font-size: 18px;
+  }
+
+  .totals-containers {
+    display: block;
+    margin-left: 0;
+    margin-top: 4px;
+  }
+}

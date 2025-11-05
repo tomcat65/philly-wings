@@ -46,7 +46,7 @@ export async function renderCateringPage() {
       initEntryChoiceV2(); // SP-001: Initialize Shared Platters V2 entry choice
       initBoxedMealsFlow();
       initPackageRecommendations(); // SP-004: Initialize package recommendations
-      initCustomizationScreen(); // SP-006: Initialize customization screen
+      // SP-006: Customization screen now initialized on-demand when navigated to
 
       // SP-003 & SP-004: Listen for navigation events from Event Details Form
       setupNavigationListeners();

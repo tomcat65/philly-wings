@@ -13,6 +13,7 @@ import { getState, updateState, onStateChange } from '../../services/shared-plat
 import { renderWingDistributionSelector, initWingDistributionSelector } from './wing-distribution-selector.js';
 import { renderIntegratedSauceDistribution, initIntegratedSauceDistribution, getSauceById, determineSauceViscosity } from './sauce-distribution-integrated.js';
 import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
+import { renderDipsCounterSelector, initDipsCounterSelector } from './dips-counter-selector.js';
 import { initPricingSummary, renderPricingSummary as renderFullPricingSummary } from './pricing-summary-master.js';
 import { recalculatePricing, getCurrentPricing } from '../../utils/pricing-aggregator.js';
 import '../../styles/sauce-distribution-integrated.css';
@@ -25,6 +26,12 @@ export function initCustomizationScreen() {
   const container = document.getElementById('customization-screen-container');
   if (!container) {
     console.log('📦 Customization screen container not found');
+    return;
+  }
+
+  // Skip if container is hidden (not ready for initialization)
+  if (container.style.display === 'none' || getComputedStyle(container).display === 'none') {
+    console.log('📦 Customization screen hidden - skipping initialization');
     return;
   }
 
@@ -220,13 +227,15 @@ function renderMobilePricingButton() {
  */
 function renderNoPackageSelected() {
   return `
-    <div class="customization-screen-empty">
-      <div class="empty-icon">📦</div>
-      <h2>No Package Selected</h2>
-      <p>Please select a package to continue customizing your order.</p>
-      <button class="btn-primary" onclick="window.location.reload()">
-        ← Back to Packages
-      </button>
+    <div id="customization-screen-container" class="customization-screen-container" style="display: none;">
+      <div class="customization-screen-empty">
+        <div class="empty-icon">📦</div>
+        <h2>No Package Selected</h2>
+        <p>Please select a package to continue customizing your order.</p>
+        <button class="btn-primary" onclick="window.location.reload()">
+          ← Back to Packages
+        </button>
+      </div>
     </div>
   `;
 }
@@ -338,12 +347,16 @@ async function renderSectionContent(sectionId) {
       return sauceHtml.join('');
 
     case 'dips':
+      // SP-009: Use counter selector for shared platters
+      const packageDipsIncluded = packageData.dipsIncluded || { quantity: 3, unit: 'five-pack' };
       const preSelectedDips = currentConfig.dips || [];
-      const maxDipSelections = packageData.dipSelections?.max || packageData.dipSelections || 3;
-      return await renderDipPhotoCardSelector({
-        maxSelections: maxDipSelections,
-        preSelectedIds: preSelectedDips,
-        onSelectionChange: handleDipSelectionChange
+      const skipDips = currentConfig.noDips || false;
+
+      return await renderDipsCounterSelector({
+        packageIncluded: packageDipsIncluded,
+        preSelected: preSelectedDips,
+        skipDips: skipDips,
+        onCounterChange: handleDipCounterChange
       });
 
     case 'sides':
@@ -387,9 +400,10 @@ function initializeSectionInteractions(sectionId) {
       break;
 
     case 'dips':
-      const maxDipSelections = packageData.dipSelections?.max || packageData.dipSelections || 3;
-      initDipPhotoCardSelector(maxDipSelections, handleDipSelectionChange);
-      console.log('🥣 Dip selector initialized');
+      // SP-009: Initialize counter selector for shared platters
+      const packageDipsIncluded = packageData.dipsIncluded || { quantity: 3, unit: 'five-pack' };
+      initDipsCounterSelector(packageDipsIncluded, handleDipCounterChange);
+      console.log('🥣 Dips counter selector initialized');
       break;
 
     // Other sections will be initialized here as they're built
@@ -836,7 +850,8 @@ function handleSauceDistributionChange(wingType, distributionData) {
 }
 
 /**
- * Handle dip selection change
+ * Handle dip selection change (legacy - boxed meals)
+ * @deprecated Use handleDipCounterChange for shared platters
  */
 function handleDipSelectionChange(selectedDipIds) {
   const state = getState();
@@ -851,6 +866,27 @@ function handleDipSelectionChange(selectedDipIds) {
   console.log(`🥣 Dip selection updated: ${selectedDipIds.length} dips selected`);
 
   // Pricing will update automatically via onStateChange listener
+}
+
+/**
+ * Handle dip counter change (SP-009 - Shared Platters)
+ * @param {Array} dipQuantities - Array of {id, name, quantity} objects
+ * @param {Boolean} skipDips - Whether dips are skipped
+ */
+function handleDipCounterChange(dipQuantities, skipDips) {
+  const state = getState();
+
+  // Update state with dip quantities and skip flag
+  updateState('currentConfig', {
+    ...state.currentConfig,
+    dips: dipQuantities,
+    noDips: skipDips
+  });
+
+  console.log(`🥣 Dips counter updated: ${dipQuantities.length} types, skip=${skipDips}`);
+
+  // Pricing will update automatically via onStateChange listener
+  // No need to call recalculatePricing() here as component already does it
 }
 
 /**
