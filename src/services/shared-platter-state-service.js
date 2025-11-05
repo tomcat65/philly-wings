@@ -45,7 +45,32 @@ const INITIAL_STATE = {
     },
 
     // Sauces (multiple selections based on package)
-    sauces: [],                       // [{id, name, heatLevel, imageUrl, quantity}]
+    sauces: [],                       // [{id, name, heatLevel, imageUrl, quantity}] - LEGACY, kept for migration
+
+    // Sauce Assignments (NEW: Per-wing-type sauce distribution)
+    sauceAssignments: {
+      selectedSauces: [],             // [{id, name, category, isDryRub, heatLevel, imageUrl}]
+      appliedPreset: null,            // 'all-same' | 'even-mix' | 'one-per-type' | 'custom' | null
+      assignments: {
+        boneless: [],                 // [{sauceId, sauceName, sauceCategory, wingCount, applicationMethod: 'tossed'|'on-the-side'}]
+        boneIn: [],                   // Same structure
+        cauliflower: []               // Same structure
+      },
+      summary: {
+        totalWingsAssigned: 0,
+        byApplicationMethod: {
+          tossed: 0,
+          onTheSide: 0
+        },
+        containersNeeded: 0,
+        validations: {
+          boneless: { valid: true, errors: [] },
+          boneIn: { valid: true, errors: [] },
+          cauliflower: { valid: true, errors: [] },
+          overall: { valid: true, errors: [] }
+        }
+      }
+    },
 
     // Dips
     dips: [],                         // [{id, name, quantity}]
@@ -889,6 +914,259 @@ export function isCustomizationComplete() {
          progress.sidesComplete &&
          progress.dessertsComplete &&
          progress.beveragesComplete;
+}
+
+// ===== SAUCE ASSIGNMENT FUNCTIONS (SP-SAUCE-ASSIGNMENT-001) =====
+
+/**
+ * Apply a preset sauce distribution across wing types
+ * @param {string} presetType - 'all-same' | 'even-mix' | 'one-per-type' | 'custom'
+ * @param {Array} selectedSauces - Array of sauce objects [{id, name, category, isDryRub}]
+ * @param {Object} wingDistribution - {boneless: number, boneIn: number, cauliflower: number}
+ * @returns {Object} assignments object {boneless: [], boneIn: [], cauliflower: []}
+ */
+export function applyPreset(presetType, selectedSauces, wingDistribution) {
+  const assignments = {
+    boneless: [],
+    boneIn: [],
+    cauliflower: []
+  };
+
+  // Filter out wing types with 0 count
+  const activeWingTypes = Object.entries(wingDistribution)
+    .filter(([type, count]) => count > 0 && type !== 'boneInStyle' && type !== 'distributionSource')
+    .map(([type, count]) => ({ type, count }));
+
+  if (activeWingTypes.length === 0 || selectedSauces.length === 0) {
+    return assignments;
+  }
+
+  switch (presetType) {
+    case 'all-same':
+      // Preset A: Assign first sauce to all wing types (all wings)
+      activeWingTypes.forEach(({ type, count }) => {
+        assignments[type] = [{
+          sauceId: selectedSauces[0].id,
+          sauceName: selectedSauces[0].name,
+          sauceCategory: selectedSauces[0].category,
+          wingCount: count,
+          applicationMethod: 'tossed'
+        }];
+      });
+      break;
+
+    case 'even-mix':
+      // Preset B: Split each wing type proportionally across all sauces
+      activeWingTypes.forEach(({ type, count }) => {
+        const wingsPerSauce = Math.floor(count / selectedSauces.length);
+        const remainder = count % selectedSauces.length;
+
+        selectedSauces.forEach((sauce, index) => {
+          const wingCount = wingsPerSauce + (index < remainder ? 1 : 0);
+          if (wingCount > 0) {
+            assignments[type].push({
+              sauceId: sauce.id,
+              sauceName: sauce.name,
+              sauceCategory: sauce.category,
+              wingCount,
+              applicationMethod: 'tossed'
+            });
+          }
+        });
+      });
+      break;
+
+    case 'one-per-type':
+      // Preset C: Assign wingTypes[i] → sauces[i % sauceCount] with wrap-around
+      activeWingTypes.forEach(({ type, count }, index) => {
+        const sauce = selectedSauces[index % selectedSauces.length];
+        assignments[type] = [{
+          sauceId: sauce.id,
+          sauceName: sauce.name,
+          sauceCategory: sauce.category,
+          wingCount: count,
+          applicationMethod: 'tossed'
+        }];
+      });
+      break;
+
+    case 'custom':
+      // Preset D: Empty state, user fills manually
+      // Return empty assignments
+      break;
+
+    default:
+      console.warn(`Unknown preset type: ${presetType}`);
+  }
+
+  return assignments;
+}
+
+/**
+ * Validate sauce assignments for a specific wing type
+ * @param {string} wingType - 'boneless' | 'boneIn' | 'cauliflower'
+ * @param {Array} assignments - Array of sauce assignments for this wing type
+ * @param {number} totalWings - Total wing count for this type
+ * @returns {Object} {valid: boolean, errors: [], assignedTotal: number, percentComplete: number}
+ */
+export function validateWingTypeAssignment(wingType, assignments, totalWings) {
+  const result = {
+    valid: true,
+    errors: [],
+    assignedTotal: 0,
+    percentComplete: 0
+  };
+
+  if (totalWings === 0) {
+    result.valid = true;
+    result.percentComplete = 100;
+    return result;
+  }
+
+  // Calculate total assigned
+  result.assignedTotal = assignments.reduce((sum, a) => sum + (a.wingCount || 0), 0);
+  result.percentComplete = Math.round((result.assignedTotal / totalWings) * 100);
+
+  // Check for negative values
+  const hasNegative = assignments.some(a => a.wingCount < 0);
+  if (hasNegative) {
+    result.valid = false;
+    result.errors.push('Wing count cannot be negative');
+  }
+
+  // Check for dry-rub with on-the-side
+  const invalidDryRub = assignments.some(a =>
+    a.sauceCategory === 'dry-rub' && a.applicationMethod === 'on-the-side'
+  );
+  if (invalidDryRub) {
+    result.valid = false;
+    result.errors.push('Dry rubs cannot be served on-the-side');
+  }
+
+  // Check total match
+  if (result.assignedTotal !== totalWings) {
+    result.valid = false;
+    if (result.assignedTotal < totalWings) {
+      result.errors.push(`Assign ${totalWings - result.assignedTotal} more wings`);
+    } else {
+      result.errors.push(`Remove ${result.assignedTotal - totalWings} wings`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Validate all sauce assignments across all wing types
+ * @param {Object} sauceAssignments - Complete sauceAssignments object from state
+ * @param {Object} wingDistribution - Wing distribution object
+ * @returns {Object} {valid: boolean, errors: []}
+ */
+export function validateAllAssignments(sauceAssignments, wingDistribution) {
+  const result = {
+    valid: true,
+    errors: []
+  };
+
+  const wingTypes = ['boneless', 'boneIn', 'cauliflower'];
+
+  wingTypes.forEach(type => {
+    const validation = validateWingTypeAssignment(
+      type,
+      sauceAssignments.assignments[type],
+      wingDistribution[type] || 0
+    );
+
+    if (!validation.valid) {
+      result.valid = false;
+      result.errors.push(`${type}: ${validation.errors.join(', ')}`);
+    }
+  });
+
+  return result;
+}
+
+/**
+ * Calculate summary metadata for sauce assignments
+ * @param {Object} sauceAssignments - Complete sauceAssignments object from state
+ * @returns {Object} Updated summary object
+ */
+export function calculateSauceAssignmentSummary(sauceAssignments) {
+  const summary = {
+    totalWingsAssigned: 0,
+    byApplicationMethod: {
+      tossed: 0,
+      onTheSide: 0
+    },
+    containersNeeded: 0,
+    validations: {
+      boneless: { valid: true, errors: [] },
+      boneIn: { valid: true, errors: [] },
+      cauliflower: { valid: true, errors: [] },
+      overall: { valid: true, errors: [] }
+    }
+  };
+
+  const wingTypes = ['boneless', 'boneIn', 'cauliflower'];
+
+  wingTypes.forEach(type => {
+    const assignments = sauceAssignments.assignments[type] || [];
+
+    assignments.forEach(assignment => {
+      summary.totalWingsAssigned += assignment.wingCount;
+
+      if (assignment.applicationMethod === 'on-the-side') {
+        summary.byApplicationMethod.onTheSide += assignment.wingCount;
+        // Calculate containers: Math.ceil(wingCount * 0.5)
+        summary.containersNeeded += Math.ceil(assignment.wingCount * 0.5);
+      } else {
+        summary.byApplicationMethod.tossed += assignment.wingCount;
+      }
+    });
+  });
+
+  return summary;
+}
+
+/**
+ * Migrate old sauce data structure to new per-wing-type structure
+ * @param {Array} oldSauces - Legacy sauces array [{id, name, wingCount}]
+ * @param {Object} wingDistribution - Current wing distribution
+ * @returns {Object} New sauceAssignments structure
+ */
+export function migrateSauceData(oldSauces, wingDistribution) {
+  // Extract sauces with wingCount > 0
+  const selectedSauces = oldSauces
+    .filter(s => s.wingCount && s.wingCount > 0)
+    .map(s => ({
+      id: s.id,
+      name: s.name,
+      category: s.category || 'signature-sauce',
+      isDryRub: s.isDryRub || false,
+      heatLevel: s.heatLevel || 0,
+      imageUrl: s.imageUrl || ''
+    }));
+
+  if (selectedSauces.length === 0) {
+    return {
+      selectedSauces: [],
+      appliedPreset: null,
+      assignments: { boneless: [], boneIn: [], cauliflower: [] },
+      summary: calculateSauceAssignmentSummary({
+        assignments: { boneless: [], boneIn: [], cauliflower: [] }
+      })
+    };
+  }
+
+  // Apply "One Per Wing Type" preset as default migration strategy
+  const assignments = applyPreset('one-per-type', selectedSauces, wingDistribution);
+
+  return {
+    selectedSauces,
+    appliedPreset: 'one-per-type',
+    assignments,
+    summary: calculateSauceAssignmentSummary({ assignments })
+  };
 }
 
 // ===== INITIALIZATION =====

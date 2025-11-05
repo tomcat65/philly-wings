@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layout Width Comparison - Current 60/40 vs Proposed 50/50</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+
+    .comparison-section {
+      margin-bottom: 4rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      border-left: 4px solid #e74c3c;
+    }
+
+    .layout-wrapper {
+      display: flex;
+      gap: 1.5rem;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Current Layout - 60/40 */
+    .current-left {
+      flex: 1 1 60%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      padding: 2rem;
+      color: white;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .current-right {
+      flex: 1 1 40%;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 8px;
+      padding: 2rem;
+      color: white;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Proposed Layout - 50/50 */
+    .proposed-left {
+      flex: 1 1 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      padding: 2rem;
+      color: white;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .proposed-right {
+      flex: 1 1 50%;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 8px;
+      padding: 2rem;
+      color: white;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .panel-label {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .panel-width {
+      font-size: 3rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .panel-details {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+
+    .improvement-badge {
+      background: #27ae60;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #7f8c8d;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .stat-change {
+      font-size: 0.9rem;
+      color: #27ae60;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    .mock-content {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .mock-line {
+      background: rgba(255, 255, 255, 0.6);
+      height: 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .mock-line.short {
+      width: 60%;
+    }
+
+    .mock-line.medium {
+      width: 80%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Layout Width Comparison</h1>
+    <p class="subtitle">Customization Screen Split-Screen Layout Analysis</p>
+
+    <!-- Current Layout -->
+    <div class="comparison-section">
+      <div class="section-title">
+        ❌ Current Layout (60% / 40% Split)
+      </div>
+      <div class="layout-wrapper">
+        <div class="current-left">
+          <div>
+            <div class="panel-label">🎨 Customization Panel</div>
+            <div class="panel-width">60%</div>
+            <div class="panel-details">
+              <strong>Contains:</strong>
+              <br>• Wing distribution selector
+              <br>• Sauce photo cards (6-column grid on narrow)
+              <br>• Dip selection
+              <br>• Beverage selection
+            </div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-line"></div>
+            <div class="mock-line medium"></div>
+            <div class="mock-line"></div>
+            <div class="mock-line short"></div>
+          </div>
+        </div>
+
+        <div class="current-right">
+          <div>
+            <div class="panel-label">💰 Pricing Summary</div>
+            <div class="panel-width">40%</div>
+            <div class="panel-details">
+              <strong>⚠️ TOO NARROW - Text cramped:</strong>
+              <br>• Package name truncated
+              <br>• Modifications list hard to read
+              <br>• Price details squeezed
+              <br>• Overall poor readability
+            </div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-line short"></div>
+            <div class="mock-line medium"></div>
+            <div class="mock-line short"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposed Layout -->
+    <div class="comparison-section">
+      <div class="section-title">
+        ✅ Proposed Layout (50% / 50% Equal Split)
+      </div>
+      <div class="layout-wrapper">
+        <div class="proposed-left">
+          <div>
+            <div class="panel-label">🎨 Customization Panel</div>
+            <div class="panel-width">50%</div>
+            <div class="panel-details">
+              <strong>Still spacious:</strong>
+              <br>• 3-column sauce cards fit well
+              <br>• All sections readable
+              <br>• Good balance maintained
+              <br>• Only 10% reduction (negligible)
+            </div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-line"></div>
+            <div class="mock-line medium"></div>
+            <div class="mock-line"></div>
+            <div class="mock-line short"></div>
+          </div>
+        </div>
+
+        <div class="proposed-right">
+          <div>
+            <div class="panel-label">💰 Pricing Summary</div>
+            <div class="panel-width">50%</div>
+            <div class="panel-details">
+              <strong>✨ MUCH BETTER - More readable:</strong>
+              <br>• 25% more width (40% → 50%)
+              <br>• Package details fully visible
+              <br>• Modifications list spacious
+              <br>• Price breakdown clear
+            </div>
+            <div class="improvement-badge">
+              +25% WIDTH IMPROVEMENT
+            </div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-line"></div>
+            <div class="mock-line medium"></div>
+            <div class="mock-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Customization Panel Change</div>
+        <div class="stat-value">60% → 50%</div>
+        <div class="stat-change">-10% (Still plenty of space)</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Pricing Summary Change</div>
+        <div class="stat-value">40% → 50%</div>
+        <div class="stat-change">+25% IMPROVEMENT</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Readability Impact</div>
+        <div class="stat-value">Major ⬆️</div>
+        <div class="stat-change">Text no longer cramped</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Layout Balance</div>
+        <div class="stat-value">Perfect 🎯</div>
+        <div class="stat-change">Equal importance to both panels</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

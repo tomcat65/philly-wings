@@ -18,6 +18,8 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase-config.js';
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
 import { renderSauceDistributionReview, initSauceDistributionReview } from './sauce-distribution-review.js';
+// OLD CSS removed - using sauce-distribution-integrated.css instead via parent component
+// import '../../styles/sauce-photo-card-selector.css';
 
 /**
  * Render enhanced sauce photo card selector
@@ -52,7 +54,7 @@ export async function renderSaucePhotoCardSelector(options = {}) {
         <div class="cart-items" id="sauce-cart-items">
           ${preSelectedIds.length > 0
             ? renderCartItems(sauces.filter(s => preSelectedIds.includes(s.id)))
-            : '<p class="cart-empty">Select up to ${maxSelections} sauces from below</p>'
+            : `<p class="cart-empty">Select up to ${maxSelections} sauces from below</p>`
           }
         </div>
 
@@ -104,8 +106,8 @@ export async function renderSaucePhotoCardSelector(options = {}) {
       </div>
 
       <!-- Sauce Cards Grid -->
-      <div class="sauce-cards-grid" id="sauce-cards-grid">
-        ${sauces.map(sauce => renderSaucePhotoCard(sauce, preSelectedIds.includes(sauce.id))).join('')}
+      <div class="sauce-grid" id="sauce-grid">
+        ${sauces.map(sauce => renderSauceCard(sauce, preSelectedIds.includes(sauce.id))).join('')}
       </div>
 
       <!-- Continue Button (appears when selections made) -->
@@ -128,15 +130,15 @@ export async function renderSaucePhotoCardSelector(options = {}) {
 }
 
 /**
- * Render individual sauce photo card
+ * Render individual sauce card (using mockup styling)
  */
-function renderSaucePhotoCard(sauce, isSelected) {
+function renderSauceCard(sauce, isSelected) {
   const heatLevel = getHeatLevel(sauce.heatLevel);
   const socialProof = getSocialProofBadge(sauce);
 
   return `
     <div
-      class="sauce-photo-card ${isSelected ? 'card-selected' : ''}"
+      class="sauce-card ${isSelected ? 'selected' : ''}"
       data-sauce-id="${sauce.id}"
       data-heat-level="${sauce.heatLevel}"
       data-heat-category="${heatLevel.category}"
@@ -165,8 +167,10 @@ function renderSaucePhotoCard(sauce, isSelected) {
       </div>
 
       <div class="sauce-card-content">
-        <h5 class="sauce-card-name">${sauce.name}</h5>
-        <p class="sauce-card-description">${sauce.description || ''}</p>
+        <h5 class="sauce-name">${sauce.name}</h5>
+        <p class="sauce-description">${sauce.description || ''}</p>
+
+        ${sauce.isDryRub ? '<div class="sauce-type-tag dry-rub-tag">DRY RUB</div>' : ''}
 
         ${sauce.story ? `
           <p class="sauce-card-story">${truncateStory(sauce.story)}</p>
@@ -207,18 +211,18 @@ function renderCartItems(selectedSauces) {
  * Initialize sauce photo card selector interactions
  */
 export function initSaucePhotoCardSelector(maxSelections, onSelectionChange) {
-  const grid = document.getElementById('sauce-cards-grid');
+  const grid = document.getElementById('sauce-grid');
   if (!grid) return;
 
   let selectedSauceIds = [];
 
   // Initialize from pre-selected cards
-  document.querySelectorAll('.sauce-photo-card.card-selected').forEach(card => {
+  document.querySelectorAll('.sauce-card.selected').forEach(card => {
     selectedSauceIds.push(card.dataset.sauceId);
   });
 
   // Card click handlers
-  document.querySelectorAll('.sauce-photo-card').forEach(card => {
+  document.querySelectorAll('.sauce-card').forEach(card => {
     // Click event
     card.addEventListener('click', () => {
       handleSauceCardClick(card, maxSelections, selectedSauceIds, onSelectionChange);
@@ -244,7 +248,7 @@ export function initSaucePhotoCardSelector(maxSelections, onSelectionChange) {
   document.addEventListener('click', (e) => {
     if (e.target.classList.contains('cart-item-remove')) {
       const sauceId = e.target.dataset.sauceId;
-      const card = document.querySelector(`.sauce-photo-card[data-sauce-id="${sauceId}"]`);
+      const card = document.querySelector(`.sauce-card[data-sauce-id="${sauceId}"]`);
       if (card) {
         handleSauceCardClick(card, maxSelections, selectedSauceIds, onSelectionChange);
       }
@@ -265,7 +269,7 @@ export function initSaucePhotoCardSelector(maxSelections, onSelectionChange) {
  */
 async function showSauceDistribution(selectedSauceIds) {
   // Hide sauce selector
-  const selectorGrid = document.getElementById('sauce-cards-grid');
+  const selectorGrid = document.getElementById('sauce-grid');
   const selectorActions = document.getElementById('sauce-selector-actions');
   const selectorCart = document.querySelector('.sauce-selection-cart');
   const selectorFilter = document.querySelector('.sauce-heat-filter');
@@ -297,11 +301,11 @@ async function showSauceDistribution(selectedSauceIds) {
  */
 async function handleSauceCardClick(card, maxSelections, selectedSauceIds, onSelectionChange) {
   const sauceId = card.dataset.sauceId;
-  const isSelected = card.classList.contains('card-selected');
+  const isSelected = card.classList.contains('selected');
 
   if (isSelected) {
     // Deselect
-    card.classList.remove('card-selected');
+    card.classList.remove('selected');
     card.setAttribute('aria-checked', 'false');
 
     const index = selectedSauceIds.indexOf(sauceId);
@@ -316,7 +320,7 @@ async function handleSauceCardClick(card, maxSelections, selectedSauceIds, onSel
     }
 
     // Select
-    card.classList.add('card-selected');
+    card.classList.add('selected');
     card.setAttribute('aria-checked', 'true');
     selectedSauceIds.push(sauceId);
   }
@@ -433,7 +437,7 @@ function handleHeatFilter(clickedBtn) {
   });
 
   // Filter cards
-  const cards = document.querySelectorAll('.sauce-photo-card');
+  const cards = document.querySelectorAll('.sauce-card');
 
   cards.forEach(card => {
     const heatCategory = card.dataset.heatCategory;
@@ -546,19 +550,51 @@ function getPlaceholderImage(sauce) {
  * Fetch active sauces from Firebase
  */
 async function fetchSauces() {
+  console.log('🔍 [SAUCE DEBUG] fetchSauces() called');
+  console.log('🔍 [SAUCE DEBUG] db._settings:', db._settings);
+  console.log('🔍 [SAUCE DEBUG] db.app.options.projectId:', db.app.options.projectId);
   try {
+    // Try without filter first to see if ANY data exists
+    const testQ = query(collection(db, 'sauces'));
+    console.log('🔍 [SAUCE DEBUG] Testing query WITHOUT filter...');
+    const testSnapshot = await getDocs(testQ);
+    console.log(`🔍 [SAUCE DEBUG] Query WITHOUT filter returned ${testSnapshot.docs.length} documents`);
+
     const q = query(
       collection(db, 'sauces'),
-      where('active', '==', true),
-      orderBy('sortOrder', 'asc')
+      where('active', '==', true)
+      // orderBy removed - sorting in JavaScript instead for emulator compatibility
     );
+    console.log('🔍 [SAUCE DEBUG] Query created WITH filter, executing getDocs()...');
     const snapshot = await getDocs(q);
-    const allSauces = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log(`🔍 [SAUCE DEBUG] Query WITH filter returned ${snapshot.docs.length} documents`);
+    const allSauces = snapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .sort((a, b) => a.sortOrder - b.sortOrder); // Sort by sortOrder in JavaScript
+
+    console.log(`✅ [SAUCE DEBUG] After mapping: ${allSauces.length} sauces`);
 
     // Filter out dipping sauces - they belong in the dips section
-    return allSauces.filter(sauce => sauce.category !== 'dipping-sauce');
+    const filtered = allSauces.filter(sauce => sauce.category !== 'dipping-sauce');
+    console.log(`✅ [SAUCE DEBUG] Returning ${filtered.length} sauces (filtered out dipping sauces)`);
+    return filtered;
   } catch (error) {
-    console.error('Error fetching sauces from Firebase:', error);
+    console.error('❌ Error fetching sauces from Firebase:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
     return [];
   }
+}
+
+/**
+ * Get sauces by IDs (exported for sauce assignment flow)
+ * @param {Array<string>} sauceIds - Array of sauce IDs
+ * @returns {Promise<Array>} Array of sauce objects
+ */
+export async function getSaucesByIds(sauceIds) {
+  const allSauces = await fetchSauces();
+  return allSauces.filter(sauce => sauceIds.includes(sauce.id));
 }

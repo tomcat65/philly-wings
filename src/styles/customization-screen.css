@@ -67,7 +67,7 @@
 
 .customization-wrapper {
   display: flex;
-  gap: var(--space-4);
+  gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -77,7 +77,8 @@
    ======================================== */
 
 .customization-panel {
-  flex: 1 1 60%;
+  flex: 1;
+  min-width: 0;
   background: var(--white);
   border-radius: var(--border-radius);
   box-shadow: var(--card-shadow);
@@ -365,7 +366,8 @@
    ======================================== */
 
 .pricing-summary-panel {
-  flex: 1 1 40%;
+  width: 400px;
+  flex-shrink: 0;
   background: var(--white);
   border-radius: var(--border-radius);
   box-shadow: var(--card-shadow);
@@ -579,6 +581,184 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
+}
+
+/* ========================================
+   Kitchen-Ready Breakdown Styles
+   ======================================== */
+
+/* Modified item highlighting */
+.include-item.modified {
+  background: linear-gradient(to right, rgba(255, 107, 53, 0.08), rgba(255, 107, 53, 0.03));
+  border-left: 4px solid #ff6b35;
+  padding-left: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  border-radius: 4px;
+}
+
+/* New item highlighting */
+.include-item.new {
+  background: linear-gradient(to right, rgba(39, 174, 96, 0.08), rgba(39, 174, 96, 0.03));
+  border-left: 4px solid #27ae60;
+  padding-left: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  border-radius: 4px;
+}
+
+/* Include header with badges */
+.include-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Badges for modified/new/pending states */
+.include-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--white);
+}
+
+.include-badge.modified {
+  background: #ff6b35;
+}
+
+.include-badge.new {
+  background: #27ae60;
+}
+
+.include-badge.pending {
+  background: #f39c12;
+}
+
+/* Breakdown details container */
+.breakdown-details {
+  margin-top: var(--space-2);
+  margin-left: 1.75rem;
+  font-size: 0.875rem;
+}
+
+/* Breakdown section (wing type grouping) */
+.breakdown-section {
+  margin-bottom: var(--space-2);
+}
+
+.breakdown-section-header {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--space-1);
+}
+
+/* Breakdown item (individual sauce/item) */
+.breakdown-item {
+  color: var(--gray-600);
+  margin-bottom: var(--space-1);
+  line-height: 1.5;
+}
+
+/* Breakdown subitem (container details) */
+.breakdown-subitem {
+  margin-left: 1rem;
+  margin-top: 0.25rem;
+  color: var(--gray-500);
+  font-size: 0.8125rem;
+}
+
+/* Container highlight */
+.container-highlight {
+  color: #ff6b35;
+  font-weight: 600;
+}
+
+/* Breakdown note (helper text) */
+.breakdown-note {
+  color: var(--gray-500);
+  font-size: 0.8125rem;
+  font-style: italic;
+  margin-top: var(--space-1);
+}
+
+/* Timeline/Badge sections for base package vs changes */
+.timeline-section {
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid #3498db;
+}
+
+.timeline-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timeline-badge.base {
+  background: #3498db;
+  color: white;
+}
+
+.timeline-badge.changes {
+  background: #e67e22;
+  color: white;
+}
+
+.original-label {
+  color: var(--gray-500);
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+.delta {
+  color: #95a5a6;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.price-impact {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  color: #856404;
+  font-size: 0.875rem;
+}
+
+/* Two-column layout for desktop (Approach 2) */
+@media (min-width: 768px) {
+  .timeline-section.two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .timeline-column {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .timeline-column.base {
+    border-left: 3px solid #3498db;
+  }
+
+  .timeline-column.changes {
+    border-left: 3px solid #e67e22;
+  }
 }
 
 /* ========================================
@@ -861,11 +1041,194 @@
     min-width: auto;
   }
 
+  /* Kitchen breakdown mobile adjustments */
+  .breakdown-details {
+    margin-left: 1rem; /* Reduced from 1.75rem */
+    font-size: 0.8125rem; /* Slightly smaller */
+  }
+
+  .breakdown-subitem {
+    margin-left: 0.75rem; /* Reduced from 1rem */
+    font-size: 0.75rem;
+  }
+
+  .breakdown-note {
+    font-size: 0.75rem;
+  }
+
+  .include-badge {
+    font-size: 0.625rem;
+    padding: 1px 4px;
+  }
+
   .notification {
     top: 1rem;
     right: 1rem;
     left: 1rem;
     max-width: none;
+  }
+}
+
+/* ========================================
+   Compact Card Grid Layout (Approach 2)
+   ======================================== */
+
+.order-summary-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.category-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.category-card.modified {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+}
+
+.card-header-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.card-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.card-title-group {
+  flex: 1;
+  margin-left: 0.75rem;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0;
+}
+
+.card-subtitle {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.card-content {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.card-section {
+  margin-top: 0.75rem;
+}
+
+.card-section-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-item {
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.card-delta-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.card-delta-badge.positive {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.card-delta-badge.negative {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.card-status-box {
+  padding: 0.75rem;
+  background: #f0fdf4;
+  border-radius: 6px;
+  border-left: 3px solid #10b981;
+  font-size: 0.85rem;
+  color: #065f46;
+  margin-top: 0.75rem;
+}
+
+.card-status-box.modified {
+  background: #fef3c7;
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
+
+.order-summary-footer {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.summary-footer-item {
+  text-align: center;
+}
+
+.summary-footer-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+}
+
+.summary-footer-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .order-summary-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-summary-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .summary-footer-item {
+    width: 100%;
   }
 }
 
@@ -880,14 +1243,16 @@
   .mobile-pricing-button,
   .mobile-pricing-drawer,
   .notification,
-  .progress-fill {
+  .progress-fill,
+  .category-card {
     transition: none;
   }
 
   .section-tab:hover,
   .btn-primary:hover,
   .btn-secondary:hover,
-  .mobile-pricing-button:hover {
+  .mobile-pricing-button:hover,
+  .category-card:hover {
     transform: none;
   }
 }

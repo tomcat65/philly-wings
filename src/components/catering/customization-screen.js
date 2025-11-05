@@ -11,10 +11,10 @@
 
 import { getState, updateState, onStateChange } from '../../services/shared-platter-state-service.js';
 import { renderWingDistributionSelector, initWingDistributionSelector } from './wing-distribution-selector.js';
-import { renderIntegratedSauceDistribution, initIntegratedSauceDistribution } from './sauce-distribution-integrated.js';
+import { renderIntegratedSauceDistribution, initIntegratedSauceDistribution, getSauceById, determineSauceViscosity } from './sauce-distribution-integrated.js';
 import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
-import { initPricingSummary } from './pricing-summary-master.js';
-import { recalculatePricing } from '../../utils/pricing-aggregator.js';
+import { initPricingSummary, renderPricingSummary as renderFullPricingSummary } from './pricing-summary-master.js';
+import { recalculatePricing, getCurrentPricing } from '../../utils/pricing-aggregator.js';
 import '../../styles/sauce-distribution-integrated.css';
 
 /**
@@ -318,6 +318,8 @@ async function renderSectionContent(sectionId) {
       }
 
       const sauceHtml = [];
+      const maxSauceSelections = packageData.sauceSelections?.max || packageData.sauceSelections || 3;
+
       for (const wingType of wingTypes) {
         const wingCount = wingDistribution[wingType];
         const preSelectedData = sauceDistributions[wingType] || [];
@@ -325,6 +327,7 @@ async function renderSectionContent(sectionId) {
         const html = await renderIntegratedSauceDistribution({
           wingType,
           wingCount,
+          maxSelections: maxSauceSelections,
           preSelectedData,
           onDistributionChange: (distributionData) => handleSauceDistributionChange(wingType, distributionData)
         });
@@ -674,10 +677,15 @@ function updatePricingSummary() {
 
   // Initialize comprehensive pricing summary only once
   if (!pricingSummaryInitialized) {
+    // Get initial pricing and state for initial render
+    const initialPricing = getCurrentPricing();
+
     // Update desktop summary
     const summaryPanel = document.querySelector('.pricing-summary-panel');
     if (summaryPanel) {
-      summaryPanel.innerHTML = renderPricingSummary(pkg, {});
+      // CRITICAL FIX: Create empty container div, then let initPricingSummary fill it
+      // This prevents double-wrapping and ID conflicts
+      summaryPanel.innerHTML = '<div id="pricing-summary-container" class="summary-content"></div>';
 
       // Initialize the comprehensive pricing summary (SP-OS-S5)
       // Pass getState FUNCTION (not snapshot) so it gets fresh state on each update
@@ -694,7 +702,8 @@ function updatePricingSummary() {
     // Update mobile drawer
     const drawerContent = document.getElementById('mobile-drawer-content');
     if (drawerContent) {
-      drawerContent.innerHTML = renderPricingSummary(pkg, {});
+      // Phase 1 fix: Pass proper pricing and state (not pkg and empty object)
+      drawerContent.innerHTML = renderFullPricingSummary(initialPricing, state, {});
     }
 
     pricingSummaryInitialized = true;
@@ -766,23 +775,64 @@ async function handleSauceSelectionChange(selectedSauceIds) {
 
 /**
  * Handle sauce distribution change for a wing type
+ * PHASE 1: Dual-write to both sauceDistributions (temp) and sauceAssignments (target)
  */
 function handleSauceDistributionChange(wingType, distributionData) {
   const state = getState();
   const currentConfig = state.currentConfig || {};
-  const sauceDistributions = currentConfig.sauceDistributions || {};
 
-  // Update distribution for this wing type
+  // Enrich distribution data with sauce metadata
+  const enrichedData = distributionData.map(item => {
+    const sauce = getSauceById(item.sauceId);
+    return {
+      sauceId: item.sauceId,
+      sauceName: sauce?.name || 'Unknown Sauce',
+      sauceCategory: sauce?.category || 'signature-sauce',
+      wingCount: item.quantity || 0,
+      applicationMethod: item.application === 'side' ? 'on-the-side' : 'tossed',
+      sauceInfo: {
+        isDryRub: sauce?.isDryRub || false,
+        viscosity: determineSauceViscosity(sauce),
+        category: sauce?.category
+      }
+    };
+  });
+
+  // DUAL-WRITE Strategy (Phase 1):
+  // 1. Save to sauceDistributions (temporary - for backward compatibility)
+  const sauceDistributions = currentConfig.sauceDistributions || {};
   sauceDistributions[wingType] = distributionData;
+
+  // 2. Save to sauceAssignments (target structure - for kitchen breakdown)
+  const sauceAssignments = currentConfig.sauceAssignments || {
+    selectedSauces: [],
+    appliedPreset: null,
+    assignments: { boneless: [], boneIn: [], cauliflower: [] },
+    summary: { totalWingsAssigned: 0, byApplicationMethod: {}, containersNeeded: 0 }
+  };
+
+  sauceAssignments.assignments[wingType] = enrichedData;
+
+  // Update state with both structures
+  console.log(`🔧 [DEBUG] About to updateState for ${wingType}`, {
+    hasSauceDistributions: !!sauceDistributions,
+    hasSauceAssignments: !!sauceAssignments,
+    assignmentsCount: Object.keys(sauceAssignments.assignments).length
+  });
 
   updateState('currentConfig', {
     ...currentConfig,
-    sauceDistributions
+    sauceDistributions,  // Temporary backward compatibility
+    sauceAssignments      // Target structure for rendering
   });
 
-  console.log(`🌶️ Sauce distribution updated for ${wingType}:`, distributionData);
+  console.log(`🌶️ Sauce distribution updated for ${wingType}:`, {
+    raw: distributionData,
+    enriched: enrichedData
+  });
+  console.log(`🔧 [DEBUG] updateState completed for ${wingType}`);
 
-  // Pricing will update automatically via onStateChange listener
+  // Order summary will update automatically via onStateChange('currentConfig.*') listener
 }
 
 /**

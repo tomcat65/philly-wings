@@ -16,7 +16,7 @@ import '../styles/package-recommendations.css'; // SP-004: Package Recommendatio
 import '../styles/preview-anchor-screen.css'; // SP-005: Preview Anchor Screen
 import '../styles/customization-screen.css'; // SP-006: Split-Screen Customization
 import '../styles/wing-distribution-selector.css'; // SP-007: Wing Distribution Selector
-import '../styles/sauce-photo-card-selector.css'; // SP-008: Enhanced Sauce Selector
+import '../styles/sauce-distribution-integrated.css'; // SP-008: Integrated Sauce Distribution (mockup styles)
 import '../styles/sauce-distribution-review.css'; // SP-009: Sauce Distribution Review
 import '../styles/boxed-meals-v2.css';
 import '../styles/boxed-meals-animations.css';

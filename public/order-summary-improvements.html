@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Summary UI Improvements - 3 Approaches</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+    .approach-container {
+      margin-bottom: 4rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .approach-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+    }
+    .approach-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+    }
+    .approach-description {
+      font-size: 1rem;
+      opacity: 0.95;
+      margin: 0;
+    }
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding: 1.5rem 2rem;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .pros-cons h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pros h4 { color: #10b981; }
+    .cons h4 { color: #ef4444; }
+    .pros-cons ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      font-size: 0.9rem;
+    }
+    .pros-cons li { margin-bottom: 0.25rem; }
+    .mockup-content {
+      padding: 2rem;
+    }
+
+    /* Approach 1: Tabbed Categories */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 1.5rem;
+      gap: 0.5rem;
+    }
+    .tab {
+      padding: 0.75rem 1.5rem;
+      background: #f8f9fa;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #666;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: white;
+      color: #667eea;
+      border-bottom: 3px solid #667eea;
+    }
+    .tab-badge {
+      background: #667eea;
+      color: white;
+      padding: 0.125rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+    .tab-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    .category-section {
+      margin-bottom: 1.5rem;
+    }
+    .category-title {
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .item-name { color: #555; }
+    .item-change {
+      font-weight: 600;
+      color: #10b981;
+    }
+    .item-change.removed { color: #ef4444; }
+
+    /* Approach 2: Compact Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .category-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.3s;
+    }
+    .category-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+      transform: translateY(-2px);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .card-icon {
+      font-size: 2rem;
+    }
+    .card-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #333;
+    }
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+    .card-content {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.6;
+    }
+    .delta-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    .delta-badge.positive {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .delta-badge.negative {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .summary-footer {
+      background: #667eea;
+      color: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .summary-footer .total {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    /* Approach 3: Accordion Sections */
+    .accordion {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .accordion-item {
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .accordion-item:last-child {
+      border-bottom: none;
+    }
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      background: #f8f9fa;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .accordion-header:hover {
+      background: #e9ecef;
+    }
+    .accordion-header.active {
+      background: #667eea;
+      color: white;
+    }
+    .accordion-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .accordion-icon {
+      font-size: 1.5rem;
+    }
+    .accordion-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .accordion-summary {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+    }
+    .accordion-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .accordion-status {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+    }
+    .status-base {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .status-modified {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .accordion-chevron {
+      font-size: 1.25rem;
+      transition: transform 0.3s;
+    }
+    .accordion-header.active .accordion-chevron {
+      transform: rotate(180deg);
+    }
+    .accordion-content {
+      padding: 1.5rem;
+      background: white;
+      display: none;
+    }
+    .accordion-content.active {
+      display: block;
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .comparison-column {
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .comparison-column.base {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+    }
+    .comparison-column.changes {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+    }
+    .comparison-header {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .comparison-column.base .comparison-header {
+      color: #1e40af;
+    }
+    .comparison-column.changes .comparison-header {
+      color: #92400e;
+    }
+    .comparison-item {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .pros-cons {
+        grid-template-columns: 1fr;
+      }
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Order Summary UI Improvements</h1>
+    <p class="subtitle">3 approaches to consolidate and improve the scattered information display</p>
+
+    <!-- APPROACH 1: Tabbed Categories -->
+    <div class="approach-container">
+      <div class="approach-header">
+        <h2 class="approach-title">Approach 1: Tabbed Category View</h2>
+        <p class="approach-description">Organize categories in tabs with focused single-category view at a time. Clean, organized, reduces visual clutter.</p>
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>✅ Pros</h4>
+          <ul>
+            <li>Clean, focused view (one category at a time)</li>
+            <li>Reduces overwhelming information density</li>
+            <li>Easy to navigate between categories</li>
+            <li>Mobile-friendly (swipeable tabs)</li>
+            <li>Scalable - can add more categories easily</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>❌ Cons</h4>
+          <ul>
+            <li>Requires clicking to see each category</li>
+            <li>Can't see full order at a glance</li>
+            <li>More interaction required to review</li>
+            <li>May miss changes in hidden tabs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mockup-content">
+        <div class="tabs">
+          <button class="tab active">🍗 Wings <span class="tab-badge">Modified</span></button>
+          <button class="tab">🥣 Dips <span class="tab-badge">5 packs</span></button>
+          <button class="tab">🍟 Sides <span class="tab-badge">7 items</span></button>
+          <button class="tab">🧃 Beverages</button>
+          <button class="tab">🍰 Desserts</button>
+        </div>
+
+        <div class="tab-content">
+          <div class="category-section">
+            <div class="category-title">🏷️ Package Includes (Base)</div>
+            <div class="item-row">
+              <span class="item-name">150 Boneless Wings</span>
+              <span>✓</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">50 Bone-In Wings</span>
+              <span>✓</span>
+            </div>
+          </div>
+
+          <div class="category-section">
+            <div class="category-title">🔄 Your Changes</div>
+            <div class="item-row">
+              <span class="item-name">90 Boneless Wings</span>
+              <span class="item-change removed">-60</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">60 Bone-In Wings</span>
+              <span class="item-change">+10</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">50 Cauliflower Wings</span>
+              <span class="item-change">+50 NEW</span>
+            </div>
+          </div>
+
+          <div class="category-section">
+            <div class="category-title">🌶️ Sauce Assignments</div>
+            <div class="item-row">
+              <span class="item-name">Boneless: Hot Buffalo (45), Garlic Parm (45)</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">Bone-In: Lemon Pepper (30), BBQ (30)</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">Cauliflower: Thai Chili (50)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPROACH 2: Compact Card Grid -->
+    <div class="approach-container">
+      <div class="approach-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <h2 class="approach-title">Approach 2: Compact Card Grid</h2>
+        <p class="approach-description">Show all categories as interactive cards in a responsive grid. See everything at once with visual hierarchy through cards.</p>
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>✅ Pros</h4>
+          <ul>
+            <li>See entire order at a glance</li>
+            <li>Visual hierarchy through card design</li>
+            <li>Quick scanning with icons and colors</li>
+            <li>Responsive grid adapts to screen size</li>
+            <li>Can expand individual cards for details</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>❌ Cons</h4>
+          <ul>
+            <li>Can feel crowded on smaller screens</li>
+            <li>Less space for detailed breakdowns</li>
+            <li>Requires scrolling for large orders</li>
+            <li>May need truncation for long lists</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mockup-content">
+        <div class="card-grid">
+          <div class="category-card">
+            <div class="card-header">
+              <div class="card-icon">🍗</div>
+              <div>
+                <div class="card-title">Wings</div>
+                <div class="card-subtitle">200 total wings</div>
+              </div>
+            </div>
+            <div class="card-content">
+              <div><strong>Base:</strong> 150 Boneless + 50 Bone-In</div>
+              <div style="margin-top: 0.5rem;"><strong>Changed to:</strong></div>
+              <div>• 90 Boneless <span class="delta-badge negative">-60</span></div>
+              <div>• 60 Bone-In <span class="delta-badge positive">+10</span></div>
+              <div>• 50 Cauliflower <span class="delta-badge positive">+50</span></div>
+              <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #667eea;">
+                ✓ Sauces assigned to all types
+              </div>
+            </div>
+          </div>
+
+          <div class="category-card">
+            <div class="card-header">
+              <div class="card-icon">🥣</div>
+              <div>
+                <div class="card-title">Dips</div>
+                <div class="card-subtitle">5 five-packs (25 containers)</div>
+              </div>
+            </div>
+            <div class="card-content">
+              <div><strong>Base:</strong> Ranch, Honey Mustard, Blue Cheese, Cheese Sauce</div>
+              <div style="margin-top: 0.75rem; padding: 0.75rem; background: #f0fdf4; border-radius: 6px; border-left: 3px solid #10b981;">
+                ✓ No changes - using base package
+              </div>
+            </div>
+          </div>
+
+          <div class="category-card">
+            <div class="card-header">
+              <div class="card-icon">🍟</div>
+              <div>
+                <div class="card-title">Sides</div>
+                <div class="card-subtitle">7 items</div>
+              </div>
+            </div>
+            <div class="card-content">
+              <div><strong>Includes:</strong></div>
+              <div>• 5 Chip 5-Packs (25 bags)</div>
+              <div>• 2 Family Coleslaw</div>
+              <div>• 2 Family Potato Salad</div>
+              <div>• 3 Veggie Sticks Trays</div>
+              <div>• 1 Caesar Salad</div>
+            </div>
+          </div>
+
+          <div class="category-card">
+            <div class="card-header">
+              <div class="card-icon">🧃</div>
+              <div>
+                <div class="card-title">Beverages</div>
+                <div class="card-subtitle">1 item</div>
+              </div>
+            </div>
+            <div class="card-content">
+              <div>• 1 × 96oz Iced Tea</div>
+              <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">(Sweet or Unsweet)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-footer">
+          <div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Order Total</div>
+            <div class="total">$356.99</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.9rem; opacity: 0.9;">Serves</div>
+            <div class="total">20-25</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPROACH 3: Accordion Sections with Smart Defaults -->
+    <div class="approach-container">
+      <div class="approach-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <h2 class="approach-title">Approach 3: Smart Accordion Sections</h2>
+        <p class="approach-description">Collapsible sections with visual status indicators. Modified items auto-expand, base items collapsed. Best of both worlds.</p>
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>✅ Pros</h4>
+          <ul>
+            <li>See status of all categories at once</li>
+            <li>Focus on modified items (auto-expanded)</li>
+            <li>Detailed view available on demand</li>
+            <li>Clear visual status (base vs modified)</li>
+            <li>Efficient use of space</li>
+            <li>Easy to review changes quickly</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>❌ Cons</h4>
+          <ul>
+            <li>Requires expanding to see base items</li>
+            <li>May feel like extra work for review</li>
+            <li>Animation states could be distracting</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mockup-content">
+        <div class="accordion">
+          <!-- Wings - Modified (Auto-expanded) -->
+          <div class="accordion-item">
+            <div class="accordion-header active">
+              <div class="accordion-left">
+                <div class="accordion-icon">🍗</div>
+                <div>
+                  <div class="accordion-title">Wings</div>
+                  <div class="accordion-summary">200 total • Distribution changed + Cauliflower added</div>
+                </div>
+              </div>
+              <div class="accordion-right">
+                <span class="accordion-status status-modified">Modified</span>
+                <span class="accordion-chevron">▼</span>
+              </div>
+            </div>
+            <div class="accordion-content active">
+              <div class="comparison-grid">
+                <div class="comparison-column base">
+                  <div class="comparison-header">🏷️ Package Base</div>
+                  <div class="comparison-item">• 150 Boneless Wings</div>
+                  <div class="comparison-item">• 50 Bone-In Wings</div>
+                </div>
+                <div class="comparison-column changes">
+                  <div class="comparison-header">🔄 Your Changes</div>
+                  <div class="comparison-item">• 90 Boneless <strong style="color: #dc2626;">(-60)</strong></div>
+                  <div class="comparison-item">• 60 Bone-In <strong style="color: #16a34a;">(+10)</strong></div>
+                  <div class="comparison-item">• 50 Cauliflower <strong style="color: #16a34a;">(+50 NEW)</strong></div>
+                  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #fde68a;">
+                    <strong>Sauce Assignments:</strong>
+                    <div class="comparison-item">Boneless: Hot Buffalo (45), Garlic Parm (45)</div>
+                    <div class="comparison-item">Bone-In: Lemon Pepper (30), BBQ (30)</div>
+                    <div class="comparison-item">Cauliflower: Thai Chili (50)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dips - Base (Collapsed) -->
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <div class="accordion-left">
+                <div class="accordion-icon">🥣</div>
+                <div>
+                  <div class="accordion-title">Dips</div>
+                  <div class="accordion-summary">5 five-packs (25 containers) • Ranch, Honey Mustard, Blue Cheese, Cheese Sauce</div>
+                </div>
+              </div>
+              <div class="accordion-right">
+                <span class="accordion-status status-base">Base Package</span>
+                <span class="accordion-chevron">▼</span>
+              </div>
+            </div>
+            <div class="accordion-content">
+              <div style="padding: 1rem; background: #eff6ff; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong>Included in base package:</strong>
+                <div class="comparison-item">• 5 Dip 5-Packs (25 containers)</div>
+                <div class="comparison-item">• Varieties: Ranch, Honey Mustard, Blue Cheese, Cheese Sauce</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sides - Base (Collapsed) -->
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <div class="accordion-left">
+                <div class="accordion-icon">🍟</div>
+                <div>
+                  <div class="accordion-title">Sides</div>
+                  <div class="accordion-summary">7 items • Chips, Coleslaw, Potato Salad, Veggie Sticks, Caesar Salad</div>
+                </div>
+              </div>
+              <div class="accordion-right">
+                <span class="accordion-status status-base">Base Package</span>
+                <span class="accordion-chevron">▼</span>
+              </div>
+            </div>
+            <div class="accordion-content">
+              <div style="padding: 1rem; background: #eff6ff; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong>Included in base package:</strong>
+                <div class="comparison-item">• 5 Miss Vickie's Variety 5-Packs (25 chip bags)</div>
+                <div class="comparison-item">• 2 Family Coleslaw (serves 32)</div>
+                <div class="comparison-item">• 2 Family Potato Salad (serves 32)</div>
+                <div class="comparison-item">• 3 Large Veggie Sticks Trays (serves 25)</div>
+                <div class="comparison-item">• 1 Family Caesar Salad (serves 8)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Beverages - Base (Collapsed) -->
+          <div class="accordion-item">
+            <div class="accordion-header">
+              <div class="accordion-left">
+                <div class="accordion-icon">🧃</div>
+                <div>
+                  <div class="accordion-title">Beverages</div>
+                  <div class="accordion-summary">1 × 96oz Iced Tea (Sweet or Unsweet)</div>
+                </div>
+              </div>
+              <div class="accordion-right">
+                <span class="accordion-status status-base">Base Package</span>
+                <span class="accordion-chevron">▼</span>
+              </div>
+            </div>
+            <div class="accordion-content">
+              <div style="padding: 1rem; background: #eff6ff; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong>Included in base package:</strong>
+                <div class="comparison-item">• 1 × 96oz Iced Tea (Choose Sweet or Unsweet)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-footer" style="margin-top: 1.5rem;">
+          <div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Order Total</div>
+            <div class="total">$356.99</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.9rem; opacity: 0.9;">Serves</div>
+            <div class="total">20-25</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h3 style="color: #667eea; margin-bottom: 1rem;">Which approach do you prefer?</h3>
+      <p style="color: #666; max-width: 600px; margin: 0 auto;">
+        <strong>Approach 1</strong> = Clean tabs, focused view<br>
+        <strong>Approach 2</strong> = See everything at once in cards<br>
+        <strong>Approach 3</strong> = Smart accordion, auto-expand changes
+      </p>
+    </div>
+  </div>
+</body>
+</html>

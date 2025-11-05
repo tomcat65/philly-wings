@@ -18,6 +18,18 @@
 import { renderWingsPricing } from './pricing-wings-renderer.js';
 import { renderItemsPricing } from './pricing-items-renderer.js';
 import { onPricingChange, getCurrentPricing } from '../../utils/pricing-aggregator.js';
+import { onStateChange } from '../../services/shared-platter-state-service.js';
+import {
+  renderWingsBreakdown,
+  renderDipsBreakdown,
+  renderSidesBreakdown,
+  renderDessertsBreakdown,
+  renderBeveragesBreakdown,
+  renderSuppliesBreakdown,
+  clearBreakdownCache
+} from '../../utils/kitchen-breakdown-renderer.js';
+import { renderCardGrid } from '../../utils/kitchen-breakdown-card-renderer.js';
+import { detectModifications } from '../../utils/kitchen-breakdown-calculator.js';
 
 /**
  * Render complete pricing summary
@@ -42,13 +54,13 @@ export function renderPricingSummary(pricing, state = {}, options = {}) {
     return renderEmptyState();
   }
 
-  const { selectedPackage = {} } = state;
+  const { selectedPackage = {}, currentConfig = {} } = state;
 
   return `
     <div class="pricing-summary-master ${printMode ? 'print-mode' : ''}" id="${containerId}">
       ${showPackageHeader ? renderPackageHeader(selectedPackage, pricing, collapsible) : ''}
 
-      ${renderPackageIncludes(selectedPackage, collapsible)}
+      ${renderPackageIncludes(selectedPackage, currentConfig, pricing, collapsible)}
 
       <div class="pricing-sections">
         ${showWings ? renderWingsSection(pricing, collapsible) : ''}
@@ -111,14 +123,24 @@ function renderPackageHeader(packageInfo, pricing, collapsible) {
 }
 
 /**
- * Render package includes section (base package contents)
+ * Render package includes section with dynamic kitchen-ready breakdown
+ *
+ * Shows detailed, hierarchical breakdown including:
+ * - Wings with sauce assignments and container calculations
+ * - Dips with 5-pack bundling
+ * - Sides, desserts, beverages with serving calculations
+ * - Visual indicators for modified/new items
  */
-function renderPackageIncludes(packageInfo, collapsible) {
-  if (!packageInfo || !packageInfo.includes || packageInfo.includes.length === 0) {
+function renderPackageIncludes(packageInfo, currentConfig, pricing, collapsible) {
+  if (!packageInfo) {
     return '';
   }
 
-  const { includes = [] } = packageInfo;
+  // Detect modifications comparing current config to package defaults
+  const modifications = detectModifications(packageInfo, currentConfig);
+
+  // NEW: Use Approach 2 - Compact Card Grid layout
+  const cardGridHtml = renderCardGrid(packageInfo, currentConfig, modifications, pricing);
 
   return `
     <div class="package-includes ${collapsible ? 'collapsible' : ''}" data-section="includes">
@@ -131,14 +153,7 @@ function renderPackageIncludes(packageInfo, collapsible) {
         ` : ''}
       </div>
       <div class="includes-content">
-        <ul class="includes-list">
-          ${includes.map(item => `
-            <li class="include-item">
-              <span class="include-icon">✓</span>
-              <span class="include-text">${item}</span>
-            </li>
-          `).join('')}
-        </ul>
+        ${cardGridHtml}
       </div>
     </div>
   `;
@@ -482,11 +497,18 @@ export function initPricingSummary(containerId, getStateFunc, options = {}) {
 
   // Subscribe to pricing updates (SP-OS-S5)
   // Get FRESH state each time pricing updates - fixes stale state bug
-  const unsubscribe = onPricingChange('pricing:updated', (pricing) => {
+  const pricingUnsubscribe = onPricingChange('pricing:updated', (pricing) => {
     const currentState = typeof getStateFunc === 'function' ? getStateFunc() : initialState;
     const html = renderPricingSummary(pricing, currentState, { ...options, containerId });
 
-    container.innerHTML = html;
+    // CRITICAL FIX: Always query fresh container instead of using cached reference
+    const freshContainer = document.getElementById(containerId);
+    if (!freshContainer) {
+      console.warn('⚠️ Container no longer exists during pricing update:', containerId);
+      return;
+    }
+
+    freshContainer.innerHTML = html;
 
     // Re-initialize collapsible after update
     if (options.collapsible !== false) {
@@ -494,7 +516,61 @@ export function initPricingSummary(containerId, getStateFunc, options = {}) {
     }
   });
 
-  return unsubscribe;
+  // NEW: Subscribe to config changes (Phase 1)
+  // This catches sauce/dip assignments that don't affect price but should appear in summary
+  // NOTE: Using wildcard 'currentConfig.*' to catch ALL nested changes (wingDistribution, sauceAssignments, dips, etc.)
+  console.log('🔧 [DEBUG] Setting up config subscription for:', containerId);
+
+  const configUnsubscribe = onStateChange('currentConfig.*', (value, path) => {
+    console.log('🔔 [DEBUG] Config change callback FIRED!', { path, hasValue: !!value });
+
+    try {
+      const currentState = typeof getStateFunc === 'function' ? getStateFunc() : initialState;
+      console.log('🔧 [DEBUG] Got currentState:', {
+        hasSelectedPackage: !!currentState.selectedPackage,
+        hasCurrentConfig: !!currentState.currentConfig,
+        hasSauceAssignments: !!currentState.currentConfig?.sauceAssignments,
+        wingDistribution: currentState.currentConfig?.wingDistribution
+      });
+
+      const currentPricing = getCurrentPricing();
+      console.log('🔧 [DEBUG] Got currentPricing:', {
+        hasPricing: !!currentPricing,
+        hasTotals: !!currentPricing?.totals
+      });
+
+      const html = renderPricingSummary(currentPricing, currentState, { ...options, containerId });
+      console.log('🔧 [DEBUG] Rendered HTML length:', html.length);
+
+      // CRITICAL FIX: Always query fresh container instead of using cached reference
+      // The container may be destroyed/recreated during navigation (e.g., entering customization screen)
+      const freshContainer = document.getElementById(containerId);
+
+      if (!freshContainer) {
+        console.warn('⚠️ [DEBUG] Container no longer exists, skipping update:', containerId);
+        return;
+      }
+
+      freshContainer.innerHTML = html;
+      console.log('🔧 [DEBUG] Updated container innerHTML (using fresh reference)');
+
+      // Re-initialize collapsible after update
+      if (options.collapsible !== false) {
+        initCollapsible(containerId);
+      }
+
+      console.log('📊 Order summary updated due to config change');
+    } catch (error) {
+      console.error('❌ [DEBUG] Error in config subscription callback:', error);
+      console.error('Stack trace:', error.stack);
+    }
+  });
+
+  // Return combined unsubscribe function
+  return () => {
+    pricingUnsubscribe();
+    configUnsubscribe();
+  };
 }
 
 /**
