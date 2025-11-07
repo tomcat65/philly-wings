@@ -18,6 +18,7 @@ import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebas
 import { db } from '../../firebase-config.js';
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
 import { recalculatePricing } from '../../utils/pricing-aggregator.js';
+import { packageTransformer } from '../../services/package-data-transformer.js';
 
 /**
  * Render sides selector with all three subsections
@@ -204,7 +205,7 @@ function renderColdSideCompact(side, preSelected) {
         <select class="size-selector-compact" data-side-id="${side.id}">
           ${side.variants.map(v => `
             <option value="${v.id}" ${v.id === currentSize ? 'selected' : ''}>
-              ${v.name} (${v.serves} servings) - $${v.price}
+              ${v.name} (${v.servings} servings) - $${v.basePrice}
             </option>
           `).join('')}
         </select>
@@ -268,7 +269,7 @@ function renderColdSideLarge(side, preSelected) {
                 data-side-id="${side.id}"
                 ${v.id === currentSize ? 'checked' : ''}>
               <span class="size-label">${v.name}</span>
-              <span class="size-details">${v.serves} servings • $${v.price}</span>
+              <span class="size-details">${v.servings} servings • $${v.basePrice}</span>
             </label>
           `).join('')}
         </div>
@@ -321,7 +322,7 @@ function renderSaladCompact(salad, preSelected) {
         <select class="size-selector-compact" data-salad-id="${salad.id}">
           ${salad.variants.map(v => `
             <option value="${v.id}" ${v.id === currentSize ? 'selected' : ''}>
-              ${v.name} (${v.serves} ${v.serves === 1 ? 'serving' : 'servings'}) - $${v.price}
+              ${v.name} (${v.servings} ${v.servings === 1 ? 'serving' : 'servings'}) - $${v.basePrice}
             </option>
           `).join('')}
         </select>
@@ -385,7 +386,7 @@ function renderSaladLarge(salad, preSelected) {
                 data-salad-id="${salad.id}"
                 ${v.id === currentSize ? 'checked' : ''}>
               <span class="size-label">${v.name}</span>
-              <span class="size-details">${v.serves} ${v.serves === 1 ? 'serving' : 'servings'} • $${v.price}</span>
+              <span class="size-details">${v.servings} ${v.servings === 1 ? 'serving' : 'servings'} • $${v.basePrice}</span>
             </label>
           `).join('')}
         </div>
@@ -660,7 +661,22 @@ async function handleCounterChange(itemId, isPlus, type) {
       const radioChecked = document.querySelector(`input[type="radio"][data-${type === 'coldSides' ? 'side' : 'salad'}-id="${itemId}"]:checked`);
       const size = sizeSelector?.value || radioChecked?.value || null;
 
-      updatedItems = [...items, { id: itemId, size: size, quantity: currentQty }];
+      // Get pricing and display info from transformer
+      const itemType = type === 'coldSides' ? 'coldSide' : 'salad';
+      const pricing = packageTransformer.getPriceForVariant(itemId, size, itemType);
+      const unitPrice = pricing?.basePrice || 0;
+      const displayName = pricing?.name || itemId;
+      const servings = pricing?.servings || 0;
+
+      updatedItems = [...items, {
+        id: itemId,
+        size: size,
+        quantity: currentQty,
+        includedQuantity: 0, // New items are not included
+        unitPrice,
+        displayName,
+        servings
+      }];
     }
   }
 

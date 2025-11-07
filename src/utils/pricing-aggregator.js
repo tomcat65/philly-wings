@@ -234,6 +234,9 @@ function mergePricingStructure(unified, specialized, source) {
  * @param {number} guestCount - Number of guests (for per-person cost)
  */
 function calculateTotals(unified, packageInfo, guestCount = 10) {
+  // Extract base package price for sidebar display
+  const basePrice = unified.items['package-base']?.basePrice || 0;
+
   // Calculate item subtotal
   const itemsSubtotal = Object.values(unified.items).reduce((sum, item) => {
     return sum + (item.basePrice || 0) * (item.quantity || 1);
@@ -263,6 +266,7 @@ function calculateTotals(unified, packageInfo, guestCount = 10) {
   const perPersonCost = guestCount > 0 ? total / guestCount : 0;
 
   unified.totals = {
+    basePrice: Number(basePrice.toFixed(2)),  // Added for sidebar display (Bug #3 fix)
     itemsSubtotal: Number(itemsSubtotal.toFixed(2)),
     upcharges: Number(upcharges.toFixed(2)),
     discounts: Number(discounts.toFixed(2)),
@@ -283,6 +287,7 @@ function calculateTotals(unified, packageInfo, guestCount = 10) {
 function createEmptyPricing() {
   const empty = createPricingStructure();
   empty.totals = {
+    basePrice: 0,
     itemsSubtotal: 0,
     upcharges: 0,
     discounts: 0,
