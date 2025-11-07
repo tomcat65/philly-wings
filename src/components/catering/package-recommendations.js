@@ -543,7 +543,7 @@ function handlePackageSelection(packageId, recommendations) {
 
   // Update state
   updateState('selectedPackage', selectedPackage);
-  updateState('currentStep', 'customize-spread');
+  updateState('currentStep', 'customization');
 
   // Announce selection for screen readers
   announceSelection(selectedPackage.name);

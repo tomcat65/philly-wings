@@ -339,11 +339,15 @@ async function fetchDips() {
     const q = query(
       collection(db, 'sauces'),
       where('active', '==', true),
-      where('category', '==', 'dipping-sauce'),
-      orderBy('sortOrder', 'asc')
+      where('category', '==', 'dipping-sauce')
+      // Note: orderBy removed to avoid composite index requirement
+      // Sorting done in JavaScript instead
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const dips = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Sort by sortOrder in JavaScript
+    return dips.sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
   } catch (error) {
     console.error('Error fetching dips from Firebase:', error);
     return [];
