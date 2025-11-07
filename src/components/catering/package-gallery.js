@@ -267,9 +267,9 @@ function closePackageModal() {
 /**
  * Select package and navigate to customization
  */
-function selectPackage(pkg) {
-  // Update state service
-  setPackage(pkg);
+async function selectPackage(pkg) {
+  // Update state service (now async to handle transformer initialization)
+  await setPackage(pkg);
   updateState('flowType', 'quick-browse');
   updateState('currentStep', 'customization');
 

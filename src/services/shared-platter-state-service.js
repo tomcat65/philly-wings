@@ -15,6 +15,7 @@
 
 import { getPackageById } from './catering-service.js';
 import { recalculatePricing as aggregatorRecalculatePricing } from '../utils/pricing-aggregator.js';
+import { packageTransformer } from './package-data-transformer.js';
 
 // ===== INITIAL STATE TEMPLATE =====
 const INITIAL_STATE = {
@@ -658,6 +659,20 @@ async function refreshPackageFromFirestore(packageId) {
     // Update state with fresh package data
     currentState.selectedPackage = freshPackage;
 
+    // Transform package data and initialize sides (SP-010)
+    // transformPackage now handles waiting for initialization internally
+    const transformed = await packageTransformer.transformPackage(freshPackage);
+    currentState.currentConfig.sides = {
+      chips: transformed.chips,
+      coldSides: transformed.coldSides || [],
+      salads: transformed.salads || []
+    };
+    console.log('🥗 Sides initialized from refreshed package:', {
+      chips: transformed.chips,
+      coldSides: transformed.coldSides.length,
+      salads: transformed.salads.length
+    });
+
     // Publish package change
     publishStateChange('selectedPackage', freshPackage);
 
@@ -675,8 +690,9 @@ async function refreshPackageFromFirestore(packageId) {
 /**
  * Set selected package and initialize defaults
  * @param {Object} packageObj - Package object from Firestore
+ * @returns {Promise<void>}
  */
-export function setPackage(packageObj) {
+export async function setPackage(packageObj) {
   currentState.selectedPackage = packageObj;
 
   const totalWings = packageObj.wingOptions?.totalWings || 0;
@@ -713,6 +729,21 @@ export function setPackage(packageObj) {
 
   // Initialize base price
   currentState.pricing.basePrice = packageObj.basePrice || 0;
+
+  // Transform package data and initialize sides (SP-010)
+  // transformPackage now handles waiting for initialization internally
+  const transformed = await packageTransformer.transformPackage(packageObj);
+  currentState.currentConfig.sides = {
+    chips: transformed.chips,
+    coldSides: transformed.coldSides || [],
+    salads: transformed.salads || []
+  };
+  console.log('🥗 Sides initialized from package:', {
+    chips: transformed.chips,
+    coldSides: transformed.coldSides.length,
+    salads: transformed.salads.length
+  });
+
   recalculatePricing();
 
   console.log('🐛 [DEBUG] setPackage() completed');

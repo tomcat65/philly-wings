@@ -33,8 +33,12 @@ import { renderPortionGuide } from '../components/catering/portion-guide.js';
 import { renderEntryChoiceV2, initEntryChoiceV2 } from '../components/catering/shared-platter-entry-choice.js';
 import { renderPackageRecommendations, initPackageRecommendations, loadAndRenderRecommendations } from '../components/catering/package-recommendations.js';
 import { renderCustomizationScreen, initCustomizationScreen } from '../components/catering/customization-screen.js';
+import { packageTransformer } from '../services/package-data-transformer.js';
 
 export async function renderCateringPage() {
+  // Initialize package data transformer (SP-010)
+  await packageTransformer.initialize();
+
   // Pre-render boxed meals flow
   const boxedMealsHtml = await renderBoxedMealsFlow();
 

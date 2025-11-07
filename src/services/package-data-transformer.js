@@ -11,7 +11,7 @@
  * Story: SP-010 (Sides Selector - Preset Loading)
  */
 
-import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase-config.js';
 
 class PackageDataTransformer {
@@ -612,11 +612,14 @@ class PackageDataTransformer {
     try {
       const q = query(
         collection(db, 'coldSides'),
-        where('active', '==', true),
-        orderBy('sortOrder', 'asc')
+        where('active', '==', true)
+        // Note: orderBy removed to avoid composite index requirement in production
+        // Sorting handled in-memory instead
       );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort in memory by sortOrder
+      return items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
     } catch (error) {
       console.error('Error fetching cold sides:', error);
       return [];
@@ -630,11 +633,14 @@ class PackageDataTransformer {
     try {
       const q = query(
         collection(db, 'freshSalads'),
-        where('active', '==', true),
-        orderBy('sortOrder', 'asc')
+        where('active', '==', true)
+        // Note: orderBy removed to avoid composite index requirement in production
+        // Sorting handled in-memory instead
       );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort in memory by sortOrder
+      return items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
     } catch (error) {
       console.error('Error fetching fresh salads:', error);
       return [];

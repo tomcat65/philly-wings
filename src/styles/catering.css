@@ -6267,3 +6267,407 @@
     margin-top: 4px;
   }
 }
+
+/* ================================
+   SP-010: Sides Selector Styles
+   Mobile-first: Alt 3 (compact) < 768px
+   Desktop: Alt 2 (large cards) >= 768px
+   ================================ */
+
+.sides-selector {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sides-section-header {
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 16px;
+}
+
+.sides-subsection {
+  margin-bottom: 32px;
+}
+
+.subsection-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+/* ==================
+   Chips Subsection
+   ================== */
+
+/* Mobile: Compact Layout (Default) */
+.chips-large-card {
+  display: none; /* Hide desktop layout on mobile */
+}
+
+.chips-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.chips-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.chips-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chips-info-compact {
+  flex: 1;
+  min-width: 0;
+}
+
+.chips-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.chips-varieties {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chips-counter-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==================
+   Cold Sides / Salads - Mobile Compact List
+   ================== */
+
+/* Hide desktop grid on mobile */
+.sides-grid-large {
+  display: none;
+}
+
+.sides-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.side-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.side-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.side-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.side-info-compact {
+  flex: 1;
+  min-width: 0;
+}
+
+.side-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.allergens-compact {
+  font-size: 11px;
+  color: #d32f2f;
+  margin: 0 0 6px 0;
+  text-transform: capitalize;
+}
+
+.size-selector-compact {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  color: #333;
+}
+
+.side-counter-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ==================
+   Desktop: Large Photo Cards (>= 768px)
+   ================== */
+
+@media (min-width: 768px) {
+  /* Hide mobile layouts */
+  .chips-compact,
+  .sides-list-compact {
+    display: none;
+  }
+
+  /* Show desktop layouts */
+  .chips-large-card,
+  .sides-grid-large {
+    display: block;
+  }
+
+  /* Chips Large Card */
+  .chips-large-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+  }
+
+  .chips-photo {
+    height: 140px;
+    overflow: hidden;
+  }
+
+  .chips-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .chips-content {
+    padding: 16px;
+  }
+
+  .chips-large-card .chips-name {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .chips-description {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 12px 0;
+  }
+
+  .chips-varieties-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .variety-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #e3f2fd;
+    color: #1976d2;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .chips-counter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .counter-unit {
+    font-size: 14px;
+    color: #666;
+    margin-left: 4px;
+  }
+
+  /* Cold Sides / Salads Grid */
+  .sides-grid-large {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .side-card-large {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .side-card-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .side-photo {
+    height: 140px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .side-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .allergen-badges {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .allergen-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(211, 47, 47, 0.9);
+    color: white;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .side-content {
+    padding: 16px;
+  }
+
+  .side-card-large .side-name {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .side-description {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+  }
+
+  .size-variants {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .size-variant-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .size-variant-option:hover {
+    background: #f5f5f5;
+  }
+
+  .size-variant-option input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .size-variant-option input[type="radio"]:checked + .size-label {
+    color: #1976d2;
+    font-weight: 600;
+  }
+
+  .size-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .size-details {
+    font-size: 13px;
+    color: #666;
+    margin-left: auto;
+  }
+
+  .side-counter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+  }
+}
+
+/* ==================
+   Shared Counter Styles
+   ================== */
+
+.counter-display[id^="chips-counter"],
+.counter-display[data-side-id],
+.counter-display[data-salad-id] {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1976d2;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Responsive: Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .sides-grid-large {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .side-photo {
+    height: 120px;
+  }
+
+  .chips-photo {
+    height: 120px;
+  }
+}
+
+/* Responsive: Large Desktop */
+@media (min-width: 1200px) {
+  .sides-grid-large {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

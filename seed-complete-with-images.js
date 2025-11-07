@@ -90,7 +90,7 @@ const sauces = [
     active: true,
     sortOrder: 11,
     isDryRub: false,
-    imageUrl: "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fblue-cheese-dip_1920x1080.webp?alt=media",
+    imageUrl: "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fblue-cheese_1920x1080.webp?alt=media",
     basePrice: 0.75
   },
   {
@@ -102,19 +102,7 @@ const sauces = [
     active: true,
     sortOrder: 12,
     isDryRub: false,
-    imageUrl: "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fhoney-mustard-dip_1920x1080.webp?alt=media",
-    basePrice: 0.75
-  },
-  {
-    id: "bbq-dip",
-    name: "BBQ Sauce",
-    category: "dipping-sauce",
-    description: "Sweet and tangy BBQ dipping sauce",
-    heatLevel: 0,
-    active: true,
-    sortOrder: 13,
-    isDryRub: false,
-    imageUrl: "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbbq-dip_1920x1080.webp?alt=media",
+    imageUrl: "https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fhoney-mustard_1920x1080.webp?alt=media",
     basePrice: 0.75
   }
 ];
