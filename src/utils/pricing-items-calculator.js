@@ -415,6 +415,9 @@ export function calculateSidesPricing(sides = {}) {
 /**
  * Calculate desserts pricing
  *
+ * SP-011: Uses Firestore basePrice from variants instead of hardcoded type-based pricing
+ * Expects: [{id, name, quantity, variantId, basePrice, servings}]
+ *
  * @param {Array<Object>} desserts - Selected desserts from state
  * @returns {Object} Pricing structure with dessert calculations
  */
@@ -430,18 +433,28 @@ export function calculateDessertsPricing(desserts) {
       const quantity = dessert.quantity || 1;
       const itemId = `dessert-${dessert.id || index}`;
 
-      // Determine pricing based on dessert type
-      let pricePerItem = ITEMS_PRICING.DESSERTS.cookies; // default
-      if (dessert.type === 'brownie') {
-        pricePerItem = ITEMS_PRICING.DESSERTS.brownies;
-      } else if (dessert.type === 'cake') {
-        pricePerItem = ITEMS_PRICING.DESSERTS.cakeslice;
+      // Use basePrice from Firestore variant data (SP-011)
+      // Falls back to legacy type-based pricing if basePrice not provided
+      let pricePerItem = dessert.basePrice;
+      if (!pricePerItem || pricePerItem === 0) {
+        // Fallback to legacy pricing (for backward compatibility)
+        pricePerItem = ITEMS_PRICING.DESSERTS.cookies; // default
+        if (dessert.type === 'brownie') {
+          pricePerItem = ITEMS_PRICING.DESSERTS.brownies;
+        } else if (dessert.type === 'cake') {
+          pricePerItem = ITEMS_PRICING.DESSERTS.cakeslice;
+        }
+        pricingLogger.warn('Using fallback pricing for dessert (basePrice not provided)', {
+          dessert: dessert.name,
+          type: dessert.type,
+          fallbackPrice: pricePerItem
+        });
       }
 
       addItem(structure, itemId, 'dessert', {
         name: dessert.name,
         quantity,
-        type: dessert.type,
+        variantId: dessert.variantId,
         servings: dessert.servings
       });
 
@@ -451,12 +464,13 @@ export function calculateDessertsPricing(desserts) {
         itemId,
         'upcharge',
         upcharge,
-        `${dessert.name} (${quantity}) (+$${pricePerItem} each)`
+        `${dessert.name} (${quantity}) (+$${pricePerItem.toFixed(2)} each)`
       );
 
       pricingLogger.info('Applied dessert upcharge', {
         name: dessert.name,
         quantity,
+        pricePerItem: `$${pricePerItem.toFixed(2)}`,
         upcharge: `$${upcharge.toFixed(2)}`
       });
     });

@@ -15,6 +15,7 @@ import { renderIntegratedSauceDistribution, initIntegratedSauceDistribution, get
 import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
 import { renderDipsCounterSelector, initDipsCounterSelector } from './dips-counter-selector.js';
 import { renderSidesSelector, initSidesSelector } from './sides-selector.js';
+import { renderDessertsCounterSelector, initDessertsCounterSelector } from './desserts-counter-selector.js';
 import { initPricingSummary, renderPricingSummary as renderFullPricingSummary } from './pricing-summary-master.js';
 import { initPriceBreakdownSidebar, renderPriceBreakdownSidebar } from './price-breakdown-sidebar.js';
 import { recalculatePricing, getCurrentPricing, onPricingChange } from '../../utils/pricing-aggregator.js';
@@ -370,6 +371,17 @@ async function renderSectionContent(sectionId) {
       });
 
     case 'desserts':
+      // SP-011: Desserts counter selector
+      const packageDessertsIncluded = packageData.dessertsIncluded || { quantity: 0, unit: 'five-pack' };
+      const preSelectedDesserts = currentConfig.desserts || [];
+      const skipDesserts = currentConfig.noDesserts || false;
+      return await renderDessertsCounterSelector({
+        packageIncluded: packageDessertsIncluded,
+        preSelected: preSelectedDesserts,
+        skipDesserts: skipDesserts,
+        onCounterChange: handleDessertCounterChange
+      });
+
     case 'beverages':
       return renderSectionPlaceholder(sectionId);
 
@@ -423,8 +435,14 @@ function initializeSectionInteractions(sectionId) {
 
     // Other sections will be initialized here as they're built
     case 'desserts':
+      // SP-011: Initialize desserts counter selector
+      const packageDessertsInit = packageData.dessertsIncluded || { quantity: 0, unit: 'five-pack' };
+      initDessertsCounterSelector(packageDessertsInit, handleDessertCounterChange);
+      console.log('🍰 Desserts counter selector initialized');
+      break;
+
     case 'beverages':
-      console.log(`📍 ${sectionId} section - component pending (SP-011 through SP-012)`);
+      console.log(`📍 ${sectionId} section - component pending (SP-012)`);
       break;
   }
 }
@@ -900,6 +918,27 @@ function handleDipCounterChange(dipQuantities, skipDips) {
   });
 
   console.log(`🥣 Dips counter updated: ${dipQuantities.length} types, skip=${skipDips}`);
+
+  // Pricing will update automatically via onStateChange listener
+  // No need to call recalculatePricing() here as component already does it
+}
+
+/**
+ * Handle dessert counter change (SP-011 - Shared Platters)
+ * @param {Array} dessertQuantities - Array of {id, name, quantity, variantId, basePrice, servings} objects
+ * @param {Boolean} skipDesserts - Whether desserts are skipped
+ */
+function handleDessertCounterChange(dessertQuantities, skipDesserts) {
+  const state = getState();
+
+  // Update state with dessert quantities and skip flag
+  updateState('currentConfig', {
+    ...state.currentConfig,
+    desserts: dessertQuantities,
+    noDesserts: skipDesserts
+  });
+
+  console.log(`🍰 Desserts counter updated: ${dessertQuantities.length} types, skip=${skipDesserts}`);
 
   // Pricing will update automatically via onStateChange listener
   // No need to call recalculatePricing() here as component already does it

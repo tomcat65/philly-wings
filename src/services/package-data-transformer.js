@@ -56,7 +56,8 @@ class PackageDataTransformer {
       this.pricingCache = {
         chips: null,
         coldSides: {},
-        salads: {}
+        salads: {},
+        desserts: {}
       };
 
       // Fetch chips pricing first
@@ -66,17 +67,21 @@ class PackageDataTransformer {
       // Build sides mapping (also populates pricing cache)
       this.sidesMapping = await this.buildSidesMapping();
 
+      // Build desserts cache
+      await this.buildDessertsCache();
+
       this.initialized = true;
       console.log('✅ Package transformer initialized with', Object.keys(this.sidesMapping).length, 'side mappings');
       console.log('💰 Pricing cache loaded:', {
         chips: this.pricingCache.chips ? `$${this.pricingCache.chips.toFixed(2)}` : 'N/A',
         coldSides: Object.keys(this.pricingCache.coldSides).length + ' variants',
-        salads: Object.keys(this.pricingCache.salads).length + ' variants'
+        salads: Object.keys(this.pricingCache.salads).length + ' variants',
+        desserts: Object.keys(this.pricingCache.desserts).length + ' variants'
       });
     } catch (error) {
       console.error('❌ Failed to initialize package transformer:', error);
       this.sidesMapping = {}; // Fallback to empty mapping
-      this.pricingCache = { chips: 10.58, coldSides: {}, salads: {} }; // Fallback pricing
+      this.pricingCache = { chips: 10.58, coldSides: {}, salads: {}, desserts: {} }; // Fallback pricing
       this.initialized = true; // Still mark as initialized to prevent retry loops
     }
   }
@@ -645,6 +650,85 @@ class PackageDataTransformer {
       console.error('Error fetching fresh salads:', error);
       return [];
     }
+  }
+
+  /**
+   * Fetch desserts from Firestore
+   */
+  async fetchDesserts() {
+    try {
+      const q = query(
+        collection(db, 'desserts'),
+        where('active', '==', true)
+        // Note: orderBy removed to avoid composite index requirement in production
+        // Sorting handled in-memory instead
+      );
+      const snapshot = await getDocs(q);
+      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort in memory by sortOrder
+      return items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    } catch (error) {
+      console.error('Error fetching desserts:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Build desserts pricing cache
+   * Caches 5-pack variant pricing for each dessert
+   */
+  async buildDessertsCache() {
+    try {
+      const desserts = await this.fetchDesserts();
+
+      desserts.forEach(dessert => {
+        dessert.variants?.forEach(variant => {
+          // Cache all variants, but prioritize 5-pack
+          const pricingKey = `${dessert.id}_${variant.id}`;
+          this.pricingCache.desserts[pricingKey] = {
+            basePrice: variant.basePrice || 0,
+            servings: variant.servings || 0,
+            size: variant.size || variant.unit || 'unknown',
+            name: variant.name || dessert.name
+          };
+
+          console.log('💰 Cached dessert pricing:', {
+            key: pricingKey,
+            dessertId: dessert.id,
+            variantId: variant.id,
+            size: variant.size || variant.unit,
+            basePrice: variant.basePrice || 0,
+            servings: variant.servings || 0
+          });
+        });
+      });
+
+      console.log('✅ Desserts cache built:', Object.keys(this.pricingCache.desserts).length, 'variants');
+    } catch (error) {
+      console.error('❌ Failed to build desserts cache:', error);
+    }
+  }
+
+  /**
+   * Get dessert pricing by ID and variant
+   * @param {string} dessertId - Dessert document ID
+   * @param {string} variantId - Variant ID (e.g., '5-pack' or 'individual')
+   * @returns {Object|null} - {basePrice, servings, size, name} or null
+   */
+  getDessertPricing(dessertId, variantId) {
+    const pricingKey = `${dessertId}_${variantId}`;
+    const result = this.pricingCache.desserts?.[pricingKey] || null;
+
+    if (!result) {
+      console.warn('⚠️ Dessert pricing not found for:', {
+        lookupKey: pricingKey,
+        dessertId,
+        variantId,
+        availableKeys: Object.keys(this.pricingCache.desserts || {}).slice(0, 10)
+      });
+    }
+
+    return result;
   }
 
   /**
