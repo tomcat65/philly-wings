@@ -81,8 +81,8 @@ export async function renderDessertsCounterSelector(options = {}) {
         </div>
       ` : ''}
 
-      <!-- Desserts Grid (hidden when skipped) -->
-      <div class="desserts-grid" id="desserts-grid" ${skipDesserts ? 'style="display: none;"' : ''}>
+      <!-- Desserts Grid (hidden when skipped) - Compact 3-column layout -->
+      <div class="desserts-compact-grid" id="desserts-grid" ${skipDesserts ? 'style="display: none;"' : ''}>
         ${desserts.map(dessert => renderDessertCard(dessert, preSelected.find(p => p.id === dessert.id)?.quantity || 0)).join('')}
       </div>
 
@@ -101,7 +101,7 @@ export async function renderDessertsCounterSelector(options = {}) {
 }
 
 /**
- * Render individual dessert card with counter
+ * Render individual dessert card with counter (Compact Grid - Option 2)
  */
 function renderDessertCard(dessert, currentQuantity = 0) {
   // Get 5-pack variant for pricing display
@@ -114,56 +114,52 @@ function renderDessertCard(dessert, currentQuantity = 0) {
   const allergens = dessert.allergens || [];
 
   return `
-    <div class="dessert-card" data-dessert-id="${dessert.id}">
-      <!-- Dessert Image -->
-      <div class="dessert-card-image">
+    <div class="dessert-card-compact" data-dessert-id="${dessert.id}">
+      <!-- Dessert Image with 3:2 aspect ratio -->
+      <div class="dessert-card-compact-image">
         <img
           src="${dessert.imageUrl || getPlaceholderImage(dessert)}"
           alt="${dessert.name}"
           loading="lazy"
-          class="dessert-img">
+          class="dessert-compact-img">
+
+        <!-- Servings badge overlaid on image -->
+        <span class="dessert-servings-badge">${servings} servings</span>
 
         ${allergens.length > 0 ? `
-          <div class="allergen-badges">
+          <div class="allergen-badges-compact">
             ${allergens.slice(0, 2).map(allergen => `
-              <span class="allergen-badge">${getAllergenIcon(allergen)} ${allergen}</span>
+              <span class="allergen-badge-compact" title="${allergen}">${getAllergenIcon(allergen)}</span>
             `).join('')}
           </div>
         ` : ''}
       </div>
 
-      <!-- Dessert Info -->
-      <div class="dessert-card-content">
-        <h5 class="dessert-card-name">${dessert.name}</h5>
-        <p class="dessert-card-description">${dessert.description || ''}</p>
-        <p class="dessert-card-details">
-          <span class="dessert-servings">${servings} servings</span>
-          ${basePrice > 0 ? `<span class="dessert-price">$${basePrice.toFixed(2)}</span>` : ''}
-        </p>
-      </div>
+      <!-- Dessert Info - Compact centered layout -->
+      <div class="dessert-card-compact-body">
+        <h5 class="dessert-compact-name" title="${dessert.name}">${dessert.name}</h5>
+        <p class="dessert-compact-price">$${basePrice.toFixed(2)}</p>
 
-      <!-- Counter Controls -->
-      <div class="dessert-counter-controls">
-        <button
-          type="button"
-          class="counter-btn counter-minus"
-          data-dessert-id="${dessert.id}"
-          aria-label="Decrease ${dessert.name} quantity"
-          ${currentQuantity === 0 ? 'disabled' : ''}>
-          −
-        </button>
-        <span class="counter-display" data-dessert-id="${dessert.id}">${currentQuantity}</span>
-        <button
-          type="button"
-          class="counter-btn counter-plus"
-          data-dessert-id="${dessert.id}"
-          aria-label="Increase ${dessert.name} quantity">
-          +
-        </button>
+        <!-- Counter Controls - Centered -->
+        <div class="dessert-compact-counter">
+          <button
+            type="button"
+            class="counter-btn counter-minus"
+            data-dessert-id="${dessert.id}"
+            aria-label="Decrease ${dessert.name} quantity"
+            ${currentQuantity === 0 ? 'disabled' : ''}>
+            −
+          </button>
+          <span class="counter-display" data-dessert-id="${dessert.id}">${currentQuantity}</span>
+          <button
+            type="button"
+            class="counter-btn counter-plus"
+            data-dessert-id="${dessert.id}"
+            aria-label="Increase ${dessert.name} quantity">
+            +
+          </button>
+        </div>
       </div>
-
-      <!-- Five-pack Label -->
-      <p class="dessert-unit-label">five-packs</p>
     </div>
   `;
 }
@@ -180,7 +176,7 @@ export function initDessertsCounterSelector(packageIncluded, onCounterChange) {
 
   // Initialize state from existing quantities
   let dessertQuantities = {};
-  document.querySelectorAll('.dessert-card .counter-display').forEach(display => {
+  document.querySelectorAll('.dessert-card-compact .counter-display').forEach(display => {
     const dessertId = display.dataset.dessertId;
     const quantity = parseInt(display.textContent) || 0;
     if (quantity > 0) {
