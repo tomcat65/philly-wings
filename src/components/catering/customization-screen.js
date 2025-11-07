@@ -14,9 +14,12 @@ import { renderWingDistributionSelector, initWingDistributionSelector } from './
 import { renderIntegratedSauceDistribution, initIntegratedSauceDistribution, getSauceById, determineSauceViscosity } from './sauce-distribution-integrated.js';
 import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
 import { renderDipsCounterSelector, initDipsCounterSelector } from './dips-counter-selector.js';
+import { renderSidesSelector, initSidesSelector } from './sides-selector.js';
 import { initPricingSummary, renderPricingSummary as renderFullPricingSummary } from './pricing-summary-master.js';
-import { recalculatePricing, getCurrentPricing } from '../../utils/pricing-aggregator.js';
+import { initPriceBreakdownSidebar, renderPriceBreakdownSidebar } from './price-breakdown-sidebar.js';
+import { recalculatePricing, getCurrentPricing, onPricingChange } from '../../utils/pricing-aggregator.js';
 import '../../styles/sauce-distribution-integrated.css';
+import '../../styles/price-breakdown-sidebar.css';
 
 /**
  * Initialize customization screen
@@ -360,6 +363,12 @@ async function renderSectionContent(sectionId) {
       });
 
     case 'sides':
+      // SP-010: Sides selector (chips, cold sides, salads)
+      const preSelectedSides = currentConfig.sides || { chips: null, coldSides: [], salads: [] };
+      return await renderSidesSelector({
+        preSelected: preSelectedSides
+      });
+
     case 'desserts':
     case 'beverages':
       return renderSectionPlaceholder(sectionId);
@@ -406,11 +415,16 @@ function initializeSectionInteractions(sectionId) {
       console.log('🥣 Dips counter selector initialized');
       break;
 
-    // Other sections will be initialized here as they're built
     case 'sides':
+      // SP-010: Initialize sides selector
+      initSidesSelector();
+      console.log('🥗 Sides selector initialized');
+      break;
+
+    // Other sections will be initialized here as they're built
     case 'desserts':
     case 'beverages':
-      console.log(`📍 ${sectionId} section - component pending (SP-009 through SP-012)`);
+      console.log(`📍 ${sectionId} section - component pending (SP-011 through SP-012)`);
       break;
   }
 }
@@ -697,27 +711,28 @@ function updatePricingSummary() {
     // Update desktop summary
     const summaryPanel = document.querySelector('.pricing-summary-panel');
     if (summaryPanel) {
-      // CRITICAL FIX: Create empty container div, then let initPricingSummary fill it
+      // CRITICAL FIX: Create empty container div, then let initPriceBreakdownSidebar fill it
       // This prevents double-wrapping and ID conflicts
       summaryPanel.innerHTML = '<div id="pricing-summary-container" class="summary-content"></div>';
 
-      // Initialize the comprehensive pricing summary (SP-OS-S5)
-      // Pass getState FUNCTION (not snapshot) so it gets fresh state on each update
-      // This fixes the bug where totals wouldn't update when sliders moved
-      pricingSummaryUnsubscribe = initPricingSummary('pricing-summary-container', getState, {
-        showPackageHeader: true,
-        showWings: true,
-        showItems: true,
-        showTotals: true,
-        collapsible: true
-      });
+      // Initialize the price breakdown sidebar (SP-010 Phase 4)
+      // Replaces comprehensive pricing summary with focused price breakdown
+      pricingSummaryUnsubscribe = initPriceBreakdownSidebar();
     }
 
     // Update mobile drawer
     const drawerContent = document.getElementById('mobile-drawer-content');
     if (drawerContent) {
-      // Phase 1 fix: Pass proper pricing and state (not pkg and empty object)
-      drawerContent.innerHTML = renderFullPricingSummary(initialPricing, state, {});
+      // Use price breakdown sidebar in mobile drawer (SP-010 Phase 4)
+      drawerContent.innerHTML = renderPriceBreakdownSidebar(initialPricing);
+      
+      // Subscribe mobile drawer to pricing updates
+      onPricingChange('pricing:updated', (pricing) => {
+        const freshDrawerContent = document.getElementById('mobile-drawer-content');
+        if (freshDrawerContent) {
+          freshDrawerContent.innerHTML = renderPriceBreakdownSidebar(pricing);
+        }
+      });
     }
 
     pricingSummaryInitialized = true;
@@ -729,13 +744,14 @@ function updatePricingSummary() {
     debouncedRecalculatePricing(state);
   }
 
-  // Update mobile button
+  // Update mobile button with current total
   const mobileButton = document.getElementById('mobile-pricing-button');
   if (mobileButton) {
-    const basePrice = pkg.basePrice || 0;
+    const currentPricing = getCurrentPricing();
+    const total = currentPricing?.totals?.total || pkg.basePrice || 0;
     const priceValue = mobileButton.querySelector('.mobile-price-value');
     if (priceValue) {
-      priceValue.textContent = `$${basePrice.toFixed(2)}`;
+      priceValue.textContent = `$${total.toFixed(2)}`;
     }
   }
 

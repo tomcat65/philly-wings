@@ -23,6 +23,7 @@ import { timeFunction, PERFORMANCE_BUDGETS } from './pricing-timing.js';
 
 /**
  * Item pricing rules and upcharges
+ * NOTE: Sides pricing now comes from Firestore via transformer (SP-010)
  */
 const ITEMS_PRICING = {
   // Dips pricing
@@ -32,30 +33,14 @@ const ITEMS_PRICING = {
     sizeUpgrade: 1.50         // +$1.50 for 3oz dip
   },
 
-  // Sides pricing
-  SIDES: {
-    chips: 3.00,              // $3.00 per 5-pack Miss Vickie's
-    fries: {
-      small: 4.00,
-      large: 6.00
-    },
-    loadedFries: {
-      small: 6.00,
-      large: 8.00
-    },
-    mozzarellaSticks: 8.00,   // $8.00 per 12-pack
-    coldSides: 5.00,          // $5.00 per cold side
-    salads: 6.00              // $6.00 per salad
-  },
-
-  // Desserts pricing
+  // Desserts pricing (TODO: Move to Firestore in future epic)
   DESSERTS: {
     cookies: 2.00,            // $2.00 per cookie
     brownies: 3.00,           // $3.00 per brownie
     cakeslice: 4.00           // $4.00 per cake slice
   },
 
-  // Beverages pricing
+  // Beverages pricing (TODO: Move to Firestore in future epic)
   BEVERAGES: {
     cold: {
       can: 2.00,              // $2.00 per can
@@ -177,12 +162,12 @@ export function calculateDipsPricing(dips, packageConfig) {
 }
 
 /**
- * Calculate sides pricing
+ * Calculate sides pricing with Firestore-based pricing and included quantity logic
  *
- * @param {Object} sides - Sides configuration from state
- * @param {Object} sides.chips - Chips quantity
- * @param {Array<Object>} sides.coldSides - Cold sides
- * @param {Array<Object>} sides.salads - Salads
+ * @param {Object} sides - Sides configuration from state (enhanced by transformer)
+ * @param {Object} sides.chips - Chips with { quantity, includedQuantity, unitPrice, displayName }
+ * @param {Array<Object>} sides.coldSides - Cold sides with pricing fields
+ * @param {Array<Object>} sides.salads - Salads with pricing fields
  * @returns {Object} Pricing structure with sides calculations
  */
 export function calculateSidesPricing(sides = {}) {
@@ -193,90 +178,216 @@ export function calculateSidesPricing(sides = {}) {
   try {
     const normalizedSides = normalizeSidesInput(sides);
     const {
-      chips = { quantity: 0 },
+      chips = null,
       coldSides = [],
       salads = []
     } = normalizedSides;
 
-    // Chips
-    if (chips.quantity > 0) {
+    // Chips pricing with included quantity logic
+    if (chips && chips.quantity > 0) {
+      const included = chips.includedQuantity || 0;
+      const additional = Math.max(0, chips.quantity - included);
+      const removed = Math.max(0, included - chips.quantity);
+      const unitPrice = chips.unitPrice || 0;
+
       addItem(structure, 'chips', 'side', {
-        name: 'Miss Vickie\'s Chips',
+        name: chips.displayName || 'Miss Vickie\'s Chips 5-Pack',
         quantity: chips.quantity,
+        includedQty: included,
+        additionalQty: additional,
         unit: '5-pack'
       });
 
-      const upcharge = chips.quantity * ITEMS_PRICING.SIDES.chips;
-      addModifier(
-        structure,
-        'chips',
-        'upcharge',
-        upcharge,
-        `Chips 5-packs (${chips.quantity}) (+$${ITEMS_PRICING.SIDES.chips} each)`
-      );
+      // Track included items (no charge)
+      if (included > 0 && chips.quantity >= included) {
+        addModifier(
+          structure,
+          'chips',
+          'included',
+          0,
+          `${included} ${chips.displayName || 'Chips 5-Pack'} included - $0.00`
+        );
+      }
 
-      pricingLogger.info('Applied chips upcharge', {
-        quantity: chips.quantity,
-        upcharge: `$${upcharge.toFixed(2)}`
-      });
+      // Apply upcharge for additional items
+      if (additional > 0) {
+        const upcharge = additional * unitPrice;
+        addModifier(
+          structure,
+          'chips',
+          'upcharge',
+          upcharge,
+          `Additional ${chips.displayName || 'Chips'} (${additional}) (+$${unitPrice.toFixed(2)} each)`
+        );
+
+        pricingLogger.info('Applied chips additional upcharge', {
+          included,
+          additional,
+          unitPrice: `$${unitPrice.toFixed(2)}`,
+          upcharge: `$${upcharge.toFixed(2)}`
+        });
+      }
+
+      // Apply removal credit if quantity below included
+      if (removed > 0) {
+        const credit = removed * unitPrice;
+        addModifier(
+          structure,
+          'chips',
+          'removal-credit',
+          -credit,
+          `Removed ${chips.displayName || 'Chips'} (${removed}) - Credit $${credit.toFixed(2)}`
+        );
+
+        pricingLogger.info('Applied chips removal credit', {
+          included,
+          removed,
+          unitPrice: `$${unitPrice.toFixed(2)}`,
+          credit: `$${credit.toFixed(2)}`
+        });
+      }
     }
 
-    // Cold sides
+    // Cold sides pricing with included quantity logic
     coldSides.forEach((side, index) => {
-      const quantity = side.quantity || 1;
+      const quantity = side.quantity || 0;
+      const included = side.includedQuantity || 0;
+      const additional = Math.max(0, quantity - included);
+      const removed = Math.max(0, included - quantity);
+      const unitPrice = side.unitPrice || 0;
       const itemId = `cold-side-${side.id || index}`;
 
       addItem(structure, itemId, 'side', {
-        name: side.name,
+        name: side.displayName || side.name,
         quantity,
-        serves: side.serves
+        includedQty: included,
+        additionalQty: additional,
+        serves: side.servings
       });
 
-      const upcharge = quantity * ITEMS_PRICING.SIDES.coldSides;
-      addModifier(
-        structure,
-        itemId,
-        'upcharge',
-        upcharge,
-        `${side.name} (${quantity}) (+$${ITEMS_PRICING.SIDES.coldSides} each)`
-      );
+      // Track included items
+      if (included > 0 && quantity >= included) {
+        addModifier(
+          structure,
+          itemId,
+          'included',
+          0,
+          `${included} ${side.displayName || side.name} included - $0.00`
+        );
+      }
 
-      pricingLogger.info('Applied cold side upcharge', {
-        name: side.name,
-        quantity,
-        upcharge: `$${upcharge.toFixed(2)}`
-      });
+      // Apply upcharge for additional
+      if (additional > 0) {
+        const upcharge = additional * unitPrice;
+        addModifier(
+          structure,
+          itemId,
+          'upcharge',
+          upcharge,
+          `Additional ${side.displayName || side.name} (${additional}) (+$${unitPrice.toFixed(2)} each)`
+        );
+
+        pricingLogger.info('Applied cold side additional upcharge', {
+          name: side.displayName,
+          included,
+          additional,
+          unitPrice: `$${unitPrice.toFixed(2)}`,
+          upcharge: `$${upcharge.toFixed(2)}`
+        });
+      }
+
+      // Apply removal credit
+      if (removed > 0) {
+        const credit = removed * unitPrice;
+        addModifier(
+          structure,
+          itemId,
+          'removal-credit',
+          -credit,
+          `Removed ${side.displayName || side.name} (${removed}) - Credit $${credit.toFixed(2)}`
+        );
+
+        pricingLogger.info('Applied cold side removal credit', {
+          name: side.displayName,
+          included,
+          removed,
+          unitPrice: `$${unitPrice.toFixed(2)}`,
+          credit: `$${credit.toFixed(2)}`
+        });
+      }
     });
 
-    // Salads
+    // Salads pricing with included quantity logic
     salads.forEach((salad, index) => {
-      const quantity = salad.quantity || 1;
+      const quantity = salad.quantity || 0;
+      const included = salad.includedQuantity || 0;
+      const additional = Math.max(0, quantity - included);
+      const removed = Math.max(0, included - quantity);
+      const unitPrice = salad.unitPrice || 0;
       const itemId = `salad-${salad.id || index}`;
 
       addItem(structure, itemId, 'side', {
-        name: salad.name,
+        name: salad.displayName || salad.name,
         quantity,
-        serves: salad.serves
+        includedQty: included,
+        additionalQty: additional,
+        serves: salad.servings
       });
 
-      const upcharge = quantity * ITEMS_PRICING.SIDES.salads;
-      addModifier(
-        structure,
-        itemId,
-        'upcharge',
-        upcharge,
-        `${salad.name} (${quantity}) (+$${ITEMS_PRICING.SIDES.salads} each)`
-      );
+      // Track included items
+      if (included > 0 && quantity >= included) {
+        addModifier(
+          structure,
+          itemId,
+          'included',
+          0,
+          `${included} ${salad.displayName || salad.name} included - $0.00`
+        );
+      }
 
-      pricingLogger.info('Applied salad upcharge', {
-        name: salad.name,
-        quantity,
-        upcharge: `$${upcharge.toFixed(2)}`
-      });
+      // Apply upcharge for additional
+      if (additional > 0) {
+        const upcharge = additional * unitPrice;
+        addModifier(
+          structure,
+          itemId,
+          'upcharge',
+          upcharge,
+          `Additional ${salad.displayName || salad.name} (${additional}) (+$${unitPrice.toFixed(2)} each)`
+        );
+
+        pricingLogger.info('Applied salad additional upcharge', {
+          name: salad.displayName,
+          included,
+          additional,
+          unitPrice: `$${unitPrice.toFixed(2)}`,
+          upcharge: `$${upcharge.toFixed(2)}`
+        });
+      }
+
+      // Apply removal credit
+      if (removed > 0) {
+        const credit = removed * unitPrice;
+        addModifier(
+          structure,
+          itemId,
+          'removal-credit',
+          -credit,
+          `Removed ${salad.displayName || salad.name} (${removed}) - Credit $${credit.toFixed(2)}`
+        );
+
+        pricingLogger.info('Applied salad removal credit', {
+          name: salad.displayName,
+          included,
+          removed,
+          unitPrice: `$${unitPrice.toFixed(2)}`,
+          credit: `$${credit.toFixed(2)}`
+        });
+      }
     });
 
     // Mark completion
-    const hasSides = chips.quantity > 0 || coldSides.length > 0 || salads.length > 0;
+    const hasSides = (chips && chips.quantity > 0) || coldSides.length > 0 || salads.length > 0;
     structure.meta.completionStatus.sides = hasSides;
     structure.meta.lastCalculated = new Date().toISOString();
 

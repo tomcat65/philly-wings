@@ -1,0 +1,221 @@
+/**
+ * Price Breakdown Sidebar Styles - SP-010 Phase 4
+ *
+ * Desktop: Sticky sidebar (≥768px)
+ * Mobile: Fixed bottom bar (<768px)
+ *
+ * @created 2025-11-06
+ * @epic SP-010
+ * @story Phase 4 - Price Breakdown Sidebar UI
+ */
+
+/* ========================================
+   Main Container
+   ======================================== */
+
+.price-breakdown-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.price-breakdown-sidebar.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--gray-600, #666);
+}
+
+.empty-message {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+/* ========================================
+   Title
+   ======================================== */
+
+.breakdown-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900, #1a1a1a);
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--gray-200, #e5e7eb);
+}
+
+/* ========================================
+   Section Headers
+   ======================================== */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+  color: var(--gray-700, #374151);
+}
+
+.section-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ========================================
+   Sections
+   ======================================== */
+
+.price-breakdown-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-base {
+  padding: 0.75rem 0;
+}
+
+.section-included {
+  background: rgba(52, 152, 219, 0.1);
+  border-left: 3px solid #3498db;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.section-additional {
+  background: rgba(39, 174, 96, 0.1);
+  border-left: 3px solid #27ae60;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.section-removed {
+  background: rgba(231, 76, 60, 0.1);
+  border-left: 3px solid #e74c3c;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.section-total {
+  border-top: 2px solid var(--gray-300, #d1d5db);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* ========================================
+   Breakdown Items
+   ======================================== */
+
+.breakdown-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9375rem;
+}
+
+.breakdown-label {
+  flex: 1;
+  color: var(--gray-700, #374151);
+  line-height: 1.4;
+}
+
+.breakdown-value {
+  font-weight: 600;
+  color: var(--gray-900, #1a1a1a);
+  white-space: nowrap;
+  margin-left: 1rem;
+}
+
+.breakdown-value.positive {
+  color: #27ae60;
+}
+
+.breakdown-value.negative {
+  color: #e74c3c;
+}
+
+.total-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.grand-total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--philly-red, #c41e3a);
+}
+
+/* ========================================
+   Mobile Styles (< 768px)
+   ======================================== */
+
+@media (max-width: 767px) {
+  .price-breakdown-sidebar {
+    padding: 1rem;
+  }
+
+  .breakdown-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-header {
+    font-size: 0.8125rem;
+  }
+
+  .breakdown-item {
+    font-size: 0.875rem;
+    padding: 0.375rem 0;
+  }
+
+  .total-value {
+    font-size: 1rem;
+  }
+
+  .grand-total {
+    font-size: 1.125rem;
+  }
+}
+
+/* ========================================
+   Included Badge (for sides selector)
+   ======================================== */
+
+.included-badge {
+  display: inline-block;
+  background: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* ========================================
+   Accessibility
+   ======================================== */
+
+.price-breakdown-sidebar[aria-live] {
+  /* Ensure screen readers announce updates */
+}
+
+/* Focus styles for keyboard navigation */
+.breakdown-item:focus-within {
+  outline: 2px solid var(--philly-red, #c41e3a);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
