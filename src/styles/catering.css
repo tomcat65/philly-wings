@@ -7060,3 +7060,238 @@
     gap: 1.25rem;
   }
 }
+
+/* ========================================================================
+   MODIFICATIONS SUMMARY CARD (SP-011 Option 3)
+   ======================================================================== */
+
+/* Summary Card Container */
+.modifications-summary-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+/* Summary Header */
+.modifications-summary-header {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-icon {
+  font-size: 1.25rem;
+}
+
+.summary-title {
+  letter-spacing: 0.025em;
+}
+
+/* Base Package Info */
+.base-package-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f59e0b;
+}
+
+.base-package-name {
+  font-weight: 600;
+  color: #78350f;
+  font-size: 1rem;
+}
+
+.base-package-price {
+  font-weight: 700;
+  color: #92400e;
+  font-size: 1rem;
+}
+
+/* Customizations Label */
+.customizations-label {
+  font-size: 0.875rem;
+  color: #78350f;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+/* Modifications List */
+.modifications-list {
+  list-style: none;
+  margin: 0 0 1rem 0;
+  padding: 0;
+}
+
+.modification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  color: #78350f;
+}
+
+.modification-category {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+}
+
+.category-icon {
+  font-size: 1rem;
+}
+
+.modification-price {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.modification-price.zero {
+  color: #6b7280;
+}
+
+.modification-price.positive {
+  color: #dc2626;
+}
+
+/* Modifications Total */
+.modifications-total {
+  border-top: 2px solid #f59e0b;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.total-label {
+  font-size: 1rem;
+}
+
+.total-amount {
+  font-size: 1.125rem;
+}
+
+/* Final Total */
+.final-total {
+  background: #92400e;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+}
+
+.final-label {
+  font-size: 1.125rem;
+  letter-spacing: 0.025em;
+}
+
+.final-amount {
+  font-size: 1.5rem;
+}
+
+/* ========================================================================
+   INLINE BADGES (SP-011 Option 3)
+   ======================================================================== */
+
+/* Badge Base Styles */
+.item-badge-included,
+.item-badge-extra,
+.item-badge-changed,
+.item-badge-new {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Included Badge (green) */
+.item-badge-included {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Extra Badge (orange) */
+.item-badge-extra {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+/* Changed Badge (blue) */
+.item-badge-changed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* New Badge (green) */
+.item-badge-new {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Item Entry with Badge */
+.item-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.item-name {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Responsive: Mobile Adjustments */
+@media (max-width: 767px) {
+  .modifications-summary-card {
+    padding: 1.25rem;
+  }
+
+  .modifications-summary-header {
+    font-size: 1rem;
+  }
+
+  .summary-icon {
+    font-size: 1.125rem;
+  }
+
+  .final-total {
+    padding: 0.875rem;
+  }
+
+  .final-label {
+    font-size: 1rem;
+  }
+
+  .final-amount {
+    font-size: 1.25rem;
+  }
+
+  .item-badge-included,
+  .item-badge-extra,
+  .item-badge-changed,
+  .item-badge-new {
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.375rem;
+  }
+}

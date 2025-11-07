@@ -17,6 +17,7 @@
 
 import { renderWingsPricing } from './pricing-wings-renderer.js';
 import { renderItemsPricing } from './pricing-items-renderer.js';
+import { renderModificationsSummaryCard } from './modifications-summary-card.js';
 import { onPricingChange, getCurrentPricing } from '../../utils/pricing-aggregator.js';
 import { onStateChange } from '../../services/shared-platter-state-service.js';
 import {
@@ -56,9 +57,14 @@ export function renderPricingSummary(pricing, state = {}, options = {}) {
 
   const { selectedPackage = {}, currentConfig = {} } = state;
 
+  // Detect modifications for summary card
+  const modifications = detectModifications(selectedPackage, currentConfig);
+
   return `
     <div class="pricing-summary-master ${printMode ? 'print-mode' : ''}" id="${containerId}">
       ${showPackageHeader ? renderPackageHeader(selectedPackage, pricing, collapsible) : ''}
+
+      ${renderModificationsSummaryCard(selectedPackage, currentConfig, pricing, modifications)}
 
       ${renderPackageIncludes(selectedPackage, currentConfig, pricing, collapsible)}
 

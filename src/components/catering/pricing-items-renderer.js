@@ -181,13 +181,22 @@ export function renderDipsPricing(pricing, options = {}) {
       ${showDetails ? `
         <div class="pricing-details">
           <ul class="items-list">
-            ${dipItems.map(dip => `
-              <li class="item-entry">
-                <span class="item-name">${dip.name}</span>
-                <span class="item-quantity">×${dip.quantity}</span>
-                ${dip.size ? `<span class="size-badge">${dip.size}</span>` : ''}
-              </li>
-            `).join('')}
+            ${dipItems.map(dip => {
+              const isIncluded = dip.includedQty > 0;
+              const hasExtra = dip.extraQty > 0;
+              const badge = isIncluded && !hasExtra
+                ? '<span class="item-badge-included">✓ INCLUDED</span>'
+                : hasExtra
+                  ? `<span class="item-badge-extra">+$${((dip.extraQty || 0) * 0.75).toFixed(2)}</span>`
+                  : '';
+
+              return `
+                <li class="item-entry">
+                  <span class="item-name">${dip.name} ×${dip.quantity}</span>
+                  ${badge}
+                </li>
+              `;
+            }).join('')}
           </ul>
         </div>
       ` : ''}
@@ -255,13 +264,22 @@ export function renderSidesPricing(pricing, options = {}) {
       ${showDetails ? `
         <div class="pricing-details">
           <ul class="items-list">
-            ${sideItems.map(side => `
-              <li class="item-entry">
-                <span class="item-name">${side.name}</span>
-                ${side.quantity > 1 ? `<span class="item-quantity">×${side.quantity}</span>` : ''}
-                ${side.serves ? `<span class="serves-badge">Serves ${side.serves}</span>` : ''}
-              </li>
-            `).join('')}
+            ${sideItems.map(side => {
+              const isIncluded = side.includedQty > 0;
+              const hasExtra = side.extraQty > 0;
+              const badge = isIncluded && !hasExtra
+                ? '<span class="item-badge-included">✓ INCLUDED</span>'
+                : hasExtra
+                  ? `<span class="item-badge-extra">+$${(side.basePrice || 0).toFixed(2)}</span>`
+                  : '';
+
+              return `
+                <li class="item-entry">
+                  <span class="item-name">${side.name}${side.quantity > 1 ? ` ×${side.quantity}` : ''}</span>
+                  ${badge}
+                </li>
+              `;
+            }).join('')}
           </ul>
         </div>
       ` : ''}
@@ -311,12 +329,22 @@ export function renderDessertsPricing(pricing, options = {}) {
       ${showDetails ? `
         <div class="pricing-details">
           <ul class="items-list">
-            ${dessertItems.map(dessert => `
-              <li class="item-entry">
-                <span class="item-name">${dessert.name}</span>
-                ${dessert.quantity > 1 ? `<span class="item-quantity">×${dessert.quantity}</span>` : ''}
-              </li>
-            `).join('')}
+            ${dessertItems.map(dessert => {
+              const isIncluded = dessert.includedQty > 0;
+              const hasExtra = dessert.extraQty > 0;
+              const badge = isIncluded && !hasExtra
+                ? '<span class="item-badge-included">✓ INCLUDED</span>'
+                : hasExtra
+                  ? `<span class="item-badge-extra">+$${(dessert.basePrice || 0).toFixed(2)}</span>`
+                  : '';
+
+              return `
+                <li class="item-entry">
+                  <span class="item-name">${dessert.name}${dessert.quantity > 1 ? ` ×${dessert.quantity}` : ''}</span>
+                  ${badge}
+                </li>
+              `;
+            }).join('')}
           </ul>
         </div>
       ` : ''}
@@ -372,9 +400,8 @@ export function renderBeveragesPricing(pricing, options = {}) {
               <ul class="items-list">
                 ${coldBeverages.map(b => `
                   <li class="item-entry">
-                    <span class="item-name">${b.name}</span>
-                    <span class="item-quantity">×${b.quantity}</span>
-                    <span class="size-badge">${b.size}</span>
+                    <span class="item-name">${b.name} ×${b.quantity}</span>
+                    <span class="item-badge-extra">+$${(b.basePrice || 0).toFixed(2)}</span>
                   </li>
                 `).join('')}
               </ul>
@@ -387,9 +414,8 @@ export function renderBeveragesPricing(pricing, options = {}) {
               <ul class="items-list">
                 ${hotBeverages.map(b => `
                   <li class="item-entry">
-                    <span class="item-name">${b.name}</span>
-                    <span class="item-quantity">×${b.quantity}</span>
-                    <span class="size-badge">${b.size}</span>
+                    <span class="item-name">${b.name} ×${b.quantity}</span>
+                    <span class="item-badge-extra">+$${(b.basePrice || 0).toFixed(2)}</span>
                   </li>
                 `).join('')}
               </ul>
