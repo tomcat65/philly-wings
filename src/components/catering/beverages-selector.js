@@ -72,11 +72,11 @@ async function fetchBeverages() {
 
     drinksSnapshot.forEach(doc => {
       const drinksData = doc.data();
-      const waterVariant = drinksData.variants?.find(v => v.id === 'water_bottle');
+      const waterVariant = drinksData.variants?.find(v => v.id === 'bottled_water');
 
       if (waterVariant) {
         // Transform individual bottle to catering bottle quantities
-        const bottlePrice = waterVariant.basePrice || 1.49;
+        const bottlePrice = waterVariant.basePrice || 2.29;
         cold.push({
           id: 'dasani_water',
           name: 'Dasani Bottled Water',
