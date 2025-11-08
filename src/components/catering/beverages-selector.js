@@ -51,18 +51,27 @@ async function fetchBeverages() {
     const cold = [];
     const hot = [];
 
-    // 1. Get Boxed Iced Tea (specific document)
-    const boxedTeaRef = doc(db, 'menuItems', 'boxed_iced_tea');
-    const boxedTeaDoc = await getDoc(boxedTeaRef);
-    if (boxedTeaDoc.exists()) {
-      cold.push({ id: boxedTeaDoc.id, ...boxedTeaDoc.data() });
-    }
+    // 1. Get Boxed Iced Tea by querying where id field = 'boxed_iced_tea'
+    const boxedTeaQuery = query(
+      collection(db, 'menuItems'),
+      where('id', '==', 'boxed_iced_tea'),
+      where('active', '==', true)
+    );
+    const boxedTeaSnapshot = await getDocs(boxedTeaQuery);
+    boxedTeaSnapshot.forEach(doc => {
+      cold.push({ id: doc.id, ...doc.data() });
+    });
 
     // 2. Get Dasani Water from drinks document and transform to catering format
-    const drinksRef = doc(db, 'menuItems', 'drinks');
-    const drinksDoc = await getDoc(drinksRef);
-    if (drinksDoc.exists()) {
-      const drinksData = drinksDoc.data();
+    const drinksQuery = query(
+      collection(db, 'menuItems'),
+      where('id', '==', 'drinks'),
+      where('active', '==', true)
+    );
+    const drinksSnapshot = await getDocs(drinksQuery);
+
+    drinksSnapshot.forEach(doc => {
+      const drinksData = doc.data();
       const waterVariant = drinksData.variants?.find(v => v.id === 'water_bottle');
 
       if (waterVariant) {
@@ -110,7 +119,7 @@ async function fetchBeverages() {
           ]
         });
       }
-    }
+    });
 
     // 3. Get Hot Beverages (coffee and hot chocolate)
     const hotBeveragesQuery = query(
