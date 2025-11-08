@@ -86,13 +86,26 @@ function calculateModificationCosts(modifications, pricing) {
     beverages: 0
   };
 
+  // Map itemIds to categories
+  const itemIdToCategoryMap = {
+    'wings-distribution': 'wings',
+    'wings-boneless': 'wings',
+    'wings-bone-in': 'wings',
+    'wings-cauliflower': 'wings',
+    'sauces': 'sauces',
+    'dips': 'dips',
+    'sides': 'sides',
+    'desserts': 'desserts',
+    'beverages': 'beverages'
+  };
+
   // Extract costs from pricing.modifiers
   if (pricing.modifiers && Array.isArray(pricing.modifiers)) {
     pricing.modifiers.forEach(modifier => {
-      if (modifier.type === 'upcharge' && modifier.source) {
-        const source = modifier.source.toLowerCase();
-        if (costs.hasOwnProperty(source)) {
-          costs[source] += modifier.amount || 0;
+      if (modifier.type === 'upcharge' || modifier.type === 'discount') {
+        const category = itemIdToCategoryMap[modifier.itemId];
+        if (category && costs.hasOwnProperty(category)) {
+          costs[category] += modifier.amount || 0;
         }
       }
     });

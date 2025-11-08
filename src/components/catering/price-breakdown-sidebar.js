@@ -75,7 +75,7 @@ export function renderPriceBreakdownSidebar(pricing) {
       </div>
 
       <!-- Wing Distribution Section -->
-      ${renderWingDistribution(wingDistribution)}
+      ${renderWingDistribution(wingDistribution, pricing)}
 
       <!-- Modifications Summary Card -->
       ${renderModificationsSummaryCard(selectedPackage, currentConfig, pricing, modifications)}
@@ -169,9 +169,10 @@ export function renderPriceBreakdownSidebar(pricing) {
  * Render wing distribution breakdown
  *
  * @param {Object} wingDistribution - Wing distribution from currentConfig
+ * @param {Object} pricing - Unified pricing structure from pricing-aggregator.js
  * @returns {string} HTML string
  */
-function renderWingDistribution(wingDistribution) {
+function renderWingDistribution(wingDistribution, pricing) {
   const { boneless = 0, boneIn = 0, cauliflower = 0, boneInStyle = 'mixed' } = wingDistribution;
   const totalWings = boneless + boneIn + cauliflower;
 
@@ -183,11 +184,18 @@ function renderWingDistribution(wingDistribution) {
   const hasTraditional = traditionalWings > 0;
   const hasPlantBased = cauliflower > 0;
 
+  // Find wing distribution modifier to check if there's an upcharge/discount
+  const wingModifier = pricing?.modifiers?.find(m => m.itemId === 'wings-distribution');
+  const hasModification = wingModifier && wingModifier.amount !== 0;
+  const modificationCost = hasModification ? wingModifier.amount : 0;
+  const isUpcharge = modificationCost > 0;
+
   return `
-    <div class="price-breakdown-section section-wings" aria-label="Wing Distribution">
+    <div class="price-breakdown-section section-wings ${hasModification ? 'has-modification' : ''}" aria-label="Wing Distribution">
       <h4 class="section-header">
         <span class="section-icon" aria-hidden="true">🍗</span>
         Your Wings
+        ${hasModification ? `<span class="modification-badge">${isUpcharge ? 'Modified +' : 'Savings '}$${Math.abs(modificationCost).toFixed(2)}</span>` : ''}
       </h4>
       <div class="breakdown-items">
         ${hasTraditional ? `
@@ -196,7 +204,7 @@ function renderWingDistribution(wingDistribution) {
               ${traditionalWings} Traditional Wings
               <span class="wing-details">${boneless} Boneless${boneIn > 0 ? `, ${boneIn} Bone-In ${boneInStyle === 'mixed' ? 'Mixed' : boneInStyle === 'drums' ? 'Drums' : 'Flats'}` : ''}</span>
             </span>
-            <span class="breakdown-value">Included</span>
+            <span class="breakdown-value">${hasModification ? 'Modified' : 'Included'}</span>
           </div>
         ` : ''}
         ${hasPlantBased ? `
@@ -205,13 +213,19 @@ function renderWingDistribution(wingDistribution) {
               ${cauliflower} Plant-Based Wings
               <span class="wing-details">Cauliflower</span>
             </span>
-            <span class="breakdown-value">Included</span>
+            <span class="breakdown-value">${hasModification ? 'Modified' : 'Included'}</span>
           </div>
         ` : ''}
         <div class="breakdown-item wing-total">
           <span class="breakdown-label">Total Wings:</span>
           <span class="breakdown-value">${totalWings}</span>
         </div>
+        ${hasModification ? `
+          <div class="breakdown-item wing-modification">
+            <span class="breakdown-label">Distribution Adjustment</span>
+            <span class="breakdown-value ${isUpcharge ? 'positive' : 'negative'}">${isUpcharge ? '+' : ''}$${modificationCost.toFixed(2)}</span>
+          </div>
+        ` : ''}
       </div>
     </div>
   `;

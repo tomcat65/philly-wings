@@ -230,9 +230,28 @@
   padding: 1rem;
 }
 
+.section-wings.has-modification {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+}
+
 .section-wings .section-header {
   color: #92400e;
   margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modification-badge {
+  display: inline-block;
+  background: #f59e0b;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  margin-left: auto;
 }
 
 .wing-item .breakdown-label {
@@ -260,6 +279,22 @@
 
 .wing-total .breakdown-value {
   color: #92400e;
+  font-weight: 700;
+}
+
+.wing-modification {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #fed7aa;
+  font-weight: 600;
+}
+
+.wing-modification .breakdown-label {
+  color: #92400e;
+  font-style: italic;
+}
+
+.wing-modification .breakdown-value {
   font-weight: 700;
 }
 
