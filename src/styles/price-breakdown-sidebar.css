@@ -298,6 +298,119 @@
   font-weight: 700;
 }
 
+/* Current Selection Section */
+.wing-current-selection {
+  margin-bottom: 0.75rem;
+}
+
+.selection-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+/* Comparison Section */
+.wing-comparison {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px dashed #f59e0b;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.comparison-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.comparison-base,
+.comparison-changes {
+  font-size: 0.875rem;
+  color: #78350f;
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+.comparison-base {
+  font-weight: 600;
+}
+
+.comparison-changes {
+  font-style: italic;
+  color: #92400e;
+}
+
+/* Cost Breakdown Section */
+.wing-cost-breakdown {
+  background: rgba(249, 115, 22, 0.05);
+  border-left: 3px solid #f59e0b;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  border-radius: 4px;
+}
+
+.cost-header {
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.cost-details {
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+}
+
+.cost-item {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+
+.cost-item.credit {
+  color: #059669;
+}
+
+.cost-item.charge {
+  color: #dc2626;
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+  .wing-comparison {
+    padding: 0.5rem;
+  }
+
+  .comparison-header,
+  .selection-label {
+    font-size: 0.6875rem;
+  }
+
+  .comparison-base,
+  .comparison-changes {
+    font-size: 0.8125rem;
+  }
+
+  .wing-cost-breakdown {
+    padding: 0.5rem;
+  }
+
+  .cost-header {
+    font-size: 0.875rem;
+  }
+
+  .cost-details {
+    font-size: 0.8125rem;
+    margin-left: 0.25rem;
+  }
+}
+
 /* ========================================
    SP-011: Per-Person Cost Indicator
    ======================================== */

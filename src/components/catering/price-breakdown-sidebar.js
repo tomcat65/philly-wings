@@ -75,7 +75,7 @@ export function renderPriceBreakdownSidebar(pricing) {
       </div>
 
       <!-- Wing Distribution Section -->
-      ${renderWingDistribution(wingDistribution, pricing)}
+      ${renderWingDistribution(wingDistribution, pricing, selectedPackage)}
 
       <!-- Modifications Summary Card -->
       ${renderModificationsSummaryCard(selectedPackage, currentConfig, pricing, modifications)}
@@ -166,13 +166,133 @@ export function renderPriceBreakdownSidebar(pricing) {
 }
 
 /**
- * Render wing distribution breakdown
+ * Calculate wing distribution deltas between current and base
+ */
+function calculateWingDeltas(current, base) {
+  return {
+    boneless: current.boneless - base.boneless,
+    boneIn: current.boneIn - base.boneIn,
+    cauliflower: current.cauliflower - base.cauliflower
+  };
+}
+
+/**
+ * Calculate wing cost breakdown (credits and charges)
+ */
+function calculateWingCosts(deltas, perWingCosts) {
+  const credits = [];
+  const charges = [];
+
+  // Calculate removal credits (negative deltas)
+  if (deltas.boneless < 0) {
+    credits.push({
+      label: 'Boneless wings removed',
+      amount: deltas.boneless * perWingCosts.boneless,
+      count: Math.abs(deltas.boneless)
+    });
+  }
+
+  if (deltas.boneIn < 0) {
+    credits.push({
+      label: 'Bone-in wings removed',
+      amount: deltas.boneIn * perWingCosts.boneIn,
+      count: Math.abs(deltas.boneIn)
+    });
+  }
+
+  if (deltas.cauliflower < 0) {
+    credits.push({
+      label: 'Plant-based wings removed',
+      amount: deltas.cauliflower * perWingCosts.cauliflower,
+      count: Math.abs(deltas.cauliflower)
+    });
+  }
+
+  // Calculate upcharges (positive deltas)
+  if (deltas.boneless > 0) {
+    charges.push({
+      label: 'Boneless wings added',
+      amount: deltas.boneless * perWingCosts.boneless,
+      count: deltas.boneless
+    });
+  }
+
+  if (deltas.boneIn > 0) {
+    charges.push({
+      label: 'Bone-in wings added',
+      amount: deltas.boneIn * perWingCosts.boneIn,
+      count: deltas.boneIn
+    });
+  }
+
+  if (deltas.cauliflower > 0) {
+    charges.push({
+      label: 'Plant-based wings added',
+      amount: deltas.cauliflower * perWingCosts.cauliflower,
+      count: deltas.cauliflower
+    });
+  }
+
+  // Calculate totals
+  const totalCredits = credits.reduce((sum, c) => sum + c.amount, 0);
+  const totalCharges = charges.reduce((sum, c) => sum + c.amount, 0);
+
+  return {
+    credits,
+    charges,
+    totalCredits,
+    totalCharges,
+    net: totalCharges + totalCredits  // credits are negative
+  };
+}
+
+/**
+ * Format base wing distribution description
+ */
+function formatWingComparison(baseDistribution) {
+  const baseBoneless = baseDistribution.boneless || 0;
+  const baseBoneIn = baseDistribution.boneIn || 0;
+  const baseCauliflower = baseDistribution.cauliflower || 0;
+  const baseTraditional = baseBoneless + baseBoneIn;
+
+  if (baseCauliflower === 0 && baseTraditional > 0) {
+    return `${baseTraditional} Traditional (${baseBoneless} Boneless + ${baseBoneIn} Bone-In)`;
+  } else if (baseTraditional === 0 && baseCauliflower > 0) {
+    return `${baseCauliflower} Plant-Based (Cauliflower)`;
+  } else if (baseTraditional > 0 && baseCauliflower > 0) {
+    return `${baseTraditional} Traditional + ${baseCauliflower} Plant-Based`;
+  } else {
+    return 'No wings';
+  }
+}
+
+/**
+ * Format change summary (what changed)
+ */
+function formatChangesSummary(deltas) {
+  const changes = [];
+  const traditionalChange = deltas.boneless + deltas.boneIn;
+
+  if (traditionalChange !== 0) {
+    changes.push(`${traditionalChange > 0 ? '+' : ''}${traditionalChange} Traditional`);
+  }
+
+  if (deltas.cauliflower !== 0) {
+    changes.push(`${deltas.cauliflower > 0 ? '+' : ''}${deltas.cauliflower} Plant-Based`);
+  }
+
+  return changes.join(', ') || 'No changes';
+}
+
+/**
+ * Render wing distribution breakdown with hybrid comparison display
  *
  * @param {Object} wingDistribution - Wing distribution from currentConfig
  * @param {Object} pricing - Unified pricing structure from pricing-aggregator.js
+ * @param {Object} selectedPackage - Selected package with base wing distribution
  * @returns {string} HTML string
  */
-function renderWingDistribution(wingDistribution, pricing) {
+function renderWingDistribution(wingDistribution, pricing, selectedPackage) {
   const { boneless = 0, boneIn = 0, cauliflower = 0, boneInStyle = 'mixed' } = wingDistribution;
   const totalWings = boneless + boneIn + cauliflower;
 
@@ -190,6 +310,31 @@ function renderWingDistribution(wingDistribution, pricing) {
   const modificationCost = hasModification ? wingModifier.amount : 0;
   const isUpcharge = modificationCost > 0;
 
+  // Get base distribution for comparison
+  const baseDistribution = selectedPackage?.wingOptions?.defaultDistribution || {
+    boneless: 0,
+    boneIn: 0,
+    cauliflower: 0
+  };
+
+  const perWingCosts = selectedPackage?.wingOptions?.perWingCosts || {
+    boneless: 0.80,
+    boneIn: 1.00,
+    cauliflower: 1.30
+  };
+
+  // Calculate deltas and costs if modified
+  let deltas = null;
+  let costs = null;
+
+  if (hasModification) {
+    deltas = calculateWingDeltas(
+      { boneless, boneIn, cauliflower },
+      baseDistribution
+    );
+    costs = calculateWingCosts(deltas, perWingCosts);
+  }
+
   return `
     <div class="price-breakdown-section section-wings ${hasModification ? 'has-modification' : ''}" aria-label="Wing Distribution">
       <h4 class="section-header">
@@ -197,36 +342,63 @@ function renderWingDistribution(wingDistribution, pricing) {
         Your Wings
         ${hasModification ? `<span class="modification-badge">${isUpcharge ? 'Modified +' : 'Savings '}$${Math.abs(modificationCost).toFixed(2)}</span>` : ''}
       </h4>
-      <div class="breakdown-items">
-        ${hasTraditional ? `
-          <div class="breakdown-item wing-item">
-            <span class="breakdown-label">
-              ${traditionalWings} Traditional Wings
-              <span class="wing-details">${boneless} Boneless${boneIn > 0 ? `, ${boneIn} Bone-In ${boneInStyle === 'mixed' ? 'Mixed' : boneInStyle === 'drums' ? 'Drums' : 'Flats'}` : ''}</span>
-            </span>
-            <span class="breakdown-value">${hasModification ? 'Modified' : 'Included'}</span>
+
+      <!-- Current Selection -->
+      <div class="wing-current-selection">
+        <div class="selection-label">YOUR SELECTION:</div>
+        <div class="breakdown-items">
+          ${hasTraditional ? `
+            <div class="breakdown-item wing-item">
+              <span class="breakdown-label">
+                ${traditionalWings} Traditional Wings
+                <span class="wing-details">${boneless} Boneless${boneIn > 0 ? `, ${boneIn} Bone-In ${boneInStyle === 'mixed' ? 'Mixed' : boneInStyle === 'drums' ? 'Drums' : 'Flats'}` : ''}</span>
+              </span>
+            </div>
+          ` : ''}
+          ${hasPlantBased ? `
+            <div class="breakdown-item wing-item">
+              <span class="breakdown-label">
+                ${cauliflower} Plant-Based Wings
+                <span class="wing-details">Cauliflower</span>
+              </span>
+            </div>
+          ` : ''}
+          <div class="breakdown-item wing-total">
+            <span class="breakdown-label">Total Wings:</span>
+            <span class="breakdown-value">${totalWings}</span>
           </div>
-        ` : ''}
-        ${hasPlantBased ? `
-          <div class="breakdown-item wing-item">
-            <span class="breakdown-label">
-              ${cauliflower} Plant-Based Wings
-              <span class="wing-details">Cauliflower</span>
-            </span>
-            <span class="breakdown-value">${hasModification ? 'Modified' : 'Included'}</span>
-          </div>
-        ` : ''}
-        <div class="breakdown-item wing-total">
-          <span class="breakdown-label">Total Wings:</span>
-          <span class="breakdown-value">${totalWings}</span>
         </div>
-        ${hasModification ? `
-          <div class="breakdown-item wing-modification">
-            <span class="breakdown-label">Distribution Adjustment</span>
-            <span class="breakdown-value ${isUpcharge ? 'positive' : 'negative'}">${isUpcharge ? '+' : ''}$${modificationCost.toFixed(2)}</span>
-          </div>
-        ` : ''}
       </div>
+
+      ${hasModification ? `
+        <!-- Comparison to Base Package -->
+        <div class="wing-comparison">
+          <div class="comparison-header">📊 COMPARED TO BASE PACKAGE:</div>
+          <div class="comparison-base">Base included: ${formatWingComparison(baseDistribution)}</div>
+          <div class="comparison-changes">Your changes: ${formatChangesSummary(deltas)}</div>
+        </div>
+
+        <!-- Cost Breakdown -->
+        <div class="wing-cost-breakdown">
+          <div class="cost-header">Distribution Adjustment: ${isUpcharge ? '+' : ''}$${modificationCost.toFixed(2)}</div>
+          <div class="cost-details">
+            ${costs.credits.length > 0 ? `
+              ${costs.credits.map((credit, idx) => `
+                <div class="cost-item credit">
+                  ${idx === 0 && costs.charges.length === 0 ? '└─' : '├─'} Credit for traditional wings removed: -$${Math.abs(credit.amount).toFixed(2)}
+                </div>
+              `).join('')}
+            ` : ''}
+            ${costs.charges.length > 0 ? `
+              ${costs.charges.map((charge, idx) => `
+                <div class="cost-item charge">
+                  ${idx === costs.charges.length - 1 ? '└─' : '├─'} Charge for plant-based wings added: +$${charge.amount.toFixed(2)}
+                </div>
+              `).join('')}
+            ` : ''}
+          </div>
+        </div>
+      ` : ''}
     </div>
   `;
 }
