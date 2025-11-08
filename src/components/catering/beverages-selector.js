@@ -13,7 +13,7 @@
  */
 
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
 /**
  * Cached beverage data from Firestore
@@ -26,6 +26,12 @@ let cachedBeverages = {
 
 /**
  * Fetch beverages from Firestore (with caching)
+ *
+ * For catering, we use:
+ * - Cold: Boxed Iced Tea, Dasani Bottled Water (from drinks document)
+ * - Hot: Lavazza Coffee, Ghirardelli Hot Chocolate
+ *
+ * Filters OUT bagged_tea (only for platform menus, not catering)
  *
  * @returns {Promise<Object>} Beverages organized by temperature
  */
@@ -42,26 +48,80 @@ async function fetchBeverages() {
   const db = getFirestore();
 
   try {
-    // Query menuItems for beverages categories
-    const q = query(
-      collection(db, 'menuItems'),
-      where('category', 'in', ['beverages', 'drinks', 'hot-beverages']),
-      where('active', '==', true)
-    );
-
-    const snapshot = await getDocs(q);
     const cold = [];
     const hot = [];
 
-    snapshot.forEach(doc => {
-      const data = { id: doc.id, ...doc.data() };
+    // 1. Get Boxed Iced Tea (specific document)
+    const boxedTeaRef = doc(db, 'menuItems', 'boxed_iced_tea');
+    const boxedTeaDoc = await getDoc(boxedTeaRef);
+    if (boxedTeaDoc.exists()) {
+      cold.push({ id: boxedTeaDoc.id, ...boxedTeaDoc.data() });
+    }
 
-      // Categorize by temperature based on category
-      if (data.category === 'hot-beverages') {
-        hot.push(data);
-      } else {
-        cold.push(data);
+    // 2. Get Dasani Water from drinks document and transform to catering format
+    const drinksRef = doc(db, 'menuItems', 'drinks');
+    const drinksDoc = await getDoc(drinksRef);
+    if (drinksDoc.exists()) {
+      const drinksData = drinksDoc.data();
+      const waterVariant = drinksData.variants?.find(v => v.id === 'water_bottle');
+
+      if (waterVariant) {
+        // Transform individual bottle to catering bottle quantities
+        const bottlePrice = waterVariant.basePrice || 1.49;
+        cold.push({
+          id: 'dasani_water',
+          name: 'Dasani Bottled Water',
+          category: 'beverages',
+          description: '16.9oz premium bottled water - perfect for events',
+          active: true,
+          sortOrder: 2,
+          images: drinksData.images || {},
+          variants: [
+            {
+              id: 'water_5bottles',
+              name: '5 Bottles',
+              quantity: 5,
+              basePrice: bottlePrice * 5,
+              servings: 5,
+              unit: 'bottles',
+              description: '5 bottles (16.9oz each)',
+              sortOrder: 1
+            },
+            {
+              id: 'water_10bottles',
+              name: '10 Bottles',
+              quantity: 10,
+              basePrice: bottlePrice * 10,
+              servings: 10,
+              unit: 'bottles',
+              description: '10 bottles (16.9oz each)',
+              sortOrder: 2
+            },
+            {
+              id: 'water_20bottles',
+              name: '20 Bottles',
+              quantity: 20,
+              basePrice: bottlePrice * 20,
+              servings: 20,
+              unit: 'bottles',
+              description: '20 bottles (16.9oz each)',
+              sortOrder: 3
+            }
+          ]
+        });
       }
+    }
+
+    // 3. Get Hot Beverages (coffee and hot chocolate)
+    const hotBeveragesQuery = query(
+      collection(db, 'menuItems'),
+      where('category', '==', 'hot-beverages'),
+      where('active', '==', true)
+    );
+
+    const hotSnapshot = await getDocs(hotBeveragesQuery);
+    hotSnapshot.forEach(doc => {
+      hot.push({ id: doc.id, ...doc.data() });
     });
 
     // Sort by sortOrder
@@ -74,6 +134,11 @@ async function fetchBeverages() {
       hot,
       lastFetched: now
     };
+
+    console.log('✅ Fetched catering beverages:', {
+      cold: cold.map(b => b.name),
+      hot: hot.map(b => b.name)
+    });
 
     return { cold, hot };
 
