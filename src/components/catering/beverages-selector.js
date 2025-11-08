@@ -12,8 +12,9 @@
  * @epic SP-012
  */
 
-import { getState, updateState, onStateChange } from '../../services/shared-platter-state-service.js';
+import { getState, updateState } from '../../services/shared-platter-state-service.js';
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { recalculatePricing } from '../../utils/pricing-aggregator.js';
 
 /**
  * Cached beverage data from Firestore
@@ -84,7 +85,9 @@ async function fetchBeverages() {
           description: '16.9oz premium bottled water - perfect for events',
           active: true,
           sortOrder: 2,
-          images: drinksData.images || {},
+          images: {
+            hero: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fdasani-water_1920x1080.webp?alt=media'
+          },
           variants: [
             {
               id: 'water_5bottles',
@@ -437,6 +440,10 @@ export function handleBeverageSizeChange(beverageId, temperature, variantId) {
       [temperature]: updatedList
     }
   }, 'currentConfig');
+
+  // Trigger pricing recalculation
+  const updatedState = getState();
+  recalculatePricing(updatedState);
 }
 
 /**
@@ -500,30 +507,15 @@ export function handleBeverageQuantityChange(beverageId, temperature, newQuantit
       [temperature]: updatedList
     }
   }, 'currentConfig');
-}
 
-/**
- * Re-render beverages selector when state changes
- */
-async function reRenderBeveragesSelector() {
-  const container = document.querySelector('.beverages-selector');
-  if (!container) {
-    console.warn('⚠️ Beverages selector container not found for re-render');
-    return;
-  }
-
-  try {
-    const newHTML = await renderBeveragesSelector();
-    container.outerHTML = newHTML;
-    console.log('✅ Beverages selector re-rendered');
-  } catch (error) {
-    console.error('❌ Error re-rendering beverages selector:', error);
-  }
+  // Trigger pricing recalculation
+  const updatedState = getState();
+  recalculatePricing(updatedState);
 }
 
 /**
  * Initialize beverages selector
- * Attaches global handlers for beverage interactions and state listeners
+ * Attaches global handlers for beverage interactions
  */
 export function initBeveragesSelector() {
   // Attach global handlers
@@ -532,11 +524,5 @@ export function initBeveragesSelector() {
   window.handleBeverageSizeChange = handleBeverageSizeChange;
   window.handleBeverageQuantityChange = handleBeverageQuantityChange;
 
-  // Subscribe to state changes for beverages
-  onStateChange('currentConfig.beverages', () => {
-    console.log('🔄 Beverages state changed, re-rendering...');
-    reRenderBeveragesSelector();
-  });
-
-  console.log('✅ Beverages selector state listener attached');
+  console.log('✅ Beverages selector initialized');
 }
