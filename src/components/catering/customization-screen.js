@@ -16,11 +16,13 @@ import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-phot
 import { renderDipsCounterSelector, initDipsCounterSelector } from './dips-counter-selector.js';
 import { renderSidesSelector, initSidesSelector } from './sides-selector.js';
 import { renderDessertsCounterSelector, initDessertsCounterSelector } from './desserts-counter-selector.js';
+import { renderBeveragesSelector, initBeveragesSelector } from './beverages-selector.js';
 import { initPricingSummary, renderPricingSummary as renderFullPricingSummary } from './pricing-summary-master.js';
 import { initPriceBreakdownSidebar, renderPriceBreakdownSidebar } from './price-breakdown-sidebar.js';
 import { recalculatePricing, getCurrentPricing, onPricingChange } from '../../utils/pricing-aggregator.js';
 import '../../styles/sauce-distribution-integrated.css';
 import '../../styles/price-breakdown-sidebar.css';
+import '../../styles/beverages-selector.css';
 
 /**
  * Initialize customization screen
@@ -383,7 +385,8 @@ async function renderSectionContent(sectionId) {
       });
 
     case 'beverages':
-      return renderSectionPlaceholder(sectionId);
+      // SP-012: Beverages selector (cold and hot beverages)
+      return await renderBeveragesSelector();
 
     default:
       return renderSectionPlaceholder('wings');
@@ -433,7 +436,6 @@ function initializeSectionInteractions(sectionId) {
       console.log('🥗 Sides selector initialized');
       break;
 
-    // Other sections will be initialized here as they're built
     case 'desserts':
       // SP-011: Initialize desserts counter selector
       const packageDessertsInit = packageData.dessertsIncluded || { quantity: 0, unit: 'five-pack' };
@@ -442,7 +444,9 @@ function initializeSectionInteractions(sectionId) {
       break;
 
     case 'beverages':
-      console.log(`📍 ${sectionId} section - component pending (SP-012)`);
+      // SP-012: Initialize beverages selector
+      initBeveragesSelector();
+      console.log('🥤 Beverages selector initialized');
       break;
   }
 }

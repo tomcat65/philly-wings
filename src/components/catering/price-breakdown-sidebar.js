@@ -43,15 +43,13 @@ export function renderPriceBreakdownSidebar(pricing) {
   // Detect modifications
   const modifications = detectModifications(selectedPackage, currentConfig);
 
-  // Extract modifiers by type (only for sides category)
-  const sidesModifiers = (pricing.modifiers || []).filter(m => {
-    const item = pricing.items?.[m.itemId];
-    return item && item.type === 'side';
-  });
+  // Extract modifiers by type (all categories: sides, dips, desserts, beverages, etc.)
+  // SP-012: Removed type filter to show all add-on categories in sidebar
+  const allModifiers = pricing.modifiers || [];
 
-  const includedModifiers = sidesModifiers.filter(m => m.type === 'included');
-  const upchargeModifiers = sidesModifiers.filter(m => m.type === 'upcharge');
-  const removalModifiers = sidesModifiers.filter(m => m.type === 'removal-credit');
+  const includedModifiers = allModifiers.filter(m => m.type === 'included');
+  const upchargeModifiers = allModifiers.filter(m => m.type === 'upcharge');
+  const removalModifiers = allModifiers.filter(m => m.type === 'removal-credit');
 
   // Calculate running total (subtotal, pre-tax)
   const basePrice = pricing.totals.basePrice || 0;

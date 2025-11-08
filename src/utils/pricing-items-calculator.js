@@ -503,6 +503,9 @@ export function calculateDessertsPricing(desserts) {
 /**
  * Calculate beverages pricing
  *
+ * SP-012: Uses Firestore basePrice from variants instead of hardcoded pricing
+ * Expects: beverages.cold/hot = [{id, name, quantity, variantId, variantName, basePrice, servings}]
+ *
  * @param {Object} beverages - Beverages configuration from state
  * @param {Array<Object>} beverages.cold - Cold beverages
  * @param {Array<Object>} beverages.hot - Hot beverages
@@ -525,19 +528,32 @@ export function calculateBeveragesPricing(beverages = {}) {
       const quantity = beverage.quantity || 1;
       const itemId = `cold-beverage-${beverage.id || index}`;
 
-      // Determine pricing based on size
-      let pricePerItem = ITEMS_PRICING.BEVERAGES.cold.can; // default
-      if (beverage.size === 'bottle') {
-        pricePerItem = ITEMS_PRICING.BEVERAGES.cold.bottle;
-      } else if (beverage.size === 'pitcher') {
-        pricePerItem = ITEMS_PRICING.BEVERAGES.cold.pitcher;
+      // Use basePrice from Firestore variant data (SP-012)
+      // Falls back to legacy pricing if basePrice not provided
+      let pricePerItem = beverage.basePrice;
+      if (!pricePerItem || pricePerItem === 0) {
+        // Fallback to legacy pricing (for backward compatibility)
+        pricePerItem = ITEMS_PRICING.BEVERAGES.cold.can;
+        if (beverage.size === 'bottle') {
+          pricePerItem = ITEMS_PRICING.BEVERAGES.cold.bottle;
+        } else if (beverage.size === 'pitcher') {
+          pricePerItem = ITEMS_PRICING.BEVERAGES.cold.pitcher;
+        }
+        pricingLogger.warn('Using fallback pricing for cold beverage (basePrice not provided)', {
+          beverage: beverage.name,
+          variantId: beverage.variantId,
+          fallbackPrice: pricePerItem
+        });
       }
+
+      const variantLabel = beverage.variantName || beverage.size || '';
 
       addItem(structure, itemId, 'beverage', {
         name: beverage.name,
         quantity,
-        size: beverage.size,
-        serves: beverage.serves,
+        variantId: beverage.variantId,
+        variantName: beverage.variantName,
+        servings: beverage.servings,
         temperature: 'cold'
       });
 
@@ -547,13 +563,14 @@ export function calculateBeveragesPricing(beverages = {}) {
         itemId,
         'upcharge',
         upcharge,
-        `${beverage.name} ${beverage.size} (${quantity}) (+$${pricePerItem} each)`
+        `${beverage.name} - ${variantLabel} (${quantity}) (+$${pricePerItem.toFixed(2)} each)`
       );
 
       pricingLogger.info('Applied cold beverage upcharge', {
         name: beverage.name,
-        size: beverage.size,
+        variant: variantLabel,
         quantity,
+        pricePerItem: `$${pricePerItem.toFixed(2)}`,
         upcharge: `$${upcharge.toFixed(2)}`
       });
     });
@@ -563,17 +580,30 @@ export function calculateBeveragesPricing(beverages = {}) {
       const quantity = beverage.quantity || 1;
       const itemId = `hot-beverage-${beverage.id || index}`;
 
-      // Determine pricing based on size
-      let pricePerItem = ITEMS_PRICING.BEVERAGES.hot.coffee;
-      if (beverage.size === 'box') {
-        pricePerItem = ITEMS_PRICING.BEVERAGES.hot.box;
+      // Use basePrice from Firestore variant data (SP-012)
+      // Falls back to legacy pricing if basePrice not provided
+      let pricePerItem = beverage.basePrice;
+      if (!pricePerItem || pricePerItem === 0) {
+        // Fallback to legacy pricing (for backward compatibility)
+        pricePerItem = ITEMS_PRICING.BEVERAGES.hot.coffee;
+        if (beverage.size === 'box') {
+          pricePerItem = ITEMS_PRICING.BEVERAGES.hot.box;
+        }
+        pricingLogger.warn('Using fallback pricing for hot beverage (basePrice not provided)', {
+          beverage: beverage.name,
+          variantId: beverage.variantId,
+          fallbackPrice: pricePerItem
+        });
       }
+
+      const variantLabel = beverage.variantName || beverage.size || '';
 
       addItem(structure, itemId, 'beverage', {
         name: beverage.name,
         quantity,
-        size: beverage.size,
-        serves: beverage.serves,
+        variantId: beverage.variantId,
+        variantName: beverage.variantName,
+        servings: beverage.servings,
         temperature: 'hot'
       });
 
@@ -583,13 +613,14 @@ export function calculateBeveragesPricing(beverages = {}) {
         itemId,
         'upcharge',
         upcharge,
-        `${beverage.name} ${beverage.size} (${quantity}) (+$${pricePerItem} each)`
+        `${beverage.name} - ${variantLabel} (${quantity}) (+$${pricePerItem.toFixed(2)} each)`
       );
 
       pricingLogger.info('Applied hot beverage upcharge', {
         name: beverage.name,
-        size: beverage.size,
+        variant: variantLabel,
         quantity,
+        pricePerItem: `$${pricePerItem.toFixed(2)}`,
         upcharge: `$${upcharge.toFixed(2)}`
       });
     });
