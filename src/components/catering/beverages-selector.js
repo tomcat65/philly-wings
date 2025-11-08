@@ -372,13 +372,14 @@ export function handleSkipColdBeverages(skip) {
   const state = getState();
   const currentBeverages = state.currentConfig?.beverages || { cold: [], hot: [], skipCold: false, skipHot: false };
 
-  updateState({
+  updateState('currentConfig', {
+    ...state.currentConfig,
     beverages: {
       ...currentBeverages,
       skipCold: skip,
       cold: skip ? [] : currentBeverages.cold // Clear selections if skipping
     }
-  }, 'currentConfig');
+  });
 }
 
 /**
@@ -390,13 +391,14 @@ export function handleSkipHotBeverages(skip) {
   const state = getState();
   const currentBeverages = state.currentConfig?.beverages || { cold: [], hot: [], skipCold: false, skipHot: false };
 
-  updateState({
+  updateState('currentConfig', {
+    ...state.currentConfig,
     beverages: {
       ...currentBeverages,
       skipHot: skip,
       hot: skip ? [] : currentBeverages.hot // Clear selections if skipping
     }
-  }, 'currentConfig');
+  });
 }
 
 /**
@@ -434,12 +436,13 @@ export function handleBeverageSizeChange(beverageId, temperature, variantId) {
       : b
   );
 
-  updateState({
+  updateState('currentConfig', {
+    ...state.currentConfig,
     beverages: {
       ...currentBeverages,
       [temperature]: updatedList
     }
-  }, 'currentConfig');
+  });
 
   // Trigger pricing recalculation
   const updatedState = getState();
@@ -501,12 +504,13 @@ export function handleBeverageQuantityChange(beverageId, temperature, newQuantit
     }
   }
 
-  updateState({
+  updateState('currentConfig', {
+    ...state.currentConfig,
     beverages: {
       ...currentBeverages,
       [temperature]: updatedList
     }
-  }, 'currentConfig');
+  });
 
   // Trigger pricing recalculation
   const updatedState = getState();
