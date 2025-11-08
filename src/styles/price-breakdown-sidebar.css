@@ -219,3 +219,114 @@
   border-radius: 4px;
 }
 
+/* ========================================
+   SP-011: Wing Distribution Section
+   ======================================== */
+
+.section-wings {
+  background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.section-wings .section-header {
+  color: #92400e;
+  margin-bottom: 0.75rem;
+}
+
+.wing-item .breakdown-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wing-details {
+  font-size: 0.8125rem;
+  color: #78350f;
+  font-weight: 400;
+}
+
+.wing-total {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #fed7aa;
+  font-weight: 600;
+}
+
+.wing-total .breakdown-label {
+  color: #92400e;
+}
+
+.wing-total .breakdown-value {
+  color: #92400e;
+  font-weight: 700;
+}
+
+/* ========================================
+   SP-011: Per-Person Cost Indicator
+   ======================================== */
+
+.section-per-person {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.per-person-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.per-person-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.per-person-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.per-person-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.per-person-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  line-height: 1;
+}
+
+.per-person-note {
+  font-size: 0.8125rem;
+  color: #60a5fa;
+  font-style: italic;
+}
+
+/* Responsive: Mobile */
+@media (max-width: 767px) {
+  .section-per-person {
+    padding: 1rem;
+  }
+
+  .per-person-value {
+    font-size: 1.75rem;
+  }
+
+  .per-person-icon {
+    font-size: 1.5rem;
+  }
+}
+

@@ -1,21 +1,27 @@
 /**
- * Price Breakdown Sidebar Component - SP-010 Phase 4
+ * Price Breakdown Sidebar Component - SP-010 Phase 4 + SP-011
  *
- * Displays real-time pricing breakdown for sides customization:
+ * Displays real-time pricing breakdown for customization:
  * - Base package price
+ * - Wing distribution breakdown
+ * - Modifications summary card
  * - Included items (no charge)
  * - Additional items (upcharges)
  * - Removed items (credits)
  * - Running total
+ * - Per-person cost indicator
  *
  * @module price-breakdown-sidebar
  * @created 2025-11-06
- * @epic SP-010
- * @story Phase 4 - Price Breakdown Sidebar UI
+ * @updated 2025-11-07 (SP-011 - Wing distribution + modifications)
+ * @epic SP-010, SP-011
+ * @story Phase 4 - Price Breakdown Sidebar UI, SP-011 - Modifications Feedback
  */
 
 import { onPricingChange, getCurrentPricing } from '../../utils/pricing-aggregator.js';
-import { onStateChange } from '../../services/shared-platter-state-service.js';
+import { onStateChange, getState } from '../../services/shared-platter-state-service.js';
+import { renderModificationsSummaryCard } from './modifications-summary-card.js';
+import { detectModifications } from '../../utils/kitchen-breakdown-calculator.js';
 
 /**
  * Render price breakdown sidebar
@@ -28,6 +34,15 @@ export function renderPriceBreakdownSidebar(pricing) {
     return renderEmptyState();
   }
 
+  // Get current state for wing distribution and modifications
+  const state = getState();
+  const { selectedPackage = {}, currentConfig = {} } = state;
+  const wingDistribution = currentConfig.wingDistribution || {};
+  const guestCount = state.eventDetails?.guestCount || selectedPackage.servesMin || 10;
+
+  // Detect modifications
+  const modifications = detectModifications(selectedPackage, currentConfig);
+
   // Extract modifiers by type (only for sides category)
   const sidesModifiers = (pricing.modifiers || []).filter(m => {
     const item = pricing.items?.[m.itemId];
@@ -39,16 +54,18 @@ export function renderPriceBreakdownSidebar(pricing) {
   const removalModifiers = sidesModifiers.filter(m => m.type === 'removal-credit');
 
   // Calculate running total (subtotal, pre-tax)
-  // Note: pricing.totals.subtotal already includes all modifiers
   const basePrice = pricing.totals.basePrice || 0;
   const modificationsTotal = upchargeModifiers.reduce((sum, m) => sum + m.amount, 0) +
                              removalModifiers.reduce((sum, m) => sum + m.amount, 0);
   const runningTotal = basePrice + modificationsTotal;
 
+  // Calculate per-person cost
+  const perPersonCost = guestCount > 0 ? (pricing.totals.total || 0) / guestCount : 0;
+
   return `
     <div class="price-breakdown-sidebar" role="region" aria-label="Price Breakdown">
       <h3 class="breakdown-title">Price Breakdown</h3>
-      
+
       <!-- Base Price Section -->
       <div class="price-breakdown-section section-base">
         <div class="breakdown-item">
@@ -56,6 +73,12 @@ export function renderPriceBreakdownSidebar(pricing) {
           <span class="breakdown-value">$${basePrice.toFixed(2)}</span>
         </div>
       </div>
+
+      <!-- Wing Distribution Section -->
+      ${renderWingDistribution(wingDistribution)}
+
+      <!-- Modifications Summary Card -->
+      ${renderModificationsSummaryCard(selectedPackage, currentConfig, pricing, modifications)}
 
       <!-- Included Items Section -->
       ${includedModifiers.length > 0 ? `
@@ -124,6 +147,70 @@ export function renderPriceBreakdownSidebar(pricing) {
         <div class="breakdown-item grand-total-item">
           <span class="breakdown-label">Total</span>
           <span class="breakdown-value grand-total">$${(pricing.totals.total || 0).toFixed(2)}</span>
+        </div>
+      </div>
+
+      <!-- Per-Person Cost Indicator -->
+      <div class="price-breakdown-section section-per-person">
+        <div class="per-person-indicator">
+          <span class="per-person-icon" aria-hidden="true">👥</span>
+          <div class="per-person-content">
+            <span class="per-person-label">Cost Per Person</span>
+            <span class="per-person-value">$${perPersonCost.toFixed(2)}</span>
+          </div>
+          <div class="per-person-note">Based on ${guestCount} guest${guestCount !== 1 ? 's' : ''}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render wing distribution breakdown
+ *
+ * @param {Object} wingDistribution - Wing distribution from currentConfig
+ * @returns {string} HTML string
+ */
+function renderWingDistribution(wingDistribution) {
+  const { boneless = 0, boneIn = 0, cauliflower = 0, boneInStyle = 'mixed' } = wingDistribution;
+  const totalWings = boneless + boneIn + cauliflower;
+
+  if (totalWings === 0) {
+    return '';
+  }
+
+  const traditionalWings = boneless + boneIn;
+  const hasTraditional = traditionalWings > 0;
+  const hasPlantBased = cauliflower > 0;
+
+  return `
+    <div class="price-breakdown-section section-wings" aria-label="Wing Distribution">
+      <h4 class="section-header">
+        <span class="section-icon" aria-hidden="true">🍗</span>
+        Your Wings
+      </h4>
+      <div class="breakdown-items">
+        ${hasTraditional ? `
+          <div class="breakdown-item wing-item">
+            <span class="breakdown-label">
+              ${traditionalWings} Traditional Wings
+              <span class="wing-details">${boneless} Boneless${boneIn > 0 ? `, ${boneIn} Bone-In ${boneInStyle === 'mixed' ? 'Mixed' : boneInStyle === 'drums' ? 'Drums' : 'Flats'}` : ''}</span>
+            </span>
+            <span class="breakdown-value">Included</span>
+          </div>
+        ` : ''}
+        ${hasPlantBased ? `
+          <div class="breakdown-item wing-item">
+            <span class="breakdown-label">
+              ${cauliflower} Plant-Based Wings
+              <span class="wing-details">Cauliflower</span>
+            </span>
+            <span class="breakdown-value">Included</span>
+          </div>
+        ` : ''}
+        <div class="breakdown-item wing-total">
+          <span class="breakdown-label">Total Wings:</span>
+          <span class="breakdown-value">${totalWings}</span>
         </div>
       </div>
     </div>
