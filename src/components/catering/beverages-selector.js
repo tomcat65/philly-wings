@@ -12,7 +12,7 @@
  * @epic SP-012
  */
 
-import { getState, updateState } from '../../services/shared-platter-state-service.js';
+import { getState, updateState, onStateChange } from '../../services/shared-platter-state-service.js';
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
 /**
@@ -319,7 +319,6 @@ function renderBeverageRow(item, selectedBeverages, temperature) {
           data-beverage-id="${item.id}"
           data-temperature="${temperature}"
           onchange="window.handleBeverageSizeChange('${item.id}', '${temperature}', this.value)"
-          ${currentQuantity === 0 ? 'disabled' : ''}
         >
           ${variants.map(variant => `
             <option
@@ -504,8 +503,27 @@ export function handleBeverageQuantityChange(beverageId, temperature, newQuantit
 }
 
 /**
+ * Re-render beverages selector when state changes
+ */
+async function reRenderBeveragesSelector() {
+  const container = document.querySelector('.beverages-selector');
+  if (!container) {
+    console.warn('⚠️ Beverages selector container not found for re-render');
+    return;
+  }
+
+  try {
+    const newHTML = await renderBeveragesSelector();
+    container.outerHTML = newHTML;
+    console.log('✅ Beverages selector re-rendered');
+  } catch (error) {
+    console.error('❌ Error re-rendering beverages selector:', error);
+  }
+}
+
+/**
  * Initialize beverages selector
- * Attaches global handlers for beverage interactions
+ * Attaches global handlers for beverage interactions and state listeners
  */
 export function initBeveragesSelector() {
   // Attach global handlers
@@ -513,4 +531,12 @@ export function initBeveragesSelector() {
   window.handleSkipHotBeverages = handleSkipHotBeverages;
   window.handleBeverageSizeChange = handleBeverageSizeChange;
   window.handleBeverageQuantityChange = handleBeverageQuantityChange;
+
+  // Subscribe to state changes for beverages
+  onStateChange('currentConfig.beverages', () => {
+    console.log('🔄 Beverages state changed, re-rendering...');
+    reRenderBeveragesSelector();
+  });
+
+  console.log('✅ Beverages selector state listener attached');
 }
