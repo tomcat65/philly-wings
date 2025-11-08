@@ -364,6 +364,75 @@ function renderBeverageRow(item, selectedBeverages, temperature) {
 }
 
 /**
+ * Update beverage UI after state change (no full re-render needed)
+ * Updates quantity, buttons, and subtotal for a specific beverage
+ *
+ * @param {string} beverageId - Beverage ID
+ * @param {string} temperature - 'cold' or 'hot'
+ */
+function updateBeverageUI(beverageId, temperature) {
+  const state = getState();
+  const currentBeverages = state.currentConfig?.beverages || { cold: [], hot: [] };
+  const beverageList = temperature === 'cold' ? currentBeverages.cold : currentBeverages.hot;
+  const selected = beverageList.find(b => b.id === beverageId);
+
+  // Find the row
+  const row = document.querySelector(
+    `tr.beverage-row[data-beverage-id="${beverageId}"][data-temperature="${temperature}"]`
+  );
+  if (!row) return;
+
+  const quantity = selected?.quantity || 0;
+  const beverageData = temperature === 'cold'
+    ? cachedBeverages.cold?.find(b => b.id === beverageId)
+    : cachedBeverages.hot?.find(b => b.id === beverageId);
+
+  const variant = beverageData?.variants?.find(v => v.id === selected?.variantId);
+  const subtotal = variant ? (variant.basePrice || 0) * quantity : 0;
+
+  // Update quantity display
+  const quantityDisplay = row.querySelector('.quantity-display');
+  if (quantityDisplay) {
+    quantityDisplay.textContent = quantity;
+  }
+
+  // Update quantity buttons
+  const minusBtn = row.querySelector('.quantity-btn.minus');
+  if (minusBtn) {
+    minusBtn.disabled = quantity === 0;
+  }
+
+  // Update subtotal
+  const subtotalDisplay = row.querySelector('.subtotal-amount');
+  if (subtotalDisplay) {
+    subtotalDisplay.textContent = `$${subtotal.toFixed(2)}`;
+  }
+}
+
+/**
+ * Refresh all beverage UI elements from current state
+ * Idempotent - safe to call multiple times
+ */
+function refreshBeveragesUI() {
+  const state = getState();
+  const currentBeverages = state.currentConfig?.beverages || { cold: [], hot: [] };
+
+  // Update all cold beverages
+  if (cachedBeverages.cold) {
+    cachedBeverages.cold.forEach(item => {
+      updateBeverageUI(item.id, 'cold');
+    });
+  }
+
+  // Update all hot beverages
+  if (cachedBeverages.hot) {
+    cachedBeverages.hot.forEach(item => {
+      updateBeverageUI(item.id, 'hot');
+    });
+  }
+}
+
+/**
  * Handle skip cold beverages toggle
  *
  * @param {boolean} skip - Whether to skip cold beverages
@@ -380,6 +449,13 @@ export function handleSkipColdBeverages(skip) {
       cold: skip ? [] : currentBeverages.cold // Clear selections if skipping
     }
   });
+
+  // Refresh UI to reflect cleared selections
+  refreshBeveragesUI();
+
+  // Trigger pricing recalculation
+  const updatedState = getState();
+  recalculatePricing(updatedState);
 }
 
 /**
@@ -399,6 +475,13 @@ export function handleSkipHotBeverages(skip) {
       hot: skip ? [] : currentBeverages.hot // Clear selections if skipping
     }
   });
+
+  // Refresh UI to reflect cleared selections
+  refreshBeveragesUI();
+
+  // Trigger pricing recalculation
+  const updatedState = getState();
+  recalculatePricing(updatedState);
 }
 
 /**
@@ -443,6 +526,9 @@ export function handleBeverageSizeChange(beverageId, temperature, variantId) {
       [temperature]: updatedList
     }
   });
+
+  // Update UI to reflect new variant (subtotal changes)
+  updateBeverageUI(beverageId, temperature);
 
   // Trigger pricing recalculation
   const updatedState = getState();
@@ -511,6 +597,9 @@ export function handleBeverageQuantityChange(beverageId, temperature, newQuantit
       [temperature]: updatedList
     }
   });
+
+  // Update UI to reflect new quantity (fast DOM update, no re-render)
+  updateBeverageUI(beverageId, temperature);
 
   // Trigger pricing recalculation
   const updatedState = getState();
