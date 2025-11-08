@@ -385,14 +385,14 @@ function renderWingDistribution(wingDistribution, pricing, selectedPackage) {
             ${costs.credits.length > 0 ? `
               ${costs.credits.map((credit, idx) => `
                 <div class="cost-item credit">
-                  ${idx === 0 && costs.charges.length === 0 ? '└─' : '├─'} Credit for traditional wings removed: -$${Math.abs(credit.amount).toFixed(2)}
+                  ${idx === costs.credits.length - 1 && costs.charges.length === 0 ? '└─' : '├─'} Credit: ${credit.label} -$${Math.abs(credit.amount).toFixed(2)}
                 </div>
               `).join('')}
             ` : ''}
             ${costs.charges.length > 0 ? `
               ${costs.charges.map((charge, idx) => `
                 <div class="cost-item charge">
-                  ${idx === costs.charges.length - 1 ? '└─' : '├─'} Charge for plant-based wings added: +$${charge.amount.toFixed(2)}
+                  ${idx === costs.charges.length - 1 ? '└─' : '├─'} Charge: ${charge.label} +$${charge.amount.toFixed(2)}
                 </div>
               `).join('')}
             ` : ''}
