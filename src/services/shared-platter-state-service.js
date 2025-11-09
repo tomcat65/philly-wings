@@ -325,9 +325,10 @@ export function validateState(step) {
       if (!currentState.selectedPackage) {
         errors.push('No package selected');
       }
-      // Wing distribution validation
+      // Wing distribution validation (BUG FIX 2025-11-09: include cauliflower wings)
       const totalWings = currentState.currentConfig.wingDistribution.boneless +
-                         currentState.currentConfig.wingDistribution.boneIn;
+                         currentState.currentConfig.wingDistribution.boneIn +
+                         (currentState.currentConfig.wingDistribution.cauliflower || 0);
       const expectedTotalWings = currentState.selectedPackage?.wingOptions?.totalWings;
       if (currentState.selectedPackage && expectedTotalWings && totalWings !== expectedTotalWings) {
         errors.push(`Wing distribution must total ${expectedTotalWings} wings`);
