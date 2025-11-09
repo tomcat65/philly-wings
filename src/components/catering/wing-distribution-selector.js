@@ -760,6 +760,9 @@ function initAcceptCustomizeButtons() {
   acceptBtn.addEventListener('click', () => {
     console.log('✅ User accepted wing distribution');
 
+    // Get current state
+    const state = getState();
+
     // Mark wings as accepted and complete - DON'T overwrite entire currentConfig
     updateState('currentConfig.wingsAccepted', true);
     updateState('currentConfig.wingsCustomized', false);
