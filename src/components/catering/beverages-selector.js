@@ -341,7 +341,9 @@ function renderBeverageRow(item, selectedBeverages, temperature) {
           <button
             type="button"
             class="quantity-btn minus"
-            onclick="window.handleBeverageQuantityChange('${item.id}', '${temperature}', ${currentQuantity - 1})"
+            data-beverage-id="${item.id}"
+            data-temperature="${temperature}"
+            data-action="decrease"
             ${currentQuantity === 0 ? 'disabled' : ''}
             aria-label="Decrease quantity"
           >−</button>
@@ -349,7 +351,9 @@ function renderBeverageRow(item, selectedBeverages, temperature) {
           <button
             type="button"
             class="quantity-btn plus"
-            onclick="window.handleBeverageQuantityChange('${item.id}', '${temperature}', ${currentQuantity + 1})"
+            data-beverage-id="${item.id}"
+            data-temperature="${temperature}"
+            data-action="increase"
             aria-label="Increase quantity"
           >+</button>
         </div>
@@ -609,13 +613,44 @@ export function handleBeverageQuantityChange(beverageId, temperature, newQuantit
 /**
  * Initialize beverages selector
  * Attaches global handlers for beverage interactions
+ *
+ * BUG FIX (2025-11-09): Added event delegation for quantity buttons.
+ * Previously used inline onclick with hardcoded currentQuantity values,
+ * which didn't update after state changes, preventing quantity increases beyond 1.
  */
 export function initBeveragesSelector() {
-  // Attach global handlers
+  // Attach global handlers (for inline onchange on size dropdown and skip toggles)
   window.handleSkipColdBeverages = handleSkipColdBeverages;
   window.handleSkipHotBeverages = handleSkipHotBeverages;
   window.handleBeverageSizeChange = handleBeverageSizeChange;
-  window.handleBeverageQuantityChange = handleBeverageQuantityChange;
 
-  console.log('✅ Beverages selector initialized');
+  // Event delegation for quantity buttons
+  const selector = document.querySelector('.beverages-selector');
+  if (selector) {
+    selector.addEventListener('click', (e) => {
+      const btn = e.target.closest('.quantity-btn');
+      if (!btn) return;
+
+      const beverageId = btn.dataset.beverageId;
+      const temperature = btn.dataset.temperature;
+      const action = btn.dataset.action;
+
+      if (!beverageId || !temperature || !action) return;
+
+      // Get current quantity from state
+      const state = getState();
+      const currentBeverages = state.currentConfig?.beverages || { cold: [], hot: [] };
+      const beverageList = temperature === 'cold' ? currentBeverages.cold : currentBeverages.hot;
+      const selected = beverageList.find(b => b.id === beverageId);
+      const currentQuantity = selected?.quantity || 0;
+
+      // Calculate new quantity based on action
+      const newQuantity = action === 'increase' ? currentQuantity + 1 : currentQuantity - 1;
+
+      // Call handler with current quantity
+      handleBeverageQuantityChange(beverageId, temperature, newQuantity);
+    });
+  }
+
+  console.log('✅ Beverages selector initialized with event delegation');
 }
