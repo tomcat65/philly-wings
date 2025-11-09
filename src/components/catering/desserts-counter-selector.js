@@ -375,48 +375,23 @@ function getPlaceholderImage(dessert) {
 /**
  * Fetch active desserts from Firebase
  *
- * BUG FIX (2025-11-09): Changed from 'desserts' collection to 'cateringAddOns'
- * to fetch correct pricing data. The 'desserts' collection lacks basePrice field,
- * causing fallback to $2.00 default pricing.
+ * BUG FIX (2025-11-09): Fetch from 'desserts' collection (source of truth).
+ * The variants array contains basePrice data that was not being accessed correctly.
+ * Now uses same approach as package-data-transformer.js
  */
 async function fetchDesserts() {
   try {
     const q = query(
-      collection(db, 'cateringAddOns'),
-      where('category', '==', 'desserts'),
-      where('active', '==', true),
-      where('packSize', '==', '5pack')  // Only fetch 5-pack variants for the counter
+      collection(db, 'desserts'),
+      where('active', '==', true)
+      // Note: orderBy removed to avoid potential composite index requirement
+      // Sorting done in JavaScript instead
     );
     const snapshot = await getDocs(q);
+    const desserts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // Transform cateringAddOns documents to match expected dessert structure
-    const desserts = snapshot.docs.map(doc => {
-      const data = doc.data();
-
-      // Extract base dessert ID from the compound ID (e.g., 'ny-cheesecake-5pack' -> 'ny_cheesecake')
-      // Convert to sourceDocumentId if available, otherwise derive from id
-      const baseDessertId = data.sourceDocumentId || data.id.replace(/-5pack$/, '').replace(/-/g, '_');
-
-      return {
-        id: baseDessertId,
-        name: data.name,
-        imageUrl: data.imageUrl,
-        allergens: data.allergens || [],
-        description: data.description,
-        displayOrder: data.displayOrder || 999,
-        // Create variants array with the 5-pack pricing
-        variants: [{
-          size: '5-pack',
-          unit: '5-pack',
-          servings: data.servings || 5,
-          basePrice: data.basePrice || 0,
-          id: data.sourceVariantId || '5-pack'
-        }]
-      };
-    });
-
-    // Sort by displayOrder in JavaScript
-    return desserts.sort((a, b) => (a.displayOrder || 999) - (b.displayOrder || 999));
+    // Sort by sortOrder in JavaScript
+    return desserts.sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
   } catch (error) {
     console.error('Error fetching desserts from Firebase:', error);
     return [];
