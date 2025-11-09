@@ -104,13 +104,14 @@ export async function renderDessertsCounterSelector(options = {}) {
  * Render individual dessert card with counter (Compact Grid - Option 2)
  */
 function renderDessertCard(dessert, currentQuantity = 0) {
-  // Get 5-pack variant for pricing display
-  const fivePackVariant = dessert.variants?.find(v =>
-    v.size === '5-pack' || v.unit === '5-pack' || v.servings === 5
-  );
+  // BUG FIX (2025-11-09): Desserts only have individual slice variants.
+  // Get slice price and multiply by 5 to show 5-pack price.
+  const sliceVariant = dessert.variants?.[0]; // First variant is the slice
+  const slicePrice = sliceVariant?.basePrice || 0;
+  const fivePackPrice = slicePrice * 5;
 
-  const basePrice = fivePackVariant?.basePrice || 0;
-  const servings = fivePackVariant?.servings || 5;
+  const basePrice = fivePackPrice;
+  const servings = 5; // Counter shows 5-packs
   const allergens = dessert.allergens || [];
 
   return `
@@ -293,19 +294,25 @@ async function handleCounterChange(dessertQuantities, skipDesserts, onCounterCha
   const desserts = await fetchDesserts();
 
   // Convert quantities object to array format expected by pricing
+  // BUG FIX (2025-11-09): Desserts in Firestore only have individual slice variants,
+  // not 5-pack variants. Counter shows 5-packs, so we multiply slice price by 5.
   const dessertArray = Object.entries(dessertQuantities).map(([dessertId, quantity]) => {
     const dessertData = desserts.find(d => d.id === dessertId);
-    const fivePackVariant = dessertData?.variants?.find(v =>
-      v.size === '5-pack' || v.unit === '5-pack' || v.servings === 5
-    );
+
+    // Get individual slice variant (the only variant available)
+    const sliceVariant = dessertData?.variants?.[0]; // Take first variant
+    const slicePrice = sliceVariant?.basePrice || 0;
+
+    // Counter represents 5-packs, so price per 5-pack = slice price × 5
+    const fivePackPrice = slicePrice * 5;
 
     return {
       id: dessertId,
       name: dessertData?.name || dessertId,
-      quantity: quantity,
-      variantId: fivePackVariant?.id || '5-pack',
-      basePrice: fivePackVariant?.basePrice || 0,
-      servings: fivePackVariant?.servings || 5
+      quantity: quantity, // This is number of 5-packs
+      variantId: sliceVariant?.id || 'slice',
+      basePrice: fivePackPrice, // Price for one 5-pack
+      servings: 5 // Each counter unit = 5 servings
     };
   });
 
@@ -328,6 +335,8 @@ async function handleCounterChange(dessertQuantities, skipDesserts, onCounterCha
 
 /**
  * Calculate credit for skipping desserts
+ *
+ * BUG FIX (2025-11-09): Calculate using individual slice prices × 5
  */
 function calculateSkipCredit(packageIncluded, desserts) {
   if (!packageIncluded || packageIncluded.quantity === 0) {
@@ -335,16 +344,16 @@ function calculateSkipCredit(packageIncluded, desserts) {
   }
 
   // Average price per five-pack based on available desserts
-  // Use actual pricing from desserts data
+  // Use actual pricing from desserts data (slice price × 5)
   if (!desserts || desserts.length === 0) {
     return 0;
   }
 
   const totalPrice = desserts.reduce((sum, dessert) => {
-    const fivePackVariant = dessert.variants?.find(v =>
-      v.size === '5-pack' || v.unit === '5-pack' || v.servings === 5
-    );
-    return sum + (fivePackVariant?.basePrice || 0);
+    const sliceVariant = dessert.variants?.[0]; // Get slice variant
+    const slicePrice = sliceVariant?.basePrice || 0;
+    const fivePackPrice = slicePrice * 5;
+    return sum + fivePackPrice;
   }, 0);
 
   const averagePricePerFivePack = totalPrice / desserts.length;
