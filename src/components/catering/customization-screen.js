@@ -17,6 +17,7 @@ import { renderDipsCounterSelector, initDipsCounterSelector } from './dips-count
 import { renderSidesSelector, initSidesSelector } from './sides-selector.js';
 import { renderDessertsCounterSelector, initDessertsCounterSelector } from './desserts-counter-selector.js';
 import { renderBeveragesSelector, initBeveragesSelector } from './beverages-selector.js';
+import { renderAddOnsSelector, initAddOnsSelector } from './shared-platter-addons-selector.js';
 import { initPricingSummary, renderPricingSummary as renderFullPricingSummary } from './pricing-summary-master.js';
 import { initPriceBreakdownSidebar, renderPriceBreakdownSidebar } from './price-breakdown-sidebar.js';
 import { recalculatePricing, getCurrentPricing, onPricingChange } from '../../utils/pricing-aggregator.js';
@@ -130,7 +131,7 @@ function renderPanelHeader(pkg) {
       </div>
       <!-- Hidden: Progress indicator - space reserved for section tabs -->
       <div class="progress-indicator" id="progress-indicator" style="display: none;">
-        <span class="progress-text">0 of 6 sections complete</span>
+        <span class="progress-text">0 of 7 sections complete</span>
         <div class="progress-bar">
           <div class="progress-fill" style="width: 0%"></div>
         </div>
@@ -149,7 +150,8 @@ function renderSectionNavigation() {
     { id: 'dips', label: 'Dips', icon: '🥣' },
     { id: 'sides', label: 'Sides', icon: '🍟' },
     { id: 'desserts', label: 'Desserts', icon: '🍰' },
-    { id: 'beverages', label: 'Beverages', icon: '🥤' }
+    { id: 'beverages', label: 'Beverages', icon: '🥤' },
+    { id: 'addons', label: 'Add-Ons', icon: '➕' }
   ];
 
   return `
@@ -389,6 +391,10 @@ async function renderSectionContent(sectionId) {
       // SP-012: Beverages selector (cold and hot beverages)
       return await renderBeveragesSelector();
 
+    case 'addons':
+      // SP-013: Add-Ons selector (quick-adds, extra beverages, desserts, sides, salads)
+      return await renderAddOnsSelector();
+
     default:
       return renderSectionPlaceholder('wings');
   }
@@ -449,6 +455,12 @@ function initializeSectionInteractions(sectionId) {
       initBeveragesSelector();
       console.log('🥤 Beverages selector initialized');
       break;
+
+    case 'addons':
+      // SP-013: Initialize add-ons selector
+      initAddOnsSelector();
+      console.log('➕ Add-Ons selector initialized');
+      break;
   }
 }
 
@@ -462,7 +474,8 @@ function renderSectionPlaceholder(sectionId) {
     dips: { icon: '🥣', title: 'Dips & Extras', desc: 'Add ranch, blue cheese, etc.' },
     sides: { icon: '🍟', title: 'Sides Selection', desc: 'Chips, coleslaw, salads' },
     desserts: { icon: '🍰', title: 'Desserts', desc: 'Sweet treats for your event' },
-    beverages: { icon: '🥤', title: 'Beverages', desc: 'Hot and cold drink options' }
+    beverages: { icon: '🥤', title: 'Beverages', desc: 'Hot and cold drink options' },
+    addons: { icon: '➕', title: 'Optional Add-Ons', desc: 'Extra chips, beverages, sides, salads' }
   };
 
   const placeholder = placeholders[sectionId] || placeholders.wings;
@@ -603,7 +616,7 @@ function toggleMobilePricingDrawer() {
 function calculateProgress() {
   const state = getState();
   const config = state.currentConfig || {};
-  const sections = ['wings', 'sauces', 'dips', 'sides', 'desserts', 'beverages'];
+  const sections = ['wings', 'sauces', 'dips', 'sides', 'desserts', 'beverages', 'addons'];
   let completed = 0;
 
   sections.forEach(section => {
@@ -646,6 +659,10 @@ function isSectionComplete(section, config) {
       return config.noDesserts || (config.desserts && config.desserts.length > 0);
     case 'beverages':
       return config.noBeverages || (config.beverages && config.beverages.length > 0);
+    case 'addons':
+      // Add-ons are optional, so section is complete even with no selections
+      // But mark as complete if user has visited (has addOns property) or has selections
+      return true; // Always complete since it's optional
     default:
       return false;
   }
@@ -672,7 +689,7 @@ function updateProgressIndicator() {
   }
 
   // Update section status badges
-  const sections = ['wings', 'sauces', 'dips', 'sides', 'desserts', 'beverages'];
+  const sections = ['wings', 'sauces', 'dips', 'sides', 'desserts', 'beverages', 'addons'];
   const state = getState();
   const config = state.currentConfig || {};
 

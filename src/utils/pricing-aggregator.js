@@ -23,6 +23,7 @@ import {
   calculateBeveragesPricing
 } from './pricing-items-calculator.js';
 import { calculateRemovalCredits } from './pricing-removal-calculator.js';
+import { calculateAddOnsPricing } from './pricing-addons-calculator.js';
 import { createPricingStructure, addModifier } from './pricing-data-structure.js';
 import pricingLogger from './pricing-logger.js';
 import { PERFORMANCE_BUDGETS } from './pricing-timing.js';
@@ -44,7 +45,8 @@ const COMPLETION_KEYS_BY_SOURCE = {
   sides: ['sides'],
   desserts: ['desserts'],
   beverages: ['beverages'],
-  removals: ['removals']
+  removals: ['removals'],
+  addons: ['addons']
 };
 
 /**
@@ -140,6 +142,9 @@ export function calculatePricing(state) {
       selectedPackage
     );
 
+    // Calculate add-ons pricing (SP-013)
+    const addOnsPricing = calculateAddOnsPricing(currentConfig.addOns || {});
+
     // Merge all pricing structures
     mergePricingStructure(unified, wingsPricing, 'wings');
     mergePricingStructure(unified, saucesPricing, 'sauces');
@@ -148,6 +153,7 @@ export function calculatePricing(state) {
     mergePricingStructure(unified, dessertsPricing, 'desserts');
     mergePricingStructure(unified, beveragesPricing, 'beverages');
     mergePricingStructure(unified, removalsPricing, 'removals');
+    mergePricingStructure(unified, addOnsPricing, 'addons');
 
     // Calculate totals (including per-person cost - SP-OS-S3)
     const guestCount = state.eventDetails?.guestCount || 10;
