@@ -32,9 +32,6 @@ export function renderModificationsSummaryCard(packageInfo, currentConfig, prici
   // Calculate total modifications cost
   const totalModifications = Object.values(modificationCosts).reduce((sum, cost) => sum + cost, 0);
 
-  // Calculate final total
-  const finalTotal = basePrice + totalModifications;
-
   // Only show card if there are modifications
   const hasModifications = Object.values(modifications).some(mod => mod.isModified);
 
@@ -64,17 +61,15 @@ export function renderModificationsSummaryCard(packageInfo, currentConfig, prici
         <span class="total-label">Total Modifications:</span>
         <span class="total-amount">+$${totalModifications.toFixed(2)}</span>
       </div>
-
-      <div class="final-total">
-        <span class="final-label">YOUR TOTAL:</span>
-        <span class="final-amount">$${finalTotal.toFixed(2)}</span>
-      </div>
     </div>
   `;
 }
 
 /**
  * Calculate modification costs per category from pricing data
+ *
+ * BUG FIX (2025-11-09): Changed from exact itemId matching to pattern matching
+ * to properly capture beverages (cold-beverage-*, hot-beverage-*), sides, desserts, etc.
  */
 function calculateModificationCosts(modifications, pricing) {
   const costs = {
@@ -86,24 +81,28 @@ function calculateModificationCosts(modifications, pricing) {
     beverages: 0
   };
 
-  // Map itemIds to categories
-  const itemIdToCategoryMap = {
-    'wings-distribution': 'wings',
-    'wings-boneless': 'wings',
-    'wings-bone-in': 'wings',
-    'wings-cauliflower': 'wings',
-    'sauces': 'sauces',
-    'dips': 'dips',
-    'sides': 'sides',
-    'desserts': 'desserts',
-    'beverages': 'beverages'
-  };
-
   // Extract costs from pricing.modifiers
   if (pricing.modifiers && Array.isArray(pricing.modifiers)) {
     pricing.modifiers.forEach(modifier => {
-      if (modifier.type === 'upcharge' || modifier.type === 'discount') {
-        const category = itemIdToCategoryMap[modifier.itemId];
+      if (modifier.type === 'upcharge' || modifier.type === 'discount' || modifier.type === 'removal-credit') {
+        const itemId = modifier.itemId;
+        let category = null;
+
+        // Map itemId to category using pattern matching
+        if (itemId === 'wings-distribution' || itemId.startsWith('wings-')) {
+          category = 'wings';
+        } else if (itemId.startsWith('cold-beverage-') || itemId.startsWith('hot-beverage-')) {
+          category = 'beverages';
+        } else if (itemId.startsWith('dip-')) {
+          category = 'dips';
+        } else if (itemId.startsWith('cold-side-') || itemId.startsWith('salad-') || itemId === 'chips') {
+          category = 'sides';
+        } else if (itemId.startsWith('dessert-')) {
+          category = 'desserts';
+        } else if (itemId === 'sauces' || itemId.startsWith('sauce-')) {
+          category = 'sauces';
+        }
+
         if (category && costs.hasOwnProperty(category)) {
           costs[category] += modifier.amount || 0;
         }
