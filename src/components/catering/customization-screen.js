@@ -20,6 +20,7 @@ import { renderBeveragesSelector, initBeveragesSelector } from './beverages-sele
 import { initPricingSummary, renderPricingSummary as renderFullPricingSummary } from './pricing-summary-master.js';
 import { initPriceBreakdownSidebar, renderPriceBreakdownSidebar } from './price-breakdown-sidebar.js';
 import { recalculatePricing, getCurrentPricing, onPricingChange } from '../../utils/pricing-aggregator.js';
+import { initPackageRecommendations } from './package-recommendations.js';
 import '../../styles/sauce-distribution-integrated.css';
 import '../../styles/price-breakdown-sidebar.css';
 import '../../styles/beverages-selector.css';
@@ -513,6 +514,9 @@ function initActionButtons() {
 
 /**
  * Handle back to packages navigation
+ *
+ * BUG FIX (2025-11-09): Re-initialize recommendations/gallery instead of just
+ * showing containers. Previously just toggled display which left empty containers.
  */
 function handleBackToPackages() {
   const state = getState();
@@ -526,11 +530,14 @@ function handleBackToPackages() {
 
   // Show appropriate previous screen
   if (flowType === 'guided-planner') {
-    // Show recommendations
+    // Show and re-initialize recommendations
     const recommendationsContainer = document.getElementById('package-recommendations-container');
     if (recommendationsContainer) {
       recommendationsContainer.style.display = 'block';
       recommendationsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Re-initialize the recommendations to render package cards
+      initPackageRecommendations();
     }
   } else {
     // Show package gallery (Quick Browse path)
