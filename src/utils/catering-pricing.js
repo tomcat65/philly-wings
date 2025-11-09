@@ -37,11 +37,17 @@ export function flattenExtras(extras = {}) {
  * Calculate subtotal for all extras selections.
  * @param {Object<string, Array>} extras - Extras keyed by category.
  * @returns {number} Total price of extras.
+ *
+ * BUG FIX (2025-11-09): Changed (quantity || 1) to properly handle quantity: 0.
+ * Previously, zero-quantity items were charged as quantity: 1 because 0 is falsy.
+ * Now uses nullish coalescing to only default undefined/null to 1.
  */
 export function calculateExtrasSubtotal(extras = {}) {
   return flattenExtras(extras).reduce((sum, item) => {
     const unitPrice = Number(item?.price) || 0;
-    const quantity = Number(item?.quantity) || 0;
-    return sum + unitPrice * (quantity || 1);
+    const quantity = Number(item?.quantity);
+    // Use ?? instead of || to properly handle 0 vs undefined/null
+    const finalQuantity = (quantity !== undefined && !isNaN(quantity)) ? quantity : 1;
+    return sum + unitPrice * finalQuantity;
   }, 0);
 }
