@@ -24,6 +24,7 @@ import {
 } from './pricing-items-calculator.js';
 import { calculateRemovalCredits } from './pricing-removal-calculator.js';
 import { calculateAddOnsPricing } from './pricing-addons-calculator.js';
+import { transformAddOnsForPricing } from '../services/addons-state-transformer.js';
 import { createPricingStructure, addModifier } from './pricing-data-structure.js';
 import pricingLogger from './pricing-logger.js';
 import { PERFORMANCE_BUDGETS } from './pricing-timing.js';
@@ -74,7 +75,7 @@ let currentPricing = null;
  * @param {Object} state.eventDetails - Event details (guest count, etc.)
  * @returns {Object} Unified pricing structure
  */
-export function calculatePricing(state) {
+export async function calculatePricing(state) {
   const startTime = performance.now();
   pricingLogger.startTimer('Complete Pricing Calculation');
 
@@ -142,8 +143,12 @@ export function calculatePricing(state) {
       selectedPackage
     );
 
-    // Calculate add-ons pricing (SP-013)
-    const addOnsPricing = calculateAddOnsPricing(currentConfig.addOns || {});
+    // Transform and calculate add-ons pricing (SP-013)
+    const enrichedAddOns = await transformAddOnsForPricing(
+      currentConfig.addOns || {},
+      currentConfig.variantAddOns || {}
+    );
+    const addOnsPricing = calculateAddOnsPricing(enrichedAddOns);
 
     // Merge all pricing structures
     mergePricingStructure(unified, wingsPricing, 'wings');
@@ -384,12 +389,12 @@ function publishPricingChange(topic, data) {
  * @param {Object} options - Calculation options
  * @param {string} options.trigger - What triggered the recalculation
  */
-export function recalculatePricing(state, options = {}) {
+export async function recalculatePricing(state, options = {}) {
   const { trigger = 'manual' } = options;
 
   pricingLogger.info('Recalculating pricing', { trigger });
 
-  const pricing = calculatePricing(state);
+  const pricing = await calculatePricing(state);
 
   // Publish to pricing:updated (which automatically notifies all listeners)
   publishPricingChange('pricing:updated', pricing);

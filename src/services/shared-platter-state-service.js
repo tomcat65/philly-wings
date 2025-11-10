@@ -745,7 +745,8 @@ export async function setPackage(packageObj) {
     salads: transformed.salads.length
   });
 
-  recalculatePricing();
+  // Trigger pricing recalculation via aggregator
+  aggregatorRecalculatePricing(currentState, { trigger: 'package-set' });
 
   console.log('🐛 [DEBUG] setPackage() completed');
   console.log('  totalWings:', totalWings);
@@ -1331,9 +1332,11 @@ export function applySmartDefaults(packageData, currentConfig = {}) {
 
   // ===== ADD-ONS =====
   const hasAddOns = currentConfig.addOns &&
-    Object.keys(currentConfig.addOns).some(key => currentConfig.addOns[key]?.length > 0);
+    Object.keys(currentConfig.addOns).length > 0;
+  const hasVariantAddOns = currentConfig.variantAddOns &&
+    Object.keys(currentConfig.variantAddOns).length > 0;
 
-  if (hasAddOns) {
+  if (hasAddOns || hasVariantAddOns) {
     metadata.userCompletedSections.push('addons');
   }
   // Note: Add-ons are optional, no defaults needed

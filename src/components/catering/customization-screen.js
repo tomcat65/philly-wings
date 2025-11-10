@@ -763,8 +763,8 @@ let pricingSummaryUnsubscribe = null;
 // Debounced pricing recalculation (SP-OS-S5)
 // Waits 150ms after last state change before recalculating
 // Prevents excessive calculations during rapid slider movements
-const debouncedRecalculatePricing = debounce((state) => {
-  recalculatePricing(state, { trigger: 'state-change-debounced' });
+const debouncedRecalculatePricing = debounce(async (state) => {
+  await recalculatePricing(state, { trigger: 'state-change-debounced' });
 }, 150);
 
 function updatePricingSummary() {
@@ -808,7 +808,9 @@ function updatePricingSummary() {
     pricingSummaryInitialized = true;
 
     // Initial calculation (immediate, no debounce)
-    recalculatePricing(state, { trigger: 'initial' });
+    (async () => {
+      await recalculatePricing(state, { trigger: 'initial' });
+    })();
   } else {
     // Subsequent updates use debounced calculation (SP-OS-S5)
     debouncedRecalculatePricing(state);

@@ -285,7 +285,7 @@ async function handleQuickAdd(addonId) {
   syncQuantityDisplays();
 
   // Trigger pricing recalculation
-  recalculatePricing(getState(), { trigger: 'addon-quick-add' });
+  await recalculatePricing(getState(), { trigger: 'addon-quick-add' });
 }
 
 /**
@@ -305,7 +305,7 @@ async function handleRegularQuantityChange(addonId, action) {
   syncQuantityDisplays();
 
   // Trigger pricing recalculation
-  recalculatePricing(getState(), { trigger: 'addon-quantity-change' });
+  await recalculatePricing(getState(), { trigger: 'addon-quantity-change' });
 }
 
 /**
@@ -325,7 +325,7 @@ async function handleVariantQuantityChange(variantId, action) {
   syncQuantityDisplays();
 
   // Trigger pricing recalculation
-  recalculatePricing(getState(), { trigger: 'variant-quantity-change' });
+  await recalculatePricing(getState(), { trigger: 'variant-quantity-change' });
 }
 
 /**
