@@ -23,8 +23,22 @@
  */
 
 import { getAllAddOnsSplitByCategory } from '../../services/catering-addons-service.js';
-import { getState, updateState } from '../../services/shared-platter-state-service.js';
+import {
+  getState,
+  updateState,
+  getAddonQuantity,
+  updateAddonQuantity,
+  getVariantQuantity,
+  updateVariantQuantity
+} from '../../services/shared-platter-state-service.js';
 import { recalculatePricing } from '../../utils/pricing-aggregator.js';
+import {
+  renderMasonryCategory,
+  renderMasonryCard,
+  renderPackVariantCard,
+  getIconForCategory,
+  formatPackSize
+} from './shared-addons-ui.js';
 
 /**
  * Add-ons cache (5-minute TTL)
@@ -168,14 +182,16 @@ export async function renderAddOnsSelector() {
           <p class="addons-subtitle">Enhance your order with premium extras (or skip to continue)</p>
         </div>
 
-        ${renderCategory('🥤 Quick-Adds & Essentials', 'quickAdds', filtered.quickAdds, currentAddOns.quickAdds, false)}
-        ${renderCategory('☕ Premium Hot Beverages', 'hotBeverages', filtered.hotBeverages, currentAddOns.hotBeverages, true)}
-        ${renderCategory('🧃 Extra Cold Beverages', 'beverages', filtered.beverages, currentAddOns.beverages, false)}
-        ${renderCategory('🥗 Fresh Salads', 'salads', filtered.salads, currentAddOns.salads, false)}
-        ${renderCategory('🥔 Premium Sides', 'sides', filtered.sides, currentAddOns.sides, false)}
-        ${renderCategory('🍰 Extra Desserts', 'desserts', filtered.desserts, currentAddOns.desserts, false)}
-        ${renderCategory('🌶️ Sauces To-Go', 'saucesToGo', filtered.saucesToGo, currentAddOns.saucesToGo, false)}
-        ${renderCategory('🥫 Dips To-Go', 'dipsToGo', filtered.dipsToGo, currentAddOns.dipsToGo, false)}
+        <div class="masonry-categories">
+          ${renderMasonryCategory('🥤 Quick-Adds & Essentials', '🥤', filtered.quickAdds, false)}
+          ${renderMasonryCategory('☕ Premium Hot Beverages', '☕', filtered.hotBeverages, true)}
+          ${renderMasonryCategory('🧃 Extra Cold Beverages', '🧃', filtered.beverages, false)}
+          ${renderMasonryCategory('🥗 Fresh Salads', '🥗', filtered.salads, false)}
+          ${renderMasonryCategory('🥔 Premium Sides', '🥔', filtered.sides, false)}
+          ${renderMasonryCategory('🍰 Extra Desserts', '🍰', filtered.desserts, false)}
+          ${renderMasonryCategory('🌶️ Sauces To-Go', '🌶️', filtered.saucesToGo, false)}
+          ${renderMasonryCategory('🥫 Dips To-Go', '🥫', filtered.dipsToGo, false)}
+        </div>
 
         <div class="addons-footer">
           <button class="btn-secondary" id="btn-back-from-addons">
@@ -198,118 +214,10 @@ export async function renderAddOnsSelector() {
   }
 }
 
-/**
- * Render a category section with horizontal scroll
- * @param {string} title - Category title with icon
- * @param {string} categoryKey - Category key (quickAdds, desserts, etc.)
- * @param {Array} items - Items in this category
- * @param {Array} currentSelections - Current selections from state
- * @param {boolean} featured - Whether to use larger cards
- * @returns {string} HTML markup
- */
-function renderCategory(title, categoryKey, items, currentSelections = [], featured = false) {
-  if (!items || items.length === 0) {
-    return ''; // Don't render empty categories
-  }
-
-  return `
-    <div class="addons-category">
-      <div class="addons-category-header">
-        <h3 class="category-title">${title}</h3>
-        <span class="category-count">${items.length} available</span>
-      </div>
-      <div class="horizontal-scroll" data-category="${categoryKey}">
-        ${items.map(item => renderAddOnCard(item, categoryKey, currentSelections, featured)).join('')}
-      </div>
-    </div>
-  `;
-}
-
-/**
- * Render individual add-on card
- * @param {Object} item - Add-on item
- * @param {string} categoryKey - Category key
- * @param {Array} currentSelections - Current selections
- * @param {boolean} featured - Featured size
- * @returns {string} HTML markup
- */
-function renderAddOnCard(item, categoryKey, currentSelections, featured) {
-  // Check if this item is currently selected
-  const selected = currentSelections?.find(s => s.id === item.id);
-  const currentQuantity = selected?.quantity || 0;
-
-  const cardClass = featured ? 'addon-card featured' : 'addon-card';
-  const price = item.price || item.basePrice || 0;
-  const servingInfo = item.servings ? `Serves ${item.servings}` : '';
-  const packInfo = item.packSize ? `${item.packSize}` : '';
-
-  // Handle missing images gracefully
-  const imageUrl = item.imageUrl || getPlaceholderIcon(categoryKey);
-
-  return `
-    <div class="${cardClass}" data-addon-id="${item.id}" data-category="${categoryKey}">
-      <div class="addon-card-image">
-        <img
-          src="${imageUrl}"
-          alt="${item.name}"
-          loading="lazy"
-          width="280"
-          height="200"
-          onerror="this.src='https://via.placeholder.com/280x200?text=No+Image'"
-        />
-      </div>
-      <div class="addon-card-content">
-        <h4 class="addon-card-name">${item.name}</h4>
-        ${item.description ? `<p class="addon-card-desc">${item.description}</p>` : ''}
-        ${packInfo ? `<p class="addon-card-pack">${packInfo}</p>` : ''}
-        ${servingInfo ? `<p class="addon-card-serving">${servingInfo}</p>` : ''}
-        <div class="addon-card-footer">
-          <div class="addon-card-price">$${price.toFixed(2)}</div>
-          ${currentQuantity > 0 ? `
-            <div class="addon-quantity-controls">
-              <button
-                class="addon-qty-btn addon-qty-minus"
-                data-addon-id="${item.id}"
-                data-category="${categoryKey}"
-                aria-label="Decrease quantity"
-              >−</button>
-              <span class="addon-qty-display">${currentQuantity}</span>
-              <button
-                class="addon-qty-btn addon-qty-plus"
-                data-addon-id="${item.id}"
-                data-category="${categoryKey}"
-                aria-label="Increase quantity"
-              >+</button>
-            </div>
-          ` : `
-            <button
-              class="addon-quick-add-btn"
-              data-addon-id="${item.id}"
-              data-category="${categoryKey}"
-            >+ Add</button>
-          `}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-/**
- * Get placeholder icon for category
- * @param {string} categoryKey - Category key
- * @returns {string} Placeholder URL
- */
-function getPlaceholderIcon(categoryKey) {
-  const icons = {
-    quickAdds: 'https://via.placeholder.com/280x200/f0f0f0/333?text=Quick+Add',
-    hotBeverages: 'https://via.placeholder.com/280x200/8B4513/fff?text=Hot+Beverage',
-    beverages: 'https://via.placeholder.com/280x200/4682B4/fff?text=Cold+Beverage',
-    desserts: 'https://via.placeholder.com/280x200/FFB6C1/333?text=Dessert',
-    salads: 'https://via.placeholder.com/280x200/90EE90/333?text=Salad',
-    sides: 'https://via.placeholder.com/280x200/FFD700/333?text=Side'
-  };
-  return icons[categoryKey] || 'https://via.placeholder.com/280x200?text=Item';
-}
+// Old rendering functions removed - now using shared masonry UI from shared-addons-ui.js
+// - renderCategory() → renderMasonryCategory()
+// - renderAddOnCard() → renderMasonryCard() / renderPackVariantCard()
+// - getPlaceholderIcon() → getIconForCategory()
 
 /**
  * Initialize add-ons selector interactions
@@ -321,31 +229,29 @@ export function initAddOnsSelector() {
     return;
   }
 
-  // Event delegation for all quantity buttons
+  // Event delegation for masonry card interactions
   container.addEventListener('click', async (e) => {
-    // Handle Quick Add button
-    if (e.target.classList.contains('addon-quick-add-btn')) {
-      const addonId = e.target.dataset.addonId;
-      const category = e.target.dataset.category;
-      await handleQuantityChange(addonId, category, 1);
+    // Handle quick-add button (regular single-variant cards)
+    const quickAddBtn = e.target.closest('.quick-add-btn');
+    if (quickAddBtn) {
+      const addonId = quickAddBtn.dataset.addonId;
+      await handleQuickAdd(addonId);
       return;
     }
 
-    // Handle quantity + button
-    if (e.target.classList.contains('addon-qty-plus')) {
-      const addonId = e.target.dataset.addonId;
-      const category = e.target.dataset.category;
-      const currentQty = getCurrentQuantity(addonId, category);
-      await handleQuantityChange(addonId, category, currentQty + 1);
-      return;
-    }
+    // Handle quantity buttons (pack variant cards)
+    const qtyBtn = e.target.closest('.qty-btn');
+    if (qtyBtn) {
+      const variantId = qtyBtn.dataset.variantId;
+      const addonId = qtyBtn.dataset.addonId;
+      const action = qtyBtn.classList.contains('qty-plus') ? 'increment' : 'decrement';
 
-    // Handle quantity - button
-    if (e.target.classList.contains('addon-qty-minus')) {
-      const addonId = e.target.dataset.addonId;
-      const category = e.target.dataset.category;
-      const currentQty = getCurrentQuantity(addonId, category);
-      await handleQuantityChange(addonId, category, Math.max(0, currentQty - 1));
+      // Determine if this is a variant or regular addon
+      if (variantId) {
+        await handleVariantQuantityChange(variantId, action);
+      } else if (addonId) {
+        await handleRegularQuantityChange(addonId, action);
+      }
       return;
     }
   });
@@ -361,24 +267,110 @@ export function initAddOnsSelector() {
     continueBtn.addEventListener('click', handleContinueToReview);
   }
 
-  console.log('✅ Add-ons selector initialized');
+  // Sync quantity displays with current state
+  syncQuantityDisplays();
+
+  console.log('✅ Add-ons selector initialized (masonry UI)');
 }
 
 /**
- * Get current quantity for an add-on
+ * Handle quick-add button click (single-variant items)
  * @param {string} addonId - Add-on ID
- * @param {string} category - Category key
- * @returns {number} Current quantity
  */
-function getCurrentQuantity(addonId, category) {
-  const state = getState();
-  const categoryItems = state.currentConfig?.addOns?.[category] || [];
-  const item = categoryItems.find(i => i.id === addonId);
-  return item?.quantity || 0;
+async function handleQuickAdd(addonId) {
+  const currentQty = getAddonQuantity(addonId);
+  updateAddonQuantity(addonId, currentQty + 1);
+
+  // Update UI
+  syncQuantityDisplays();
+
+  // Trigger pricing recalculation
+  recalculatePricing(getState(), { trigger: 'addon-quick-add' });
 }
 
 /**
- * Handle quantity change for an add-on
+ * Handle regular quantity change (shown quantity controls)
+ * @param {string} addonId - Add-on ID
+ * @param {string} action - 'increment' or 'decrement'
+ */
+async function handleRegularQuantityChange(addonId, action) {
+  const currentQty = getAddonQuantity(addonId);
+  const newQty = action === 'increment'
+    ? currentQty + 1
+    : Math.max(0, currentQty - 1);
+
+  updateAddonQuantity(addonId, newQty);
+
+  // Update UI
+  syncQuantityDisplays();
+
+  // Trigger pricing recalculation
+  recalculatePricing(getState(), { trigger: 'addon-quantity-change' });
+}
+
+/**
+ * Handle variant quantity change (pack variant cards)
+ * @param {string} variantId - Variant ID
+ * @param {string} action - 'increment' or 'decrement'
+ */
+async function handleVariantQuantityChange(variantId, action) {
+  const currentQty = getVariantQuantity(variantId);
+  const newQty = action === 'increment'
+    ? currentQty + 1
+    : Math.max(0, currentQty - 1);
+
+  updateVariantQuantity(variantId, newQty);
+
+  // Update UI
+  syncQuantityDisplays();
+
+  // Trigger pricing recalculation
+  recalculatePricing(getState(), { trigger: 'variant-quantity-change' });
+}
+
+/**
+ * Sync quantity displays with current state
+ * Updates all qty-display elements to reflect current state
+ */
+function syncQuantityDisplays() {
+  const state = getState();
+
+  // Update regular addon quantities
+  const addOns = state.currentConfig?.addOns || {};
+  Object.entries(addOns).forEach(([addonId, qty]) => {
+    const displays = document.querySelectorAll(`[data-addon-id="${addonId}"] .qty-display`);
+    displays.forEach(display => {
+      display.textContent = qty;
+
+      // Toggle quick-add button vs quantity controls
+      const card = display.closest('.masonry-card');
+      if (card) {
+        const quickAddBtn = card.querySelector('.quick-add-btn');
+        const qtyControls = card.querySelector('.quantity-controls');
+
+        if (qty > 0) {
+          if (quickAddBtn) quickAddBtn.style.display = 'none';
+          if (qtyControls) qtyControls.style.display = 'flex';
+        } else {
+          if (quickAddBtn) quickAddBtn.style.display = 'block';
+          if (qtyControls) qtyControls.style.display = 'none';
+        }
+      }
+    });
+  });
+
+  // Update variant quantities
+  const variantAddOns = state.currentConfig?.variantAddOns || {};
+  Object.entries(variantAddOns).forEach(([variantId, qty]) => {
+    const displays = document.querySelectorAll(`.qty-display[data-variant-id="${variantId}"]`);
+    displays.forEach(display => {
+      display.textContent = qty;
+    });
+  });
+}
+
+/**
+ * Handle quantity change for an add-on (DEPRECATED - kept for backwards compatibility)
  * @param {string} addonId - Add-on ID
  * @param {string} categoryKey - Category key
  * @param {number} newQuantity - New quantity

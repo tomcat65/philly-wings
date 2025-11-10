@@ -1348,6 +1348,74 @@ export function applySmartDefaults(packageData, currentConfig = {}) {
   return { config: completeConfig, metadata };
 }
 
+// ===== VARIANT ADD-ONS HELPERS =====
+
+/**
+ * Get quantity for a specific variant
+ * @param {string} variantId - Variant ID
+ * @returns {number} Current quantity
+ */
+export function getVariantQuantity(variantId) {
+  return currentState.currentConfig?.variantAddOns?.[variantId] || 0;
+}
+
+/**
+ * Update quantity for a specific variant
+ * @param {string} variantId - Variant ID
+ * @param {number} quantity - New quantity
+ */
+export function updateVariantQuantity(variantId, quantity) {
+  const currentConfig = currentState.currentConfig || {};
+  const variantAddOns = { ...(currentConfig.variantAddOns || {}) };
+
+  if (quantity <= 0) {
+    delete variantAddOns[variantId];
+  } else {
+    variantAddOns[variantId] = quantity;
+  }
+
+  updateState('currentConfig', {
+    ...currentConfig,
+    variantAddOns
+  });
+
+  // Notify subscribers
+  notifySubscribers('currentConfig');
+}
+
+/**
+ * Get addon quantity (backwards compatible helper)
+ * @param {string} addonId - Add-on ID
+ * @returns {number} Current quantity
+ */
+export function getAddonQuantity(addonId) {
+  return currentState.currentConfig?.addOns?.[addonId] || 0;
+}
+
+/**
+ * Update addon quantity (backwards compatible helper)
+ * @param {string} addonId - Add-on ID
+ * @param {number} quantity - New quantity
+ */
+export function updateAddonQuantity(addonId, quantity) {
+  const currentConfig = currentState.currentConfig || {};
+  const addOns = { ...(currentConfig.addOns || {}) };
+
+  if (quantity <= 0) {
+    delete addOns[addonId];
+  } else {
+    addOns[addonId] = quantity;
+  }
+
+  updateState('currentConfig', {
+    ...currentConfig,
+    addOns
+  });
+
+  // Notify subscribers
+  notifySubscribers('currentConfig');
+}
+
 // ===== INITIALIZATION =====
 
 /**

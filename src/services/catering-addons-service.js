@@ -231,6 +231,49 @@ export async function getAddOnById(addOnId) {
 }
 
 /**
+ * Get variant by variant ID from grouped add-ons
+ * Searches through all categories including those with variants
+ * @param {string} variantId - Variant ID to find
+ * @returns {Promise<Object|null>} Variant data with baseName and packSize, or null
+ */
+export async function getVariantById(variantId) {
+  const categorized = await getAllAddOnsSplitByCategory();
+
+  // Search all categories for the variant
+  for (const category of Object.values(categorized)) {
+    if (!Array.isArray(category)) continue;
+
+    for (const item of category) {
+      // Check if item has variants
+      if (item.hasVariants && item.variants) {
+        for (const [packSize, variant] of Object.entries(item.variants)) {
+          if (variant.id === variantId) {
+            return {
+              ...variant,
+              baseName: item.displayName || item.name,
+              packSize: packSize,
+              category: item.category,
+              imageUrl: item.imageUrl
+            };
+          }
+        }
+      } else {
+        // Single-variant item - check if ID matches
+        if (item.id === variantId) {
+          return {
+            ...item,
+            baseName: item.name,
+            packSize: item.packSize || 'single'
+          };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
  * Get add-ons split into categories for rendering
  * @param {number} tier - Package tier
  * @returns {Promise<Object>} { desserts: [], beverages: [], salads: [], sides: [], quickAdds: [], hotBeverages: [] }
