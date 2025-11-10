@@ -22,60 +22,47 @@
  * @epic SP-013
  */
 
-import { getAddOnsForTier } from '../../services/catering-addons-service.js';
+import { getAllAddOnsSplitByCategory } from '../../services/catering-addons-service.js';
 import { getState, updateState } from '../../services/shared-platter-state-service.js';
 import { recalculatePricing } from '../../utils/pricing-aggregator.js';
 
 /**
- * Add-ons cache (5-minute TTL, tier-specific)
+ * Add-ons cache (5-minute TTL)
  */
 let addOnsCache = {
   data: null,
-  tier: null,
   timestamp: null,
   TTL: 5 * 60 * 1000 // 5 minutes
 };
 
 /**
- * Fetch add-ons for current package tier with caching
- * @param {number} tier - Package tier (1, 2, or 3)
- * @returns {Promise<Object>} Categorized add-ons
+ * Fetch add-ons with caching
+ * Uses same function as boxed meals for consistency
+ * @returns {Promise<Object>} Categorized add-ons with all categories
  */
-async function fetchAddOnsWithCaching(tier) {
+async function fetchAddOnsWithCaching() {
   const now = Date.now();
 
   // Return cache if valid
   if (addOnsCache.data &&
-      addOnsCache.tier === tier &&
       (now - addOnsCache.timestamp) < addOnsCache.TTL) {
     console.log('✅ Using cached add-ons data');
     return addOnsCache.data;
   }
 
-  // Fetch fresh data
+  // Fetch fresh data (same as boxed meals)
   console.log('🔄 Fetching fresh add-ons data from Firestore');
-  const allAddOns = await getAddOnsForTier(tier);
-
-  // Organize by category
-  const categorized = {
-    quickAdds: allAddOns.filter(a => a.category === 'quick-adds'),
-    hotBeverages: allAddOns.filter(a => a.category === 'hot-beverages'),
-    beverages: allAddOns.filter(a => a.category === 'beverages'),
-    desserts: allAddOns.filter(a => a.category === 'desserts'),
-    salads: allAddOns.filter(a => a.category === 'salads'),
-    sides: allAddOns.filter(a => a.category === 'sides')
-  };
+  const categorized = await getAllAddOnsSplitByCategory();
 
   // Update cache
   addOnsCache = {
     data: categorized,
-    tier,
-    timestamp: now
+    timestamp: now,
+    TTL: 5 * 60 * 1000
   };
 
   console.log('✅ Add-ons data cached', {
-    tier,
-    categories: Object.keys(categorized).filter(k => categorized[k].length > 0)
+    categories: Object.keys(categorized).filter(k => categorized[k]?.length > 0)
   });
 
   return categorized;
@@ -138,7 +125,13 @@ function filterAvailableAddOns(categorized, packageData, currentConfig) {
     }),
 
     // QUICK-ADDS: Always show (chips, water always needed)
-    quickAdds: categorized.quickAdds
+    quickAdds: categorized.quickAdds,
+
+    // SAUCES TO-GO: Always show (extra sauces beyond package)
+    saucesToGo: categorized.saucesToGo || [],
+
+    // DIPS TO-GO: Always show (extra dips beyond package)
+    dipsToGo: categorized.dipsToGo || []
   };
 }
 
@@ -154,11 +147,9 @@ export async function renderAddOnsSelector() {
     return '<div class="error-state">No package selected</div>';
   }
 
-  const tier = selectedPackage.tier || 3;
-
   try {
-    // Fetch add-ons with caching
-    const categorized = await fetchAddOnsWithCaching(tier);
+    // Fetch add-ons with caching (same as boxed meals - all add-ons available)
+    const categorized = await fetchAddOnsWithCaching();
 
     // Filter to prevent conflicts
     const filtered = filterAvailableAddOns(
@@ -183,6 +174,8 @@ export async function renderAddOnsSelector() {
         ${renderCategory('🥗 Fresh Salads', 'salads', filtered.salads, currentAddOns.salads, false)}
         ${renderCategory('🥔 Premium Sides', 'sides', filtered.sides, currentAddOns.sides, false)}
         ${renderCategory('🍰 Extra Desserts', 'desserts', filtered.desserts, currentAddOns.desserts, false)}
+        ${renderCategory('🌶️ Sauces To-Go', 'saucesToGo', filtered.saucesToGo, currentAddOns.saucesToGo, false)}
+        ${renderCategory('🥫 Dips To-Go', 'dipsToGo', filtered.dipsToGo, currentAddOns.dipsToGo, false)}
 
         <div class="addons-footer">
           <button class="btn-secondary" id="btn-back-from-addons">
