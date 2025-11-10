@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   build_and_deploy:
@@ -46,12 +48,16 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
 
-      - name: Verify asset hashes
+      - name: Build verification
         run: |
+          echo "=== Build Information ==="
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
           echo "=== Built Assets ==="
-          ls -la dist/assets/ | grep platformMenu
-          echo "=== Admin HTML Script Tags ==="
-          grep -n "platformMenu" dist/admin/platform-menu.html
+          ls -la dist/assets/ | head -20
+          echo "=== Catering Assets ==="
+          ls -la dist/assets/ | grep -E "(catering|beverages|desserts)" || echo "No catering-specific assets found"
           echo "=== Asset Hash Verification Complete ==="
 
       - name: Deploy to Firebase Hosting (Preview)

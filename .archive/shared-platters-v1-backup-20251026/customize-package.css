@@ -1,0 +1,513 @@
+/**
+ * Customize Package Step - Split-screen layout with real-time pricing
+ * Mobile-first responsive design
+ */
+
+/* ============================================================================
+   SPLIT SCREEN LAYOUT
+   ============================================================================ */
+
+.customize-split-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Desktop: Side-by-side layout */
+@media (min-width: 1024px) {
+  .customize-split-screen {
+    flex-direction: row;
+    gap: 2.5rem;
+    align-items: flex-start;
+  }
+
+  .customize-left-panel {
+    flex: 1;
+    min-width: 0; /* Prevent flex overflow */
+  }
+
+  .customize-right-panel {
+    flex: 0 0 380px;
+    position: sticky;
+    top: 120px;
+  }
+}
+
+/* ============================================================================
+   LEFT PANEL - CUSTOMIZATION CONTROLS
+   ============================================================================ */
+
+.customization-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.customize-category {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.category-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.category-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.category-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.customize-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.customize-item:hover {
+  background: #f5f5f5;
+  border-color: rgba(255, 107, 53, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.item-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+/* ============================================================================
+   QUANTITY CONTROLS
+   ============================================================================ */
+
+.quantity-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.qty-btn {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #1a1a1a;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.qty-btn:hover {
+  background: #ff6b35;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.qty-btn:active {
+  transform: scale(0.95);
+}
+
+.qty-btn.qty-minus:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #f5f5f5;
+  color: #999;
+}
+
+.qty-display {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  user-select: none;
+}
+
+.price-delta {
+  min-width: 60px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #999;
+  transition: all 0.2s ease;
+}
+
+/* ============================================================================
+   RIGHT PANEL - PRICE SUMMARY
+   ============================================================================ */
+
+.price-summary {
+  background: #1a1a1a;
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.summary-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-header h4 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ff6b35;
+}
+
+.summary-serves {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.summary-base-price {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.summary-base-price strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.summary-selections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summary-selections h5 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.summary-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-items li {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+}
+
+.price-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ff6b35;
+}
+
+.summary-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0.5rem 0;
+}
+
+.summary-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.price-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.price-line.price-total {
+  padding-top: 0.75rem;
+  border-top: 2px solid rgba(255, 107, 53, 0.3);
+  font-size: 1.25rem;
+  color: #ffffff;
+}
+
+.price-line strong {
+  font-weight: 700;
+  color: #ff6b35;
+  transition: transform 0.2s ease;
+}
+
+#current-total-price {
+  font-size: 1.5rem;
+}
+
+/* ============================================================================
+   MOBILE RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 1023px) {
+  .customize-right-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    background: #1a1a1a;
+    border-radius: 18px 18px 0 0;
+    padding: 1.5rem;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  .price-summary {
+    padding: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .summary-selections {
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  /* Add padding to bottom of left panel so content isn't hidden */
+  .customize-left-panel {
+    padding-bottom: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .customize-category {
+    padding: 1.25rem;
+  }
+
+  .customize-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .item-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .category-title {
+    font-size: 1.125rem;
+  }
+
+  .item-name {
+    font-size: 0.875rem;
+  }
+
+  .price-delta {
+    min-width: auto;
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes pulsePrice {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.price-line strong.price-updated {
+  animation: pulsePrice 0.3s ease;
+}
+
+/* ============================================================================
+   PHOTO CARD QUANTITY OVERLAYS
+   ============================================================================ */
+
+/* Quantity overlay positioned at bottom of photo cards */
+.qty-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 0 0 12px 12px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.qty-overlay .qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  padding: 0.25rem;
+}
+
+.qty-overlay .qty-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.qty-overlay .qty-btn:hover {
+  background: #f0f0f0;
+  border-color: #ff6b35;
+  transform: scale(1.1);
+}
+
+.qty-overlay .qty-btn:active {
+  transform: scale(0.95);
+}
+
+.qty-overlay .qty-btn.qty-minus {
+  color: #d32f2f;
+}
+
+.qty-overlay .qty-btn.qty-plus {
+  color: #2e7d32;
+}
+
+.qty-overlay .qty-display {
+  min-width: 40px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+}
+
+.qty-overlay .price-delta {
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  min-width: 60px;
+  text-align: center;
+}
+
+.qty-overlay .price-delta.price-increase {
+  color: #ffd54f;
+  background: rgba(255, 213, 79, 0.2);
+}
+
+.qty-overlay .price-delta.price-decrease {
+  color: #81c784;
+  background: rgba(129, 199, 132, 0.2);
+}
+
+/* Photo card adjustments for overlay compatibility */
+.photo-card {
+  position: relative;
+  overflow: visible; /* Allow overlay to extend */
+}
+
+.photo-card-image {
+  position: relative;
+}
+
+/* Responsive overlay adjustments */
+@media (max-width: 768px) {
+  .qty-overlay {
+    padding: 0.5rem;
+  }
+
+  .qty-overlay .qty-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+
+  .qty-overlay .qty-display {
+    min-width: 32px;
+    font-size: 1rem;
+  }
+
+  .qty-overlay .price-delta {
+    font-size: 0.85rem;
+    min-width: 50px;
+  }
+}

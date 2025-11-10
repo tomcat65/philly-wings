@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Summary Mockups - Philly Wings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 2rem;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .mockup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .mockup-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .mockup-header {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .mockup-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .mockup-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .pros h4, .cons h4 {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .pros {
+      color: #27ae60;
+    }
+
+    .cons {
+      color: #e74c3c;
+    }
+
+    .pros ul, .cons ul {
+      list-style: none;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .pros li:before {
+      content: "✓ ";
+      font-weight: bold;
+    }
+
+    .cons li:before {
+      content: "✗ ";
+      font-weight: bold;
+    }
+
+    /* Order Summary Styles */
+    .order-summary {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .summary-header {
+      background: #2c3e50;
+      color: white;
+      padding: 1rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .include-item {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .include-item:last-child {
+      border-bottom: none;
+    }
+
+    .include-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .include-icon {
+      color: #27ae60;
+      font-size: 1.2rem;
+    }
+
+    .include-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-left: 0.5rem;
+    }
+
+    .include-badge.modified {
+      background: #ff6b35;
+      color: white;
+    }
+
+    .include-badge.new {
+      background: #27ae60;
+      color: white;
+    }
+
+    .include-badge.standard {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .breakdown-details {
+      margin-left: 1.75rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .breakdown-section {
+      margin-bottom: 0.75rem;
+    }
+
+    .breakdown-section-header {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .breakdown-item {
+      margin-bottom: 0.3rem;
+      color: #666;
+    }
+
+    .breakdown-subitem {
+      margin-left: 1rem;
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .container-highlight {
+      color: #ff6b35;
+      font-weight: 600;
+    }
+
+    .arrow {
+      color: #ff6b35;
+      font-weight: bold;
+    }
+
+    .original-label {
+      color: #7f8c8d;
+      font-size: 0.85rem;
+    }
+
+    /* Approach 2: Two Column */
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .column-header {
+      background: #ecf0f1;
+      padding: 0.75rem;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .column {
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    /* Approach 3: Accordion */
+    .accordion-item {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      background: #f8f9fa;
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+
+    .accordion-header:hover {
+      background: #e9ecef;
+    }
+
+    .accordion-icon {
+      font-size: 0.8rem;
+      transition: transform 0.3s;
+    }
+
+    .accordion-content {
+      padding: 1rem;
+      background: white;
+    }
+
+    .section-label {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-label.package {
+      background: #3498db;
+      color: white;
+    }
+
+    .section-label.changes {
+      background: #e67e22;
+      color: white;
+    }
+
+    .section-label.sauces {
+      background: #e74c3c;
+      color: white;
+    }
+
+    /* Approach 4: Timeline */
+    .timeline-section {
+      margin-bottom: 1.5rem;
+      padding-left: 1rem;
+      border-left: 3px solid #3498db;
+    }
+
+    .timeline-badge {
+      display: inline-block;
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-badge.base {
+      background: #3498db;
+      color: white;
+    }
+
+    .timeline-badge.changes {
+      background: #e67e22;
+      color: white;
+    }
+
+    .delta {
+      color: #95a5a6;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .price-impact {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin-top: 0.75rem;
+      font-weight: 600;
+      color: #856404;
+    }
+
+    .recommendation {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .recommendation h2 {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🍗 Order Summary Mockups</h1>
+    
+    <div class="mockup-grid">
+      
+      <!-- APPROACH 1: INLINE COMPARISON -->
+      <div class="mockup-card">
+        <div class="mockup-header">
+          <div class="mockup-title">Approach 1: Inline Comparison</div>
+          <div class="mockup-subtitle">Recommended • Compact • Mobile-friendly</div>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-header">ORDER SUMMARY</div>
+          
+          <div class="include-item">
+            <div class="include-header">
+              <span class="include-icon">✓</span>
+              <span>Wings: 200 Total</span>
+              <span class="include-badge modified">Modified</span>
+            </div>
+            <div class="breakdown-details">
+              <div class="original-label">└─ Original: 100 Boneless + 100 Bone-In</div>
+              <div style="font-weight: 600; margin: 0.5rem 0;">└─ Your Choice: 90 Boneless + 60 Bone-In + 50 Cauliflower</div>
+              
+              <div class="breakdown-section" style="margin-top: 1rem;">
+                <div class="breakdown-section-header">Sauce Assignments:</div>
+                
+                <div style="margin-left: 1rem;">
+                  <div style="font-weight: 600; margin-top: 0.5rem;">└─ Boneless Wings (90 total)</div>
+                  <div class="breakdown-item">• 45 wings - Buffalo (on the side)</div>
+                  <div class="breakdown-subitem">→ <span class="container-highlight">3 × 1.5oz containers</span></div>
+                  <div class="breakdown-item">• 45 wings - BBQ (tossed in sauce)</div>
+                  
+                  <div style="font-weight: 600; margin-top: 0.75rem;">└─ Bone-In Wings (60 total)</div>
+                  <div class="breakdown-item">• 30 wings - Hot (on the side)</div>
+                  <div class="breakdown-subitem">→ <span class="container-highlight">2 × 1.5oz containers</span></div>
+                  <div class="breakdown-item">• 30 wings - Teriyaki (tossed in sauce)</div>
+                  
+                  <div style="font-weight: 600; margin-top: 0.75rem;">└─ Cauliflower Wings (50 total) <span class="include-badge new">New</span></div>
+                  <div class="breakdown-item">• 50 wings - Garlic Parm (tossed in sauce)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="include-item">
+            <div class="include-header">
+              <span class="include-icon">✓</span>
+              <span>Dips: 15 Total (3 packs of 5)</span>
+              <span class="include-badge standard">Standard</span>
+            </div>
+            <div class="breakdown-details">
+              <div class="breakdown-item">└─ 5 Ranch, 5 Blue Cheese, 5 Honey Mustard</div>
+              <div class="original-label">└─ No changes</div>
+            </div>
+          </div>
+
+          <div class="include-item">
+            <div class="include-header">
+              <span class="include-icon">✓</span>
+              <span>Sides: 2 Large Sides</span>
+              <span class="include-badge standard">Standard</span>
+            </div>
+            <div class="breakdown-details">
+              <div class="breakdown-item">└─ Fries + Mac & Cheese</div>
+              <div class="original-label">└─ No changes</div>
+            </div>
+          </div>
+
+          <div class="include-item">
+            <div class="include-header">
+              <span class="include-icon">✓</span>
+              <span>Complete serving supplies</span>
+            </div>
+            <div class="breakdown-details">
+              <div class="breakdown-item">└─ Plates, napkins, utensils, wet wipes</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros:</h4>
+            <ul>
+              <li>Very compact</li>
+              <li>Easy to scan</li>
+              <li>Mobile-friendly</li>
+              <li>Shows kitchen details</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons:</h4>
+            <ul>
+              <li>Might be busy if many changes</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROACH 2: TWO COLUMN -->
+      <div class="mockup-card">
+        <div class="mockup-header">
+          <div class="mockup-title">Approach 2: Two-Column Side-by-Side</div>
+          <div class="mockup-subtitle">Clear separation • Good for desktop</div>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-header">ORDER SUMMARY</div>
+          
+          <div style="padding: 1rem;">
+            <div class="two-column" style="margin-bottom: 1.5rem;">
+              <div class="column-header">STANDARD PACKAGE</div>
+              <div class="column-header">YOUR CUSTOMIZATIONS</div>
+            </div>
+
+            <div class="two-column" style="margin-bottom: 1.5rem;">
+              <div class="column">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">✓ 200 Wings</div>
+                <div style="margin-left: 1rem; color: #666;">
+                  <div>• 100 Boneless</div>
+                  <div>• 100 Bone-In</div>
+                </div>
+              </div>
+              <div class="column">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">✓ 200 Wings <span class="include-badge modified">Modified</span></div>
+                <div style="margin-left: 1rem; color: #666;">
+                  <div>• 90 Boneless</div>
+                  <div>• 60 Bone-In</div>
+                  <div>• 50 Cauliflower <span class="include-badge new">New</span></div>
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.85rem;">
+                  <div style="font-weight: 600;">Sauce Assignments:</div>
+                  <div style="margin-left: 0.5rem; margin-top: 0.5rem;">
+                    <div>Boneless: Buffalo (45, side - 3 cont.), BBQ (45, tossed)</div>
+                    <div>Bone-In: Hot (30, side - 2 cont.), Teriyaki (30, tossed)</div>
+                    <div>Cauliflower: Garlic Parm (50, tossed)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="two-column">
+              <div class="column">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">✓ 15 Dips (3 packs)</div>
+                <div style="margin-left: 1rem; color: #666; font-size: 0.9rem;">
+                  Ranch, Blue Cheese, Honey Mustard
+                </div>
+              </div>
+              <div class="column">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">✓ 15 Dips <span class="include-badge standard">Standard</span></div>
+                <div style="margin-left: 1rem; color: #888; font-size: 0.9rem;">
+                  (No changes)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros:</h4>
+            <ul>
+              <li>Very clear separation</li>
+              <li>Easy comparison</li>
+              <li>Good for desktop</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons:</h4>
+            <ul>
+              <li>Takes horizontal space</li>
+              <li>Awkward on mobile</li>
+              <li>Empty right side for unmodified</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROACH 3: ACCORDION -->
+      <div class="mockup-card">
+        <div class="mockup-header">
+          <div class="mockup-title">Approach 3: Accordion Expand/Collapse</div>
+          <div class="mockup-subtitle">Space-efficient • Interactive</div>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-header">ORDER SUMMARY</div>
+          
+          <div style="padding: 1rem;">
+            <!-- Expanded section -->
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <span>▼ Wings: 200 Total <span class="include-badge modified">Modified</span></span>
+              </div>
+              <div class="accordion-content">
+                <div class="section-label package">📦 STANDARD PACKAGE INCLUDES:</div>
+                <div style="margin-left: 1rem; margin-bottom: 1rem; color: #666;">
+                  <div>• 100 Boneless Wings</div>
+                  <div>• 100 Bone-In Wings (Mixed - Drums & Flats)</div>
+                </div>
+
+                <div class="section-label changes">✏️ YOUR CUSTOMIZATIONS:</div>
+                <div style="margin-left: 1rem; margin-bottom: 1rem; color: #666;">
+                  <div>• Changed to: 90 Boneless + 60 Bone-In + 50 Cauliflower</div>
+                  <div style="color: #e67e22; font-weight: 600;">• Price Impact: +$27.00 (cauliflower upcharge)</div>
+                </div>
+
+                <div class="section-label sauces">🌶️ SAUCE ASSIGNMENTS YOU ADDED:</div>
+                <div style="margin-left: 1rem; font-size: 0.9rem; color: #666;">
+                  <div style="margin-top: 0.5rem;">
+                    <div style="font-weight: 600;">Boneless (90):</div>
+                    <div style="margin-left: 1rem;">45 - Buffalo (side, 3 containers), 45 - BBQ (tossed)</div>
+                  </div>
+                  <div style="margin-top: 0.5rem;">
+                    <div style="font-weight: 600;">Bone-In (60):</div>
+                    <div style="margin-left: 1rem;">30 - Hot (side, 2 containers), 30 - Teriyaki (tossed)</div>
+                  </div>
+                  <div style="margin-top: 0.5rem;">
+                    <div style="font-weight: 600;">Cauliflower (50):</div>
+                    <div style="margin-left: 1rem;">50 - Garlic Parm (tossed)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Collapsed sections -->
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <span>▶ Dips: 15 Total <span class="include-badge standard">Standard</span></span>
+                <span style="font-size: 0.85rem; color: #888;">(Click to expand)</span>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <span>▶ Sides: 2 Large Sides <span class="include-badge standard">Standard</span></span>
+                <span style="font-size: 0.85rem; color: #888;">(Click to expand)</span>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <span>▶ Supplies: Complete serving set</span>
+                <span style="font-size: 0.85rem; color: #888;">(Click to expand)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros:</h4>
+            <ul>
+              <li>Clean collapsed view</li>
+              <li>Saves vertical space</li>
+              <li>Icons make it clear</li>
+              <li>Good for mobile</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons:</h4>
+            <ul>
+              <li>Requires interaction</li>
+              <li>User might miss details</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROACH 4: TIMELINE/BADGE -->
+      <div class="mockup-card">
+        <div class="mockup-header">
+          <div class="mockup-title">Approach 4: Badge-Based Timeline</div>
+          <div class="mockup-subtitle">Shows deltas • Price impact prominent</div>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-header">ORDER SUMMARY</div>
+          
+          <div class="include-item">
+            <div class="include-header">
+              <span class="include-icon">✓</span>
+              <span>Wings: 200 Total</span>
+              <span class="include-badge modified">Modified</span>
+            </div>
+
+            <div class="timeline-section">
+              <div class="timeline-badge base">🏷️ PACKAGE INCLUDES (BASE):</div>
+              <div style="margin-left: 1rem; color: #666;">
+                <div>• 100 Boneless Wings</div>
+                <div>• 100 Bone-In Wings</div>
+              </div>
+            </div>
+
+            <div class="timeline-section">
+              <div class="timeline-badge changes">🔄 YOUR CHANGES:</div>
+              <div style="margin-left: 1rem; color: #666;">
+                <div style="margin-bottom: 0.5rem; font-weight: 600;">Changed distribution:</div>
+                <div style="margin-left: 1rem;">
+                  <div>• 90 Boneless <span class="delta">(-10)</span></div>
+                  <div>• 60 Bone-In <span class="delta">(-40)</span></div>
+                  <div>• 50 Cauliflower <span class="delta">(+50)</span> <span class="include-badge new">New</span></div>
+                </div>
+
+                <div style="margin: 0.75rem 0 0.5rem 0; font-weight: 600;">Added sauce assignments:</div>
+                <div style="margin-left: 1rem; font-size: 0.9rem;">
+                  <div>Boneless: Buffalo (45, side - 3 cont.), BBQ (45, tossed)</div>
+                  <div>Bone-In: Hot (30, side - 2 cont.), Teriyaki (30, tossed)</div>
+                  <div>Cauliflower: Garlic Parm (50, tossed)</div>
+                </div>
+              </div>
+
+              <div class="price-impact">
+                💰 Price Impact: +$27.00
+              </div>
+            </div>
+          </div>
+
+          <div class="include-item">
+            <div class="include-header">
+              <span class="include-icon">✓</span>
+              <span>Dips: 15 Total</span>
+              <span class="include-badge standard">Standard</span>
+            </div>
+
+            <div class="timeline-section">
+              <div class="timeline-badge base">🏷️ PACKAGE INCLUDES:</div>
+              <div style="margin-left: 1rem; color: #666; margin-bottom: 0.5rem;">
+                • 15 dips (3 packs of 5): Ranch, Blue Cheese, Honey Mustard
+              </div>
+              <div style="margin-left: 1rem; color: #27ae60; font-weight: 600;">
+                ✅ No changes - keeping as standard
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>Pros:</h4>
+            <ul>
+              <li>Very clear structure</li>
+              <li>Shows deltas (+/-)</li>
+              <li>Price impact prominent</li>
+              <li>Mobile-friendly</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>Cons:</h4>
+            <ul>
+              <li>More verbose</li>
+              <li>Takes vertical space</li>
+              <li>Repeated structure</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="recommendation">
+      <h2>✨ My Recommendation: Approach 1 (Inline Comparison)</h2>
+      <p>Most compact, mobile-friendly, and kitchen-ready with clear modifications</p>
+    </div>
+
+  </div>
+</body>
+</html>

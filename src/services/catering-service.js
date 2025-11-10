@@ -6,6 +6,43 @@ import { db } from '../firebase-config.js';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 
 /**
+ * Normalize addon array with image fallbacks
+ * @param {Array|Object} field - Raw addon data from Firestore
+ * @param {string} category - Addon category (cold-sides, salads, desserts, beverages)
+ * @returns {Array} Normalized addons with image fallback chain
+ */
+function normalizeAddonArray(field, category) {
+  const arr = Array.isArray(field) ? field : (field ? Object.values(field) : []);
+  return arr.map(item => ({
+    ...item,
+    // Image fallback chain: specific item → category → default placeholder
+    image: item.image || `/images/addons/${category}.webp`,
+    fallback: `/images/placeholders/addon-default.webp`
+  }));
+}
+
+/**
+ * Normalize package data to ensure consistent schema
+ * Prevents "t is not iterable" errors in Step 5
+ * Enhanced with image fallback system for visual richness
+ * @param {Object} pkg - Raw package from Firestore
+ * @returns {Object} Normalized package with guaranteed array fields and image fallbacks
+ */
+export function normalizePackageRecord(pkg) {
+  return {
+    ...pkg,
+    isPlantBased: Boolean(pkg.isPlantBased),
+    // Force-cast to arrays with image fallbacks
+    coldSides: normalizeAddonArray(pkg.coldSides, 'cold-sides'),
+    salads: normalizeAddonArray(pkg.salads, 'salads'),
+    desserts: normalizeAddonArray(pkg.desserts, 'desserts'),
+    beverages: normalizeAddonArray(pkg.beverages, 'beverages'),
+    // Package hero image fallback - check both heroImage and imageUrl
+    heroImage: pkg.heroImage || pkg.imageUrl || '/images/placeholders/package-default.webp'
+  };
+}
+
+/**
  * Get all active catering packages
  * @returns {Promise<Array>} Array of catering packages
  */
@@ -19,10 +56,12 @@ export async function getCateringPackages() {
     );
 
     const snapshot = await getDocs(q);
-    const packages = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const packages = snapshot.docs.map(doc =>
+      normalizePackageRecord({
+        id: doc.id,
+        ...doc.data()
+      })
+    );
 
     // Sort by basePrice in memory after fetching
     return packages.sort((a, b) => {
@@ -139,119 +178,12 @@ export function getCauliflowerCapacity(orderDate) {
 /**
  * Get single package by ID
  * @param {string} packageId - Package document ID
- * @returns {Promise<Object|null>} Package data or null
+ * @returns {Promise<Object|null>} Package data or null (normalized)
  */
 export async function getPackageById(packageId) {
   const packages = await getCateringPackages();
-  return packages.find(pkg => pkg.id === packageId) || null;
-}
-
-/**
- * Get all 14 signature sauces for display
- * @returns {Array} Sauce information
- */
-export function getAllSauces() {
-  // Static sauce list matching what we send to ezCater
-  return [
-    {
-      name: "Philly Classic Hot",
-      description: "City pride - classic buffalo heat",
-      heatLevel: 3,
-      category: "philly-signature",
-      story: "The original. What put us on the map. Classic buffalo heat with Philly attitude."
-    },
-    {
-      name: "Northeast Hot Lemon",
-      description: "Spicy lemon pepper - Oxford Circle style",
-      heatLevel: 3,
-      category: "philly-signature",
-      story: "Named for Oxford Circle, Mayfair, and Frankford where Arleth grew up. Spicy lemon pepper with cayenne kick."
-    },
-    {
-      name: "Broad & Pattison Burn",
-      description: "Named for the sports complex",
-      heatLevel: 4,
-      category: "philly-signature",
-      story: "Named for the intersection where the Eagles, Phillies, and Sixers play. Heat that matches game day intensity."
-    },
-    {
-      name: "Frankford Cajun",
-      description: "Northeast Philly cajun seasoning",
-      heatLevel: 3,
-      category: "philly-signature",
-      story: "Frankford Avenue meets Louisiana. Northeast Philly's take on cajun spice."
-    },
-    {
-      name: "Gritty's Revenge",
-      description: "Flyers mascot - scorpion pepper heat!",
-      heatLevel: 5,
-      category: "philly-signature",
-      story: "Named after the Flyers' chaotic mascot. Scorpion pepper heat that's absolutely unhinged. Not for the weak."
-    },
-    {
-      name: "Honey BBQ",
-      description: "Sweet and smoky crowd-pleaser",
-      heatLevel: 1,
-      category: "classic",
-      story: "Sweet, smoky, and always a crowd favorite. Perfect for the team members who like it mild."
-    },
-    {
-      name: "Teriyaki",
-      description: "Asian-inspired sweet glaze",
-      heatLevel: 1,
-      category: "classic",
-      story: "Asian-inspired sweetness that balances out the heat lovers on your team."
-    },
-    {
-      name: "Lemon Pepper",
-      description: "Zesty citrus seasoning",
-      heatLevel: 1,
-      category: "classic",
-      story: "Bright, zesty, and no heat. For the sauce skeptics who still want flavor."
-    },
-    {
-      name: "Buffalo",
-      description: "Classic tangy buffalo sauce",
-      heatLevel: 2,
-      category: "classic",
-      story: "The standard bearer. Classic tangy buffalo that everyone knows and loves."
-    },
-    {
-      name: "Nashville Hot",
-      description: "Southern-style cayenne heat",
-      heatLevel: 4,
-      category: "classic",
-      story: "Music City meets the City of Brotherly Love. Southern cayenne heat done right."
-    },
-    {
-      name: "BBQ",
-      description: "Traditional smoky barbecue",
-      heatLevel: 1,
-      category: "classic",
-      story: "Traditional smoky barbecue. Simple, reliable, delicious."
-    },
-    {
-      name: "Mild",
-      description: "Gentle heat for sensitive palates",
-      heatLevel: 1,
-      category: "classic",
-      story: "For your team members who think ketchup is spicy. We got you."
-    },
-    {
-      name: "Garlic Parmesan",
-      description: "Savory garlic butter coating",
-      heatLevel: 0,
-      category: "classic",
-      story: "Savory garlic and parmesan. Zero heat, all flavor. The safe choice."
-    },
-    {
-      name: "Sweet Chili",
-      description: "Asian sweet heat",
-      heatLevel: 2,
-      category: "classic",
-      story: "Sweet with a gentle kick. Asian-inspired flavor that finds the middle ground."
-    }
-  ];
+  const pkg = packages.find(pkg => pkg.id === packageId) || null;
+  return pkg ? normalizePackageRecord(pkg) : null;
 }
 
 /**

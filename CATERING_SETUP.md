@@ -38,10 +38,10 @@ node scripts/seed-catering-data.js --emulator
 **Expected Output:**
 ```
 🌱 Seeding catering packages to Firestore...
-✅ Prepared: The Lunch Box Special (Tier 1, serves 10-12)
-✅ Prepared: The Sampler Spread (Tier 1, serves 12-15)
-... (6 packages total)
-🎉 Successfully seeded 6 catering packages!
+✅ Prepared: The Lunch Box Special (Tier 1, serves 10-14)
+✅ Prepared: The Sampler Spread (Tier 1, serves 14-18)
+... (8 packages total)
+🎉 Successfully seeded 8 catering packages!
 
 📅 Initializing catering availability for next 90 days...
 ✅ Initialized: 2025-10-13
@@ -79,7 +79,7 @@ curl -X POST http://localhost:5002/philly-wings/us-central1/ezCaterOrderWebhook 
       "company_name": "Test Company",
       "contact_name": "John Doe",
       "email": "john@test.com",
-      "phone": "555-1234"
+      "phone": "267-376-3113"
     },
     "items": [{
       "name": "The Lunch Box Special",
@@ -157,6 +157,8 @@ firebase functions:config:get
 # Seed to production Firestore (NO --emulator flag)
 node scripts/seed-catering-data.js
 ```
+
+> ℹ️ **Service account required:** Set `GOOGLE_APPLICATION_CREDENTIALS` to your Firebase service account JSON before running the production seed command, or place `serviceAccountKey.json` in the project root. The seed script reads this path automatically.
 
 ### Step 4: Deploy Functions
 
@@ -387,7 +389,7 @@ firebase functions:config:get ezcater.webhook_secret
 ```
 philly-wings/
 ├── scripts/
-│   └── seed-catering-data.js          ← Seed 6 packages + availability
+│   └── seed-catering-data.js          ← Seed 8 packages + availability
 ├── functions/
 │   ├── ezcater/
 │   │   ├── menuSync.js                ← Menu API sync logic

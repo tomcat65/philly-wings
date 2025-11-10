@@ -1,0 +1,1442 @@
+/**
+ * Shared Platters V2 - Centralized State Management Service
+ *
+ * Manages the complete state for the shared platters catering flow with:
+ * - Two-path entry system (Quick Browse vs Guided Planner)
+ * - Complex nested configuration (wings, sauces, dips, sides, desserts, beverages)
+ * - Draft persistence with localStorage (24hr expiry)
+ * - Event system for reactive updates (pub/sub pattern)
+ * - Step validation before transitions
+ *
+ * Created: 2025-10-26
+ * Epic: SP-V2-001
+ * Story: SP-005 (State Management Setup)
+ */
+
+import { getPackageById } from './catering-service.js';
+import { recalculatePricing as aggregatorRecalculatePricing } from '../utils/pricing-aggregator.js';
+import { packageTransformer } from './package-data-transformer.js';
+
+// ===== INITIAL STATE TEMPLATE =====
+const INITIAL_STATE = {
+  // Flow metadata
+  flowType: null,                     // 'quick-browse' | 'guided-planner'
+  currentStep: 'entry-choice',        // Current step in the flow
+  lastUpdated: null,                  // Timestamp of last state change
+
+  // Selected package from cateringPackages collection
+  selectedPackage: null,              // Full package object from Firestore
+
+  // Event details (captured in Guided Planner path)
+  eventDetails: {
+    guestCount: 10,                   // Default minimum
+    eventType: '',                    // 'corporate' | 'sports' | 'party' | 'other'
+    dietaryNeeds: []                  // ['vegetarian', 'vegan', 'gluten-free', 'nut-allergies', 'other']
+  },
+
+  // Current customization configuration
+  currentConfig: {
+    // Wings distribution
+    wingDistribution: {
+      boneless: 0,
+      boneIn: 0,
+      cauliflower: 0,                  // NEW: Plant-based wings
+      boneInStyle: 'mixed',            // 'mixed' | 'flats' | 'drums'
+      distributionSource: null         // NEW: 'conversational-wizard' | 'manual' | null
+    },
+
+    // Sauces (multiple selections based on package)
+    sauces: [],                       // [{id, name, heatLevel, imageUrl, quantity}] - LEGACY, kept for migration
+
+    // Sauce Assignments (NEW: Per-wing-type sauce distribution)
+    sauceAssignments: {
+      selectedSauces: [],             // [{id, name, category, isDryRub, heatLevel, imageUrl}]
+      appliedPreset: null,            // 'all-same' | 'even-mix' | 'one-per-type' | 'custom' | null
+      assignments: {
+        boneless: [],                 // [{sauceId, sauceName, sauceCategory, wingCount, applicationMethod: 'tossed'|'on-the-side'}]
+        boneIn: [],                   // Same structure
+        cauliflower: []               // Same structure
+      },
+      summary: {
+        totalWingsAssigned: 0,
+        byApplicationMethod: {
+          tossed: 0,
+          onTheSide: 0
+        },
+        containersNeeded: 0,
+        validations: {
+          boneless: { valid: true, errors: [] },
+          boneIn: { valid: true, errors: [] },
+          cauliflower: { valid: true, errors: [] },
+          overall: { valid: true, errors: [] }
+        }
+      }
+    },
+
+    // Dips
+    dips: [],                         // [{id, name, quantity}]
+    noDips: false,                    // Skip dips option
+
+    // Sides
+    sides: {
+      chips: { quantity: 0 },         // Miss Vickie's 5-packs
+      coldSides: [],                  // [{id, name, quantity, serves}]
+      salads: []                      // [{id, name, quantity, serves}]
+    },
+
+    // Desserts
+    desserts: [],                     // [{id, name, quantity, servings}]
+
+    // Beverages (UNIQUE TO SHARED PLATTERS)
+    beverages: {
+      cold: [],                       // [{id, name, size, quantity, serves}]
+      hot: []                         // [{id, name, size, quantity, serves}]
+    },
+
+    // Special instructions
+    specialInstructions: ''
+  },
+
+  // Add-ons from "Nobody Left Behind" screen
+  extras: {
+    quickAdds: [],                    // Popular add-ons
+    additionalWings: [],              // Extra wings
+    premiumSides: [],                 // Premium sides
+    desserts: [],                     // Extra desserts
+    beverages: []                     // Extra beverages
+  },
+
+  // Contact & delivery information
+  contact: {
+    company: '',
+    name: '',
+    email: '',
+    phone: '',
+    deliveryAddress: {
+      street: '',
+      street2: '',
+      city: '',
+      state: '',
+      zip: ''
+    },
+    billingAddress: {
+      sameAsDelivery: true,
+      street: '',
+      street2: '',
+      city: '',
+      state: '',
+      zip: ''
+    },
+    deliveryDate: '',                 // YYYY-MM-DD
+    deliveryTime: '',                 // HH:MM
+    notes: ''
+  },
+
+  // Pricing breakdown
+  pricing: {
+    basePrice: 0,
+    modificationsTotal: 0,            // From Richard's pricing system
+    extrasTotal: 0,
+    subtotal: 0,
+    tax: 0,
+    total: 0
+  },
+
+  // Progress tracking
+  progress: {
+    wingsComplete: false,
+    saucesComplete: false,
+    dipsComplete: false,
+    sidesComplete: false,
+    dessertsComplete: false,
+    beveragesComplete: false,
+    extrasComplete: false,
+    contactComplete: false
+  }
+};
+
+/**
+ * Deep clone helper for state management
+ * Uses structuredClone if available, falls back to JSON serialization
+ * @returns {Object} Deep copy of INITIAL_STATE
+ */
+function cloneInitialState() {
+  if (typeof structuredClone !== 'undefined') {
+    return structuredClone(INITIAL_STATE);
+  }
+  return JSON.parse(JSON.stringify(INITIAL_STATE));
+}
+
+// ===== STATE MANAGEMENT =====
+let currentState = cloneInitialState();
+const stateListeners = {};  // Event subscribers
+const DRAFT_KEY = 'philly-wings-shared-platter-draft';
+const DRAFT_VERSION = 1;  // Schema version for draft migration
+const DRAFT_EXPIRY_HOURS = 24;
+let saveDraftTimeout = null;  // For debouncing
+
+/**
+ * Get current state (immutable copy)
+ * @returns {Object} Deep copy of current state
+ */
+export function getState() {
+  return JSON.parse(JSON.stringify(currentState));
+}
+
+/**
+ * Get initial state template (for testing)
+ * @returns {Object} Deep copy of INITIAL_STATE
+ */
+export function getInitialState() {
+  return cloneInitialState();
+}
+
+/**
+ * Update state at a specific path
+ * @param {string} path - Dot-notation path (e.g., 'currentConfig.sauces')
+ * @param {*} value - New value to set
+ * @param {boolean} silent - If true, don't publish change event
+ */
+export function updateState(path, value, silent = false) {
+  const pathParts = path.split('.');
+  let target = currentState;
+
+  // DEBUG: Track wingDistribution changes
+  const isWingDistributionChange = path === 'currentConfig.wingDistribution';
+  const isCurrentConfigChange = path.startsWith('currentConfig.');
+
+  // CRITICAL: Track WHO is setting wingDistribution to null
+  if (path === 'currentConfig.wingDistribution' && value === null) {
+    console.error('🚨 [BUG] Something is setting wingDistribution to NULL!');
+    console.trace(); // Show full stack trace
+  }
+
+  if (isCurrentConfigChange) {
+    console.log(`🐛 [STATE DEBUG] updateState called: path="${path}"`, {
+      wingDistributionBefore: currentState.currentConfig?.wingDistribution,
+      newValue: path === 'currentConfig.wingDistribution' ? value : `<${path} update>`
+    });
+  }
+
+  // Navigate to parent object
+  for (let i = 0; i < pathParts.length - 1; i++) {
+    if (!target[pathParts[i]]) {
+      target[pathParts[i]] = {};
+    }
+    target = target[pathParts[i]];
+  }
+
+  // Set value
+  const key = pathParts[pathParts.length - 1];
+  target[key] = value;
+
+  // DEBUG: Verify wingDistribution wasn't cleared
+  if (isCurrentConfigChange && !isWingDistributionChange) {
+    console.log('🐛 [STATE DEBUG] After setting key:', {
+      path,
+      wingDistributionAfter: currentState.currentConfig?.wingDistribution
+    });
+  }
+
+  // Update lastUpdated timestamp
+  currentState.lastUpdated = new Date().toISOString();
+
+  // Publish change event
+  if (!silent) {
+    publishStateChange(path, value);
+  }
+
+  // Auto-save draft
+  saveDraft();
+}
+
+/**
+ * Batch update multiple state paths
+ * @param {Object} updates - Object with path:value pairs
+ */
+export function batchUpdate(updates) {
+  Object.entries(updates).forEach(([path, value]) => {
+    updateState(path, value, true);  // Silent updates
+  });
+
+  // Publish changes for each path individually
+  Object.entries(updates).forEach(([path, value]) => {
+    publishStateChange(path, value);
+  });
+
+  // Also publish wildcard event
+  publishStateChange('*', currentState);
+  saveDraft();
+}
+
+/**
+ * Reset state to initial
+ * @param {boolean} clearDraft - If true, also clear localStorage draft
+ */
+export function resetState(clearDraft = true) {
+  currentState = cloneInitialState();
+  currentState.lastUpdated = new Date().toISOString();
+
+  if (clearDraft) {
+    localStorage.removeItem(DRAFT_KEY);
+  }
+
+  publishStateChange('*', currentState);
+}
+
+/**
+ * Validate state for a specific step
+ * @param {string} step - Step to validate
+ * @returns {Object} {valid: boolean, errors: string[]}
+ */
+export function validateState(step) {
+  const errors = [];
+
+  switch (step) {
+    case 'entry-choice':
+      // Always valid
+      break;
+
+    case 'package-selection':
+    case 'package-gallery':
+      if (!currentState.selectedPackage) {
+        errors.push('Please select a package');
+      }
+      break;
+
+    case 'event-details':
+      if (currentState.flowType === 'guided-planner') {
+        if (!currentState.eventDetails.guestCount || currentState.eventDetails.guestCount < 10) {
+          errors.push('Guest count must be at least 10');
+        }
+        if (!currentState.eventDetails.eventType) {
+          errors.push('Please select an event type');
+        }
+      }
+      break;
+
+    case 'package-recommendations':
+      if (!currentState.selectedPackage) {
+        errors.push('Please select a package from recommendations');
+      }
+      break;
+
+    case 'customization':
+      if (!currentState.selectedPackage) {
+        errors.push('No package selected');
+      }
+      // Wing distribution validation (BUG FIX 2025-11-09: include cauliflower wings)
+      const totalWings = currentState.currentConfig.wingDistribution.boneless +
+                         currentState.currentConfig.wingDistribution.boneIn +
+                         (currentState.currentConfig.wingDistribution.cauliflower || 0);
+      const expectedTotalWings = currentState.selectedPackage?.wingOptions?.totalWings;
+      if (currentState.selectedPackage && expectedTotalWings && totalWings !== expectedTotalWings) {
+        errors.push(`Wing distribution must total ${expectedTotalWings} wings`);
+      }
+      // Sauce validation
+      if (currentState.currentConfig.sauces.length === 0) {
+        errors.push('Please select at least one sauce');
+      }
+      break;
+
+    case 'contact':
+      const { contact } = currentState;
+      if (!contact.company) errors.push('Company name required');
+      if (!contact.name) errors.push('Contact name required');
+      if (!contact.email) errors.push('Email required');
+      if (!contact.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.push('Valid email required');
+      if (!contact.phone) errors.push('Phone number required');
+      if (!contact.deliveryAddress.street) errors.push('Delivery address required');
+      if (!contact.deliveryAddress.city) errors.push('City required');
+      if (!contact.deliveryAddress.state) errors.push('State required');
+      if (!contact.deliveryAddress.zip) errors.push('ZIP code required');
+      if (!contact.deliveryDate) errors.push('Delivery date required');
+      if (!contact.deliveryTime) errors.push('Delivery time required');
+      break;
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+// ===== EVENT SYSTEM (PUB/SUB) =====
+
+/**
+ * Subscribe to state changes
+ * @param {string} path - Path to watch ('*' for all changes, 'foo.*' for wildcard)
+ * @param {Function} callback - Function to call on change (receives value)
+ * @returns {Function} Unsubscribe function
+ */
+export function onStateChange(path, callback) {
+  if (!stateListeners[path]) {
+    stateListeners[path] = [];
+  }
+
+  stateListeners[path].push(callback);
+
+  // Return unsubscribe function
+  return () => {
+    const index = stateListeners[path].indexOf(callback);
+    if (index > -1) {
+      stateListeners[path].splice(index, 1);
+    }
+  };
+}
+
+/**
+ * Subscribe to all state changes (convenience wrapper)
+ * @param {Function} callback - Function to call on any change
+ * @returns {Function} Unsubscribe function
+ */
+export function subscribeAll(callback) {
+  return onStateChange('*', callback);
+}
+
+/**
+ * Publish state change event
+ * @param {string} path - Path that changed
+ * @param {*} value - New value
+ */
+function publishStateChange(path, value) {
+  // Notify exact path listeners
+  if (stateListeners[path]) {
+    stateListeners[path].forEach(callback => callback(value, path));
+  }
+
+  // Notify wildcard/glob listeners (e.g., 'currentConfig.*' matches 'currentConfig.sauces')
+  Object.keys(stateListeners).forEach(listenerPath => {
+    if (listenerPath !== path && listenerPath !== '*' && listenerPath.endsWith('.*')) {
+      const prefix = listenerPath.slice(0, -2); // Remove '.*'
+      if (path.startsWith(prefix + '.')) {
+        stateListeners[listenerPath].forEach(callback => callback(value, path));
+      }
+    }
+  });
+
+  // Notify global wildcard listeners
+  if (stateListeners['*'] && path !== '*') {
+    stateListeners['*'].forEach(callback => callback(value, path));
+  }
+}
+
+// ===== LOCALSTORAGE DRAFT PERSISTENCE =====
+
+/**
+ * Save current state to localStorage as draft (debounced 1 second)
+ */
+export function saveDraft() {
+  // Clear existing timeout
+  if (saveDraftTimeout) {
+    clearTimeout(saveDraftTimeout);
+  }
+
+  // Set new debounced save
+  saveDraftTimeout = setTimeout(() => {
+    try {
+      const draft = {
+        version: DRAFT_VERSION,
+        state: currentState,
+        savedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + DRAFT_EXPIRY_HOURS * 60 * 60 * 1000).toISOString()
+      };
+
+      // DEBUG: Log what wingDistribution is being saved
+      console.log('🐛 [SAVE DEBUG] Saving draft with wingDistribution:', currentState.currentConfig?.wingDistribution);
+
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+    }
+  }, 1000); // 1 second debounce
+}
+
+/**
+ * Migrate draft from older versions
+ * @param {Object} draft - Draft object to migrate
+ * @returns {Object} Migrated draft
+ */
+function migrateDraft(draft) {
+  const version = draft.version || 0;
+
+  // Version 0 -> 1 (example migration)
+  if (version < 1) {
+    console.log('Migrating draft from version', version, 'to 1');
+    // No actual schema changes yet, just add version
+    draft.version = 1;
+  }
+
+  // Future migrations go here
+  // if (version < 2) { ... }
+
+  return draft;
+}
+
+/**
+ * Deep merge helper - merges source onto target recursively
+ * @param {Object} target - Base object
+ * @param {Object} source - Object to merge in
+ * @returns {Object} Merged object
+ */
+function deepMerge(target, source) {
+  const result = { ...target };
+
+  const cloneValue = value => {
+    if (Array.isArray(value)) {
+      return value.map(item => cloneValue(item));
+    }
+    if (value && typeof value === 'object') {
+      return deepMerge({}, value);
+    }
+    return value;
+  };
+
+  for (const key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      const value = source[key];
+
+      if (Array.isArray(value)) {
+        result[key] = cloneValue(value);
+      } else if (value && typeof value === 'object') {
+        result[key] = deepMerge(target[key] || {}, value);
+      } else {
+        result[key] = value;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Load draft from localStorage
+ * @returns {boolean} True if draft loaded successfully
+ */
+export function loadDraft() {
+  try {
+    const draftJson = localStorage.getItem(DRAFT_KEY);
+    if (!draftJson) {
+      return false;
+    }
+
+    let draft = JSON.parse(draftJson);
+
+    // Check expiry
+    if (new Date(draft.expiresAt) < new Date()) {
+      console.log('Draft expired, clearing...');
+      localStorage.removeItem(DRAFT_KEY);
+      return false;
+    }
+
+    // Migrate if needed
+    if (!draft.version || draft.version < DRAFT_VERSION) {
+      draft = migrateDraft(draft);
+    }
+
+    // Deep clone initial state and merge draft onto it
+    // This ensures any new schema keys are present
+    const baseState = cloneInitialState();
+    currentState = deepMerge(baseState, draft.state);
+
+    // DEBUG: Check what wingDistribution the draft had
+    console.log('🐛 [DRAFT DEBUG] Draft loaded with wingDistribution:', currentState.currentConfig?.wingDistribution);
+
+    // MIGRATION: Clear NULL wingDistribution from draft (Bug #4 fix)
+    // Draft may have been saved BEFORE wingDistribution was calculated
+    // Null wingDistribution means it needs to be recalculated from wizard/package defaults
+    if (currentState.currentConfig && currentState.currentConfig.wingDistribution === null) {
+      console.warn('⚠️ Clearing null wingDistribution from draft - will recalculate from wizard/defaults');
+      delete currentState.currentConfig.wingDistribution;
+    }
+
+    // MIGRATION: ALWAYS clear sauces from draft
+    // Sauces should ONLY appear after customer actively selects them in current session
+    // Draft sauces are stale and may be from different package or old schema
+    if (currentState.currentConfig?.sauces?.length > 0) {
+      console.warn('⚠️ Clearing sauces from draft - customer will re-select during customization');
+      currentState.currentConfig.sauces = [];
+      currentState.currentConfig.saucesSource = null;
+    }
+
+    // MIGRATION: Copy boneInStyle to wingDistribution if missing (Bug #2 fix)
+    // Old drafts stored boneInStyle separately, pricing calculator needs it in wingDistribution
+    if (currentState.currentConfig?.boneInStyle && currentState.currentConfig?.wingDistribution) {
+      if (!currentState.currentConfig.wingDistribution.boneInStyle) {
+        console.warn('⚠️ Migrating boneInStyle to wingDistribution object');
+        currentState.currentConfig.wingDistribution.boneInStyle = currentState.currentConfig.boneInStyle;
+      }
+    }
+
+    // CRITICAL FIX (SP-OS-S1): Refresh package data from Firestore
+    // Draft may have stale package schema missing pricing fields (defaultDistribution, perWingCosts)
+    // This async refresh ensures latest package schema is loaded
+    if (currentState.selectedPackage?.id) {
+      refreshPackageFromFirestore(currentState.selectedPackage.id);
+    }
+
+    publishStateChange('*', currentState);
+
+    console.log('Draft loaded successfully (saved', draft.savedAt, ')');
+    return true;
+  } catch (error) {
+    console.error('Failed to load draft:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if a draft exists and is valid
+ * @returns {Object|null} Draft info or null
+ */
+export function getDraftInfo() {
+  try {
+    const draftJson = localStorage.getItem(DRAFT_KEY);
+    if (!draftJson) return null;
+
+    const draft = JSON.parse(draftJson);
+
+    // Check expiry
+    if (new Date(draft.expiresAt) < new Date()) {
+      return null;
+    }
+
+    return {
+      savedAt: draft.savedAt,
+      expiresAt: draft.expiresAt,
+      packageName: draft.state.selectedPackage?.name || 'Unknown'
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Clear draft from localStorage
+ */
+export function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY);
+}
+
+// ===== HELPER FUNCTIONS =====
+
+/**
+ * Get value at specific path
+ * @param {string} path - Dot-notation path
+ * @returns {*} Value at path or undefined
+ */
+export function getValue(path) {
+  const pathParts = path.split('.');
+  let value = currentState;
+
+  for (const part of pathParts) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    value = value[part];
+  }
+
+  return value;
+}
+
+/**
+ * Refresh package data from Firestore (SP-OS-S1 fix)
+ * Used after loading draft to ensure latest package schema with pricing fields
+ * @param {string} packageId - Package ID to refresh
+ */
+async function refreshPackageFromFirestore(packageId) {
+  try {
+    console.log('🔄 Refreshing package from Firestore:', packageId);
+
+    const freshPackage = await getPackageById(packageId);
+
+    if (!freshPackage) {
+      console.warn('⚠️ Package not found in Firestore:', packageId);
+      return;
+    }
+
+    // Package refreshed successfully
+
+    // Update state with fresh package data
+    currentState.selectedPackage = freshPackage;
+
+    // Transform package data and initialize sides (SP-010)
+    // transformPackage now handles waiting for initialization internally
+    const transformed = await packageTransformer.transformPackage(freshPackage);
+    currentState.currentConfig.sides = {
+      chips: transformed.chips,
+      coldSides: transformed.coldSides || [],
+      salads: transformed.salads || []
+    };
+    console.log('🥗 Sides initialized from refreshed package:', {
+      chips: transformed.chips,
+      coldSides: transformed.coldSides.length,
+      salads: transformed.salads.length
+    });
+
+    // Publish package change
+    publishStateChange('selectedPackage', freshPackage);
+
+    // Trigger pricing recalculation with fresh package data
+    aggregatorRecalculatePricing(currentState, { trigger: 'package-refresh' });
+
+    console.log('✅ Package refreshed and pricing recalculated');
+
+  } catch (error) {
+    console.error('❌ Failed to refresh package from Firestore:', error);
+    // Don't crash - just log error and continue with draft package
+  }
+}
+
+/**
+ * Set selected package and initialize defaults
+ * @param {Object} packageObj - Package object from Firestore
+ * @returns {Promise<void>}
+ */
+export async function setPackage(packageObj) {
+  currentState.selectedPackage = packageObj;
+
+  const totalWings = packageObj.wingOptions?.totalWings || 0;
+
+  // Check if user made plant-based choice in event planner wizard
+  const wizardPercentages = currentState.eventDetails?.wingDistributionPercentages;
+
+  if (wizardPercentages && wizardPercentages.plantBased > 0) {
+    // PRESERVE user's wizard choice
+    const plantBasedCount = Math.round((totalWings * wizardPercentages.plantBased) / 100);
+    const traditionalCount = totalWings - plantBasedCount;
+
+    // Split traditional between boneless/bone-in (default 60/40)
+    const bonelessCount = Math.round(traditionalCount * 0.6);
+    const boneInCount = traditionalCount - bonelessCount;
+
+    currentState.currentConfig.wingDistribution = {
+      boneless: bonelessCount,
+      boneIn: boneInCount,
+      cauliflower: plantBasedCount,
+      boneInStyle: 'mixed',
+      distributionSource: 'event-planner'
+    };
+  } else {
+    // No wizard choice - use default (all boneless)
+    currentState.currentConfig.wingDistribution = {
+      boneless: totalWings,
+      boneIn: 0,
+      cauliflower: 0,
+      boneInStyle: 'mixed',
+      distributionSource: null
+    };
+  }
+
+  // Initialize base price
+  currentState.pricing.basePrice = packageObj.basePrice || 0;
+
+  // Transform package data and initialize sides (SP-010)
+  // transformPackage now handles waiting for initialization internally
+  const transformed = await packageTransformer.transformPackage(packageObj);
+  currentState.currentConfig.sides = {
+    chips: transformed.chips,
+    coldSides: transformed.coldSides || [],
+    salads: transformed.salads || []
+  };
+  console.log('🥗 Sides initialized from package:', {
+    chips: transformed.chips,
+    coldSides: transformed.coldSides.length,
+    salads: transformed.salads.length
+  });
+
+  // Trigger pricing recalculation via aggregator
+  aggregatorRecalculatePricing(currentState, { trigger: 'package-set' });
+
+  console.log('🐛 [DEBUG] setPackage() completed');
+  console.log('  totalWings:', totalWings);
+  console.log('  wizardPercentages:', wizardPercentages);
+  if (wizardPercentages && wizardPercentages.plantBased > 0) {
+    console.log('  plantBasedCount calculated:', Math.round((totalWings * wizardPercentages.plantBased) / 100));
+    console.log('  traditionalCount calculated:', totalWings - Math.round((totalWings * wizardPercentages.plantBased) / 100));
+  }
+  console.log('  wingDistribution SET TO:', {
+    boneless: currentState.currentConfig.wingDistribution.boneless,
+    boneIn: currentState.currentConfig.wingDistribution.boneIn,
+    cauliflower: currentState.currentConfig.wingDistribution.cauliflower,
+    boneInStyle: currentState.currentConfig.wingDistribution.boneInStyle,
+    distributionSource: currentState.currentConfig.wingDistribution.distributionSource
+  });
+
+  publishStateChange('selectedPackage', packageObj);
+  saveDraft();
+}
+
+/**
+ * Recalculate pricing based on current state
+ * Uses Richard's modification pricing system
+ */
+export function recalculatePricing() {
+  // TODO: Integrate with Richard's pricing system
+  // For now, just calculate simple totals
+
+  const basePrice = currentState.pricing.basePrice || 0;
+  const modificationsTotal = currentState.pricing.modificationsTotal || 0;
+  const extrasTotal = currentState.pricing.extrasTotal || 0;
+
+  const subtotal = basePrice + modificationsTotal + extrasTotal;
+  const tax = subtotal * 0.08; // 8% tax (Philadelphia)
+  const total = subtotal + tax;
+
+  batchUpdate({
+    'pricing.subtotal': subtotal,
+    'pricing.tax': tax,
+    'pricing.total': total
+  });
+}
+
+/**
+ * Calculate sauce distribution across mixed wing types
+ * Uses Approach 3: Hybrid with smart preset + optional override
+ *
+ * @param {Array} selectedSauces - Array of sauce objects with {id, name, heatLevel, etc.}
+ * @param {Object} wingDistribution - Current wing distribution {boneless, boneIn, cauliflower}
+ * @returns {Array} Sauce distribution with even split across wing types
+ *
+ * Algorithm:
+ * 1. Calculate total wings
+ * 2. Divide wings evenly among sauces (with remainder distribution)
+ * 3. For each sauce, split proportionally across wing types (traditional vs plant-based)
+ * 4. Within traditional, split by boneless/bone-in ratio
+ *
+ * Example: 250 wings (150 boneless, 50 bone-in, 50 cauliflower), 5 sauces
+ * - Each sauce gets 50 wings
+ * - Traditional ratio: 200/250 = 80%, Plant-based: 50/250 = 20%
+ * - Per sauce: 40 traditional (30 boneless, 10 bone-in) + 10 cauliflower
+ */
+export function calculateSauceDistribution(selectedSauces, wingDistribution) {
+  // Calculate totals
+  const totalWings = wingDistribution.boneless +
+                     wingDistribution.boneIn +
+                     wingDistribution.cauliflower;
+
+  const sauceCount = selectedSauces.length;
+
+  if (sauceCount === 0 || totalWings === 0) {
+    return [];
+  }
+
+  // Base wings per sauce and remainder
+  const wingsPerSauce = Math.floor(totalWings / sauceCount);
+  const remainder = totalWings % sauceCount;
+
+  // Calculate ratios for proportional distribution
+  const traditionalTotal = wingDistribution.boneless + wingDistribution.boneIn;
+  const traditionalRatio = traditionalTotal > 0 ? traditionalTotal / totalWings : 0;
+  const plantBasedRatio = wingDistribution.cauliflower / totalWings;
+
+  const bonelessRatio = traditionalTotal > 0
+    ? wingDistribution.boneless / traditionalTotal
+    : 0;
+  const boneInRatio = traditionalTotal > 0
+    ? wingDistribution.boneIn / traditionalTotal
+    : 0;
+
+  // Distribute wings to each sauce
+  return selectedSauces.map((sauce, index) => {
+    // First sauces get extra wings from remainder
+    const assignedWings = wingsPerSauce + (index < remainder ? 1 : 0);
+
+    // Split by traditional vs plant-based
+    const traditionalWings = Math.round(assignedWings * traditionalRatio);
+    const plantBasedWings = assignedWings - traditionalWings;
+
+    // Split traditional by boneless vs bone-in
+    const bonelessWings = Math.round(traditionalWings * bonelessRatio);
+    const boneInWings = traditionalWings - bonelessWings;
+
+    return {
+      id: sauce.id,
+      name: sauce.name,
+      heatLevel: sauce.heatLevel,
+      imageUrl: sauce.imageUrl,
+      wingCount: assignedWings,
+      distribution: {
+        boneless: bonelessWings,
+        boneIn: boneInWings,
+        cauliflower: plantBasedWings
+      }
+    };
+  });
+}
+
+/**
+ * Set sauce selection and calculate smart distribution
+ * @param {Array} selectedSauces - Array of sauce objects
+ */
+export function setSauces(selectedSauces) {
+  const distribution = calculateSauceDistribution(
+    selectedSauces,
+    currentState.currentConfig.wingDistribution
+  );
+
+  updateState('currentConfig.sauces', distribution);
+  markSectionComplete('sauces');
+}
+
+/**
+ * Update custom sauce distribution (user override)
+ * @param {string} sauceId - Sauce ID to update
+ * @param {Object} newDistribution - New distribution {boneless, boneIn, cauliflower}
+ */
+export function updateSauceDistribution(sauceId, newDistribution) {
+  const sauces = [...currentState.currentConfig.sauces];
+  const sauceIndex = sauces.findIndex(s => s.id === sauceId);
+
+  if (sauceIndex === -1) {
+    console.error('Sauce not found:', sauceId);
+    return;
+  }
+
+  // Update distribution
+  sauces[sauceIndex].distribution = newDistribution;
+  sauces[sauceIndex].wingCount = newDistribution.boneless +
+                                  newDistribution.boneIn +
+                                  newDistribution.cauliflower;
+
+  updateState('currentConfig.sauces', sauces);
+}
+
+/**
+ * Validate sauce distribution totals
+ * Ensures all sauces combined equal total wing count
+ * @returns {Object} {valid: boolean, totalAssigned: number, expected: number}
+ */
+export function validateSauceDistribution() {
+  const sauces = currentState.currentConfig.sauces;
+  const wingDistribution = currentState.currentConfig.wingDistribution;
+
+  const totalAssigned = sauces.reduce((sum, sauce) => sum + sauce.wingCount, 0);
+  const expected = wingDistribution.boneless +
+                   wingDistribution.boneIn +
+                   wingDistribution.cauliflower;
+
+  return {
+    valid: totalAssigned === expected,
+    totalAssigned,
+    expected,
+    difference: expected - totalAssigned
+  };
+}
+
+/**
+ * Mark a progress section as complete
+ * @param {string} section - Section name (e.g., 'wings', 'sauces')
+ */
+export function markSectionComplete(section) {
+  const key = `${section}Complete`;
+  if (currentState.progress[key] !== undefined) {
+    updateState(`progress.${key}`, true);
+  }
+}
+
+/**
+ * Check if all required sections are complete
+ * @returns {boolean}
+ */
+export function isCustomizationComplete() {
+  const { progress } = currentState;
+  return progress.wingsComplete &&
+         progress.saucesComplete &&
+         progress.dipsComplete &&
+         progress.sidesComplete &&
+         progress.dessertsComplete &&
+         progress.beveragesComplete;
+}
+
+// ===== SAUCE ASSIGNMENT FUNCTIONS (SP-SAUCE-ASSIGNMENT-001) =====
+
+/**
+ * Apply a preset sauce distribution across wing types
+ * @param {string} presetType - 'all-same' | 'even-mix' | 'one-per-type' | 'custom'
+ * @param {Array} selectedSauces - Array of sauce objects [{id, name, category, isDryRub}]
+ * @param {Object} wingDistribution - {boneless: number, boneIn: number, cauliflower: number}
+ * @returns {Object} assignments object {boneless: [], boneIn: [], cauliflower: []}
+ */
+export function applyPreset(presetType, selectedSauces, wingDistribution) {
+  const assignments = {
+    boneless: [],
+    boneIn: [],
+    cauliflower: []
+  };
+
+  // Filter out wing types with 0 count
+  const activeWingTypes = Object.entries(wingDistribution)
+    .filter(([type, count]) => count > 0 && type !== 'boneInStyle' && type !== 'distributionSource')
+    .map(([type, count]) => ({ type, count }));
+
+  if (activeWingTypes.length === 0 || selectedSauces.length === 0) {
+    return assignments;
+  }
+
+  switch (presetType) {
+    case 'all-same':
+      // Preset A: Assign first sauce to all wing types (all wings)
+      activeWingTypes.forEach(({ type, count }) => {
+        assignments[type] = [{
+          sauceId: selectedSauces[0].id,
+          sauceName: selectedSauces[0].name,
+          sauceCategory: selectedSauces[0].category,
+          wingCount: count,
+          applicationMethod: 'tossed'
+        }];
+      });
+      break;
+
+    case 'even-mix':
+      // Preset B: Split each wing type proportionally across all sauces
+      activeWingTypes.forEach(({ type, count }) => {
+        const wingsPerSauce = Math.floor(count / selectedSauces.length);
+        const remainder = count % selectedSauces.length;
+
+        selectedSauces.forEach((sauce, index) => {
+          const wingCount = wingsPerSauce + (index < remainder ? 1 : 0);
+          if (wingCount > 0) {
+            assignments[type].push({
+              sauceId: sauce.id,
+              sauceName: sauce.name,
+              sauceCategory: sauce.category,
+              wingCount,
+              applicationMethod: 'tossed'
+            });
+          }
+        });
+      });
+      break;
+
+    case 'one-per-type':
+      // Preset C: Assign wingTypes[i] → sauces[i % sauceCount] with wrap-around
+      activeWingTypes.forEach(({ type, count }, index) => {
+        const sauce = selectedSauces[index % selectedSauces.length];
+        assignments[type] = [{
+          sauceId: sauce.id,
+          sauceName: sauce.name,
+          sauceCategory: sauce.category,
+          wingCount: count,
+          applicationMethod: 'tossed'
+        }];
+      });
+      break;
+
+    case 'custom':
+      // Preset D: Empty state, user fills manually
+      // Return empty assignments
+      break;
+
+    default:
+      console.warn(`Unknown preset type: ${presetType}`);
+  }
+
+  return assignments;
+}
+
+/**
+ * Validate sauce assignments for a specific wing type
+ * @param {string} wingType - 'boneless' | 'boneIn' | 'cauliflower'
+ * @param {Array} assignments - Array of sauce assignments for this wing type
+ * @param {number} totalWings - Total wing count for this type
+ * @returns {Object} {valid: boolean, errors: [], assignedTotal: number, percentComplete: number}
+ */
+export function validateWingTypeAssignment(wingType, assignments, totalWings) {
+  const result = {
+    valid: true,
+    errors: [],
+    assignedTotal: 0,
+    percentComplete: 0
+  };
+
+  if (totalWings === 0) {
+    result.valid = true;
+    result.percentComplete = 100;
+    return result;
+  }
+
+  // Calculate total assigned
+  result.assignedTotal = assignments.reduce((sum, a) => sum + (a.wingCount || 0), 0);
+  result.percentComplete = Math.round((result.assignedTotal / totalWings) * 100);
+
+  // Check for negative values
+  const hasNegative = assignments.some(a => a.wingCount < 0);
+  if (hasNegative) {
+    result.valid = false;
+    result.errors.push('Wing count cannot be negative');
+  }
+
+  // Check for dry-rub with on-the-side
+  const invalidDryRub = assignments.some(a =>
+    a.sauceCategory === 'dry-rub' && a.applicationMethod === 'on-the-side'
+  );
+  if (invalidDryRub) {
+    result.valid = false;
+    result.errors.push('Dry rubs cannot be served on-the-side');
+  }
+
+  // Check total match
+  if (result.assignedTotal !== totalWings) {
+    result.valid = false;
+    if (result.assignedTotal < totalWings) {
+      result.errors.push(`Assign ${totalWings - result.assignedTotal} more wings`);
+    } else {
+      result.errors.push(`Remove ${result.assignedTotal - totalWings} wings`);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Validate all sauce assignments across all wing types
+ * @param {Object} sauceAssignments - Complete sauceAssignments object from state
+ * @param {Object} wingDistribution - Wing distribution object
+ * @returns {Object} {valid: boolean, errors: []}
+ */
+export function validateAllAssignments(sauceAssignments, wingDistribution) {
+  const result = {
+    valid: true,
+    errors: []
+  };
+
+  const wingTypes = ['boneless', 'boneIn', 'cauliflower'];
+
+  wingTypes.forEach(type => {
+    const validation = validateWingTypeAssignment(
+      type,
+      sauceAssignments.assignments[type],
+      wingDistribution[type] || 0
+    );
+
+    if (!validation.valid) {
+      result.valid = false;
+      result.errors.push(`${type}: ${validation.errors.join(', ')}`);
+    }
+  });
+
+  return result;
+}
+
+/**
+ * Calculate summary metadata for sauce assignments
+ * @param {Object} sauceAssignments - Complete sauceAssignments object from state
+ * @returns {Object} Updated summary object
+ */
+export function calculateSauceAssignmentSummary(sauceAssignments) {
+  const summary = {
+    totalWingsAssigned: 0,
+    byApplicationMethod: {
+      tossed: 0,
+      onTheSide: 0
+    },
+    containersNeeded: 0,
+    validations: {
+      boneless: { valid: true, errors: [] },
+      boneIn: { valid: true, errors: [] },
+      cauliflower: { valid: true, errors: [] },
+      overall: { valid: true, errors: [] }
+    }
+  };
+
+  const wingTypes = ['boneless', 'boneIn', 'cauliflower'];
+
+  wingTypes.forEach(type => {
+    const assignments = sauceAssignments.assignments[type] || [];
+
+    assignments.forEach(assignment => {
+      summary.totalWingsAssigned += assignment.wingCount;
+
+      if (assignment.applicationMethod === 'on-the-side') {
+        summary.byApplicationMethod.onTheSide += assignment.wingCount;
+        // Calculate containers: Math.ceil(wingCount * 0.5)
+        summary.containersNeeded += Math.ceil(assignment.wingCount * 0.5);
+      } else {
+        summary.byApplicationMethod.tossed += assignment.wingCount;
+      }
+    });
+  });
+
+  return summary;
+}
+
+/**
+ * Migrate old sauce data structure to new per-wing-type structure
+ * @param {Array} oldSauces - Legacy sauces array [{id, name, wingCount}]
+ * @param {Object} wingDistribution - Current wing distribution
+ * @returns {Object} New sauceAssignments structure
+ */
+export function migrateSauceData(oldSauces, wingDistribution) {
+  // Extract sauces with wingCount > 0
+  const selectedSauces = oldSauces
+    .filter(s => s.wingCount && s.wingCount > 0)
+    .map(s => ({
+      id: s.id,
+      name: s.name,
+      category: s.category || 'signature-sauce',
+      isDryRub: s.isDryRub || false,
+      heatLevel: s.heatLevel || 0,
+      imageUrl: s.imageUrl || ''
+    }));
+
+  if (selectedSauces.length === 0) {
+    return {
+      selectedSauces: [],
+      appliedPreset: null,
+      assignments: { boneless: [], boneIn: [], cauliflower: [] },
+      summary: calculateSauceAssignmentSummary({
+        assignments: { boneless: [], boneIn: [], cauliflower: [] }
+      })
+    };
+  }
+
+  // Apply "One Per Wing Type" preset as default migration strategy
+  const assignments = applyPreset('one-per-type', selectedSauces, wingDistribution);
+
+  return {
+    selectedSauces,
+    appliedPreset: 'one-per-type',
+    assignments,
+    summary: calculateSauceAssignmentSummary({ assignments })
+  };
+}
+
+// ===== SMART DEFAULTS =====
+
+/**
+ * Apply smart defaults for incomplete sections
+ * Allows users to proceed to checkout with partial customization
+ *
+ * @param {Object} packageData - Selected package configuration
+ * @param {Object} currentConfig - Current partial configuration
+ * @returns {Object} { config: completeConfig, metadata: { hasDefaults, defaultedSections, requiresFollowUp, followUpNotes } }
+ */
+export function applySmartDefaults(packageData, currentConfig = {}) {
+  if (!packageData) {
+    console.warn('No package selected, cannot apply defaults');
+    return {
+      config: currentConfig,
+      metadata: {
+        hasDefaults: false,
+        defaultedSections: [],
+        requiresFollowUp: false,
+        followUpNotes: [],
+        userCompletedSections: []
+      }
+    };
+  }
+
+  const completeConfig = { ...currentConfig };
+  const metadata = {
+    hasDefaults: false,
+    defaultedSections: [],
+    requiresFollowUp: false,
+    followUpNotes: [],
+    userCompletedSections: []
+  };
+
+  // ===== WINGS DISTRIBUTION =====
+  const hasWingDistribution = currentConfig.wingDistribution &&
+    (currentConfig.wingDistribution.boneless > 0 ||
+     currentConfig.wingDistribution.boneIn > 0 ||
+     currentConfig.wingDistribution.cauliflower > 0);
+
+  if (!hasWingDistribution && packageData.wingOptions?.totalWings) {
+    const totalWings = packageData.wingOptions.totalWings;
+    completeConfig.wingDistribution = {
+      boneless: Math.floor(totalWings / 2),
+      boneIn: Math.ceil(totalWings / 2),
+      cauliflower: 0,
+      boneInStyle: 'mixed',
+      distributionSource: 'auto-default'
+    };
+    metadata.hasDefaults = true;
+    metadata.defaultedSections.push('wings');
+    metadata.requiresFollowUp = true;
+    metadata.followUpNotes.push('Confirm wing distribution (boneless/bone-in split)');
+    console.log('✨ Applied default wing distribution: 50/50 split');
+  } else if (hasWingDistribution) {
+    metadata.userCompletedSections.push('wings');
+  }
+
+  // ===== SAUCES =====
+  const hasSauces = currentConfig.sauces && currentConfig.sauces.length > 0;
+  const hasSauceDistributions = currentConfig.sauceDistributions &&
+    Object.keys(currentConfig.sauceDistributions).length > 0;
+
+  if (!hasSauces && !hasSauceDistributions && packageData.sauceSelections) {
+    // Default to popular sauces (Mild, Hot, BBQ)
+    const maxSauces = packageData.sauceSelections.max || packageData.sauceSelections || 3;
+    const popularSauceIds = ['mild', 'hot', 'bbq', 'lemon-pepper', 'old-bay'];
+    completeConfig.sauces = popularSauceIds.slice(0, maxSauces).map(id => ({
+      id,
+      isDefault: true
+    }));
+    metadata.hasDefaults = true;
+    metadata.defaultedSections.push('sauces');
+    metadata.requiresFollowUp = true;
+    metadata.followUpNotes.push('Confirm sauce selections');
+    console.log(`✨ Applied default sauces: ${popularSauceIds.slice(0, maxSauces).join(', ')}`);
+  } else if (hasSauces || hasSauceDistributions) {
+    metadata.userCompletedSections.push('sauces');
+  }
+
+  // ===== DIPS =====
+  const hasDips = (currentConfig.dips && currentConfig.dips.length > 0) || currentConfig.noDips;
+
+  if (!hasDips && packageData.dipsIncluded?.quantity > 0) {
+    // Default to popular dips (Ranch, Blue Cheese)
+    const dipQuantity = packageData.dipsIncluded.quantity;
+    const popularDips = ['ranch', 'blue-cheese', 'honey-mustard'];
+    completeConfig.dips = popularDips.slice(0, dipQuantity).map((id, index) => ({
+      id: `dip-${id}`,
+      quantity: 1,
+      isDefault: true
+    }));
+    metadata.hasDefaults = true;
+    metadata.defaultedSections.push('dips');
+    // Dips are less critical - no follow-up needed for defaults
+    console.log(`✨ Applied default dips: ${dipQuantity} popular varieties`);
+  } else if (hasDips) {
+    metadata.userCompletedSections.push('dips');
+  }
+
+  // ===== SIDES =====
+  const hasSides = currentConfig.sides &&
+    (currentConfig.sides.chips || currentConfig.sides.coldSides?.length > 0 || currentConfig.sides.salads?.length > 0);
+
+  if (hasSides) {
+    metadata.userCompletedSections.push('sides');
+  }
+  // Note: Sides are optional, no defaults needed
+
+  // ===== DESSERTS =====
+  const hasDesserts = (currentConfig.desserts && currentConfig.desserts.length > 0) || currentConfig.noDesserts;
+
+  if (hasDesserts) {
+    metadata.userCompletedSections.push('desserts');
+  }
+  // Note: Desserts are optional, no defaults needed
+
+  // ===== BEVERAGES =====
+  const hasBeverages = currentConfig.beverages &&
+    ((currentConfig.beverages.cold && currentConfig.beverages.cold.length > 0) ||
+     (currentConfig.beverages.hot && currentConfig.beverages.hot.length > 0)) ||
+    currentConfig.noBeverages;
+
+  if (hasBeverages) {
+    metadata.userCompletedSections.push('beverages');
+  }
+  // Note: Beverages are optional, no defaults needed
+
+  // ===== ADD-ONS =====
+  const hasAddOns = currentConfig.addOns &&
+    Object.keys(currentConfig.addOns).length > 0;
+  const hasVariantAddOns = currentConfig.variantAddOns &&
+    Object.keys(currentConfig.variantAddOns).length > 0;
+
+  if (hasAddOns || hasVariantAddOns) {
+    metadata.userCompletedSections.push('addons');
+  }
+  // Note: Add-ons are optional, no defaults needed
+
+  console.log('🎯 Smart defaults applied', {
+    hasDefaults: metadata.hasDefaults,
+    defaultedSections: metadata.defaultedSections,
+    userCompletedSections: metadata.userCompletedSections,
+    requiresFollowUp: metadata.requiresFollowUp
+  });
+
+  return { config: completeConfig, metadata };
+}
+
+// ===== VARIANT ADD-ONS HELPERS =====
+
+/**
+ * Get quantity for a specific variant
+ * @param {string} variantId - Variant ID
+ * @returns {number} Current quantity
+ */
+export function getVariantQuantity(variantId) {
+  return currentState.currentConfig?.variantAddOns?.[variantId] || 0;
+}
+
+/**
+ * Update quantity for a specific variant
+ * @param {string} variantId - Variant ID
+ * @param {number} quantity - New quantity
+ */
+export function updateVariantQuantity(variantId, quantity) {
+  const currentConfig = currentState.currentConfig || {};
+  const variantAddOns = { ...(currentConfig.variantAddOns || {}) };
+
+  if (quantity <= 0) {
+    delete variantAddOns[variantId];
+  } else {
+    variantAddOns[variantId] = quantity;
+  }
+
+  updateState('currentConfig', {
+    ...currentConfig,
+    variantAddOns
+  });
+
+  // Notify subscribers
+  notifySubscribers('currentConfig');
+}
+
+/**
+ * Get addon quantity (backwards compatible helper)
+ * @param {string} addonId - Add-on ID
+ * @returns {number} Current quantity
+ */
+export function getAddonQuantity(addonId) {
+  return currentState.currentConfig?.addOns?.[addonId] || 0;
+}
+
+/**
+ * Update addon quantity (backwards compatible helper)
+ * @param {string} addonId - Add-on ID
+ * @param {number} quantity - New quantity
+ */
+export function updateAddonQuantity(addonId, quantity) {
+  const currentConfig = currentState.currentConfig || {};
+  const addOns = { ...(currentConfig.addOns || {}) };
+
+  if (quantity <= 0) {
+    delete addOns[addonId];
+  } else {
+    addOns[addonId] = quantity;
+  }
+
+  updateState('currentConfig', {
+    ...currentConfig,
+    addOns
+  });
+
+  // Notify subscribers
+  notifySubscribers('currentConfig');
+}
+
+// ===== INITIALIZATION =====
+
+/**
+ * Initialize state service
+ * Attempts to load draft on startup
+ */
+export function initializeStateService() {
+  // Try to load existing draft
+  const draftLoaded = loadDraft();
+
+  if (!draftLoaded) {
+    console.log('No valid draft found, starting fresh');
+    currentState = cloneInitialState();
+    currentState.lastUpdated = new Date().toISOString();
+  }
+
+  return draftLoaded;
+}
+
+// Auto-initialize on module load
+initializeStateService();

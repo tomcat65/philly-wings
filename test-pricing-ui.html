@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing Test - SP-OS-S1/S2/S3/S4</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #D32F2F; }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    input, select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      background: #D32F2F;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #B71C1C;
+    }
+    #pricing-output {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .highlight {
+      background: #FFF3E0;
+      padding: 10px;
+      border-left: 4px solid #FF9800;
+      margin: 10px 0;
+    }
+    .success {
+      background: #E8F5E9;
+      border-left-color: #4CAF50;
+    }
+    pre {
+      background: #263238;
+      color: #EEFFFF;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    .feature-badge {
+      display: inline-block;
+      background: #4CAF50;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Order Summary Pricing Test <span class="feature-badge">SP-OS-S1 + S2 + S3 + S4</span></h1>
+
+  <div class="test-section">
+    <h2>Test Configuration</h2>
+    <p>Configure a sample catering order to test the new pricing features:</p>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>Boneless Wings:</label>
+        <input type="number" id="boneless" value="150" min="0" max="300" oninput="calculatePricing()">
+      </div>
+
+      <div class="control-group">
+        <label>Bone-In Wings:</label>
+        <input type="number" id="boneIn" value="50" min="0" max="300" oninput="calculatePricing()">
+      </div>
+
+      <div class="control-group">
+        <label>Cauliflower Wings:</label>
+        <input type="number" id="cauliflower" value="0" min="0" max="300" oninput="calculatePricing()">
+      </div>
+
+      <div class="control-group">
+        <label>Guest Count:</label>
+        <input type="number" id="guestCount" value="15" min="1" max="500" oninput="calculatePricing()">
+      </div>
+    </div>
+
+    <h3>Item Removal Credits (SP-OS-S4)</h3>
+    <p>Select items to remove from the package:</p>
+    <div class="controls">
+      <div class="control-group">
+        <label><input type="checkbox" id="removeChips" onchange="calculatePricing()"> Remove Chips (2x) - High Margin</label>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="removeSalad" onchange="calculatePricing()"> Remove Caesar Salad - Medium Margin</label>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="removeBeverages" onchange="calculatePricing()"> Remove Beverages (10x) - Low Margin</label>
+      </div>
+    </div>
+
+    <button onclick="calculatePricing()">Recalculate Pricing</button>
+    <button onclick="testScenario('default')">Test: Default Distribution</button>
+    <button onclick="testScenario('expensive')">Test: More Expensive Wings</button>
+    <button onclick="testScenario('cheaper')">Test: Cheaper Wings</button>
+    <button onclick="testScenario('withRemovals')">Test: With Item Removals</button>
+    <button onclick="testScenario('cappedRemovals')">Test: Capped Removals (20%)</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Pricing Output</h2>
+    <div id="pricing-output">
+      <p style="color: #999;">Click "Calculate Pricing" to see results...</p>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Features Being Tested</h2>
+    <div class="highlight success">
+      <strong>✅ SP-OS-S1: Wing Distribution Differential</strong><br>
+      Calculates price difference when wing distribution differs from package defaults.<br>
+      • Boneless: $0.80/wing | Bone-In: $1.00/wing | Cauliflower: $1.30/wing
+    </div>
+    <div class="highlight success">
+      <strong>✅ SP-OS-S2: Tax Calculation (8%)</strong><br>
+      Applies Philadelphia combined sales tax rate to subtotal.
+    </div>
+    <div class="highlight success">
+      <strong>✅ SP-OS-S3: Per-Person Cost</strong><br>
+      Divides total price (including tax) by guest count for event planning.
+    </div>
+    <div class="highlight success">
+      <strong>✅ SP-OS-S4: Item Removal Credits</strong><br>
+      Tiered credit system for removed items based on margin:<br>
+      • High-margin items (70%+): 50% credit<br>
+      • Medium-margin items (50-69%): 75% credit<br>
+      • Low-margin items (<50%): 100% credit<br>
+      • Maximum total credits: 20% of base package price
+    </div>
+  </div>
+
+  <script>
+    // Simplified inline pricing calculation for testing
+    window.calculatePricing = function() {
+      const boneless = parseInt(document.getElementById('boneless').value) || 0;
+      const boneIn = parseInt(document.getElementById('boneIn').value) || 0;
+      const cauliflower = parseInt(document.getElementById('cauliflower').value) || 0;
+      const guestCount = parseInt(document.getElementById('guestCount').value) || 10;
+
+      // Removal checkboxes
+      const removeChips = document.getElementById('removeChips').checked;
+      const removeSalad = document.getElementById('removeSalad').checked;
+      const removeBeverages = document.getElementById('removeBeverages').checked;
+
+      // Package defaults
+      const defaultBoneless = 150;
+      const defaultBoneIn = 50;
+      const defaultCauliflower = 0;
+
+      // Per-wing costs
+      const bonelessCost = 0.80;
+      const boneInCost = 1.00;
+      const cauliflowerCost = 1.30;
+
+      // Base package price
+      const basePrice = 329.99;
+      const taxRate = 0.08;
+      const MAX_REMOVAL_CREDIT_PCT = 0.20;
+
+      // Calculate current wing cost
+      const currentCost = (boneless * bonelessCost) + (boneIn * boneInCost) + (cauliflower * cauliflowerCost);
+
+      // Calculate default wing cost
+      const defaultCost = (defaultBoneless * bonelessCost) + (defaultBoneIn * boneInCost) + (defaultCauliflower * cauliflowerCost);
+
+      // Calculate differential (SP-OS-S1)
+      const differential = currentCost - defaultCost;
+
+      // Calculate removal credits (SP-OS-S4)
+      const removalItems = [];
+      let totalRemovalCredits = 0;
+
+      if (removeChips) {
+        // High-margin item: 50% credit
+        const chipPrice = 3.99;
+        const chipCredit = chipPrice * 0.50; // 50% credit
+        removalItems.push({
+          name: 'Chips',
+          quantity: 2,
+          creditPerUnit: chipCredit,
+          totalCredit: chipCredit * 2,
+          marginTier: 'high'
+        });
+        totalRemovalCredits += chipCredit * 2;
+      }
+
+      if (removeSalad) {
+        // Medium-margin item: 75% credit
+        const saladPrice = 5.99;
+        const saladCredit = saladPrice * 0.75; // 75% credit
+        removalItems.push({
+          name: 'Caesar Salad',
+          quantity: 1,
+          creditPerUnit: saladCredit,
+          totalCredit: saladCredit,
+          marginTier: 'medium'
+        });
+        totalRemovalCredits += saladCredit;
+      }
+
+      if (removeBeverages) {
+        // Low-margin item: 100% credit
+        const beveragePrice = 1.50;
+        const beverageCredit = beveragePrice * 1.00; // 100% credit
+        removalItems.push({
+          name: 'Beverages',
+          quantity: 10,
+          creditPerUnit: beverageCredit,
+          totalCredit: beverageCredit * 10,
+          marginTier: 'low'
+        });
+        totalRemovalCredits += beverageCredit * 10;
+      }
+
+      // Apply 20% cap
+      const maxCredit = basePrice * MAX_REMOVAL_CREDIT_PCT;
+      const cappedCredits = Math.min(totalRemovalCredits, maxCredit);
+      const capExceeded = totalRemovalCredits > maxCredit;
+
+      // Calculate subtotal with wing differential and removal credits
+      const subtotal = basePrice + differential - cappedCredits;
+
+      // Calculate tax (SP-OS-S2)
+      const tax = subtotal * taxRate;
+
+      // Calculate total
+      const total = subtotal + tax;
+
+      // Calculate per-person cost (SP-OS-S3)
+      const perPersonCost = guestCount > 0 ? total / guestCount : 0;
+
+      // Build modifiers array
+      const modifiers = [];
+
+      if (differential !== 0) {
+        modifiers.push({
+          id: 'wings-distribution',
+          type: differential > 0 ? 'upcharge' : 'discount',
+          amount: Math.abs(differential),
+          label: differential > 0
+            ? `Wing distribution adjustment (+$${Math.abs(differential).toFixed(2)})`
+            : `Wing distribution savings (-$${Math.abs(differential).toFixed(2)})`
+        });
+      }
+
+      if (cappedCredits > 0) {
+        modifiers.push({
+          itemId: 'item-removal-credits',
+          type: 'discount',
+          amount: cappedCredits,
+          label: `Item removal credits (${removalItems.length} item${removalItems.length > 1 ? 's' : ''})`,
+          metadata: {
+            breakdown: removalItems,
+            totalCreditsBeforeCap: totalRemovalCredits,
+            cappedAmount: cappedCredits,
+            capExceeded: capExceeded
+          }
+        });
+      }
+
+      if (capExceeded) {
+        modifiers.push({
+          itemId: 'removal-credit-cap',
+          type: 'warning',
+          amount: 0,
+          label: `Removal credits capped at ${(MAX_REMOVAL_CREDIT_PCT * 100).toFixed(0)}% of base price ($${maxCredit.toFixed(2)})`
+        });
+      }
+
+      // Build pricing object
+      const pricing = {
+        totals: {
+          itemsSubtotal: basePrice,
+          upcharges: differential > 0 ? differential : 0,
+          discounts: (differential < 0 ? Math.abs(differential) : 0) + cappedCredits,
+          subtotal: subtotal,
+          tax: tax,
+          taxRate: taxRate,
+          total: total,
+          perPersonCost: perPersonCost,
+          guestCount: guestCount
+        },
+        modifiers: modifiers
+      };
+
+      displayPricing(pricing, boneless, boneIn, cauliflower, guestCount);
+    };
+
+    window.testScenario = function(scenario) {
+      // Reset removals first
+      document.getElementById('removeChips').checked = false;
+      document.getElementById('removeSalad').checked = false;
+      document.getElementById('removeBeverages').checked = false;
+
+      switch(scenario) {
+        case 'default':
+          document.getElementById('boneless').value = 150;
+          document.getElementById('boneIn').value = 50;
+          document.getElementById('cauliflower').value = 0;
+          document.getElementById('guestCount').value = 15;
+          break;
+        case 'expensive':
+          document.getElementById('boneless').value = 100;
+          document.getElementById('boneIn').value = 100;
+          document.getElementById('cauliflower').value = 0;
+          document.getElementById('guestCount').value = 20;
+          break;
+        case 'cheaper':
+          document.getElementById('boneless').value = 200;
+          document.getElementById('boneIn').value = 0;
+          document.getElementById('cauliflower').value = 0;
+          document.getElementById('guestCount').value = 25;
+          break;
+        case 'withRemovals':
+          document.getElementById('boneless').value = 150;
+          document.getElementById('boneIn').value = 50;
+          document.getElementById('cauliflower').value = 0;
+          document.getElementById('guestCount').value = 15;
+          document.getElementById('removeChips').checked = true;
+          document.getElementById('removeSalad').checked = true;
+          break;
+        case 'cappedRemovals':
+          document.getElementById('boneless').value = 150;
+          document.getElementById('boneIn').value = 50;
+          document.getElementById('cauliflower').value = 0;
+          document.getElementById('guestCount').value = 15;
+          document.getElementById('removeChips').checked = true;
+          document.getElementById('removeSalad').checked = true;
+          document.getElementById('removeBeverages').checked = true;
+          break;
+      }
+      window.calculatePricing();
+    };
+
+    function displayPricing(pricing, boneless, boneIn, cauliflower, guestCount) {
+      const { totals, modifiers } = pricing;
+
+      // Find differential modifier
+      const differential = modifiers.find(m => m.id === 'wings-distribution');
+
+      let output = '<h3>📊 Pricing Breakdown</h3>';
+
+      // Wing distribution
+      output += '<div style="background: #E3F2FD; padding: 15px; border-radius: 4px; margin-bottom: 15px;">';
+      output += '<strong>Wing Distribution:</strong><br>';
+      output += `Boneless: ${boneless} wings @ $0.80 = $${(boneless * 0.80).toFixed(2)}<br>`;
+      output += `Bone-In: ${boneIn} wings @ $1.00 = $${(boneIn * 1.00).toFixed(2)}<br>`;
+      output += `Cauliflower: ${cauliflower} wings @ $1.30 = $${(cauliflower * 1.30).toFixed(2)}<br>`;
+      output += `<strong>Current Total: $${((boneless * 0.80) + (boneIn * 1.00) + (cauliflower * 1.30)).toFixed(2)}</strong><br>`;
+      output += `<em>Default Total: $${((150 * 0.80) + (50 * 1.00)).toFixed(2)}</em>`;
+      output += '</div>';
+
+      // Differential
+      if (differential) {
+        const isUpcharge = differential.type === 'upcharge';
+        output += `<div class="highlight ${isUpcharge ? '' : 'success'}">`;
+        output += `<strong>${isUpcharge ? '⬆️' : '⬇️'} SP-OS-S1: Wing Distribution ${isUpcharge ? 'Upcharge' : 'Savings'}</strong><br>`;
+        output += `${differential.label}<br>`;
+        output += `Amount: ${isUpcharge ? '+' : '-'}$${differential.amount.toFixed(2)}`;
+        output += '</div>';
+      } else {
+        output += '<div class="highlight success">';
+        output += '<strong>✓ SP-OS-S1: No Differential</strong><br>';
+        output += 'Wing distribution matches package defaults.';
+        output += '</div>';
+      }
+
+      // Removal Credits (SP-OS-S4)
+      const removalCredits = modifiers.find(m => m.itemId === 'item-removal-credits');
+      const capWarning = modifiers.find(m => m.itemId === 'removal-credit-cap');
+
+      if (removalCredits && removalCredits.amount > 0) {
+        const breakdown = removalCredits.metadata?.breakdown || [];
+        output += '<div class="highlight success">';
+        output += '<strong>💰 SP-OS-S4: Item Removal Credits</strong><br>';
+        output += `Total Credits: -$${removalCredits.amount.toFixed(2)}<br><br>`;
+
+        if (breakdown.length > 0) {
+          output += '<strong>Breakdown:</strong><br>';
+          breakdown.forEach(item => {
+            const tierLabel = item.marginTier === 'high' ? '50%' : item.marginTier === 'medium' ? '75%' : '100%';
+            output += `• ${item.name} (${item.quantity}x) @ $${item.creditPerUnit.toFixed(2)} each (${tierLabel} credit) = -$${item.totalCredit.toFixed(2)}<br>`;
+          });
+        }
+
+        if (capWarning) {
+          output += `<br><strong style="color: #FF9800;">⚠️ ${capWarning.label}</strong>`;
+        }
+        output += '</div>';
+      }
+
+      // Totals
+      output += '<div style="background: #FFF3E0; padding: 15px; border-radius: 4px; margin-top: 15px;">';
+      output += '<h4 style="margin-top: 0;">Order Summary</h4>';
+      output += `<strong>Base Price:</strong> $329.99<br>`;
+      if (differential) {
+        output += `<strong>Wing Adjustment:</strong> ${differential.type === 'upcharge' ? '+' : '-'}$${differential.amount.toFixed(2)}<br>`;
+      }
+      if (removalCredits && removalCredits.amount > 0) {
+        output += `<strong>Removal Credits:</strong> -$${removalCredits.amount.toFixed(2)}<br>`;
+      }
+      output += `<strong>Subtotal:</strong> $${totals.subtotal.toFixed(2)}<br>`;
+      output += '</div>';
+
+      // Tax
+      output += '<div class="highlight">';
+      output += '<strong>💰 SP-OS-S2: Tax Calculation</strong><br>';
+      output += `Philadelphia Sales Tax (${(totals.taxRate * 100).toFixed(0)}%): $${totals.tax.toFixed(2)}<br>`;
+      output += `<em>Tax calculated on subtotal: $${totals.subtotal.toFixed(2)} × 0.08 = $${totals.tax.toFixed(2)}</em>`;
+      output += '</div>';
+
+      // Total
+      output += '<div style="background: #E8F5E9; padding: 15px; border-radius: 4px; margin-top: 15px;">';
+      output += `<h3 style="margin: 0; color: #2E7D32;">Grand Total: $${totals.total.toFixed(2)}</h3>`;
+      output += '</div>';
+
+      // Per-person
+      output += '<div class="highlight success">';
+      output += '<strong>👥 SP-OS-S3: Per-Person Cost</strong><br>';
+      output += `Based on ${totals.guestCount} guests<br>`;
+      output += `<strong style="font-size: 18px; color: #2E7D32;">$${totals.perPersonCost.toFixed(2)} per person</strong><br>`;
+      output += `<em>Calculation: $${totals.total.toFixed(2)} ÷ ${totals.guestCount} = $${totals.perPersonCost.toFixed(2)}</em>`;
+      output += '</div>';
+
+      // Raw data
+      output += '<h3>📦 Raw Pricing Object</h3>';
+      output += '<pre>' + JSON.stringify({ totals, modifiers }, null, 2) + '</pre>';
+
+      document.getElementById('pricing-output').innerHTML = output;
+    }
+
+    // Auto-calculate on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      calculatePricing();
+    });
+  </script>
+</body>
+</html>

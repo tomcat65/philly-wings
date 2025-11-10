@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, connectFirestoreEmulator, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getAnalytics } from 'firebase/analytics';
@@ -19,31 +19,36 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize services
-export const db = getFirestore(app);
+// Check if we should use emulators
+const useEmulators = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+// Initialize Firestore with modern persistence (production only, emulator uses default settings)
+export const db = useEmulators
+  ? getFirestore(app)
+  : initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    });
+
+// Initialize other services
 export const storage = getStorage(app);
 export const auth = getAuth(app);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const functions = getFunctions(app);
 
-// Connect to emulators in development (TEMPORARILY DISABLED - using production for testing new sections)
-// if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-//   console.log('🧪 Connecting to Firebase Emulators...');
-//   connectFirestoreEmulator(db, 'localhost', 8081);
-//   connectFunctionsEmulator(functions, 'localhost', 5002);
-//   connectStorageEmulator(storage, 'localhost', 9199);
-//   connectAuthEmulator(auth, 'http://localhost:9099');
-// }
-
-// Enable offline persistence (updated for Firebase v10+)
-enableIndexedDbPersistence(db, {
-  forceOwnership: false
-}).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    console.warn('Persistence failed: Multiple tabs open');
-  } else if (err.code === 'unimplemented') {
-    console.warn('Persistence not available');
-  }
-});
+// Connect to emulators in development (MUST be before any queries)
+if (useEmulators) {
+  console.log('🧪 Connecting to Firebase Emulators...');
+  console.log('🧪 hostname:', window.location.hostname);
+  console.log('🧪 Firestore settings:', db._settings);
+  connectFirestoreEmulator(db, '127.0.0.1', 8081);
+  console.log('✅ Connected to Firestore emulator at 127.0.0.1:8081');
+  console.log('✅ Firestore settings after connection:', db._settings);
+  connectFunctionsEmulator(functions, '127.0.0.1', 5002);
+  // Storage and Auth emulators not running
+  // connectStorageEmulator(storage, '127.0.0.1', 9199);
+  // connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+}
 
 export default app;

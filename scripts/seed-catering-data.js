@@ -3,11 +3,12 @@
  * Run with: node scripts/seed-catering-data.js
  * Or for emulator: node scripts/seed-catering-data.js --emulator
  *
- * TypeScript types defined in: /src/types/catering.ts
+ * Matches production Firestore schema for cateringPackages collection.
  */
 
 const admin = require('firebase-admin');
 const path = require('path');
+const fs = require('fs');
 
 // Parse command line args
 const useEmulator = process.argv.includes('--emulator');
@@ -20,279 +21,626 @@ if (useEmulator) {
     projectId: 'philly-wings'
   });
 } else {
-  const serviceAccountPath = path.join(__dirname, '..', 'philly-wings-firebase-adminsdk-fbsvc-b9a46d307f.json');
+  const rawServiceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+    path.join(__dirname, '..', 'serviceAccountKey.json');
+  const serviceAccountPath = path.isAbsolute(rawServiceAccountPath)
+    ? rawServiceAccountPath
+    : path.resolve(process.cwd(), rawServiceAccountPath);
+
+  if (!fs.existsSync(serviceAccountPath)) {
+    console.error(
+      '❌ Service account file not found. Set GOOGLE_APPLICATION_CREDENTIALS or place serviceAccountKey.json in project root.'
+    );
+    process.exit(1);
+  }
+
+  const serviceAccount = require(serviceAccountPath);
   admin.initializeApp({
-    credential: admin.credential.cert(require(serviceAccountPath))
+    credential: admin.credential.cert(serviceAccount)
   });
 }
 
 const db = admin.firestore();
 
-const baseWingTypes = [
-  { id: 'bone-in', label: 'Classic Bone-In', dietaryTags: [], prepOptions: ['mixed', 'flats', 'drums'] },
-  { id: 'boneless', label: 'Boneless', dietaryTags: [], prepOptions: [] },
-  { id: 'cauliflower', label: 'Cauliflower Wings', dietaryTags: ['vegan'], prepOptions: [], allergens: ['none'], equipment: ['fryer'] },
-  { id: 'mixed', label: 'Mix & Match', dietaryTags: [], prepOptions: [] }
-];
-
-const defaultDipTypes = ['ranch', 'blue-cheese', 'honey-mustard', 'cheese-sauce'];
-
 /**
- * Catering Package Data - 6 Tiered Packages
+ * Catering Package Data - Mirrors Production Firestore
  */
 const cateringPackages = [
-  // TIER 1: Office Lunch Packages (10-15 people)
   {
     id: 'lunch-box-special',
-    name: 'The Lunch Box Special',
+    name: 'Lunch Box Special',
     tier: 1,
     servesMin: 10,
     servesMax: 12,
     basePrice: 149.99,
-    targetMargin: 57.5,
-    description: 'Perfect when the team earned it. 3 sauce choices mean everyone\'s happy. Feeds 10-12. You\'re welcome.',
-    marketingHook: 'Perfect for team lunches and small meetings',
+    priceLabel: 'Starting at',
+    description: 'Perfect for team lunches and small meetings. Mix of boneless and bone-in wings with chips and fresh sides.',
+    marketingHook: 'Perfect when the team earned it - feeds 10-12 people',
     popular: true,
     imageUrl: 'catering/lunch-box-special.webp',
     wingOptions: {
-      totalWings: 60,
-      allowMixed: true,
-      types: baseWingTypes,
-      boneInOptions: ['mixed', 'flats', 'drums']
+      totalWings: 100,
+      boneless: 75,
+      boneIn: 25,
+      allowCustomMix: true,
+      boneInOptions: ['mixed', 'flats', 'drums'],
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      defaultDistribution: {
+        boneless: 75,
+        boneIn: 25,
+        cauliflower: 0
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
     },
     sauceSelections: {
       min: 3,
-      max: 3,
-      allowedTypes: ['dry-rub', 'wet-sauce']
+      max: 4,
+      allowedTypes: ['dry-rub', 'signature-sauce']
     },
-    dipsIncluded: {
-      count: 15,
-      types: defaultDipTypes
+    dips: {
+      fivePacksIncluded: 3,
+      totalContainers: 15,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce']
     },
-    sides: [
-      { item: 'Large Fries', quantity: 3 },
-      { item: 'Mozzarella Sticks', quantity: 12 }
+    chips: {
+      fivePacksIncluded: 2,
+      totalBags: 10,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 1, serves: 8 },
+      { item: 'Large Veggie Sticks Tray', quantity: 1, serves: 10 }
     ],
+    salads: [],
+    desserts: [],
+    beverages: [],
     includes: [
-      '60 wings (choice of 3 sauces)',
-      '3 large fries',
-      '12 mozzarella sticks',
-      '15 dipping cups (ranch/blue cheese/cheese sauce)',
-      'Plates, napkins, wet wipes included'
+      '75 Boneless Wings + 25 Bone-In Wings (100 total)',
+      "2 Miss Vickie's Variety 5-Packs (10 chip bags)",
+      '1 Family Coleslaw (serves 8)',
+      '1 Large Veggie Sticks Tray',
+      '3 Dip 5-Packs (15 containers)',
+      '3-4 Sauce selections',
+      'Complete serving supplies (plates, napkins, utensils, wet wipes)'
     ],
-    active: true
+    active: true,
+    sortOrder: 1
   },
   {
     id: 'sampler-spread',
-    name: 'The Sampler Spread',
+    name: 'Sampler Spread',
     tier: 1,
-    servesMin: 12,
-    servesMax: 15,
-    basePrice: 179.99,
-    targetMargin: 59,
-    description: 'More sauce variety = more excitement. Perfect for client lunches and department meetings. Feeds 12-15.',
-    marketingHook: 'Ideal for client lunches and department meetings',
+    servesMin: 15,
+    servesMax: 20,
+    basePrice: 209.99,
+    priceLabel: 'Starting at',
+    description: 'Great for client lunches and department meetings. More variety with increased portions and optional desserts.',
+    marketingHook: 'More sauce variety = more excitement - feeds 15-20 people',
     popular: false,
     imageUrl: 'catering/sampler-spread.webp',
     wingOptions: {
-      totalWings: 72,
-      allowMixed: true,
-      types: baseWingTypes,
-      boneInOptions: ['mixed', 'flats', 'drums']
+      totalWings: 150,
+      boneless: 110,
+      boneIn: 40,
+      allowCustomMix: true,
+      boneInOptions: ['mixed', 'flats', 'drums'],
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      defaultDistribution: {
+        boneless: 110,
+        boneIn: 40,
+        cauliflower: 0
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
     },
     sauceSelections: {
       min: 4,
-      max: 4,
-      allowedTypes: ['dry-rub', 'wet-sauce']
+      max: 5,
+      allowedTypes: ['dry-rub', 'signature-sauce']
     },
-    dipsIncluded: {
-      count: 20,
-      types: defaultDipTypes
+    dips: {
+      fivePacksIncluded: 4,
+      totalContainers: 20,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce']
     },
-    sides: [
-      { item: 'Large Fries', quantity: 4 },
-      { item: 'Mozzarella Sticks', quantity: 16 }
+    chips: {
+      fivePacksIncluded: 3,
+      totalBags: 15,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 1, serves: 8 },
+      { item: 'Family Potato Salad', quantity: 1, serves: 8 },
+      { item: 'Large Veggie Sticks Tray', quantity: 2, serves: 20 }
     ],
+    salads: [],
+    desserts: [
+      { item: 'Dessert 5-Pack', quantity: 1, optional: true, serves: 5 }
+    ],
+    beverages: [],
     includes: [
-      '72 wings (choice of 4 different sauces for variety)',
-      '4 large fries',
-      '16 mozzarella sticks',
-      '20 dipping cups',
-      'Plates, napkins, wet wipes included'
+      '110 Boneless Wings + 40 Bone-In Wings (150 total)',
+      "3 Miss Vickie's Variety 5-Packs (15 chip bags)",
+      '1 Family Coleslaw (serves 8)',
+      '1 Family Potato Salad (serves 8)',
+      '2 Large Veggie Sticks Trays',
+      '4 Dip 5-Packs (20 containers)',
+      '4-5 Sauce selections',
+      'Optional: 1 Dessert 5-Pack',
+      'Complete serving supplies (plates, napkins, utensils, wet wipes)'
     ],
-    active: true
+    active: true,
+    sortOrder: 2
   },
-
-  // TIER 2: Party Packages (20-35 people)
   {
     id: 'tailgate-party-pack',
-    name: 'The Tailgate Party Pack',
+    name: 'Tailgate Party Pack',
     tier: 2,
     servesMin: 20,
     servesMax: 25,
     basePrice: 329.99,
-    targetMargin: 60,
-    description: 'Perfect for office parties, birthday celebrations, watch parties. Heavy sports theme for Eagles/Phillies/Sixers/Flyers games. Feeds 20-25.',
-    marketingHook: 'Perfect for office parties and game day events',
+    priceLabel: 'Starting at',
+    description: 'Perfect for office parties, birthday celebrations, watch parties. Heavy sports theme for Eagles/Phillies/Sixers/Flyers games.',
+    marketingHook: 'Perfect for office parties and game day events - feeds 20-25 people',
     popular: true,
     imageUrl: 'catering/tailgate-party-pack.webp',
     wingOptions: {
-      totalWings: 120,
-      allowMixed: true,
-      types: baseWingTypes,
-      boneInOptions: ['mixed', 'flats', 'drums']
-    },
-    sauceSelections: {
-      min: 5,
-      max: 5,
-      allowedTypes: ['dry-rub', 'wet-sauce']
-    },
-    dipsIncluded: {
-      count: 30,
-      types: defaultDipTypes
-    },
-    sides: [
-      { item: 'Large Fries', quantity: 6 },
-      { item: 'Mozzarella Sticks', quantity: 24 }
-    ],
-    includes: [
-      '120 wings (choice of 5 sauces)',
-      '6 large fries',
-      '24 mozzarella sticks',
-      '30 dipping cups',
-      'Optional 2 Caesar salads (+$24)',
-      'Plates, napkins, wet wipes, serving utensils included'
-    ],
-    active: true
-  },
-  {
-    id: 'northeast-philly-feast',
-    name: 'The Northeast Philly Feast',
-    tier: 2,
-    servesMin: 30,
-    servesMax: 35,
-    basePrice: 449.99,
-    targetMargin: 61,
-    description: 'Name emphasizes local Philly authenticity as differentiator. Perfect for large office celebrations and company events. Feeds 30-35.',
-    marketingHook: 'Ideal for large office celebrations',
-    popular: false,
-    imageUrl: 'catering/northeast-philly-feast.webp',
-    wingOptions: {
-      totalWings: 180,
-      allowMixed: true,
-      types: baseWingTypes,
-      boneInOptions: ['mixed', 'flats', 'drums']
+      totalWings: 200,
+      boneless: 150,
+      boneIn: 50,
+      allowCustomMix: true,
+      boneInOptions: ['mixed', 'flats', 'drums'],
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      defaultDistribution: {
+        boneless: 150,
+        boneIn: 50,
+        cauliflower: 0
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
     },
     sauceSelections: {
       min: 6,
       max: 6,
-      allowedTypes: ['dry-rub', 'wet-sauce']
+      allowedTypes: ['dry-rub', 'signature-sauce']
     },
-    dipsIncluded: {
-      count: 40,
-      types: defaultDipTypes
+    dips: {
+      fivePacksIncluded: 5,
+      totalContainers: 25,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce']
     },
-    sides: [
-      { item: 'Large Fries', quantity: 8 },
-      { item: 'Mozzarella Sticks', quantity: 32 },
-      { item: 'Large Caesar Salads', quantity: 3 }
+    chips: {
+      fivePacksIncluded: 5,
+      totalBags: 25,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 2, serves: 16 },
+      { item: 'Family Potato Salad', quantity: 2, serves: 16 },
+      { item: 'Large Veggie Sticks Tray', quantity: 3, serves: 25 }
+    ],
+    salads: [
+      { item: 'Family Caesar Salad', quantity: 1, serves: 8 }
+    ],
+    desserts: [],
+    beverages: [
+      {
+        item: '96oz Iced Tea',
+        quantity: 1,
+        options: ['Sweet', 'Unsweet']
+      }
     ],
     includes: [
-      '180 wings (choice of 6 sauces - shows off variety!)',
-      '8 large fries',
-      '32 mozzarella sticks',
-      '3 large Caesar salads',
-      '40 dipping cups',
-      'Full setup with plates, napkins, wet wipes, serving trays, tongs'
+      '150 Boneless Wings + 50 Bone-In Wings (200 total)',
+      "5 Miss Vickie's Variety 5-Packs (25 chip bags)",
+      '2 Family Coleslaw (serves 16)',
+      '2 Family Potato Salad (serves 16)',
+      '3 Large Veggie Sticks Trays',
+      '1 Family Caesar Salad (serves 8)',
+      '5 Dip 5-Packs (25 containers)',
+      '6 Sauce selections',
+      '96oz Iced Tea (Sweet or Unsweet)',
+      'Complete serving supplies (plates, napkins, utensils, wet wipes)'
     ],
-    active: true
+    active: true,
+    sortOrder: 3
   },
-
-  // TIER 3: Large Event Packages (50-100 people)
   {
-    id: 'game-day-blowout',
-    name: 'The Game Day Blowout',
-    tier: 3,
-    servesMin: 50,
-    servesMax: 60,
-    basePrice: 749.99,
-    targetMargin: 62.5,
-    description: 'Enough variety for everyone to find their favorite! Perfect for company-wide events, Super Bowl parties, playoff watch parties. Feeds 50-60.',
-    marketingHook: 'Perfect for company-wide events and major parties',
-    popular: true,
-    imageUrl: 'catering/game-day-blowout.webp',
+    id: 'northeast-philly-feast',
+    name: 'Northeast Philly Feast',
+    tier: 2,
+    servesMin: 30,
+    servesMax: 35,
+    basePrice: 449.99,
+    priceLabel: 'Starting at',
+    description: 'Name emphasizes local Philly authenticity as differentiator. Perfect for large office celebrations and company events.',
+    marketingHook: 'Ideal for large office celebrations - feeds 30-35 people',
+    popular: false,
+    imageUrl: 'catering/northeast-philly-feast.webp',
     wingOptions: {
       totalWings: 300,
-      allowMixed: true,
-      types: baseWingTypes,
-      boneInOptions: ['mixed', 'flats', 'drums']
+      boneless: 225,
+      boneIn: 75,
+      allowCustomMix: true,
+      boneInOptions: ['mixed', 'flats', 'drums'],
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      defaultDistribution: {
+        boneless: 225,
+        boneIn: 75,
+        cauliflower: 0
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
     },
     sauceSelections: {
       min: 8,
       max: 8,
-      allowedTypes: ['dry-rub', 'wet-sauce']
+      allowedTypes: ['dry-rub', 'signature-sauce']
     },
-    dipsIncluded: {
-      count: 60,
-      types: defaultDipTypes
+    dips: {
+      fivePacksIncluded: 7,
+      totalContainers: 35,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce']
     },
-    sides: [
-      { item: 'Large Fries', quantity: 12 },
-      { item: 'Mozzarella Sticks', quantity: 48 },
-      { item: 'Large Caesar Salads', quantity: 5 }
+    chips: {
+      fivePacksIncluded: 7,
+      totalBags: 35,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 3, serves: 24 },
+      { item: 'Family Potato Salad', quantity: 3, serves: 24 },
+      { item: 'Large Veggie Sticks Tray', quantity: 4, serves: 35 }
+    ],
+    salads: [
+      { item: 'Family Caesar Salad', quantity: 1, serves: 8 },
+      { item: 'Family Spring Mix Salad', quantity: 1, serves: 8 }
+    ],
+    desserts: [
+      { item: 'Dessert 5-Pack', quantity: 2, serves: 10 }
+    ],
+    beverages: [
+      { item: '96oz Iced Tea Sweet', quantity: 1 },
+      { item: '96oz Iced Tea Unsweet', quantity: 1 }
     ],
     includes: [
-      '300 wings (choice of 8 sauces - maximum variety!)',
-      '12 large fries',
-      '48 mozzarella sticks',
-      '5 large Caesar salads',
-      '60 dipping cups',
-      'Complete setup with serving supplies'
+      '225 Boneless Wings + 75 Bone-In Wings (300 total)',
+      "7 Miss Vickie's Variety 5-Packs (35 chip bags)",
+      '3 Family Coleslaw (serves 24)',
+      '3 Family Potato Salad (serves 24)',
+      '4 Large Veggie Sticks Trays',
+      '2 Family Salads - 1 Caesar + 1 Spring Mix (serves 16 total)',
+      '7 Dip 5-Packs (35 containers)',
+      '8 Sauce selections',
+      '2x 96oz Iced Tea (Sweet + Unsweet)',
+      '2 Dessert 5-Packs (10 individual desserts)',
+      'Complete serving supplies (plates, napkins, utensils, wet wipes)'
     ],
-    active: true
+    active: true,
+    sortOrder: 4
+  },
+  {
+    id: 'game-day-blowout',
+    name: 'Game Day Blowout',
+    tier: 3,
+    servesMin: 50,
+    servesMax: 60,
+    basePrice: 749.99,
+    priceLabel: 'Starting at',
+    description: 'Enough variety for everyone to find their favorite! Perfect for company-wide events, Super Bowl parties, playoff watch parties.',
+    marketingHook: 'Perfect for company-wide events and major parties - feeds 50-60 people',
+    popular: true,
+    imageUrl: 'catering/game-day-blowout.webp',
+    wingOptions: {
+      totalWings: 500,
+      boneless: 375,
+      boneIn: 125,
+      allowCustomMix: true,
+      boneInOptions: ['mixed', 'flats', 'drums'],
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      defaultDistribution: {
+        boneless: 375,
+        boneIn: 125,
+        cauliflower: 0
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
+    },
+    sauceSelections: {
+      min: 10,
+      max: 10,
+      allowedTypes: ['dry-rub', 'signature-sauce']
+    },
+    dips: {
+      fivePacksIncluded: 12,
+      totalContainers: 60,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce']
+    },
+    chips: {
+      fivePacksIncluded: 12,
+      totalBags: 60,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 5, serves: 40 },
+      { item: 'Family Potato Salad', quantity: 5, serves: 40 },
+      { item: 'Large Veggie Sticks Tray', quantity: 6, serves: 60 }
+    ],
+    salads: [
+      { item: 'Family Caesar Salad', quantity: 2, serves: 16 },
+      { item: 'Family Spring Mix Salad', quantity: 2, serves: 16 }
+    ],
+    desserts: [
+      { item: 'Dessert 5-Pack', quantity: 4, serves: 20 }
+    ],
+    beverages: [
+      { item: '3-Gallon Iced Tea Sweet', quantity: 1 },
+      { item: '3-Gallon Iced Tea Unsweet', quantity: 1 },
+      { item: '96oz Coffee', quantity: 1, optional: true },
+      { item: '96oz Hot Chocolate', quantity: 1, optional: true }
+    ],
+    includes: [
+      '375 Boneless Wings + 125 Bone-In Wings (500 total)',
+      "12 Miss Vickie's Variety 5-Packs (60 chip bags)",
+      '5 Family Coleslaw (serves 40)',
+      '5 Family Potato Salad (serves 40)',
+      '6 Large Veggie Sticks Trays',
+      '4 Family Salads - 2 Caesar + 2 Spring Mix (serves 32 total)',
+      '12 Dip 5-Packs (60 containers)',
+      '10 Sauce selections',
+      '2x 3-Gallon Iced Tea (Sweet + Unsweet)',
+      '4 Dessert 5-Packs (20 individual desserts)',
+      'Optional: Hot Beverage Service (96oz Coffee + 96oz Hot Chocolate)',
+      'Complete serving supplies (plates, napkins, utensils, wet wipes)'
+    ],
+    active: true,
+    sortOrder: 5
   },
   {
     id: 'championship-spread',
-    name: 'The Championship Spread',
+    name: 'Championship Spread',
     tier: 3,
     servesMin: 90,
     servesMax: 100,
     basePrice: 1399.99,
-    targetMargin: 63.5,
-    description: 'ONLY catering option offering all 14 flavors simultaneously. Premium experience for large corporate events, championship celebrations, major parties. Feeds 90-100.',
-    marketingHook: 'Ultimate catering experience with all 14 sauces',
+    priceLabel: 'Starting at',
+    description: 'ONLY catering option offering all 14 flavors simultaneously. Premium experience for large corporate events, championship celebrations, major parties.',
+    marketingHook: 'Ultimate catering experience with all 14 sauces - feeds 90-100 people',
     popular: false,
     imageUrl: 'catering/championship-spread.webp',
     wingOptions: {
-      totalWings: 600,
-      allowMixed: true,
-      types: baseWingTypes,
-      boneInOptions: ['mixed', 'flats', 'drums']
+      totalWings: 900,
+      boneless: 675,
+      boneIn: 225,
+      allowCustomMix: true,
+      boneInOptions: ['mixed', 'flats', 'drums'],
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      defaultDistribution: {
+        boneless: 675,
+        boneIn: 225,
+        cauliflower: 0
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
     },
     sauceSelections: {
       min: 14,
       max: 14,
-      allowedTypes: ['dry-rub', 'wet-sauce']
+      allowedTypes: ['dry-rub', 'signature-sauce'],
+      allSauces: true
     },
-    dipsIncluded: {
-      count: 100,
-      types: defaultDipTypes
+    dips: {
+      fivePacksIncluded: 20,
+      totalContainers: 100,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce'],
+      allDips: true
     },
-    sides: [
-      { item: 'Large Fries', quantity: 20 },
-      { item: 'Mozzarella Sticks', quantity: 80 },
-      { item: 'Large Caesar Salads', quantity: 8 }
+    chips: {
+      fivePacksIncluded: 20,
+      totalBags: 100,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 10, serves: 80 },
+      { item: 'Family Potato Salad', quantity: 10, serves: 80 },
+      { item: 'Large Veggie Sticks Tray', quantity: 12, serves: 100 }
+    ],
+    salads: [
+      { item: 'Family Caesar Salad', quantity: 4, serves: 32 },
+      { item: 'Family Spring Mix Salad', quantity: 4, serves: 32 }
+    ],
+    desserts: [
+      { item: 'Dessert 5-Pack', quantity: 8, serves: 40 }
+    ],
+    beverages: [
+      { item: '3-Gallon Iced Tea Sweet', quantity: 1 },
+      { item: '3-Gallon Iced Tea Unsweet', quantity: 1 },
+      { item: '3-Gallon Iced Tea Half-and-Half', quantity: 1 },
+      { item: 'Water 5-Pack', quantity: 2 },
+      { item: '128oz Lavazza Coffee', quantity: 1 },
+      { item: '128oz Ghirardelli Hot Chocolate', quantity: 1 }
     ],
     includes: [
-      '600 wings (ALL 14 SAUCES AVAILABLE - ultimate differentiator!)',
-      '20 large fries',
-      '80 mozzarella sticks',
-      '8 large Caesar salads',
-      '100 dipping cups',
-      'Premium setup with optional chafing dishes (+$50)',
-      'Dedicated setup staff coordination'
+      '675 Boneless Wings + 225 Bone-In Wings (900 total)',
+      "20 Miss Vickie's Variety 5-Packs (100 chip bags)",
+      '10 Family Coleslaw (serves 80)',
+      '10 Family Potato Salad (serves 80)',
+      '12 Large Veggie Sticks Trays',
+      '8 Family Salads - 4 Caesar + 4 Spring Mix (serves 64 total)',
+      '20 Dip 5-Packs (100 containers)',
+      'ALL 14 Sauce selections (complete sauce bar)',
+      '3x 3-Gallon Iced Tea (Sweet, Unsweet, Half-and-Half)',
+      '2 Water 5-Packs (10 bottled waters)',
+      '128oz Lavazza Coffee Service',
+      '128oz Ghirardelli Hot Chocolate Service',
+      '8 Dessert 5-Packs (40 individual desserts)',
+      'Premium serving supplies and setup'
     ],
-    active: true
+    active: true,
+    sortOrder: 6
+  },
+  {
+    id: 'plant-based-lunch-special',
+    name: 'Plant-Based Lunch Special',
+    tier: 1,
+    servesMin: 10,
+    servesMax: 12,
+    basePrice: 159.99,
+    priceLabel: 'Starting at',
+    description: '100% plant-based cauliflower wings with generous sides and salad. Perfect for vegan-friendly team lunches.',
+    marketingHook: 'Plant-based perfection - feeds 10-12 people',
+    popular: false,
+    imageUrl: 'catering/plant-based-lunch-special.webp',
+    wingOptions: {
+      totalWings: 100,
+      plantBased: 100,
+      prepOptions: ['baked', 'fried'],
+      allowCustomMix: false,
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      // Plant-based packages cannot be customized, but schema included for consistency
+      defaultDistribution: {
+        boneless: 0,
+        boneIn: 0,
+        cauliflower: 100
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
+    },
+    sauceSelections: {
+      min: 4,
+      max: 4,
+      allowedTypes: ['dry-rub', 'signature-sauce']
+    },
+    dips: {
+      fivePacksIncluded: 3,
+      totalContainers: 15,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce']
+    },
+    chips: {
+      fivePacksIncluded: 3,
+      totalBags: 15,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 2, serves: 16 },
+      { item: 'Family Potato Salad', quantity: 1, serves: 8 },
+      { item: 'Large Veggie Sticks Tray', quantity: 2, serves: 20 }
+    ],
+    salads: [
+      { item: 'Family Spring Mix Salad', quantity: 1, serves: 8 }
+    ],
+    desserts: [],
+    beverages: [],
+    includes: [
+      '100 Plant-Based Wings (cauliflower florets - fried or baked)',
+      "3 Miss Vickie's Variety 5-Packs (15 chip bags)",
+      '2 Family Coleslaw (serves 16)',
+      '1 Family Potato Salad (serves 8)',
+      '2 Large Veggie Sticks Trays',
+      '1 Family Spring Mix Salad (serves 8)',
+      '3 Dip 5-Packs (15 containers)',
+      '4 Sauce selections',
+      'Complete serving supplies (plates, napkins, utensils, wet wipes)'
+    ],
+    active: true,
+    sortOrder: 7,
+    dietaryTags: ['plant-based', 'vegan-friendly']
+  },
+  {
+    id: 'plant-based-sampler-spread',
+    name: 'Plant-Based Sampler Spread',
+    tier: 1,
+    servesMin: 15,
+    servesMax: 20,
+    basePrice: 219.99,
+    priceLabel: 'Starting at',
+    description: '150 plant-based cauliflower wings with premium sides, salads, and desserts. Ideal for vegan-inclusive company events.',
+    marketingHook: 'Plant-based variety for the whole team - feeds 15-20 people',
+    popular: false,
+    imageUrl: 'catering/plant-based-sampler-spread.webp',
+    wingOptions: {
+      totalWings: 150,
+      plantBased: 150,
+      prepOptions: ['baked', 'fried', 'split'],
+      allowCustomMix: false,
+      // Wing cost tracking for differential pricing (SP-OS-S1)
+      // Plant-based packages cannot be customized, but schema included for consistency
+      defaultDistribution: {
+        boneless: 0,
+        boneIn: 0,
+        cauliflower: 150
+      },
+      perWingCosts: {
+        boneless: 0.80,
+        boneIn: 1.00,
+        cauliflower: 1.30
+      }
+    },
+    sauceSelections: {
+      min: 4,
+      max: 4,
+      allowedTypes: ['dry-rub', 'signature-sauce']
+    },
+    dips: {
+      fivePacksIncluded: 4,
+      totalContainers: 20,
+      options: ['ranch', 'honey-mustard', 'blue-cheese', 'cheese-sauce']
+    },
+    chips: {
+      fivePacksIncluded: 4,
+      totalBags: 20,
+      brand: "Miss Vickie's Variety"
+    },
+    coldSides: [
+      { item: 'Family Coleslaw', quantity: 2, serves: 16 },
+      { item: 'Family Potato Salad', quantity: 2, serves: 16 },
+      { item: 'Large Veggie Sticks Tray', quantity: 3, serves: 25 }
+    ],
+    salads: [
+      { item: 'Family Caesar Salad', quantity: 1, serves: 8 },
+      { item: 'Family Spring Mix Salad', quantity: 1, serves: 8 }
+    ],
+    desserts: [
+      { item: 'Dessert 5-Pack', quantity: 2, serves: 10 }
+    ],
+    beverages: [],
+    includes: [
+      '150 Plant-Based Wings (cauliflower florets - fried or baked)',
+      "4 Miss Vickie's Variety 5-Packs (20 chip bags)",
+      '2 Family Coleslaw (serves 16)',
+      '2 Family Potato Salad (serves 16)',
+      '3 Large Veggie Sticks Trays',
+      '2 Family Salads - 1 Caesar + 1 Spring Mix (serves 16 total)',
+      '4 Dip 5-Packs (20 containers)',
+      '4 Sauce selections',
+      '2 Dessert 5-Packs (10 individual desserts)',
+      'Complete serving supplies (plates, napkins, utensils, wet wipes)'
+    ],
+    active: true,
+    sortOrder: 8,
+    dietaryTags: ['plant-based', 'vegan-friendly']
   }
 ];
 
@@ -321,223 +669,511 @@ async function seedCateringPackages() {
 }
 
 /**
- * Catering Add-Ons Data - Vegetarian & Desserts
- * Based on TypeScript types in /src/types/catering.ts
+ * Catering Add-Ons Data - Lightweight Reference Schema
+ * References source collections instead of duplicating data
+ * Includes: 10 desserts, 2 beverages, 2 salads, 2 sides, 2 quick-adds
  */
+const timestamp = new Date().toISOString();
+
 const cateringAddOns = [
-  // VEGETARIAN MAIN ALTERNATIVES
+  // ========== DESSERTS - INDIVIDUAL ==========
   {
-    id: 'elenas-eggplant-parmesan-tray',
-    name: "Elena's Eggplant Parmesan",
-    category: 'vegetarian',
-    type: 'main-alternative',
-    description: 'Authentic Italian eggplant parmesan, ready to heat and serve. Crispy breaded eggplant layered with marinara and melted mozzarella.',
-    supplier: "Restaurant Depot - Elena's",
-    supplierSku: 'ELENA-EGGPLANT-FULL',
-    storageType: 'frozen',
-    leadTimeDays: 2,
-    prepTimeMinutes: 50,
-    teamCapability: 'heat-only',
-    requiredEquipment: ['impingerOven'],
-    operationalNotes: 'Thaw overnight in refrigeration. Heat at 350°F for 45-50 minutes until internal temp reaches 165°F.',
-    servingSize: 'Full tray',
-    serves: '12-15 people',
-    basePrice: 45.00,
-    costPerUnit: 18.50,
-    marginTarget: 59,
+    id: 'marble-pound-cake-individual',
+    category: 'desserts',
+    packSize: 'individual',
     availableForTiers: [1, 2, 3],
-    maxDailyUnits: 10,
-    allergens: ['dairy', 'gluten', 'egg'],
+    displayOrder: 1,
+    active: true,
+    marketingCopy: "Nobody left behind - Daisy's famous marble pound cake slice",
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'marble_pound_cake',
+    sourceVariantId: 'marble_pound_cake_slice',
+    name: "Daisy's Marble Pound Cake (Individual)",
+    basePrice: 3.50,
+    servings: 1,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmarble-pound-cake_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
     dietaryTags: ['vegetarian'],
-    imageUrl: 'catering/elenas-eggplant-parmesan.webp',
-    badge: 'Vegetarian',
-    featured: true,
-    active: true
+    description: 'Individually wrapped marble pound cake slice',
+    platformPricing: { ezcater: 4.2 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: 'slices'
   },
   {
-    id: 'cauliflower-wings-50',
-    name: 'Cauliflower Wings',
-    category: 'vegetarian',
-    type: 'wing-alternative',
-    description: 'Crispy breaded cauliflower, double-fried just like our chicken wings. Choose any 2 of our 14 signature sauces!',
-    supplier: 'Restaurant Depot - Sysco Veggie',
-    supplierSku: 'SYSCO-CAULI-50PC',
-    storageType: 'frozen',
-    leadTimeDays: 2,
-    prepTimeMinutes: 35,
-    teamCapability: 'fry',
-    requiredEquipment: ['fryer'],
-    operationalNotes: 'Fry from frozen at 350°F for 5-6 minutes, rest 2 minutes, second fry 3-4 minutes until golden. Toss in sauce immediately. SAUCE LIMIT: Customer may select up to 2 different sauces per 50-piece order (split 25/25 or keep all 50 in one sauce).',
-    servingSize: '50 pieces',
-    serves: '8-10 people',
-    basePrice: 50.00,
-    costPerUnit: 19.75,
-    marginTarget: 60.5,
+    id: 'gourmet-brownies-individual',
+    category: 'desserts',
+    packSize: 'individual',
     availableForTiers: [1, 2, 3],
-    maxDailyUnits: 15,
-    allergens: ['gluten', 'soy'],
+    displayOrder: 2,
+    active: true,
+    marketingCopy: "Daisy's signature gourmet brownie - rich and fudgy",
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'gourmet_brownies',
+    sourceVariantId: 'brownie_single',
+    name: "Daisy's Gourmet Brownie (Individual)",
+    basePrice: 4.00,
+    servings: 1,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fgourmet-brownie_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
     dietaryTags: ['vegetarian'],
-    preparationOptions: [
-      {
-        id: 'fried',
-        label: 'Fried – double fry finish',
-        teamCapability: 'fry',
-        requiredEquipment: ['fryer'],
-        prepTimeMinutes: 35,
-        operationalNotes: 'Fry from frozen at 350°F for 5-6 minutes, rest 2 minutes, second fry 3-4 minutes until golden. Toss in sauce immediately. Maintain dedicated fryer oil before chicken batches.'
-      },
-      {
-        id: 'baked',
-        label: 'Baked – impinger oven finish',
-        teamCapability: 'heat-only',
-        requiredEquipment: ['impingerOven'],
-        prepTimeMinutes: 45,
-        maxDailyUnits: 8,
-        operationalNotes: 'Bake from frozen on parchment-lined sheet at 425°F in impinger for 12 minutes, flip, bake additional 10-12 minutes until internal temp 165°F. Finish 2-minute broiler pass for crunch. Allow 3-minute rest on rack before saucing.'
-      }
-    ],
-    imageUrl: 'catering/cauliflower-wings.webp',
-    badge: 'Vegetarian',
-    featured: true,
-    active: true
+    description: 'Individually wrapped gourmet brownie with chocolate drizzle',
+    platformPricing: { ezcater: 5 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: 'brownies'
   },
   {
-    id: 'sally-sherman-coleslaw-quart',
-    name: "Sally Sherman's Coleslaw",
-    category: 'vegetarian',
-    type: 'side',
-    description: 'Classic creamy coleslaw with crisp cabbage and carrots. Perfect cooling side for spicy wings.',
-    supplier: 'Restaurant Depot - Sally Sherman',
-    supplierSku: 'SALLY-COLESLAW-QT',
-    storageType: 'refrigerated',
-    leadTimeDays: 1,
-    prepTimeMinutes: 5,
-    teamCapability: 'none',
-    requiredEquipment: ['refrigeration'],
-    operationalNotes: 'Keep refrigerated. Serve cold. Stir before serving.',
-    servingSize: '1 quart',
-    serves: '6-8 people',
-    basePrice: 12.00,
-    costPerUnit: 4.25,
-    marginTarget: 64.6,
+    id: 'mini-cheesecake-individual',
+    category: 'desserts',
+    packSize: 'individual',
     availableForTiers: [1, 2, 3],
-    maxDailyUnits: 20,
-    allergens: ['egg', 'dairy'],
-    dietaryTags: ['vegetarian', 'gluten-free'],
-    imageUrl: 'catering/sally-sherman-coleslaw.webp',
-    badge: 'Vegetarian',
-    featured: false,
-    active: true
+    displayOrder: 3,
+    active: true,
+    marketingCopy: 'Classic mini cheesecake with graham cracker crust',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'mini_cheesecake',
+    sourceVariantId: 'mini_cheesecake_single',
+    name: 'Mini Cheesecake (Individual)',
+    basePrice: 4.50,
+    servings: 1,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmini-cheesecake_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
+    dietaryTags: ['vegetarian'],
+    description: 'Individual New York-style mini cheesecake with fruit glaze',
+    platformPricing: { ezcater: 5.5 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: 'cheesecakes'
+  },
+  {
+    id: 'chocolate-chip-cookie-individual',
+    category: 'desserts',
+    packSize: 'individual',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 4,
+    active: true,
+    marketingCopy: 'Fresh-baked chocolate chip cookies (individually wrapped)',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'chocolate_chip_cookie',
+    sourceVariantId: 'cookie_single',
+    name: 'Chocolate Chip Cookie (Individual)',
+    basePrice: 2.75,
+    servings: 1,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchocolate-chip-cookie_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
+    dietaryTags: ['vegetarian'],
+    description: 'Individually wrapped chocolate chip cookie baked in-house',
+    platformPricing: { ezcater: 3.3 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5, 6, 7],
+    quantityLabel: 'cookies'
+  },
+  {
+    id: 'brookie-individual',
+    category: 'desserts',
+    packSize: 'individual',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 5,
+    active: true,
+    marketingCopy: 'Half brownie, half cookie, 100% Philly favorite',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'brookie',
+    sourceVariantId: 'brookie_single',
+    name: 'Brookie (Individual)',
+    basePrice: 3.75,
+    servings: 1,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbrookie_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
+    dietaryTags: ['vegetarian'],
+    description: 'The best of both worlds: brownie + cookie in one indulgent treat',
+    platformPricing: { ezcater: 4.4 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: 'brookies'
   },
 
-  // DESSERTS
+  // ========== DESSERTS - FIVE PACKS ==========
   {
-    id: 'daisys-chocolate-chip-cookies-24',
-    name: "Daisy's Chocolate Chip Cookies",
-    category: 'dessert',
-    type: 'cookies',
-    description: 'Fresh-baked chocolate chip cookies from local Northeast Philly bakery. Soft, chewy, and loaded with chips.',
-    supplier: "Daisy's Bakery - Northeast Philly",
-    supplierSku: 'DAISY-CHOC-CHIP-24',
-    storageType: 'ambient',
-    leadTimeDays: 1,
-    prepTimeMinutes: 5,
-    teamCapability: 'none',
-    requiredEquipment: ['boxingStation'],
-    operationalNotes: 'Same-day delivery required. Store at room temperature. Package in individual sleeves if available.',
-    servingSize: '24 cookies',
-    serves: '24 people',
-    basePrice: 28.00,
-    costPerUnit: 13.20,
-    marginTarget: 52.9,
+    id: 'brownie-5pack',
+    category: 'desserts',
+    packSize: '5pack',
     availableForTiers: [1, 2, 3],
-    maxDailyUnits: 25,
-    allergens: ['gluten', 'egg', 'dairy', 'soy'],
+    displayOrder: 6,
+    active: true,
+    marketingCopy: 'Shareable brownie platter - 5 pieces of Daisy’s famous recipe',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'gourmet_brownies',
+    sourceVariantId: 'brownie_5pack',
+    name: "Daisy's Gourmet Brownies (5-Pack)",
+    basePrice: 18.00,
+    servings: 5,
+    quantityMultiplier: 5,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fgourmet-brownie_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
     dietaryTags: ['vegetarian'],
-    imageUrl: 'catering/daisys-cookies.webp',
-    badge: 'Local',
-    featured: true,
-    active: true
+    description: 'Shareable brownie platter cut into 5 generous pieces',
+    platformPricing: { ezcater: 22 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4],
+    quantityLabel: 'platters'
   },
   {
-    id: 'chefs-quality-sheet-cake-quarter',
-    name: "Chef's Quality Sheet Cake",
-    category: 'dessert',
-    type: 'cake',
-    description: 'Classic vanilla or chocolate sheet cake. Perfect for celebrations and large groups.',
-    supplier: "Restaurant Depot - Chef's Quality",
-    supplierSku: 'CHEFS-SHEET-QTR',
-    storageType: 'frozen',
-    leadTimeDays: 2,
-    prepTimeMinutes: 15,
-    teamCapability: 'none',
-    requiredEquipment: ['refrigeration'],
-    operationalNotes: 'Thaw in refrigeration 4-6 hours before service. Keep refrigerated until serving.',
-    servingSize: '1/4 sheet',
-    serves: '20-25 people',
-    basePrice: 35.00,
-    costPerUnit: 12.75,
-    marginTarget: 63.6,
-    availableForTiers: [2, 3],
-    maxDailyUnits: 8,
-    allergens: ['gluten', 'egg', 'dairy', 'soy'],
+    id: 'cookie-5pack',
+    category: 'desserts',
+    packSize: '5pack',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 7,
+    active: true,
+    marketingCopy: 'Baked fresh every morning - 5 warm cookies',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'chocolate_chip_cookie',
+    sourceVariantId: 'cookie_5pack',
+    name: 'Chocolate Chip Cookies (5-Pack)',
+    basePrice: 10.50,
+    servings: 5,
+    quantityMultiplier: 5,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fchocolate-chip-cookie_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
     dietaryTags: ['vegetarian'],
-    imageUrl: 'catering/chefs-quality-cake.webp',
-    badge: 'Premium',
-    featured: false,
-    active: true
+    description: 'Five warm chocolate chip cookies baked fresh in-house',
+    platformPricing: { ezcater: 12.5 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: 'bags'
   },
   {
-    id: 'chef-pierre-cheesecake-bites-50',
-    name: 'Chef Pierre Cheesecake Bites',
-    category: 'dessert',
-    type: 'cheesecake',
-    description: 'Individual New York-style cheesecake bites. Rich, creamy, and perfectly portioned.',
-    supplier: 'Restaurant Depot - Chef Pierre',
-    supplierSku: 'PIERRE-CHEESE-BITES-50',
-    storageType: 'frozen',
-    leadTimeDays: 2,
-    prepTimeMinutes: 10,
-    teamCapability: 'none',
-    requiredEquipment: ['refrigeration'],
-    operationalNotes: 'Thaw in refrigeration 2-3 hours before service. Serve chilled.',
-    servingSize: '50 pieces',
-    serves: '50 people',
-    basePrice: 45.00,
-    costPerUnit: 18.25,
-    marginTarget: 59.4,
-    availableForTiers: [2, 3],
-    maxDailyUnits: 12,
-    allergens: ['gluten', 'egg', 'dairy'],
+    id: 'muni-cheesecake-5pack',
+    category: 'desserts',
+    packSize: '5pack',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 8,
+    active: true,
+    marketingCopy: 'Assorted mini cheesecakes - perfect bite-sized treats',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'mini_cheesecake',
+    sourceVariantId: 'mini_cheesecake_5pack',
+    name: 'Mini Cheesecake Sampler (5-Pack)',
+    basePrice: 21.50,
+    servings: 5,
+    quantityMultiplier: 5,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fmini-cheesecake_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
     dietaryTags: ['vegetarian'],
-    imageUrl: 'catering/chef-pierre-cheesecake.webp',
-    badge: 'Premium',
-    featured: true,
-    active: true
+    description: 'Assorted mini cheesecakes - includes seasonal rotating flavors',
+    platformPricing: { ezcater: 25 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4],
+    quantityLabel: 'samplers'
+  },
+  {
+    id: 'brookie-5pack',
+    category: 'desserts',
+    packSize: '5pack',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 9,
+    active: true,
+    marketingCopy: 'Fan-favorite brookie platter - 5 indulgent pieces',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'brookie',
+    sourceVariantId: 'brookie_5pack',
+    name: 'Brookies (5-Pack)',
+    basePrice: 17.50,
+    servings: 5,
+    quantityMultiplier: 5,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fbrookie_800x800.webp?alt=media',
+    allergens: ['gluten', 'dairy', 'eggs'],
+    dietaryTags: ['vegetarian'],
+    description: 'Five brookies (half brownie, half cookie) cut for sharing',
+    platformPricing: { ezcater: 21 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4],
+    quantityLabel: 'platters'
+  },
+  {
+    id: 'vegan-brownie-5pack',
+    category: 'desserts',
+    packSize: '5pack',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 10,
+    active: true,
+    marketingCopy: 'Vegan-friendly brownie bars made with dark chocolate',
+    sourceCollection: 'desserts',
+    sourceDocumentId: 'vegan_brownie',
+    sourceVariantId: 'vegan_brownie_5pack',
+    name: 'Vegan Brownies (5-Pack)',
+    basePrice: 19.00,
+    servings: 5,
+    quantityMultiplier: 5,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fvegan-brownie_800x800.webp?alt=media',
+    allergens: ['gluten'],
+    dietaryTags: ['vegan'],
+    description: 'Plant-based brownie bars made with dark chocolate and olive oil',
+    platformPricing: { ezcater: 23 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3],
+    quantityLabel: 'platters'
+  },
+
+  // ========== BEVERAGES ==========
+  {
+    id: '96oz-iced-tea',
+    category: 'beverages',
+    packSize: '96oz',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 11,
+    active: true,
+    marketingCopy: '96oz insulated carrier - choose sweet or unsweet',
+    sourceCollection: 'beverages',
+    sourceDocumentId: 'iced_tea_96oz',
+    sourceVariantId: 'iced_tea_carrier',
+    name: '96oz Iced Tea Carrier',
+    basePrice: 12.00,
+    servings: 8,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea-carrier_800x800.webp?alt=media',
+    allergens: [],
+    dietaryTags: ['vegan'],
+    description: 'Insulated beverage carrier with cups, lids, and sweetener packets',
+    platformPricing: { ezcater: 14 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    options: ['Sweet', 'Unsweet'],
+    suggestedQuantities: [1, 2, 3, 4],
+    quantityLabel: 'carriers'
+  },
+  {
+    id: '3gal-iced-tea',
+    category: 'beverages',
+    packSize: '3gal',
+    availableForTiers: [2, 3],
+    displayOrder: 12,
+    active: true,
+    marketingCopy: 'Large event iced tea service (sweet/unsweet/half-and-half)',
+    sourceCollection: 'beverages',
+    sourceDocumentId: 'iced_tea_3gal',
+    sourceVariantId: 'iced_tea_dispenser',
+    name: '3-Gallon Iced Tea Dispenser',
+    basePrice: 34.00,
+    servings: 25,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Ficed-tea-dispenser_800x800.webp?alt=media',
+    allergens: [],
+    dietaryTags: ['vegan'],
+    description: 'Full iced tea service with 3-gallon dispenser, cups, lids, and citrus garnish',
+    platformPricing: { ezcater: 39 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    options: ['Sweet', 'Unsweet', 'Half-and-Half'],
+    suggestedQuantities: [1, 2, 3],
+    quantityLabel: 'dispensers'
+  },
+
+  // ========== SALADS ==========
+  {
+    id: 'caesar-salad-family',
+    category: 'salads',
+    packSize: 'family',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 13,
+    active: true,
+    marketingCopy: 'Classic Caesar with romaine, parmesan, croutons, and dressing',
+    sourceCollection: 'freshSalads',
+    sourceDocumentId: 'caesar_family',
+    sourceVariantId: 'caesar_family_bowl',
+    name: 'Family Caesar Salad',
+    basePrice: 22.00,
+    servings: 8,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcaesar-salad_800x800.webp?alt=media',
+    allergens: ['dairy', 'gluten'],
+    dietaryTags: ['vegetarian'],
+    description: 'Family-sized Caesar salad with dressing on the side',
+    platformPricing: { ezcater: 26 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3],
+    quantityLabel: 'bowls'
+  },
+  {
+    id: 'spring-mix-salad-family',
+    category: 'salads',
+    packSize: 'family',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 14,
+    active: true,
+    marketingCopy: 'Mixed greens with seasonal veggies and house vinaigrette',
+    sourceCollection: 'freshSalads',
+    sourceDocumentId: 'spring_mix_family',
+    sourceVariantId: 'spring_mix_family_bowl',
+    name: 'Family Spring Mix Salad',
+    basePrice: 24.00,
+    servings: 8,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fspring-mix-salad_800x800.webp?alt=media',
+    allergens: [],
+    dietaryTags: ['vegan'],
+    description: 'Seasonal spring mix salad with house-made vinaigrette',
+    platformPricing: { ezcater: 28 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3],
+    quantityLabel: 'bowls'
+  },
+
+  // ========== SIDES ==========
+  {
+    id: 'coleslaw-family',
+    category: 'sides',
+    packSize: 'family',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 15,
+    active: true,
+    marketingCopy: 'Creamy homestyle coleslaw (serves 8)',
+    sourceCollection: 'coldSides',
+    sourceDocumentId: 'homestyle_coleslaw_family',
+    sourceVariantId: 'coleslaw_family_bowl',
+    name: 'Family Coleslaw',
+    basePrice: 14.00,
+    servings: 8,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fcoleslaw_800x800.webp?alt=media',
+    allergens: ['eggs'],
+    dietaryTags: ['vegetarian'],
+    description: 'Creamy homestyle coleslaw with shredded cabbage and carrots',
+    platformPricing: { ezcater: 16.5 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: 'bowls'
+  },
+  {
+    id: 'potato-salad-family',
+    category: 'sides',
+    packSize: 'family',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 16,
+    active: true,
+    marketingCopy: 'Creamy red potato salad with dill and scallions',
+    sourceCollection: 'coldSides',
+    sourceDocumentId: 'potato_salad_family',
+    sourceVariantId: 'potato_salad_family_bowl',
+    name: 'Family Potato Salad',
+    basePrice: 16.00,
+    servings: 8,
+    quantityMultiplier: 1,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fpotato-salad_800x800.webp?alt=media',
+    allergens: ['eggs'],
+    dietaryTags: ['vegetarian'],
+    description: 'Red bliss potato salad with dill, scallions, and house dressing',
+    platformPricing: { ezcater: 18.5 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: 'bowls'
+  },
+
+  // ========== QUICK-ADDS ==========
+  {
+    id: 'water-5pack',
+    category: 'quick-adds',
+    packSize: '5pack',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 17,
+    active: true,
+    marketingCopy: 'Pack of 5 bottled waters (16.9oz each)',
+    sourceCollection: 'menuItems',
+    sourceDocumentId: 'HDtMAgkIiERc9bsIJ12j',
+    sourceVariantId: 'water_single',
+    name: 'Water Bottles (5-Pack)',
+    basePrice: 0, // Placeholder - pricing resolved from source variant
+    servings: 5,
+    quantityMultiplier: 5,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fresized%2Fwater-bottles_800x800.webp?alt=media',
+    allergens: [],
+    dietaryTags: ['vegan'],
+    description: 'Five bottled waters (16.9oz) - perfect add-on for any package',
+    platformPricing: { ezcater: 8.5 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4, 5],
+    quantityLabel: '5-packs'
+  },
+  {
+    id: 'chips-5pack',
+    category: 'quick-adds',
+    packSize: '5pack',
+    availableForTiers: [1, 2, 3],
+    displayOrder: 18,
+    active: true,
+    marketingCopy: "Miss Vickie's premium kettle chips - variety flavors",
+    sourceCollection: 'menuItems',
+    sourceDocumentId: 'HDtMAgkIiERc9bsIJ12j',
+    sourceVariantId: 'chips_single',
+    name: "Miss Vickie's Chips (5-Pack)",
+    basePrice: 0, // Placeholder - pricing resolved from source variant
+    servings: 5,
+    quantityMultiplier: 5,
+    imageUrl: 'https://firebasestorage.googleapis.com/v0/b/philly-wings.firebasestorage.app/o/images%2Fmiss-vickies-chips.webp?alt=media',
+    allergens: [],
+    dietaryTags: ['vegetarian'],
+    description: "5 bags of Miss Vickie's premium kettle chips - variety flavors",
+    platformPricing: { ezcater: 9 },
+    sourceLastUpdated: timestamp,
+    lastSyncedAt: timestamp,
+    suggestedQuantities: [1, 2, 3, 4],
+    quantityLabel: '5-packs'
   }
 ];
 
+cateringAddOns.forEach(addOn => {
+  if (addOn.basePrice === 0 && addOn.sourceVariantId) {
+    console.warn(`⚠️  ${addOn.id} has basePrice of 0 and relies on enrichment. Consider setting fallback price.`);
+  }
+  if (addOn.basePrice === 0 && !addOn.sourceVariantId) {
+    throw new Error(`❌ ${addOn.id} has invalid pricing: basePrice is 0 with no sourceVariantId`);
+  }
+});
+
 /**
- * Seed catering add-ons to Firestore
+ * Seed catering add-ons to Firestore with lightweight reference schema
  */
 async function seedCateringAddOns() {
-  console.log('\n🌱 Seeding catering add-ons to Firestore...\n');
+  console.log('\n🌱 Seeding catering add-ons (Lightweight Reference Schema)...\n');
 
   const batch = db.batch();
   let count = 0;
 
   for (const addOn of cateringAddOns) {
     const docRef = db.collection('cateringAddOns').doc(addOn.id);
-    batch.set(docRef, {
-      ...addOn,
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
+    batch.set(docRef, addOn);
     count++;
-    console.log(`✅ Prepared: ${addOn.name} (${addOn.category}, $${addOn.basePrice})`);
+    console.log(`✅ Prepared: ${addOn.name} (${addOn.category}/${addOn.packSize}, $${addOn.basePrice})`);
   }
 
   await batch.commit();
   console.log(`\n🎉 Successfully seeded ${count} catering add-ons!`);
+  console.log('   📋 Summary:');
+  console.log('      - 10 desserts (5 individual + 5 five-packs)');
+  console.log('      - 2 beverages (96oz + 3gal)');
+  console.log('      - 2 salads (family size)');
+  console.log('      - 2 sides (family size)');
+  console.log('      - 2 quick-adds (5-packs)');
 }
 
 /**
@@ -592,8 +1228,8 @@ async function main() {
     console.log('\n=================================');
     console.log('✅ All catering data seeded successfully!\n');
     console.log('📦 Collections created:');
-    console.log('   - cateringPackages (6 packages)');
-    console.log('   - cateringAddOns (6 add-ons: 3 vegetarian, 3 desserts)');
+    console.log('   - cateringPackages (8 packages)');
+    console.log('   - cateringAddOns (18 items with lightweight reference schema)');
     console.log('   - cateringAvailability (90 days)\n');
 
     process.exit(0);
