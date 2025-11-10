@@ -194,7 +194,13 @@ export async function getAddOnsByCategory(category) {
  */
 export async function getAddOnsForTier(tier) {
   const allAddOns = await getCateringAddOns();
-  return allAddOns.filter(addOn => addOn.availableForTiers.includes(tier));
+  return allAddOns.filter(addOn => {
+    // If availableForTiers is not defined, assume available for all tiers
+    if (!addOn.availableForTiers || !Array.isArray(addOn.availableForTiers)) {
+      return true;
+    }
+    return addOn.availableForTiers.includes(tier);
+  });
 }
 
 /**
@@ -205,7 +211,13 @@ export async function getAddOnsForTier(tier) {
  */
 export async function getAddOnsByCategoryAndTier(category, tier) {
   const categoryAddOns = await getAddOnsByCategory(category);
-  return categoryAddOns.filter(addOn => addOn.availableForTiers.includes(tier));
+  return categoryAddOns.filter(addOn => {
+    // If availableForTiers is not defined, assume available for all tiers
+    if (!addOn.availableForTiers || !Array.isArray(addOn.availableForTiers)) {
+      return true;
+    }
+    return addOn.availableForTiers.includes(tier);
+  });
 }
 
 /**
