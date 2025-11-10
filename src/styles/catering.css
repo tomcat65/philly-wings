@@ -7694,3 +7694,74 @@
     font-size: 1.25rem;
   }
 }
+
+/* ============================================================================
+   PANEL FOOTER HELPFUL MESSAGING
+   Non-coercive UX improvements
+   ============================================================================ */
+
+.panel-footer {
+  padding: 1.5rem 1rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.footer-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(33, 150, 243, 0.08);
+  border-left: 3px solid #2196f3;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.hint-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.hint-text {
+  font-size: 0.9375rem;
+  color: #1a1a1a;
+  line-height: 1.5;
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-buttons .btn-secondary,
+.footer-buttons .btn-primary {
+  flex: 1;
+  min-width: 140px;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Responsive: Mobile Adjustments */
+@media (max-width: 767px) {
+  .footer-hint {
+    padding: 0.875rem;
+  }
+
+  .hint-text {
+    font-size: 0.875rem;
+  }
+
+  .footer-buttons {
+    flex-direction: column;
+  }
+
+  .footer-buttons .btn-secondary,
+  .footer-buttons .btn-primary {
+    width: 100%;
+  }
+}

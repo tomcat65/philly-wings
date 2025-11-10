@@ -9,7 +9,7 @@
  * Created: 2025-10-27
  */
 
-import { getState, updateState, onStateChange } from '../../services/shared-platter-state-service.js';
+import { getState, updateState, onStateChange, applySmartDefaults } from '../../services/shared-platter-state-service.js';
 import { renderWingDistributionSelector, initWingDistributionSelector } from './wing-distribution-selector.js';
 import { renderIntegratedSauceDistribution, initIntegratedSauceDistribution, getSauceById, determineSauceViscosity } from './sauce-distribution-integrated.js';
 import { renderDipPhotoCardSelector, initDipPhotoCardSelector } from './dip-photo-card-selector.js';
@@ -180,15 +180,21 @@ function renderSectionNavigation() {
 function renderPanelFooter() {
   return `
     <div class="panel-footer">
-      <button class="btn-secondary" id="btn-back-to-packages">
-        ← Back to Packages
-      </button>
-      <button class="btn-secondary" id="btn-save-draft">
-        💾 Save Draft
-      </button>
-      <button class="btn-primary" id="btn-continue-to-addons">
-        Continue to Add-Ons →
-      </button>
+      <div class="footer-hint">
+        <span class="hint-icon">ℹ️</span>
+        <span class="hint-text">Not sure about some details? No problem - we'll confirm by phone before delivery.</span>
+      </div>
+      <div class="footer-buttons">
+        <button class="btn-secondary" id="btn-back-to-packages">
+          ← Back to Packages
+        </button>
+        <button class="btn-secondary" id="btn-save-draft">
+          💾 Save Draft
+        </button>
+        <button class="btn-primary" id="btn-continue-to-addons">
+          Continue to Checkout →
+        </button>
+      </div>
     </div>
   `;
 }
@@ -583,21 +589,39 @@ function handleSaveDraft() {
 }
 
 /**
- * Handle continue to add-ons
+ * Handle continue to checkout
+ * No validation - user can proceed at any customization level
+ * Smart defaults will be applied for incomplete sections
  */
 function handleContinue() {
-  const progress = calculateProgress();
+  const state = getState();
 
-  if (progress.percentage < 50) {
-    showNotification('Please complete at least 3 sections before continuing', 'warning');
-    return;
+  // Apply smart defaults for any incomplete sections
+  const configWithDefaults = applySmartDefaults(state.selectedPackage, state.currentConfig);
+
+  // Update state with complete configuration
+  updateState('currentConfig', configWithDefaults.config);
+  updateState('orderMetadata', configWithDefaults.metadata);
+
+  // Move to review/checkout step
+  updateState('currentStep', 'review-order');
+
+  console.log('→ Continuing to checkout', {
+    hasDefaults: configWithDefaults.metadata.hasDefaults,
+    defaultedSections: configWithDefaults.metadata.defaultedSections,
+    requiresFollowUp: configWithDefaults.metadata.requiresFollowUp
+  });
+
+  // Future: Navigate to order review screen
+  // For now, show helpful message
+  if (configWithDefaults.metadata.hasDefaults) {
+    showNotification(
+      `✅ Order ready! We'll confirm ${configWithDefaults.metadata.defaultedSections.join(' and ')} details by phone.`,
+      'info'
+    );
+  } else {
+    showNotification('✅ Order ready for checkout!', 'success');
   }
-
-  updateState('currentStep', 'add-ons');
-  console.log('→ Continuing to add-ons (not yet implemented)');
-
-  // Placeholder for now
-  showNotification('Add-ons screen coming soon! (Sprint 2)', 'info');
 }
 
 /**

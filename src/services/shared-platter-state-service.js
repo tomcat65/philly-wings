@@ -1201,6 +1201,153 @@ export function migrateSauceData(oldSauces, wingDistribution) {
   };
 }
 
+// ===== SMART DEFAULTS =====
+
+/**
+ * Apply smart defaults for incomplete sections
+ * Allows users to proceed to checkout with partial customization
+ *
+ * @param {Object} packageData - Selected package configuration
+ * @param {Object} currentConfig - Current partial configuration
+ * @returns {Object} { config: completeConfig, metadata: { hasDefaults, defaultedSections, requiresFollowUp, followUpNotes } }
+ */
+export function applySmartDefaults(packageData, currentConfig = {}) {
+  if (!packageData) {
+    console.warn('No package selected, cannot apply defaults');
+    return {
+      config: currentConfig,
+      metadata: {
+        hasDefaults: false,
+        defaultedSections: [],
+        requiresFollowUp: false,
+        followUpNotes: [],
+        userCompletedSections: []
+      }
+    };
+  }
+
+  const completeConfig = { ...currentConfig };
+  const metadata = {
+    hasDefaults: false,
+    defaultedSections: [],
+    requiresFollowUp: false,
+    followUpNotes: [],
+    userCompletedSections: []
+  };
+
+  // ===== WINGS DISTRIBUTION =====
+  const hasWingDistribution = currentConfig.wingDistribution &&
+    (currentConfig.wingDistribution.boneless > 0 ||
+     currentConfig.wingDistribution.boneIn > 0 ||
+     currentConfig.wingDistribution.cauliflower > 0);
+
+  if (!hasWingDistribution && packageData.wingOptions?.totalWings) {
+    const totalWings = packageData.wingOptions.totalWings;
+    completeConfig.wingDistribution = {
+      boneless: Math.floor(totalWings / 2),
+      boneIn: Math.ceil(totalWings / 2),
+      cauliflower: 0,
+      boneInStyle: 'mixed',
+      distributionSource: 'auto-default'
+    };
+    metadata.hasDefaults = true;
+    metadata.defaultedSections.push('wings');
+    metadata.requiresFollowUp = true;
+    metadata.followUpNotes.push('Confirm wing distribution (boneless/bone-in split)');
+    console.log('✨ Applied default wing distribution: 50/50 split');
+  } else if (hasWingDistribution) {
+    metadata.userCompletedSections.push('wings');
+  }
+
+  // ===== SAUCES =====
+  const hasSauces = currentConfig.sauces && currentConfig.sauces.length > 0;
+  const hasSauceDistributions = currentConfig.sauceDistributions &&
+    Object.keys(currentConfig.sauceDistributions).length > 0;
+
+  if (!hasSauces && !hasSauceDistributions && packageData.sauceSelections) {
+    // Default to popular sauces (Mild, Hot, BBQ)
+    const maxSauces = packageData.sauceSelections.max || packageData.sauceSelections || 3;
+    const popularSauceIds = ['mild', 'hot', 'bbq', 'lemon-pepper', 'old-bay'];
+    completeConfig.sauces = popularSauceIds.slice(0, maxSauces).map(id => ({
+      id,
+      isDefault: true
+    }));
+    metadata.hasDefaults = true;
+    metadata.defaultedSections.push('sauces');
+    metadata.requiresFollowUp = true;
+    metadata.followUpNotes.push('Confirm sauce selections');
+    console.log(`✨ Applied default sauces: ${popularSauceIds.slice(0, maxSauces).join(', ')}`);
+  } else if (hasSauces || hasSauceDistributions) {
+    metadata.userCompletedSections.push('sauces');
+  }
+
+  // ===== DIPS =====
+  const hasDips = (currentConfig.dips && currentConfig.dips.length > 0) || currentConfig.noDips;
+
+  if (!hasDips && packageData.dipsIncluded?.quantity > 0) {
+    // Default to popular dips (Ranch, Blue Cheese)
+    const dipQuantity = packageData.dipsIncluded.quantity;
+    const popularDips = ['ranch', 'blue-cheese', 'honey-mustard'];
+    completeConfig.dips = popularDips.slice(0, dipQuantity).map((id, index) => ({
+      id: `dip-${id}`,
+      quantity: 1,
+      isDefault: true
+    }));
+    metadata.hasDefaults = true;
+    metadata.defaultedSections.push('dips');
+    // Dips are less critical - no follow-up needed for defaults
+    console.log(`✨ Applied default dips: ${dipQuantity} popular varieties`);
+  } else if (hasDips) {
+    metadata.userCompletedSections.push('dips');
+  }
+
+  // ===== SIDES =====
+  const hasSides = currentConfig.sides &&
+    (currentConfig.sides.chips || currentConfig.sides.coldSides?.length > 0 || currentConfig.sides.salads?.length > 0);
+
+  if (hasSides) {
+    metadata.userCompletedSections.push('sides');
+  }
+  // Note: Sides are optional, no defaults needed
+
+  // ===== DESSERTS =====
+  const hasDesserts = (currentConfig.desserts && currentConfig.desserts.length > 0) || currentConfig.noDesserts;
+
+  if (hasDesserts) {
+    metadata.userCompletedSections.push('desserts');
+  }
+  // Note: Desserts are optional, no defaults needed
+
+  // ===== BEVERAGES =====
+  const hasBeverages = currentConfig.beverages &&
+    ((currentConfig.beverages.cold && currentConfig.beverages.cold.length > 0) ||
+     (currentConfig.beverages.hot && currentConfig.beverages.hot.length > 0)) ||
+    currentConfig.noBeverages;
+
+  if (hasBeverages) {
+    metadata.userCompletedSections.push('beverages');
+  }
+  // Note: Beverages are optional, no defaults needed
+
+  // ===== ADD-ONS =====
+  const hasAddOns = currentConfig.addOns &&
+    Object.keys(currentConfig.addOns).some(key => currentConfig.addOns[key]?.length > 0);
+
+  if (hasAddOns) {
+    metadata.userCompletedSections.push('addons');
+  }
+  // Note: Add-ons are optional, no defaults needed
+
+  console.log('🎯 Smart defaults applied', {
+    hasDefaults: metadata.hasDefaults,
+    defaultedSections: metadata.defaultedSections,
+    userCompletedSections: metadata.userCompletedSections,
+    requiresFollowUp: metadata.requiresFollowUp
+  });
+
+  return { config: completeConfig, metadata };
+}
+
 // ===== INITIALIZATION =====
 
 /**
